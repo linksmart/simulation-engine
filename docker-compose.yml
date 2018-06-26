@@ -1,0 +1,61 @@
+version: '3'
+services:
+  bgw:
+    image: "docker.linksmart.eu/bgw:snapshot"
+    #network_mode: "host"
+    container_name: "bgw"
+    networks:
+      - bgw_nw
+    ports:
+      - "443:443"
+    volumes:
+      - "/home/garagon/dsf_se/bgw/config:/bgw/config"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+   # restart: "always"
+  nginx:
+    image: "nginx"
+    container_name: "nginx"
+    #ports:
+      #- "8085:8085"
+    #environment:
+      #- NGINX_HOST=nginx
+      #- NGINX_PORT=8085
+    volumes:
+      #- /home/garagon/dsf_se/nginx/config.d/mysite.template:/etc/nginx/conf.d/mysite.template
+      - /home/garagon/dsf_se/nginx/config.d/default.conf:/etc/nginx/conf.d/default.conf
+    #network_mode: "host"
+    #command: /bin/bash -c "envsubst < /etc/nginx/conf.d/mysite.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
+    networks:
+      - bgw_nw
+      - se_nw
+    depends_on:
+      - se
+     # - bgw
+  se:
+    build:
+      context: /home/garagon/dsf_se
+      dockerfile: Dockerfile
+    image: "simulation_engine"
+    #network_mode: "host"
+    container_name: "se"
+    networks:
+      - se_nw
+    #ports:
+        #- "9090:9090"
+    command: ["python3", "-u", "main.py"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+   # restart: "always"
+
+networks:
+  bgw_nw:
+    driver: bridge
+  se_nw:
+    driver: bridge

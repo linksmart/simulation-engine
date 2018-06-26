@@ -1,0 +1,25 @@
+
+# Use an official Python runtime as a parent image
+FROM python:3.6.5-stretch
+
+# Set the working directory to usr/src/app
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+RUN apt-get update -y && apt-get install -y \
+      gcc gfortran python3-pip build-essential wget  libfreetype6-dev libpng-dev libopenblas-dev python3-yaml
+#RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
+RUN pip3 install --no-cache-dir numpy scipy pandas matplotlib
+
+# Copy the current directory contents into the container usr/src/app
+#COPY requirements.txt /usr/src/app/
+
+
+#RUN pip3 install -r requirements.txt
+RUN pip3 install OpenDSSDirect.py[extras]
+
+
+
+
+
+
