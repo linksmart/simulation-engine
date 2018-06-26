@@ -1,0 +1,23 @@
+{  
+   "tls_key":"/bgw/config/simplon.fit.fraunhofer.de_sec_key_wo_pass.pem",
+   "tls_cert":"/bgw/config/simplon.fit.fraunhofer.de_cert_with_chain.pem",
+   "external_domain":"simplon.fit.fraunhofer.de",
+   "single_core":"true",
+   "mqtt_proxy_bind_address":"127.0.0.1",
+   "mqtt_proxy_bind_port":"5051",
+   "http_proxy_bind_address":"127.0.0.1",
+   "http_proxy_bind_port":"5050",
+   "http_proxy_aliases":{  
+      "se":{  
+         "local_address":"http://nginx:8085/se"
+      }      
+   },
+   "aaa_client_secret":"/bgw/config/simplon.fit.fraunhofer.de_sec_key_wo_pass.pem",
+   "aaa_client_log_level":"debug",
+   "aaa_client_auth_provider":"openid",
+   "aaa_client_host":"https://auth.fit.fraunhofer.de/kc/realms/S4G-dev",
+   "aaa_client_openid_clientid":"s4g_client",
+   "aaa_client_openid_grant_type":"password",
+   "aaa_client_openid_anonymous_user":"anonymous",
+   "aaa_client_openid_anonymous_pass":"anonymous"
+}

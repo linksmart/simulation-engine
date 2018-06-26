@@ -1,0 +1,29 @@
+
+# Use an official Python runtime as a parent image
+FROM garagon/opendss:0.2_python3.6.5
+
+#RUN apt-get update -y && apt-get install -y \
+#    python3-yaml
+
+# Set the working directory to usr/src/app
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+# Copy the current directory contents into the container usr/src/app
+COPY main.py /usr/src/app/
+COPY requirements.txt /usr/src/app/
+COPY swagger_server /usr/src/app/swagger_server
+
+
+
+RUN pip3 install -r requirements.txt
+
+
+
+
+
+
+
+
+
+
