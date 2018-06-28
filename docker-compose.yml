@@ -1,7 +1,7 @@
 version: '3'
 services:
   bgw:
-    image: "docker.linksmart.eu/bgw:snapshot"
+    image: "docker.linksmart.eu/bgw:latest"
     #network_mode: "host"
     container_name: "bgw"
     networks:
@@ -37,15 +37,15 @@ services:
      # - bgw
   se:
     build:
-      context: /home/garagon/dsf_se
+      context: ""
       dockerfile: Dockerfile
     image: "simulation_engine"
     #network_mode: "host"
     container_name: "se"
     networks:
       - se_nw
-    #ports:
-        #- "9090:9090"
+    ports:
+        - "9090:9090"
     command: ["python3", "-u", "main.py"]
     logging:
       driver: "json-file"
