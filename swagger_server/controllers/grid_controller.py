@@ -1,10 +1,15 @@
 import connexion
 import six
+import logging
 
 from swagger_server.models.coordinates import Coordinates  # noqa: E501
 from swagger_server.models.grid import Grid  # noqa: E501
 from swagger_server import util
 
+from simulator.openDSS import OpenDSS
+
+logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__file__)
 
 def create_grid(body):  # noqa: E501
     """Insert grid components
@@ -16,8 +21,19 @@ def create_grid(body):  # noqa: E501
 
     :rtype: None
     """
+
     if connexion.request.is_json:
+        logger.debug("Post grid request")
         body = Grid.from_dict(connexion.request.get_json())  # noqa: E501
+        logger.info("This is the dictionary: "+ body.to_str())
+        body=body.to_dict()
+        load=body["loads"]
+        logger.debug("Creating an instance of the simulator")
+        sim=OpenDSS("Test 1")
+        logger.debug("Charging the loads into the simulator")
+        sim.setLoads(load)
+        logger.debug("Loads charged")
+
     return 'do some magic!'
 
 
