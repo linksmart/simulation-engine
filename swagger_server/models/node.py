@@ -15,18 +15,18 @@ class Node(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: int=None, latitude: int=None, longitude: int=None):  # noqa: E501
+    def __init__(self, id: str=None, latitude: int=None, longitude: int=None):  # noqa: E501
         """Node - a model defined in Swagger
 
         :param id: The id of this Node.  # noqa: E501
-        :type id: int
+        :type id: str
         :param latitude: The latitude of this Node.  # noqa: E501
         :type latitude: int
         :param longitude: The longitude of this Node.  # noqa: E501
         :type longitude: int
         """
         self.swagger_types = {
-            'id': int,
+            'id': str,
             'latitude': int,
             'longitude': int
         }
@@ -53,23 +53,25 @@ class Node(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """Gets the id of this Node.
 
 
         :return: The id of this Node.
-        :rtype: int
+        :rtype: str
         """
         return self._id
 
     @id.setter
-    def id(self, id: int):
+    def id(self, id: str):
         """Sets the id of this Node.
 
 
         :param id: The id of this Node.
-        :type id: int
+        :type id: str
         """
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
 

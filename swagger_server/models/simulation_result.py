@@ -17,18 +17,18 @@ class SimulationResult(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, node_id: int=None, voltage: Voltage=None, error: Error=None):  # noqa: E501
+    def __init__(self, node_id: str=None, voltage: Voltage=None, error: Error=None):  # noqa: E501
         """SimulationResult - a model defined in Swagger
 
         :param node_id: The node_id of this SimulationResult.  # noqa: E501
-        :type node_id: int
+        :type node_id: str
         :param voltage: The voltage of this SimulationResult.  # noqa: E501
         :type voltage: Voltage
         :param error: The error of this SimulationResult.  # noqa: E501
         :type error: Error
         """
         self.swagger_types = {
-            'node_id': int,
+            'node_id': str,
             'voltage': Voltage,
             'error': Error
         }
@@ -55,22 +55,22 @@ class SimulationResult(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def node_id(self) -> int:
+    def node_id(self) -> str:
         """Gets the node_id of this SimulationResult.
 
 
         :return: The node_id of this SimulationResult.
-        :rtype: int
+        :rtype: str
         """
         return self._node_id
 
     @node_id.setter
-    def node_id(self, node_id: int):
+    def node_id(self, node_id: str):
         """Sets the node_id of this SimulationResult.
 
 
         :param node_id: The node_id of this SimulationResult.
-        :type node_id: int
+        :type node_id: str
         """
         if node_id is None:
             raise ValueError("Invalid value for `node_id`, must not be `None`")  # noqa: E501

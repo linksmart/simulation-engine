@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.node import Node  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,15 +15,15 @@ class Powerline(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: int=None, node1: Node=None, node2: Node=None, req: float=None, xeq: float=None, ceq_tot: float=None, phases: int=None, length: float=None, unitlength: str=None, linecode: str=None):  # noqa: E501
+    def __init__(self, id: str=None, node1: str=None, node2: str=None, req: float=None, xeq: float=None, ceq_tot: float=None, phases: int=None, length: float=None, unitlength: str=None, linecode: str=None):  # noqa: E501
         """Powerline - a model defined in Swagger
 
         :param id: The id of this Powerline.  # noqa: E501
-        :type id: int
+        :type id: str
         :param node1: The node1 of this Powerline.  # noqa: E501
-        :type node1: Node
+        :type node1: str
         :param node2: The node2 of this Powerline.  # noqa: E501
-        :type node2: Node
+        :type node2: str
         :param req: The req of this Powerline.  # noqa: E501
         :type req: float
         :param xeq: The xeq of this Powerline.  # noqa: E501
@@ -41,9 +40,9 @@ class Powerline(Model):
         :type linecode: str
         """
         self.swagger_types = {
-            'id': int,
-            'node1': Node,
-            'node2': Node,
+            'id': str,
+            'node1': str,
+            'node2': str,
             'req': float,
             'xeq': float,
             'ceq_tot': float,
@@ -89,22 +88,22 @@ class Powerline(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """Gets the id of this Powerline.
 
 
         :return: The id of this Powerline.
-        :rtype: int
+        :rtype: str
         """
         return self._id
 
     @id.setter
-    def id(self, id: int):
+    def id(self, id: str):
         """Sets the id of this Powerline.
 
 
         :param id: The id of this Powerline.
-        :type id: int
+        :type id: str
         """
         if id is None:
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
@@ -112,22 +111,22 @@ class Powerline(Model):
         self._id = id
 
     @property
-    def node1(self) -> Node:
+    def node1(self) -> str:
         """Gets the node1 of this Powerline.
 
 
         :return: The node1 of this Powerline.
-        :rtype: Node
+        :rtype: str
         """
         return self._node1
 
     @node1.setter
-    def node1(self, node1: Node):
+    def node1(self, node1: str):
         """Sets the node1 of this Powerline.
 
 
         :param node1: The node1 of this Powerline.
-        :type node1: Node
+        :type node1: str
         """
         if node1 is None:
             raise ValueError("Invalid value for `node1`, must not be `None`")  # noqa: E501
@@ -135,22 +134,22 @@ class Powerline(Model):
         self._node1 = node1
 
     @property
-    def node2(self) -> Node:
+    def node2(self) -> str:
         """Gets the node2 of this Powerline.
 
 
         :return: The node2 of this Powerline.
-        :rtype: Node
+        :rtype: str
         """
         return self._node2
 
     @node2.setter
-    def node2(self, node2: Node):
+    def node2(self, node2: str):
         """Sets the node2 of this Powerline.
 
 
         :param node2: The node2 of this Powerline.
-        :type node2: Node
+        :type node2: str
         """
         if node2 is None:
             raise ValueError("Invalid value for `node2`, must not be `None`")  # noqa: E501
