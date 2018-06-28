@@ -18,9 +18,9 @@ def main():
 
     logger.info("Simulation Engine started")
 
-    logger.info("Starting OpenDSS")
-    logger.info("OpenDSS version: "+dss.__version__)
+    logger.info("Starting the webserver")
     webserver.main()
+
 
 
 
