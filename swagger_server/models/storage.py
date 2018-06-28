@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.node import Node  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,13 +15,13 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: int=None, node: Node=None, so_c: float=None, do_d: float=None, so_h: float=None, energy: float=None, inverter_efficiency: float=None, phases: int=None, voltage: float=None, voltageunit: str=None, power: float=None, powerunit: str=None, powerfactor: float=None):  # noqa: E501
+    def __init__(self, id: str=None, node: str=None, so_c: float=None, do_d: float=None, so_h: float=None, energy: float=None, inverter_efficiency: float=None, phases: int=None, voltage: float=None, voltageunit: str=None, power: float=None, powerunit: str=None, powerfactor: float=None):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501
-        :type id: int
+        :type id: str
         :param node: The node of this Storage.  # noqa: E501
-        :type node: Node
+        :type node: str
         :param so_c: The so_c of this Storage.  # noqa: E501
         :type so_c: float
         :param do_d: The do_d of this Storage.  # noqa: E501
@@ -47,8 +46,8 @@ class Storage(Model):
         :type powerfactor: float
         """
         self.swagger_types = {
-            'id': int,
-            'node': Node,
+            'id': str,
+            'node': str,
             'so_c': float,
             'do_d': float,
             'so_h': float,
@@ -104,22 +103,22 @@ class Storage(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """Gets the id of this Storage.
 
 
         :return: The id of this Storage.
-        :rtype: int
+        :rtype: str
         """
         return self._id
 
     @id.setter
-    def id(self, id: int):
+    def id(self, id: str):
         """Sets the id of this Storage.
 
 
         :param id: The id of this Storage.
-        :type id: int
+        :type id: str
         """
         if id is None:
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
@@ -127,22 +126,22 @@ class Storage(Model):
         self._id = id
 
     @property
-    def node(self) -> Node:
+    def node(self) -> str:
         """Gets the node of this Storage.
 
 
         :return: The node of this Storage.
-        :rtype: Node
+        :rtype: str
         """
         return self._node
 
     @node.setter
-    def node(self, node: Node):
+    def node(self, node: str):
         """Sets the node of this Storage.
 
 
         :param node: The node of this Storage.
-        :type node: Node
+        :type node: str
         """
         if node is None:
             raise ValueError("Invalid value for `node`, must not be `None`")  # noqa: E501

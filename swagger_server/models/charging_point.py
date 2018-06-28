@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.node import Node  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,17 +15,17 @@ class ChargingPoint(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: int=None, node: Node=None):  # noqa: E501
+    def __init__(self, id: str=None, node: str=None):  # noqa: E501
         """ChargingPoint - a model defined in Swagger
 
         :param id: The id of this ChargingPoint.  # noqa: E501
-        :type id: int
+        :type id: str
         :param node: The node of this ChargingPoint.  # noqa: E501
-        :type node: Node
+        :type node: str
         """
         self.swagger_types = {
-            'id': int,
-            'node': Node
+            'id': str,
+            'node': str
         }
 
         self.attribute_map = {
@@ -49,22 +48,22 @@ class ChargingPoint(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """Gets the id of this ChargingPoint.
 
 
         :return: The id of this ChargingPoint.
-        :rtype: int
+        :rtype: str
         """
         return self._id
 
     @id.setter
-    def id(self, id: int):
+    def id(self, id: str):
         """Sets the id of this ChargingPoint.
 
 
         :param id: The id of this ChargingPoint.
-        :type id: int
+        :type id: str
         """
         if id is None:
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
@@ -72,22 +71,22 @@ class ChargingPoint(Model):
         self._id = id
 
     @property
-    def node(self) -> Node:
+    def node(self) -> str:
         """Gets the node of this ChargingPoint.
 
 
         :return: The node of this ChargingPoint.
-        :rtype: Node
+        :rtype: str
         """
         return self._node
 
     @node.setter
-    def node(self, node: Node):
+    def node(self, node: str):
         """Sets the node of this ChargingPoint.
 
 
         :param node: The node of this ChargingPoint.
-        :type node: Node
+        :type node: str
         """
         if node is None:
             raise ValueError("Invalid value for `node`, must not be `None`")  # noqa: E501

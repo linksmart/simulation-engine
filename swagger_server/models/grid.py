@@ -8,6 +8,7 @@ from typing import List, Dict  # noqa: F401
 from swagger_server.models.base_model_ import Model
 from swagger_server.models.charging_point import ChargingPoint  # noqa: F401,E501
 from swagger_server.models.coordinates import Coordinates  # noqa: F401,E501
+from swagger_server.models.load import Load  # noqa: F401,E501
 from swagger_server.models.photovoltaic import Photovoltaic  # noqa: F401,E501
 from swagger_server.models.powerline import Powerline  # noqa: F401,E501
 from swagger_server.models.storage import Storage  # noqa: F401,E501
@@ -21,13 +22,15 @@ class Grid(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, grid_id: int=None, coordinates: Coordinates=None, transformer: Transformer=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None):  # noqa: E501
+    def __init__(self, grid_id: str=None, coordinates: Coordinates=None, loads: List[Load]=None, transformer: Transformer=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None):  # noqa: E501
         """Grid - a model defined in Swagger
 
         :param grid_id: The grid_id of this Grid.  # noqa: E501
-        :type grid_id: int
+        :type grid_id: str
         :param coordinates: The coordinates of this Grid.  # noqa: E501
         :type coordinates: Coordinates
+        :param loads: The loads of this Grid.  # noqa: E501
+        :type loads: List[Load]
         :param transformer: The transformer of this Grid.  # noqa: E501
         :type transformer: Transformer
         :param power_lines: The power_lines of this Grid.  # noqa: E501
@@ -40,8 +43,9 @@ class Grid(Model):
         :type charging_points: List[ChargingPoint]
         """
         self.swagger_types = {
-            'grid_id': int,
+            'grid_id': str,
             'coordinates': Coordinates,
+            'loads': List[Load],
             'transformer': Transformer,
             'power_lines': List[Powerline],
             'photovoltaics': List[Photovoltaic],
@@ -52,6 +56,7 @@ class Grid(Model):
         self.attribute_map = {
             'grid_id': 'gridId',
             'coordinates': 'coordinates',
+            'loads': 'loads',
             'transformer': 'transformer',
             'power_lines': 'powerLines',
             'photovoltaics': 'photovoltaics',
@@ -61,6 +66,7 @@ class Grid(Model):
 
         self._grid_id = grid_id
         self._coordinates = coordinates
+        self._loads = loads
         self._transformer = transformer
         self._power_lines = power_lines
         self._photovoltaics = photovoltaics
@@ -79,22 +85,22 @@ class Grid(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def grid_id(self) -> int:
+    def grid_id(self) -> str:
         """Gets the grid_id of this Grid.
 
 
         :return: The grid_id of this Grid.
-        :rtype: int
+        :rtype: str
         """
         return self._grid_id
 
     @grid_id.setter
-    def grid_id(self, grid_id: int):
+    def grid_id(self, grid_id: str):
         """Sets the grid_id of this Grid.
 
 
         :param grid_id: The grid_id of this Grid.
-        :type grid_id: int
+        :type grid_id: str
         """
 
         self._grid_id = grid_id
@@ -119,6 +125,27 @@ class Grid(Model):
         """
 
         self._coordinates = coordinates
+
+    @property
+    def loads(self) -> List[Load]:
+        """Gets the loads of this Grid.
+
+
+        :return: The loads of this Grid.
+        :rtype: List[Load]
+        """
+        return self._loads
+
+    @loads.setter
+    def loads(self, loads: List[Load]):
+        """Sets the loads of this Grid.
+
+
+        :param loads: The loads of this Grid.
+        :type loads: List[Load]
+        """
+
+        self._loads = loads
 
     @property
     def transformer(self) -> Transformer:

@@ -16,11 +16,11 @@ class Simulation(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, grid_id: int=None, duration: Duration=None, threshold_low: float=None, threshold_medium: float=None, threshold_high: float=None):  # noqa: E501
+    def __init__(self, grid_id: str=None, duration: Duration=None, threshold_low: float=None, threshold_medium: float=None, threshold_high: float=None):  # noqa: E501
         """Simulation - a model defined in Swagger
 
         :param grid_id: The grid_id of this Simulation.  # noqa: E501
-        :type grid_id: int
+        :type grid_id: str
         :param duration: The duration of this Simulation.  # noqa: E501
         :type duration: Duration
         :param threshold_low: The threshold_low of this Simulation.  # noqa: E501
@@ -31,7 +31,7 @@ class Simulation(Model):
         :type threshold_high: float
         """
         self.swagger_types = {
-            'grid_id': int,
+            'grid_id': str,
             'duration': Duration,
             'threshold_low': float,
             'threshold_medium': float,
@@ -64,22 +64,22 @@ class Simulation(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def grid_id(self) -> int:
+    def grid_id(self) -> str:
         """Gets the grid_id of this Simulation.
 
 
         :return: The grid_id of this Simulation.
-        :rtype: int
+        :rtype: str
         """
         return self._grid_id
 
     @grid_id.setter
-    def grid_id(self, grid_id: int):
+    def grid_id(self, grid_id: str):
         """Sets the grid_id of this Simulation.
 
 
         :param grid_id: The grid_id of this Simulation.
-        :type grid_id: int
+        :type grid_id: str
         """
 
         self._grid_id = grid_id

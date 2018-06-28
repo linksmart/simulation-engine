@@ -15,11 +15,11 @@ class Transformer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: int=None, latitude: int=None, longitude: int=None, voltage_primary: float=None, voltage_secondary: float=None, voltage_base_primary: float=None, voltage_base_secondary: float=None, power_primary: int=None, power_secondary: int=None, connection: str=None, node_hv: str=None, node_lv: str=None, no_load_loss: float=None, req: float=None, xeq: float=None, ceq_total: float=None, monitor: int=None, control: int=None, tap_level: float=None, voltageunit: str=None, frequency: int=None, unitpower: str=None):  # noqa: E501
+    def __init__(self, id: str=None, latitude: int=None, longitude: int=None, voltage_primary: float=None, voltage_secondary: float=None, voltage_base_primary: float=None, voltage_base_secondary: float=None, power_primary: int=None, power_secondary: int=None, connection: str=None, node_hv: str=None, node_lv: str=None, no_load_loss: float=None, req: float=None, xeq: float=None, ceq_total: float=None, monitor: int=None, control: int=None, tap_level: float=None, voltageunit: str=None, frequency: int=None, unitpower: str=None):  # noqa: E501
         """Transformer - a model defined in Swagger
 
         :param id: The id of this Transformer.  # noqa: E501
-        :type id: int
+        :type id: str
         :param latitude: The latitude of this Transformer.  # noqa: E501
         :type latitude: int
         :param longitude: The longitude of this Transformer.  # noqa: E501
@@ -64,7 +64,7 @@ class Transformer(Model):
         :type unitpower: str
         """
         self.swagger_types = {
-            'id': int,
+            'id': str,
             'latitude': int,
             'longitude': int,
             'voltage_primary': float,
@@ -148,22 +148,22 @@ class Transformer(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def id(self) -> int:
+    def id(self) -> str:
         """Gets the id of this Transformer.
 
 
         :return: The id of this Transformer.
-        :rtype: int
+        :rtype: str
         """
         return self._id
 
     @id.setter
-    def id(self, id: int):
+    def id(self, id: str):
         """Sets the id of this Transformer.
 
 
         :param id: The id of this Transformer.
-        :type id: int
+        :type id: str
         """
         if id is None:
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
