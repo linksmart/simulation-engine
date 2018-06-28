@@ -10,10 +10,6 @@ from swagger_server import util
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
-def getDataJSON(object, key):
-    data=json.dumps(object)
-    data2=json.loads(data)
-    return data2[key]
 	
 def run_simulation(body):  # noqa: E501
     """Runs a simulation
@@ -29,13 +25,13 @@ def run_simulation(body):  # noqa: E501
         logger.info("Start command")
         body = Simulation.from_dict(connexion.request.get_json())  # noqa: E501
 
-        gridId = getDataJSON(body, "gridId")
-        thresholdLow = getDataJSON(body, "thresholdLow")
-        thresholdMedium = getDataJSON(body, "thresholdMedium")
-        thresholdHigh = getDataJSON(body, "thresholdHigh")
-        logger.info("Id of the grid: " + str(gridId))
-        logger.info("Threshold low: " + str(thresholdLow))
-        logger.info("Threshold medium: " + str(thresholdMedium))
-        logger.info("Threshold high: " + str(thresholdHigh))
+        #gridId = getDataJSON(body, "gridId")
+        #thresholdLow = getDataJSON(body, "thresholdLow")
+        #thresholdMedium = getDataJSON(body, "thresholdMedium")
+        #thresholdHigh = getDataJSON(body, "thresholdHigh")
+        #logger.info("Id of the grid: " + str(gridId))
+        #logger.info("Threshold low: " + str(thresholdLow))
+        #logger.info("Threshold medium: " + str(thresholdMedium))
+        #logger.info("Threshold high: " + str(thresholdHigh))
     return 'Response'
 
