@@ -9,14 +9,19 @@ FROM garagon/opendss:0.2_python3.6.5
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
+COPY requirements.txt /usr/src/app/
+RUN pip3 install -r requirements.txt
+
 # Copy the current directory contents into the container usr/src/app
 COPY main.py /usr/src/app/
-COPY requirements.txt /usr/src/app/
+
 COPY swagger_server /usr/src/app/swagger_server
+COPY tests /usr/src/app/tests
+COPY simulator /usr/src/app/simulator
 
 
 
-RUN pip3 install -r requirements.txt
+
 
 
 
