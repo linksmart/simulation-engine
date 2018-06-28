@@ -154,9 +154,13 @@ definitions:
     type: "object"
     properties:
       gridId:
-        type: "integer"
+        type: "string"
       coordinates:
         $ref: "#/definitions/Coordinates"
+      loads:
+        type: "array"
+        items:
+          $ref: "#/definitions/Load"
       transformer:
         $ref: "#/definitions/Transformer"
       powerLines:
@@ -175,151 +179,22 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/ChargingPoint"
-    example:
-      coordinates:
-        latitude: 6
-        longitude: 1
-      transformer:
-        voltagePrimary: 7.061401241503109105224211816675961017608642578125
-        tapLevel: 4.9652184929849543237878606305457651615142822265625
-        voltageSecondary: 9.301444243932575517419536481611430644989013671875
-        Xeq: 1.489415909854170383397331534069962799549102783203125
-        unitpower: "unitpower"
-        latitude: 5
-        monitor: 7
-        control: 1
-        voltageBaseSecondary: 2.027123023002321833274663731572218239307403564453125
-        nodeLV: "nodeLV"
-        voltageunit: "voltageunit"
-        frequency: 5
-        nodeHV: "nodeHV"
-        voltageBasePrimary: 3.61607674925191080461672754609026014804840087890625
-        noLoadLoss: 1.231513536777255612975068288506008684635162353515625
-        connection: "connection"
-        id: 5
-        powerPrimary: 4
-        powerSecondary: 7
-        CeqTotal: 6.8468526983526398765889098285697400569915771484375
-        longitude: 2
-        Req: 1.024645700144157789424070870154537260532379150390625
-      storageUnits:
-      - inverterEfficiency: 0.10263654006109401706225980888120830059051513671875
-        SoC: 7.14353804701230643559028976596891880035400390625
-        powerunit: "powerunit"
-        SoH: 7.05877035158235610623478351044468581676483154296875
-        voltageunit: "voltageunit"
-        voltage: 8.9695787981969115065794539987109601497650146484375
-        node:
-          latitude: 6
-          id: 9
-          longitude: 8
-        powerfactor: 3.02057969929162428712743349024094641208648681640625
-        DoD: 0.885137473901165261480628032586537301540374755859375
-        id: 3
-        power: 7.7403518187411730622216055053286254405975341796875
-        phases: 4
-        energy: 6.51918095101838179772357761976309120655059814453125
-      - inverterEfficiency: 0.10263654006109401706225980888120830059051513671875
-        SoC: 7.14353804701230643559028976596891880035400390625
-        powerunit: "powerunit"
-        SoH: 7.05877035158235610623478351044468581676483154296875
-        voltageunit: "voltageunit"
-        voltage: 8.9695787981969115065794539987109601497650146484375
-        node:
-          latitude: 6
-          id: 9
-          longitude: 8
-        powerfactor: 3.02057969929162428712743349024094641208648681640625
-        DoD: 0.885137473901165261480628032586537301540374755859375
-        id: 3
-        power: 7.7403518187411730622216055053286254405975341796875
-        phases: 4
-        energy: 6.51918095101838179772357761976309120655059814453125
-      gridId: 0
-      powerLines:
-      - linecode: "linecode"
-        node2:
-          latitude: 6
-          id: 9
-          longitude: 8
-        CeqTot: 3.557195227068097320710649000830017030239105224609375
-        Xeq: 6.438423552598546706349225132726132869720458984375
-        length: 1.2846590061165319429647979632136411964893341064453125
-        id: 9
-        node1:
-          latitude: 6
-          id: 9
-          longitude: 8
-        phases: 6
-        unitlength: "unitlength"
-        Req: 9.0183481860707832566959041287191212177276611328125
-      - linecode: "linecode"
-        node2:
-          latitude: 6
-          id: 9
-          longitude: 8
-        CeqTot: 3.557195227068097320710649000830017030239105224609375
-        Xeq: 6.438423552598546706349225132726132869720458984375
-        length: 1.2846590061165319429647979632136411964893341064453125
-        id: 9
-        node1:
-          latitude: 6
-          id: 9
-          longitude: 8
-        phases: 6
-        unitlength: "unitlength"
-        Req: 9.0183481860707832566959041287191212177276611328125
-      chargingPoints:
-      - node:
-          latitude: 6
-          id: 9
-          longitude: 8
-        id: 3
-      - node:
-          latitude: 6
-          id: 9
-          longitude: 8
-        id: 3
-      photovoltaics:
-      - node:
-          latitude: 6
-          id: 9
-          longitude: 8
-        inverterEfficiency: 6.77832496304801335185175048536621034145355224609375
-        powerfactor: 3.35319334701124294184637619764544069766998291015625
-        powerunit: "powerunit"
-        id: 2
-        power: 6.70401929795003592715829654480330646038055419921875
-        voltageunit: "voltageunit"
-        phases: 6
-        voltage: 5.94489560761401580890606055618263781070709228515625
-      - node:
-          latitude: 6
-          id: 9
-          longitude: 8
-        inverterEfficiency: 6.77832496304801335185175048536621034145355224609375
-        powerfactor: 3.35319334701124294184637619764544069766998291015625
-        powerunit: "powerunit"
-        id: 2
-        power: 6.70401929795003592715829654480330646038055419921875
-        voltageunit: "voltageunit"
-        phases: 6
-        voltage: 5.94489560761401580890606055618263781070709228515625
+
     xml:
       name: "Grid"
+
   Node:
     type: "object"
+    required:
+    - "id"
     properties:
       id:
-        type: "integer"
+        type: "string"
       latitude:
         type: "integer"
       longitude:
         type: "integer"
-    example:
-      latitude: 6
-      id: 9
-      longitude: 8
+
   Coordinates:
     type: "object"
     properties:
@@ -327,9 +202,33 @@ definitions:
         type: "integer"
       longitude:
         type: "integer"
-    example:
-      latitude: 6
-      longitude: 1
+
+  Load:
+    type: "object"
+    required:
+    - "id"
+    - "node1"
+    properties:
+      id:
+        type: "string"
+      node1:
+        type: "string"
+      phases:
+        type: "integer"
+        format: "int32"
+      voltage:
+        type: "number"
+      powerfactor:
+        type: "number"
+        maximum: 1
+      power_profile:
+        $ref: "#/definitions/PowerProfile"
+    xml:
+      name: "Load"
+  PowerProfile:
+    type: "array"
+    items:
+      type: "number"
   Powerline:
     type: "object"
     required:
@@ -340,12 +239,11 @@ definitions:
     - "unitlength"
     properties:
       id:
-        type: "integer"
-        format: "int64"
+        type: "string"
       node1:
-        $ref: "#/definitions/Node"
+        type: "string"
       node2:
-        $ref: "#/definitions/Node"
+        type: "string"
       Req:
         type: "number"
       Xeq:
@@ -361,23 +259,7 @@ definitions:
         type: "string"
       linecode:
         type: "string"
-    example:
-      linecode: "linecode"
-      node2:
-        latitude: 6
-        id: 9
-        longitude: 8
-      CeqTot: 3.557195227068097320710649000830017030239105224609375
-      Xeq: 6.438423552598546706349225132726132869720458984375
-      length: 1.2846590061165319429647979632136411964893341064453125
-      id: 9
-      node1:
-        latitude: 6
-        id: 9
-        longitude: 8
-      phases: 6
-      unitlength: "unitlength"
-      Req: 9.0183481860707832566959041287191212177276611328125
+
     xml:
       name: "Powerline"
   Storage:
@@ -389,9 +271,9 @@ definitions:
     - "node"
     properties:
       id:
-        type: "integer"
+        type: "string"
       node:
-        $ref: "#/definitions/Node"
+        type: "string"
       SoC:
         type: "number"
       DoD:
@@ -414,23 +296,7 @@ definitions:
         type: "string"
       powerfactor:
         type: "number"
-    example:
-      inverterEfficiency: 0.10263654006109401706225980888120830059051513671875
-      SoC: 7.14353804701230643559028976596891880035400390625
-      powerunit: "powerunit"
-      SoH: 7.05877035158235610623478351044468581676483154296875
-      voltageunit: "voltageunit"
-      voltage: 8.9695787981969115065794539987109601497650146484375
-      node:
-        latitude: 6
-        id: 9
-        longitude: 8
-      powerfactor: 3.02057969929162428712743349024094641208648681640625
-      DoD: 0.885137473901165261480628032586537301540374755859375
-      id: 3
-      power: 7.7403518187411730622216055053286254405975341796875
-      phases: 4
-      energy: 6.51918095101838179772357761976309120655059814453125
+
   Photovoltaic:
     type: "object"
     required:
@@ -439,9 +305,9 @@ definitions:
     - "power"
     properties:
       id:
-        type: "integer"
+        type: "string"
       node:
-        $ref: "#/definitions/Node"
+        type: "string"
       inverterEfficiency:
         type: "number"
       phases:
@@ -456,19 +322,7 @@ definitions:
         type: "string"
       powerfactor:
         type: "number"
-    example:
-      node:
-        latitude: 6
-        id: 9
-        longitude: 8
-      inverterEfficiency: 6.77832496304801335185175048536621034145355224609375
-      powerfactor: 3.35319334701124294184637619764544069766998291015625
-      powerunit: "powerunit"
-      id: 2
-      power: 6.70401929795003592715829654480330646038055419921875
-      voltageunit: "voltageunit"
-      phases: 6
-      voltage: 5.94489560761401580890606055618263781070709228515625
+
   ChargingPoint:
     type: "object"
     required:
@@ -476,22 +330,17 @@ definitions:
     - "node"
     properties:
       id:
-        type: "integer"
+        type: "string"
       node:
-        $ref: "#/definitions/Node"
-    example:
-      node:
-        latitude: 6
-        id: 9
-        longitude: 8
-      id: 3
+        type: "string"
+
   Transformer:
     type: "object"
     required:
     - "id"
     properties:
       id:
-        type: "integer"
+        type: "string"
       latitude:
         type: "integer"
       longitude:
@@ -534,29 +383,7 @@ definitions:
         type: "integer"
       unitpower:
         type: "string"
-    example:
-      voltagePrimary: 7.061401241503109105224211816675961017608642578125
-      tapLevel: 4.9652184929849543237878606305457651615142822265625
-      voltageSecondary: 9.301444243932575517419536481611430644989013671875
-      Xeq: 1.489415909854170383397331534069962799549102783203125
-      unitpower: "unitpower"
-      latitude: 5
-      monitor: 7
-      control: 1
-      voltageBaseSecondary: 2.027123023002321833274663731572218239307403564453125
-      nodeLV: "nodeLV"
-      voltageunit: "voltageunit"
-      frequency: 5
-      nodeHV: "nodeHV"
-      voltageBasePrimary: 3.61607674925191080461672754609026014804840087890625
-      noLoadLoss: 1.231513536777255612975068288506008684635162353515625
-      connection: "connection"
-      id: 5
-      powerPrimary: 4
-      powerSecondary: 7
-      CeqTotal: 6.8468526983526398765889098285697400569915771484375
-      longitude: 2
-      Req: 1.024645700144157789424070870154537260532379150390625
+
   Duration:
     type: "object"
     properties:
@@ -569,16 +396,12 @@ definitions:
       year:
         type: "integer"
         format: "int32"
-    example:
-      month: 1
-      year: 5
-      day: 6
+
   Simulation:
     type: "object"
     properties:
       gridId:
-        type: "integer"
-        format: "int64"
+        type: "string"
       duration:
         $ref: "#/definitions/Duration"
       thresholdLow:
@@ -593,15 +416,7 @@ definitions:
         type: "number"
         format: "float"
         description: "Maximum threshold in % for voltage error"
-    example:
-      duration:
-        month: 1
-        year: 5
-        day: 6
-      thresholdMedium: 2.302136
-      gridId: 0
-      thresholdHigh: 7.0614014
-      thresholdLow: 5.637377
+
   SimulationResult:
     type: "object"
     required:
@@ -609,22 +424,12 @@ definitions:
     - "voltage"
     properties:
       nodeId:
-        type: "integer"
-        format: "int64"
+        type: "string"
       voltage:
         $ref: "#/definitions/Voltage"
       error:
         $ref: "#/definitions/Error"
-    example:
-      error:
-        voltageT: true
-        voltageR: true
-        voltageS: true
-      nodeId: 0
-      voltage:
-        voltageT: 5
-        voltageR: 6
-        voltageS: 1
+
   Voltage:
     type: "object"
     properties:
@@ -637,10 +442,7 @@ definitions:
       voltageT:
         type: "integer"
         format: "int64"
-    example:
-      voltageT: 5
-      voltageR: 6
-      voltageS: 1
+
   Error:
     type: "object"
     properties:
@@ -650,10 +452,7 @@ definitions:
         type: "boolean"
       voltageT:
         type: "boolean"
-    example:
-      voltageT: true
-      voltageR: true
-      voltageS: true
+
 externalDocs:
-  description: "Find out more about Swagger"
-  url: "http://swagger.io"
+  description: "Find out more about Storage4Grid"
+  url: "http://www.storage4grid.eu/pages/index.html"
