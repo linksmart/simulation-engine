@@ -20,7 +20,7 @@ class TestGridController(BaseTestCase):
         """
         body = Grid()
         response = self.client.open(
-            '/simulation/grid',
+            '/se/grid',
             method='POST',
             data=json.dumps(body),
             content_type='application/json')
@@ -34,7 +34,7 @@ class TestGridController(BaseTestCase):
         """
         body = Grid()
         response = self.client.open(
-            '/simulation/grid/{id}'.format(id=789),
+            '/se/grid/{id}'.format(id=789),
             method='DELETE',
             data=json.dumps(body),
             content_type='application/json')
@@ -48,7 +48,7 @@ class TestGridController(BaseTestCase):
         """
         coordinates = Coordinates()
         response = self.client.open(
-            '/simulation/grid/{id}'.format(id=789),
+            '/se/grid/{id}'.format(id=789),
             method='GET',
             data=json.dumps(coordinates),
             content_type='application/json')
@@ -62,7 +62,7 @@ class TestGridController(BaseTestCase):
         """
         body = Grid()
         response = self.client.open(
-            '/simulation/grid/{id}'.format(id=789),
+            '/se/grid/{id}'.format(id=789),
             method='PUT',
             data=json.dumps(body),
             content_type='application/json')
