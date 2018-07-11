@@ -6,6 +6,12 @@ from flask import json
 from swagger_server.models.simulation import Simulation  # noqa: E501
 from swagger_server.models.simulation_result import SimulationResult  # noqa: E501
 from swagger_server import util
+from data_management.controller import gridController as gControl
+from swagger_server.models.simulation_result import SimulationResult
+from swagger_server.models.voltage import Voltage
+
+from  more_itertools import unique_everseen
+
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -24,14 +30,44 @@ def run_simulation(body):  # noqa: E501
     if connexion.request.is_json:
         logger.info("Start command")
         body = Simulation.from_dict(connexion.request.get_json())  # noqa: E501
+        gridController = gControl()
+        listNames, listValues = gridController.runSimulation(body.grid_id,body.duration,body.threshold_high,body.threshold_medium,body.threshold_low)
+        response = buildAnswer(listNames,listValues)
+    return response
 
-        #gridId = getDataJSON(body, "gridId")
-        #thresholdLow = getDataJSON(body, "thresholdLow")
-        #thresholdMedium = getDataJSON(body, "thresholdMedium")
-        #thresholdHigh = getDataJSON(body, "thresholdHigh")
-        #logger.info("Id of the grid: " + str(gridId))
-        #logger.info("Threshold low: " + str(thresholdLow))
-        #logger.info("Threshold medium: " + str(thresholdMedium))
-        #logger.info("Threshold high: " + str(thresholdHigh))
-    return 'Response'
 
+def buildAnswer(listNames=None, listValues=None):
+
+    body = []
+    values = []
+    names = []
+
+
+    for name in listNames:
+        names.append(name.split('.',1)[0])
+        names=list(unique_everseen(names))
+
+    logger.info("Names: "+str(names))
+
+    group_value = [None] * 3
+    for j in range(len(names)):
+        for i in range(len(listValues)):
+            if names[j] in listNames[i]:
+                if ".1"  in listNames[i]:
+                    group_value[0]=listValues[i]
+                elif ".2"  in listNames[i]:
+                    group_value[1] = listValues[i]
+                elif ".3"  in listNames[i]:
+                    group_value[2] = listValues[i]
+
+        voltages=Voltage(group_value[0],group_value[1],group_value[2])
+        #logger.info("Voltages: "+str(voltages))
+        values.append(voltages)
+        #del group_value[:]
+        group_value = [None] * 3
+
+
+    for i in range(len(names)):
+        body.append(SimulationResult(names[i], str(values[i])))
+
+    return body
