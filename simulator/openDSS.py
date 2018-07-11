@@ -9,6 +9,7 @@ Created on Fri Mar 16 15:05:36 2018
 import logging
 import opendssdirect as dss
 
+
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
@@ -18,9 +19,67 @@ class OpenDSS:
         logger.info("OpenDSS version: " + dss.__version__)
         self.grid_name=grid_name
         dss.run_command("Clear")
-        dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
+        dss.Basic.NewCircuit("Test 1")
+        #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
 
 
+    def solveCircuitSolution(self):
+        #dss.Solution.Solve()
+        dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEE13Nodeckt.dss')
+        logger.info("Loads names: "+str(dss.Loads.AllNames()))
+        logger.info("Bus names: " + str(dss.Circuit.AllBusNames()))
+        logger.info("All Node names: " + str(dss.Circuit.AllNodeNames()))
+        logger.info("Length of Node Names: " + str(len(dss.Circuit.AllNodeNames())))
+        logger.info("Voltages: "+str(dss.Circuit.AllBusVolts()))
+        logger.info("Length of Bus Voltages: "+str(len(dss.Circuit.AllBusVolts())))
+        logger.info("Bus Voltages: "+ str(dss.Bus.Voltages()))
+        logger.info("Just magnitude of Voltages: "+str(dss.Circuit.AllBusVMag()))
+        logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusVMag())))
+        logger.info("Just pu of Voltages: " + str(dss.Circuit.AllBusMagPu()))
+        logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusMagPu())))
+        return (dss.Circuit.AllNodeNames(),dss.Circuit.AllBusMagPu())
+    #def getVoltages(self):
+
+
+    #def setSolveMode(self, mode):
+     #   self.mode=mode
+      #  dss.run_command("Solve mode=" + self.mode)
+    def setStartingHour(self, hour):
+        self.hour=hour
+        dss.Solution.DblHour(self.hour)
+        logger.debug("Starting hour "+str(dss.Solution.DblHour()))
+
+    def setVoltageBases(self,V1,V2):
+        self.V1=V1
+        self.V2=V2
+        #dss.Settings.VoltageBases(0.4,16)
+        dss.run_command("Set voltagebases = [{value1},{value2}]".format(value1=self.V1,value2=self.V2))
+        dss.run_command("calcv")
+        logger.debug("Voltage bases: "+str(dss.Settings.VoltageBases()))
+
+    def solutionConverged(self):
+        return dss.Solution.Coverged()
+
+    def setMode(self, mode):
+        self.mode = mode
+        dss.run_command("Set mode="+self.mode)
+        logger.debug("Solution mode "+str(dss.Solution.ModeID()))
+
+    #Options: minutes or hours
+    def setStepSize(self, time_step):
+        self.time_step=time_step
+        if "minutes" in self.time_step:
+            dss.Solution.StepSizeMin(1)
+        if "hours" in self.time_step:
+            dss.Solution.StepSizeHr(1)
+        logger.debug("Simulation step_size " + str(dss.Solution.StepSize()))
+
+
+    def numberSimulations(self, number):
+        self.number=number
+        dss.Solution.Number(self.number)
+        logger.debug("Simulation number " + str(dss.Solution.Number()))
+        #dss.run_command("Set number =" + self.number)
 
     def setLoads(self, loads):
         logger.debug("Setting up the loads")
