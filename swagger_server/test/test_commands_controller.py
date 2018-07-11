@@ -20,7 +20,7 @@ class TestCommandsController(BaseTestCase):
         """
         body = Simulation()
         response = self.client.open(
-            '/simulation/commands/run',
+            '/se/commands/run',
             method='POST',
             data=json.dumps(body),
             content_type='application/json')
