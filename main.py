@@ -4,8 +4,8 @@
 """
 
 import logging, time
-import opendssdirect as dss
-import swagger_server.__main__ as webserver
+import swagger_server.wsgi as webserver
+#import swagger_server.__main__ as webserver
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -20,6 +20,7 @@ def main():
 
     logger.info("Starting the webserver")
     webserver.main()
+    #webserver.main()
 
 
 
