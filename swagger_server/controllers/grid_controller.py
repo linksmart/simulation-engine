@@ -6,7 +6,8 @@ from swagger_server.models.coordinates import Coordinates  # noqa: E501
 from swagger_server.models.grid import Grid  # noqa: E501
 from swagger_server import util
 
-from simulator.openDSS import OpenDSS
+from data_management.controller import gridController as gControl
+
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -24,17 +25,16 @@ def create_grid(body):  # noqa: E501
 
     if connexion.request.is_json:
         logger.debug("Post grid request")
-        body = Grid.from_dict(connexion.request.get_json())  # noqa: E501
-        logger.info("This is the dictionary: "+ body.to_str())
-        body=body.to_dict()
-        load=body["loads"]
-        logger.debug("Creating an instance of the simulator")
-        sim=OpenDSS("Test 1")
-        logger.debug("Charging the loads into the simulator")
-        sim.setLoads(load)
-        logger.debug("Loads charged")
+        body = Grid.from_dict(connexion.request.get_json()).to_dict()  # noqa: E501
+        logger.info("This is the dictionary: "+ str(body))
+        gridController= gControl()
+        if "loads" in body.keys():
+        #body=body.to_dict()
+            load=body["loads"]
+            gridController.setLoads(load)
 
-    return 'do some magic!'
+
+    return "OK"
 
 
 def delete_storage(id, body):  # noqa: E501
