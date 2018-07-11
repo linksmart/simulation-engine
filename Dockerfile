@@ -18,6 +18,7 @@ COPY main.py /usr/src/app/
 COPY swagger_server /usr/src/app/swagger_server
 COPY tests /usr/src/app/tests
 COPY simulator /usr/src/app/simulator
+COPY data_management /usr/src/app/data_management
 
 
 
