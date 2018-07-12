@@ -60,8 +60,8 @@ def buildAnswer(listNames=None, listValues=None, thres_High = 0.1, thres_Medium=
                 elif ".3"  in listNames[i]:
                     group_value[2] = listValues[i]
 
-        group_value_1=[0.99,0.87,0.98]
-        errors=checkError(group_value_1, thres_High, thres_Medium, thres_Low)
+
+        errors=checkError(group_value, thres_High, thres_Medium, thres_Low)
         values_error.append(errors)
         voltages=Voltage(group_value[0],group_value[1],group_value[2])
         values.append(voltages)
@@ -95,5 +95,4 @@ def checkError(value, thresHigh, thresMedium, thresLow):
             counter = counter + 1
 
     error=Error(group_value_error_high,group_value_error_medium,group_value_error_low)
-    logger.info("Error message: "+str(error))
     return error
