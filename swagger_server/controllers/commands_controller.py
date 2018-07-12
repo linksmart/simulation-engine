@@ -9,6 +9,7 @@ from swagger_server import util
 from data_management.controller import gridController as gControl
 from swagger_server.models.simulation_result import SimulationResult
 from swagger_server.models.voltage import Voltage
+from swagger_server.models.error import Error
 
 from  more_itertools import unique_everseen
 
@@ -31,23 +32,22 @@ def run_simulation(body):  # noqa: E501
         logger.info("Start command")
         body = Simulation.from_dict(connexion.request.get_json())  # noqa: E501
         gridController = gControl()
-        listNames, listValues = gridController.runSimulation(body.grid_id,body.duration,body.threshold_high,body.threshold_medium,body.threshold_low)
-        response = buildAnswer(listNames,listValues)
+        listNames, listValues = gridController.runSimulation(body.grid_id,body.duration)
+        response = buildAnswer(listNames,listValues,body.threshold_high,body.threshold_medium,body.threshold_low)
     return response
 
 
-def buildAnswer(listNames=None, listValues=None):
+def buildAnswer(listNames=None, listValues=None, thres_High = 0.1, thres_Medium=0.05, thres_Low=0.025):
 
     body = []
     values = []
     names = []
+    values_error=[]
 
 
     for name in listNames:
         names.append(name.split('.',1)[0])
         names=list(unique_everseen(names))
-
-    logger.info("Names: "+str(names))
 
     group_value = [None] * 3
     for j in range(len(names)):
@@ -60,14 +60,40 @@ def buildAnswer(listNames=None, listValues=None):
                 elif ".3"  in listNames[i]:
                     group_value[2] = listValues[i]
 
+        group_value_1=[0.99,0.87,0.98]
+        errors=checkError(group_value_1, thres_High, thres_Medium, thres_Low)
+        values_error.append(errors)
         voltages=Voltage(group_value[0],group_value[1],group_value[2])
-        #logger.info("Voltages: "+str(voltages))
         values.append(voltages)
         #del group_value[:]
         group_value = [None] * 3
 
-
     for i in range(len(names)):
-        body.append(SimulationResult(names[i], str(values[i])))
+        body.append(SimulationResult(names[i], values[i],values_error[i]))
 
     return body
+
+def checkError(value, thresHigh, thresMedium, thresLow):
+    group_value_error_high = [None] * 3
+    group_value_error_medium = [None] * 3
+    group_value_error_low = [None] * 3
+
+    counter = 0
+    for val in value:
+        logger.info("Counter: " + str(counter))
+        if val != None:
+            logger.info("Val: "+ str(val))
+            if float(val) < (1 - thresHigh) or float(val) > (1 + thresHigh):
+                group_value_error_high[counter] = val
+            elif (float(val) < (1 - thresMedium) or float(val) > (1 + thresMedium)):
+                group_value_error_medium[counter] = val
+            elif (float(val) < (1 - thresLow) or float(val) > (1 + thresLow)):
+                group_value_error_low[counter] = val
+
+            counter = counter + 1
+        else:
+            counter = counter + 1
+
+    error=Error(group_value_error_high,group_value_error_medium,group_value_error_low)
+    logger.info("Error message: "+str(error))
+    return error
