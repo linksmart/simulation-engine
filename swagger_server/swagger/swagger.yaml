@@ -446,12 +446,12 @@ definitions:
   Error:
     type: "object"
     properties:
-      voltageR:
-        type: "boolean"
-      voltageS:
-        type: "boolean"
-      voltageT:
-        type: "boolean"
+      thresholdHigh:
+        $ref: "#/definitions/Voltage"
+      thresholdMedium:
+        $ref: "#/definitions/Voltage"
+      thresholdLow:
+        $ref: "#/definitions/Voltage"
 
 externalDocs:
   description: "Find out more about Storage4Grid"
