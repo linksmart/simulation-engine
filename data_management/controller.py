@@ -20,17 +20,15 @@ class gridController:
         self.sim.setLoads(self.object)
         logger.debug("Loads charged")
 
-    def runSimulation(self, gridId, duration, thres_High, thres_Medium, thres_Low):
+    def runSimulation(self, gridId, duration):
         self.gridID = gridId
         self.duration = duration
-        self.thres_High = thres_High
-        self.thres_Medium = thres_Medium
-        self.thres_Low = thres_Low
+
         logger.debug("Simulation of grid " + self.gridID + " started")
         logger.debug("These are the parameters")
         logger.debug("GridID: "+str(self.gridID))
         logger.debug("Duration: "+str(self.duration))
-        logger.debug("Thresholds: "+str(self.thres_High)+str(self.thres_Medium)+str(self.thres_Low))
+
         day = self.duration.to_dict()["day"]
         month= self.duration.to_dict()["month"]
         year = self.duration.to_dict()["year"]
@@ -41,9 +39,28 @@ class gridController:
         elif year > 0:
             numSteps = 365
 
-        #self.sim.setSolveMode("snap")
-        listNames, listValues = self.sim.solveCircuitSolution()
+        self.sim.runNode13()
+        logger.info("Solution mode: "+str(self.sim.getMode()))
+        logger.info("Solution step size: " + str(self.sim.getStepSize()))
+        logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
+        logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
+        self.sim.setMode("daily")
+        logger.info("Solution mode 2: " + str(self.sim.getMode()))
+        #self.sim.setStepSize("minutes")
+        #logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
+        self.sim.setNumberSimulations(1)
+        logger.info("Number simulations 2: " + str(self.sim.getNumberSimulations()))
+        self.sim.setVoltageBases(115,4.16,0.48)
+        logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
+        logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
+        #self.sim.setVoltageBases()
+        numSteps=100
+        logger.info("Number of steps: "+str(numSteps))
+        for i in range(numSteps):
+            listNames, listValues = self.sim.solveCircuitSolution()
+        logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         return (listNames, listValues)
+        #return "OK"
         """#ToDo test with snap and daily
         self.sim.setMode("daily")
         self.sim.setStepSize("minutes")
