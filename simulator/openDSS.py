@@ -22,21 +22,22 @@ class OpenDSS:
         dss.Basic.NewCircuit("Test 1")
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
 
+    def runNode13(self):
+        dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEE13Nodeckt.dss')
 
     def solveCircuitSolution(self):
-        #dss.Solution.Solve()
-        dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEE13Nodeckt.dss')
-        logger.info("Loads names: "+str(dss.Loads.AllNames()))
-        logger.info("Bus names: " + str(dss.Circuit.AllBusNames()))
-        logger.info("All Node names: " + str(dss.Circuit.AllNodeNames()))
-        logger.info("Length of Node Names: " + str(len(dss.Circuit.AllNodeNames())))
-        logger.info("Voltages: "+str(dss.Circuit.AllBusVolts()))
-        logger.info("Length of Bus Voltages: "+str(len(dss.Circuit.AllBusVolts())))
-        logger.info("Bus Voltages: "+ str(dss.Bus.Voltages()))
-        logger.info("Just magnitude of Voltages: "+str(dss.Circuit.AllBusVMag()))
-        logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusVMag())))
-        logger.info("Just pu of Voltages: " + str(dss.Circuit.AllBusMagPu()))
-        logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusMagPu())))
+        dss.Solution.Solve()
+        #logger.info("Loads names: "+str(dss.Loads.AllNames()))
+        #logger.info("Bus names: " + str(dss.Circuit.AllBusNames()))
+        #logger.info("All Node names: " + str(dss.Circuit.AllNodeNames()))
+        #logger.info("Length of Node Names: " + str(len(dss.Circuit.AllNodeNames())))
+        #logger.info("Voltages: "+str(dss.Circuit.AllBusVolts()))
+        #logger.info("Length of Bus Voltages: "+str(len(dss.Circuit.AllBusVolts())))
+        #logger.info("Bus Voltages: "+ str(dss.Bus.Voltages()))
+        #logger.info("Just magnitude of Voltages: "+str(dss.Circuit.AllBusVMag()))
+        #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusVMag())))
+        #logger.info("Just pu of Voltages: " + str(dss.Circuit.AllBusMagPu()))
+        #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusMagPu())))
         return (dss.Circuit.AllNodeNames(),dss.Circuit.AllBusMagPu())
     #def getVoltages(self):
 
@@ -44,27 +45,41 @@ class OpenDSS:
     #def setSolveMode(self, mode):
      #   self.mode=mode
       #  dss.run_command("Solve mode=" + self.mode)
+    def getStartingHour(self):
+        return dss.Solution.DblHour()
+
     def setStartingHour(self, hour):
         self.hour=hour
         dss.Solution.DblHour(self.hour)
         logger.debug("Starting hour "+str(dss.Solution.DblHour()))
 
-    def setVoltageBases(self,V1,V2):
+    def getVoltageBases(self):
+        return dss.Settings.VoltageBases()
+
+    def setVoltageBases(self,V1=None,V2=None,V3=None,V4=None,V5=None):
         self.V1=V1
         self.V2=V2
+        self.V3=V3
+        self.V4=V4
+        self.V5=V5
         #dss.Settings.VoltageBases(0.4,16)
-        dss.run_command("Set voltagebases = [{value1},{value2}]".format(value1=self.V1,value2=self.V2))
+        dss.run_command("Set voltagebases = [{value1},{value2},{value3},{value4},{value5}]".format(value1=self.V1,value2=self.V2,value3=self.V3,value4=self.V4,value5=self.V5))
         dss.run_command("calcv")
-        logger.debug("Voltage bases: "+str(dss.Settings.VoltageBases()))
+        #logger.debug("Voltage bases: "+str(dss.Settings.VoltageBases()))
 
     def solutionConverged(self):
         return dss.Solution.Coverged()
 
+    def getMode(self):
+        return dss.Solution.ModeID()
+
     def setMode(self, mode):
         self.mode = mode
         dss.run_command("Set mode="+self.mode)
-        logger.debug("Solution mode "+str(dss.Solution.ModeID()))
+        #logger.debug("Solution mode "+str(dss.Solution.ModeID()))
 
+    def getStepSize(self):
+        return dss.Solution.StepSize()
     #Options: minutes or hours
     def setStepSize(self, time_step):
         self.time_step=time_step
@@ -72,10 +87,12 @@ class OpenDSS:
             dss.Solution.StepSizeMin(1)
         if "hours" in self.time_step:
             dss.Solution.StepSizeHr(1)
-        logger.debug("Simulation step_size " + str(dss.Solution.StepSize()))
+        #logger.debug("Simulation step_size " + str(dss.Solution.StepSize()))
 
+    def getNumberSimulations(self):
+        return dss.Solution.Number()
 
-    def numberSimulations(self, number):
+    def setNumberSimulations(self, number):
         self.number=number
         dss.Solution.Number(self.number)
         logger.debug("Simulation number " + str(dss.Solution.Number()))
