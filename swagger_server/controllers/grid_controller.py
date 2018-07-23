@@ -32,6 +32,26 @@ def create_grid(body):  # noqa: E501
         #body=body.to_dict()
             load=body["loads"]
             gridController.setLoads(load)
+        if "transformer" in body.keys():
+        #body=body.to_dict()
+            transformer=body["transformer"]
+            gridController.setTransformer(transformer)
+        if "powerLines" in body.keys():
+        #body=body.to_dict()
+            powerLines=body["powerLines"]
+            gridController.setPowerLines(powerLines)
+        if "photovoltaics" in body.keys():
+        #body=body.to_dict()
+            photovoltaic=body["photovoltaics"]
+            gridController.setPhotovoltaic(photovoltaic)
+        if "storageUnits" in body.keys():
+        #body=body.to_dict()
+            storage=body["storageUnits"]
+            gridController.setStorage(storage)
+        if "chargingPoints" in body.keys():
+        #body=body.to_dict()
+            chargingPoints=body["chargingPoints"]
+            gridController.setChargingPoints(chargingPoints)
 
 
     return "OK"
