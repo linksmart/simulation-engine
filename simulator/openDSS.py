@@ -146,70 +146,79 @@ class OpenDSS:
                 shape=self.power_profile
             ))
 
-""""
-    def example(self):
 
-        dss.run_command('Redirect ./tests/data/13Bus/IEEE13Nodeckt.dss')
-        for i in dss.Circuit.AllBusNames():
-            logger.info(i)
+    def setTransformers(self, transformers):
+        logger.debug("Setting up the transformers")
+        self.transformers=transformers
+        try:
+            for element in self.transformers:
+                for key, value in element.items():
+                    logger.debug("Key: "+str(key)+" Value: "+str(value))
+                    if key=="id":
+                        transformer_name=value
+                    elif key=="voltagePrimary":
+                        voltage_primary=value
+                    elif key=="voltageSecondary":
+                        voltage_secondary=value
+                    elif key == "voltageBasePrimary":
+                        voltage_Base_Primary = value
+                    elif key == "voltageBaseSecondary":
+                        voltage_Base_Secondary = value
+                    elif key == "powerPrimary":
+                        power_Primary = value
+                    elif key=="powerSecondary":
+                        power_Secondary=value
+                    elif key=="connection":
+                        connection=value
+                    elif key == "nodeHV":
+                        node_HV = value
+                    elif key == "nodeLV":
+                        power_factor = value
+                    elif key == "noLoadLoss":
+                        power_profile = value
+                    elif key == "Req":
+                        power_profile = value
+                    elif key=="Xeq":
+                        voltage_primary=value
+                    elif key=="CeqTotal":
+                        voltage_secondary=value
+                    elif key == "monitor":
+                        voltage_kV = value
+                    elif key == "control":
+                        power_factor = value
+                    elif key == "tapLevel":
+                        power_profile = value
+                    elif key == "voltageunit":
+                        voltage_kV = value
+                    elif key == "frequency":
+                        power_factor = value
+                    elif key == "unitpower":
+                        power_profile = value
+                    else:
+                        break
+                self.setTransformer(load_name, bus_name, num_phases, voltage_kV, power_factor, power_profile)
 
-        logger.info("Inspecting submodules")
-        import types
+            dss.run_command('Solve')
 
-        import inspect
+            logger.info("Transformer names: " + str(dss.Transformers.AllNames()))
+        except Exception as e:
+            logger.error(e)
 
-        logger.info("2")
-        for name, module in inspect.getmembers(dss):
-            if isinstance(module, types.ModuleType) and not name.startswith('_'):
-                logger.info(f'dss.{name}')
 
-        logger.info("3")
-        for name, function in inspect.getmembers(dss.Loads):
-            if callable(function) and not name.startswith('_'):
-                logger.info(f'dss.Loads.{name}')
+    def setTransformer(self, load_name, bus_name, num_phases=3, voltage_kV=0.4, power_factor=1, power_profile=None):
+        self.load_name=load_name
+        self.bus_name=bus_name
+        self.num_phases=num_phases
+        self.voltage_kV=voltage_kV
+        self.power_factor=power_factor
+        self.power_profile=power_profile
 
-        logger.info("4")
-
-        logger.info("Load names: " + str(dss.Loads.AllNames()))
-        logger.info("5")
-        dss.Loads.First()
-        logger.info("6")
-        while True:
-
-            logger.info(
-                'Name={name} \t kW={kW}'.format(
-                    name=str(dss.Loads.Name()),
-                    kW=str(dss.Loads.kW())
-                )
-            )
-
-            if not dss.Loads.Next() > 0:
-                break
-        logger.info("7")
         dss.run_command(
-            "New Load.{load_name} Bus1={bus_name}  Phases=3 Conn=Delta Model=1 kV=4.16   kW=1155 kvar=660".format(
-                load_name='Aragon',
-                bus_name='671.1.2.3'
+            "New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn=Delta Model=1 kV={voltage_kV}   pf={power_factor} Daily={shape}".format(
+                load_name=self.load_name,
+                bus_name=self.bus_name,
+                num_phases=self.num_phases,
+                voltage_kV=self.voltage_kV,
+                power_factor=self.power_factor,
+                shape=self.power_profile
             ))
-        dss.run_command('Solve')
-
-        logger.info("Load names 2: " + str(dss.Loads.AllNames()))
-
-        logger.info("8")
-        from opendssdirect.utils import Iterator
-        for i in Iterator(dss.Loads, 'Name'):
-            logger.info(
-                'Name={name} \t kW={kW}'.format(
-                    name=str(i()),
-                    kW=str(dss.Loads.kW())
-                )
-            )
-        logger.info("9")
-        dss.run_command(
-            "New Storage.{bus_name} Bus1={bus_name} phases=1 kV=2.2 kWRated={rating} kWhRated={kwh_rating} kWhStored={initial_state} %IdlingkW=0 %reserve=0 %EffCharge=100 %EffDischarge=100 State=CHARGING".format(
-                bus_name='675',
-                rating=20,
-                kwh_rating=20,
-                initial_state=20
-            ))
-"""
