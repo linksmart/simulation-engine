@@ -15,10 +15,39 @@ class gridController:
 
     def setLoads(self, object):
         self.object=object
-        logger.debug("Creating an instance of the simulator")
         logger.debug("Charging the loads into the simulator")
         self.sim.setLoads(self.object)
         logger.debug("Loads charged")
+
+    def setTransformer(self,object):
+        logger.debug("Charging the transformers into the simulator")
+        self.object = object
+        self.sim.setTransformers(self.object)
+        logger.debug("Transformers charged")
+
+    def setPowerLines(self,object):
+        logger.debug("Charging the power lines into the simulator")
+        self.object = object
+        self.sim.setPowerLines(self.object)#
+        logger.debug("Power lines charged")
+
+    def setPhotovoltaic(self,object):
+        logger.debug("Charging the photovoltaics into the simulator")
+        self.object = object
+        self.sim.setPhotovoltaics(self.object)
+        logger.debug("Photovoltaics charged")
+
+    def setStorage(self,object):
+        logger.debug("Charging the ESS into the simulator")
+        self.object = object
+        self.sim.setStorage(self.object)
+        logger.debug("ESS charged")
+
+    def setChargingPoints(self,object):
+        logger.debug("Charging the charging points into the simulator")
+        self.object = object
+        self.sim.setChargingPoints(self.object)
+        logger.debug("Charging points charged")
 
     def runSimulation(self, gridId, duration):
         self.gridID = gridId
