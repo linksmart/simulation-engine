@@ -345,6 +345,12 @@ definitions:
         type: "integer"
       longitude:
         type: "integer"
+      phases:
+        type: "integer"
+        description: "Number of Phases"
+        default: 3
+      winding:
+        type: "integer"
       voltagePrimary:
         type: "number"
       voltageSecondary:

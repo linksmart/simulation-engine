@@ -19,7 +19,7 @@ class gridController:
         self.sim.setLoads(self.object)
         logger.debug("Loads charged")
 
-    def setTransformer(self,object):
+    def setTransformers(self, object):
         logger.debug("Charging the transformers into the simulator")
         self.object = object
         self.sim.setTransformers(self.object)
