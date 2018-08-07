@@ -351,6 +351,16 @@ definitions:
         default: 3
       winding:
         type: "integer"
+        description: "Number of windings"
+        default: 2
+      xhl:
+        type: "number"
+        description: "Percent reactance high-to-low (winding 1 to winding 2)"
+      kvs:
+        type: "array"
+        description: "Array of kV ratings following rules started above for the kV file dfor windings"
+        items:
+          type: "number"
       voltagePrimary:
         type: "number"
       voltageSecondary:
