@@ -151,6 +151,11 @@ class OpenDSS:
     def setTransformers(self, transformers):
         logger.debug("Setting up the transformers")
         try:
+            id = None
+            phases = None
+            winding = None
+            xhl = None
+            kvs = None
             for key, value in transformers.items():
                 logger.debug("Key: "+str(key)+" Value: "+str(value))
                 if key == "id":
@@ -159,6 +164,10 @@ class OpenDSS:
                     phases = value
                 if key == "winding":
                     winding = value
+                if key == "xhl":
+                    xhl = value
+                if key == "kvs":
+                    kvs = value
                 if key == "voltagePrimary":
                     voltagePrimary = value
                 if key == "voltageSecondary":
@@ -198,7 +207,7 @@ class OpenDSS:
                 if key == "unitpower":
                     unitpower = value
 
-            self.setTransformer(id, phases, winding)
+            self.setTransformer(id, phases, winding, xhl, kvs)
             dss.run_command('Solve')
 
             logger.info("Transformer names: " + str(dss.Transformers.AllNames()))
@@ -206,11 +215,12 @@ class OpenDSS:
             logger.error(e)
 
 
-    def setTransformer(self, transformer_name, phases, winding):
+    def setTransformer(self, transformer_name, phases, winding, xhl):
         # New Transformer.TR1 phases=3 winding=2 xhl=0.014 kVs=(16, 0.4) kVAs=[400 400] wdg=1 bus=SourceBus conn=delta kv=16  !%r=.5 XHT=1 wdg=2 bus=225875 conn=wye kv=0.4        !%r=.5 XLT=1
         dss.run_command(
-            "New Transformer.{transformer_name} phases={phases} winding={winding}".format(
+            "New Transformer.{transformer_name} Phases={phases} Windings={winding} XHL={xhl}".format(
                 transformer_name = transformer_name,
                 phases = phases,
-                winding = winding
+                winding = winding,
+                xhl = xhl,
             ))
