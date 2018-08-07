@@ -358,9 +358,23 @@ definitions:
         description: "Percent reactance high-to-low (winding 1 to winding 2)"
       kvs:
         type: "array"
-        description: "Array of kV ratings following rules started above for the kV file dfor windings"
+        description: "Array of kV ratings following rules started above for the kV file for windings"
         items:
           type: "number"
+      kvas:
+        type: "array"
+        description: "Array of base kVA rating for windings"
+        items:
+          type: "number"
+      wdg:
+        type: "integer"
+        description: "Integer representing the winding witch will become the active winding for subsequent data"
+      bus:
+        type: "string"
+        description: "Definition for the connector of this winding (each winding is connected to one terminal of the transformator and, hence, to one bus"
+      kv:
+        type: "number"
+        description: "Rated voltage of this winding, kV"
       voltagePrimary:
         type: "number"
       voltageSecondary:
@@ -375,6 +389,8 @@ definitions:
         type: "integer"
       connection:
         type: "string"
+        description: "Connection of this winding."
+        default: "wye"
       nodeHV:
         type: "string"
       nodeLV:

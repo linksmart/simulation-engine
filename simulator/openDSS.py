@@ -156,8 +156,13 @@ class OpenDSS:
             winding = None
             xhl = None
             kvs = None
+            kvas = None
+            wdg = None
+            bus = None
+            connection = None
+            kv = None
             for key, value in transformers.items():
-                logger.debug("Key: "+str(key)+" Value: "+str(value))
+                # logger.debug("Key: "+str(key)+" Value: "+str(value))
                 if key == "id":
                     id = value
                 if key == "phases":
@@ -168,46 +173,55 @@ class OpenDSS:
                     xhl = value
                 if key == "kvs":
                     kvs = value
-                if key == "voltagePrimary":
-                    voltagePrimary = value
-                if key == "voltageSecondary":
-                    voltageSecondary = value
-                if key == "voltageBasePrimary":
-                    voltageBasePrimary = value
-                if key == "voltageBaseSecondary":
-                    voltageBaseSecondary = value
-                if key == "powerPrimary":
-                    powerPrimary = value
-                if key == "powerSecondary":
-                    powerSecondary = value
+                if key == "kvas":
+                    kvas = value
+                if key == "wdg":
+                    wdg = value
+                if key == "bus":
+                    bus = value
                 if key == "connection":
                     connection = value
-                if key == "nodeHV":
-                    nodeHV = value
-                if key == "nodeLV":
-                    nodeLV = value
-                if key == "noLoadLoss":
-                    noLoadLoss = value
-                if key == "Req":
-                    Req = value
-                if key == "Xeq":
-                    Xeq = value
-                if key == "CeqTotal":
-                    CeqTotal = value
-                if key == "monitor":
-                    monitor = value
-                if key == "control":
-                    control = value
-                if key == "tapLevel":
-                    tapLevel = value
-                if key == "voltageunit":
-                    voltageunit = value
-                if key == "frequency":
-                    frequency = value
-                if key == "unitpower":
-                    unitpower = value
+                if key == "kv":
+                    kv = value
 
-            self.setTransformer(id, phases, winding, xhl, kvs)
+            #    if key == "voltagePrimary":
+            #        voltagePrimary = value
+            #    if key == "voltageSecondary":
+            #        voltageSecondary = value
+            #    if key == "voltageBasePrimary":
+            #        voltageBasePrimary = value
+            #    if key == "voltageBaseSecondary":
+            #        voltageBaseSecondary = value
+            #    if key == "powerPrimary":
+            #        powerPrimary = value
+            #    if key == "powerSecondary":
+            #        powerSecondary = value
+            #    if key == "nodeHV":
+            #        nodeHV = value
+            #    if key == "nodeLV":
+            #        nodeLV = value
+            #    if key == "noLoadLoss":
+            #        noLoadLoss = value
+            #    if key == "Req":
+            #        Req = value
+            #    if key == "Xeq":
+            #        Xeq = value
+            #    if key == "CeqTotal":
+            #        CeqTotal = value
+            #    if key == "monitor":
+            #        monitor = value
+            #    if key == "control":
+            #        control = value
+            #    if key == "tapLevel":
+            #        tapLevel = value
+            #    if key == "voltageunit":
+            #        voltageunit = value
+            #    if key == "frequency":
+            #        frequency = value
+            #    if key == "unitpower":
+            #        unitpower = value
+
+            self.setTransformer(id, phases, winding, xhl, kvs, kvas, wdg, bus, connection, kv)
             dss.run_command('Solve')
 
             logger.info("Transformer names: " + str(dss.Transformers.AllNames()))
@@ -215,12 +229,19 @@ class OpenDSS:
             logger.error(e)
 
 
-    def setTransformer(self, transformer_name, phases, winding, xhl):
+    def setTransformer(self, transformer_name, phases, winding, xhl, kvs, kvas, wdg, bus, conn, kv):
         # New Transformer.TR1 phases=3 winding=2 xhl=0.014 kVs=(16, 0.4) kVAs=[400 400] wdg=1 bus=SourceBus conn=delta kv=16  !%r=.5 XHT=1 wdg=2 bus=225875 conn=wye kv=0.4        !%r=.5 XLT=1
-        dss.run_command(
-            "New Transformer.{transformer_name} Phases={phases} Windings={winding} XHL={xhl}".format(
+        dss_string = "New Transformer.{transformer_name} Phases={phases} Windings={winding} XHL={xhl} KVs=[{kvs}] KVAs=[{kvas}] Wdg={wdg} Bus={bus} Conn={conn} Kv={kv}".format(
                 transformer_name = transformer_name,
                 phases = phases,
                 winding = winding,
                 xhl = xhl,
-            ))
+                kvs = ','.join(kvs),
+                kvas = ','.join(kvas),
+                wdg = wdg,
+                bus = bus,
+                conn = conn,
+                kv = kv
+            )
+        logger.debug(dss_string)
+        dss.run_command(dss_string)
