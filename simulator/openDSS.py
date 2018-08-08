@@ -162,7 +162,7 @@ class OpenDSS:
             connection = None
             kv = None
             for key, value in transformers.items():
-                # logger.debug("Key: "+str(key)+" Value: "+str(value))
+                #logger.debug("Key: "+str(key)+" Value: "+str(value))
                 if key == "id":
                     id = value
                 if key == "phases":
@@ -235,9 +235,9 @@ class OpenDSS:
                 transformer_name = transformer_name,
                 phases = phases,
                 winding = winding,
-                xhl = xhl,
-                kvs = ','.join(kvs),
-                kvas = ','.join(kvas),
+                xhl = str(xhl),
+                kvs = ','.join(['{:f}'.format(x) for x in kvs]),
+                kvas = ','.join(['{:f}'.format(x) for x in kvas]),
                 wdg = wdg,
                 bus = bus,
                 conn = conn,
