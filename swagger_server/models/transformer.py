@@ -15,7 +15,7 @@ class Transformer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, latitude: int=None, longitude: int=None, voltage_primary: float=None, voltage_secondary: float=None, voltage_base_primary: float=None, voltage_base_secondary: float=None, power_primary: int=None, power_secondary: int=None, connection: str=None, node_hv: str=None, node_lv: str=None, no_load_loss: float=None, req: float=None, xeq: float=None, ceq_total: float=None, monitor: int=None, control: int=None, tap_level: float=None, voltageunit: str=None, frequency: int=None, unitpower: str=None):  # noqa: E501
+    def __init__(self, id: str=None, latitude: int=None, longitude: int=None, phases: int=None, winding: int=None, xhl: float=None, kvs: List[float]=None, kvas: List[float]=None, wdg: int=None, bus: str=None, kv: float=None, voltage_primary: float=None, voltage_secondary: float=None, voltage_base_primary: float=None, voltage_base_secondary: float=None, power_primary: int=None, power_secondary: int=None, connection: str='wye', node_hv: str=None, node_lv: str=None, no_load_loss: float=None, req: float=None, xeq: float=None, ceq_total: float=None, monitor: int=None, control: int=None, tap_level: float=None, voltageunit: str=None, frequency: int=None, unitpower: str=None):  # noqa: E501
         """Transformer - a model defined in Swagger
 
         :param id: The id of this Transformer.  # noqa: E501
@@ -24,6 +24,22 @@ class Transformer(Model):
         :type latitude: int
         :param longitude: The longitude of this Transformer.  # noqa: E501
         :type longitude: int
+        :param phases: The phases of this Transformer.  # noqa: E501
+        :type phases: int
+        :param winding: The winding of this Transformer.  # noqa: E501
+        :type winding: int
+        :param xhl: The xhl of this Transformer.  # noqa: E501
+        :type xhl: float
+        :param kvs: The kvs of this Transformer.  # noqa: E501
+        :type kvs: List[float]
+        :param kvas: The kvas of this Transformer.  # noqa: E501
+        :type kvas: List[float]
+        :param wdg: The wdg of this Transformer.  # noqa: E501
+        :type wdg: int
+        :param bus: The bus of this Transformer.  # noqa: E501
+        :type bus: str
+        :param kv: The kv of this Transformer.  # noqa: E501
+        :type kv: float
         :param voltage_primary: The voltage_primary of this Transformer.  # noqa: E501
         :type voltage_primary: float
         :param voltage_secondary: The voltage_secondary of this Transformer.  # noqa: E501
@@ -67,6 +83,14 @@ class Transformer(Model):
             'id': str,
             'latitude': int,
             'longitude': int,
+            'phases': int,
+            'winding': int,
+            'xhl': float,
+            'kvs': List[float],
+            'kvas': List[float],
+            'wdg': int,
+            'bus': str,
+            'kv': float,
             'voltage_primary': float,
             'voltage_secondary': float,
             'voltage_base_primary': float,
@@ -92,6 +116,14 @@ class Transformer(Model):
             'id': 'id',
             'latitude': 'latitude',
             'longitude': 'longitude',
+            'phases': 'phases',
+            'winding': 'winding',
+            'xhl': 'xhl',
+            'kvs': 'kvs',
+            'kvas': 'kvas',
+            'wdg': 'wdg',
+            'bus': 'bus',
+            'kv': 'kv',
             'voltage_primary': 'voltagePrimary',
             'voltage_secondary': 'voltageSecondary',
             'voltage_base_primary': 'voltageBasePrimary',
@@ -116,6 +148,14 @@ class Transformer(Model):
         self._id = id
         self._latitude = latitude
         self._longitude = longitude
+        self._phases = phases
+        self._winding = winding
+        self._xhl = xhl
+        self._kvs = kvs
+        self._kvas = kvas
+        self._wdg = wdg
+        self._bus = bus
+        self._kv = kv
         self._voltage_primary = voltage_primary
         self._voltage_secondary = voltage_secondary
         self._voltage_base_primary = voltage_base_primary
@@ -211,6 +251,190 @@ class Transformer(Model):
         """
 
         self._longitude = longitude
+
+    @property
+    def phases(self) -> int:
+        """Gets the phases of this Transformer.
+
+        Number of Phases  # noqa: E501
+
+        :return: The phases of this Transformer.
+        :rtype: int
+        """
+        return self._phases
+
+    @phases.setter
+    def phases(self, phases: int):
+        """Sets the phases of this Transformer.
+
+        Number of Phases  # noqa: E501
+
+        :param phases: The phases of this Transformer.
+        :type phases: int
+        """
+
+        self._phases = phases
+
+    @property
+    def winding(self) -> int:
+        """Gets the winding of this Transformer.
+
+        Number of windings  # noqa: E501
+
+        :return: The winding of this Transformer.
+        :rtype: int
+        """
+        return self._winding
+
+    @winding.setter
+    def winding(self, winding: int):
+        """Sets the winding of this Transformer.
+
+        Number of windings  # noqa: E501
+
+        :param winding: The winding of this Transformer.
+        :type winding: int
+        """
+
+        self._winding = winding
+
+    @property
+    def xhl(self) -> float:
+        """Gets the xhl of this Transformer.
+
+        Percent reactance high-to-low (winding 1 to winding 2)  # noqa: E501
+
+        :return: The xhl of this Transformer.
+        :rtype: float
+        """
+        return self._xhl
+
+    @xhl.setter
+    def xhl(self, xhl: float):
+        """Sets the xhl of this Transformer.
+
+        Percent reactance high-to-low (winding 1 to winding 2)  # noqa: E501
+
+        :param xhl: The xhl of this Transformer.
+        :type xhl: float
+        """
+
+        self._xhl = xhl
+
+    @property
+    def kvs(self) -> List[float]:
+        """Gets the kvs of this Transformer.
+
+        Array of kV ratings following rules started above for the kV file for windings  # noqa: E501
+
+        :return: The kvs of this Transformer.
+        :rtype: List[float]
+        """
+        return self._kvs
+
+    @kvs.setter
+    def kvs(self, kvs: List[float]):
+        """Sets the kvs of this Transformer.
+
+        Array of kV ratings following rules started above for the kV file for windings  # noqa: E501
+
+        :param kvs: The kvs of this Transformer.
+        :type kvs: List[float]
+        """
+
+        self._kvs = kvs
+
+    @property
+    def kvas(self) -> List[float]:
+        """Gets the kvas of this Transformer.
+
+        Array of base kVA rating for windings  # noqa: E501
+
+        :return: The kvas of this Transformer.
+        :rtype: List[float]
+        """
+        return self._kvas
+
+    @kvas.setter
+    def kvas(self, kvas: List[float]):
+        """Sets the kvas of this Transformer.
+
+        Array of base kVA rating for windings  # noqa: E501
+
+        :param kvas: The kvas of this Transformer.
+        :type kvas: List[float]
+        """
+
+        self._kvas = kvas
+
+    @property
+    def wdg(self) -> int:
+        """Gets the wdg of this Transformer.
+
+        Integer representing the winding witch will become the active winding for subsequent data  # noqa: E501
+
+        :return: The wdg of this Transformer.
+        :rtype: int
+        """
+        return self._wdg
+
+    @wdg.setter
+    def wdg(self, wdg: int):
+        """Sets the wdg of this Transformer.
+
+        Integer representing the winding witch will become the active winding for subsequent data  # noqa: E501
+
+        :param wdg: The wdg of this Transformer.
+        :type wdg: int
+        """
+
+        self._wdg = wdg
+
+    @property
+    def bus(self) -> str:
+        """Gets the bus of this Transformer.
+
+        Definition for the connector of this winding (each winding is connected to one terminal of the transformator and, hence, to one bus  # noqa: E501
+
+        :return: The bus of this Transformer.
+        :rtype: str
+        """
+        return self._bus
+
+    @bus.setter
+    def bus(self, bus: str):
+        """Sets the bus of this Transformer.
+
+        Definition for the connector of this winding (each winding is connected to one terminal of the transformator and, hence, to one bus  # noqa: E501
+
+        :param bus: The bus of this Transformer.
+        :type bus: str
+        """
+
+        self._bus = bus
+
+    @property
+    def kv(self) -> float:
+        """Gets the kv of this Transformer.
+
+        Rated voltage of this winding, kV  # noqa: E501
+
+        :return: The kv of this Transformer.
+        :rtype: float
+        """
+        return self._kv
+
+    @kv.setter
+    def kv(self, kv: float):
+        """Sets the kv of this Transformer.
+
+        Rated voltage of this winding, kV  # noqa: E501
+
+        :param kv: The kv of this Transformer.
+        :type kv: float
+        """
+
+        self._kv = kv
 
     @property
     def voltage_primary(self) -> float:
@@ -342,6 +566,7 @@ class Transformer(Model):
     def connection(self) -> str:
         """Gets the connection of this Transformer.
 
+        Connection of this winding.  # noqa: E501
 
         :return: The connection of this Transformer.
         :rtype: str
@@ -352,6 +577,7 @@ class Transformer(Model):
     def connection(self, connection: str):
         """Sets the connection of this Transformer.
 
+        Connection of this winding.  # noqa: E501
 
         :param connection: The connection of this Transformer.
         :type connection: str
