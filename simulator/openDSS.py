@@ -127,7 +127,6 @@ class OpenDSS:
         except Exception as e:
             logger.error(e)
 
-
     def setLoad(self, load_name, bus_name, num_phases=3, voltage_kV=0.4, power_factor=1, power_profile=None):
         self.load_name=load_name
         self.bus_name=bus_name
@@ -145,8 +144,6 @@ class OpenDSS:
                 power_factor=self.power_factor,
                 shape=self.power_profile
             ))
-
-
 
     def setTransformers(self, transformers):
         logger.debug("Setting up the transformers")
@@ -228,7 +225,6 @@ class OpenDSS:
         except Exception as e:
             logger.error(e)
 
-
     def setTransformer(self, transformer_name, phases, winding, xhl, kvs, kvas, wdg, bus, conn, kv):
         # New Transformer.TR1 phases=3 winding=2 xhl=0.014 kVs=(16, 0.4) kVAs=[400 400] wdg=1 bus=SourceBus conn=delta kv=16  !%r=.5 XHT=1 wdg=2 bus=225875 conn=wye kv=0.4        !%r=.5 XLT=1
         dss_string = "New Transformer.{transformer_name} Phases={phases} Windings={winding} XHL={xhl} KVs=[{kvs}] KVAs=[{kvas}] Wdg={wdg} Bus={bus} Conn={conn} Kv={kv}".format(
@@ -245,3 +241,19 @@ class OpenDSS:
             )
         logger.debug(dss_string)
         dss.run_command(dss_string)
+
+    def setPowerLines(self, lines):
+        logger.info("Setting up the powerlines")
+        try:
+            for element in lines:
+                for key, value in element.items():
+                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                self.setPowerLine()
+                dss.run_command('Solve')
+                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+        except Exception as e:
+            logger.error(e)
+
+    def setPowerLine(self, id, node1, node2, phases, length, unit, linecode):
+        # New line.82876 bus1=225875 bus2=107558 phases=3  length=0.007 units=km linecode=underground_95mm
+        dss_string = "New Line.82876 bus1=225875 bus2=107558 phases=3  length=0.007 units=km linecode=underground_95mm"
