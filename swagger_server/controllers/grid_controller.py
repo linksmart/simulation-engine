@@ -33,13 +33,13 @@ def create_grid(body):  # noqa: E501
             load=body["loads"]
             gridController.setLoads(load)
         if "transformer" in body.keys() and body["transformer"] is not None:
-            # body=body.to_dict()
             transformer=body["transformer"]
             gridController.setTransformers(transformer)
-        if "power_lines" in body.keys() and body["power_lines"] is not None:
-            # body=body.to_dict()
-            powerLines=body["power_lines"]
-            gridController.setPowerLines(powerLines)
+        if "power_lines" in body.keys() and body["power_lines"] is not None \
+                and "linecode" in body.keys() and body["linecode"] is not None:
+            powerlines = body["power_lines"]
+            linecodes =  body["linecode"]
+            gridController.setPowerLines(powerlines, linecodes)
         if "photovoltaics" in body.keys() and body["photovoltaics"] is not None:
         #body=body.to_dict()
             photovoltaic=body["photovoltaics"]
