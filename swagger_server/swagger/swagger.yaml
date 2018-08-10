@@ -167,6 +167,10 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Powerline"
+      linecode:
+        type: "array"
+        items:
+          $ref: "#/definitions/Linecode"
       photovoltaics:
         type: "array"
         items:
@@ -229,6 +233,7 @@ definitions:
     type: "array"
     items:
       type: "number"
+
   Powerline:
     type: "object"
     required:
@@ -259,9 +264,31 @@ definitions:
         type: "string"
       linecode:
         type: "string"
-
     xml:
       name: "Powerline"
+
+  Linecode:
+    type: "object"
+    required:
+      - "id"
+      - "r1"
+      - "x1"
+      - "c0"
+      - "units"
+    properties:
+      id:
+        type: "string"
+      r1:
+        type: "number"
+      x1:
+        type: "number"
+      c0:
+        type: "integer"
+      units:
+        type: "string"
+    xml:
+      name: "Linecode"
+
   Storage:
     type: "object"
     required:
