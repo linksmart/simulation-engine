@@ -25,10 +25,10 @@ class gridController:
         self.sim.setTransformers(self.object)
         logger.debug("Transformers charged")
 
-    def setPowerLines(self, object):
+    def setPowerLines(self, powerlines, linecodes):
         logger.debug("Charging the power lines into the simulator")
-        self.object = object
-        self.sim.setPowerLines(self.object)
+        self.sim.setLineCodes(linecodes)
+        self.sim.setPowerLines(powerlines)
         logger.debug("Power lines charged")
 
     def setPhotovoltaic(self,object):

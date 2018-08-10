@@ -8,6 +8,7 @@ from typing import List, Dict  # noqa: F401
 from swagger_server.models.base_model_ import Model
 from swagger_server.models.charging_point import ChargingPoint  # noqa: F401,E501
 from swagger_server.models.coordinates import Coordinates  # noqa: F401,E501
+from swagger_server.models.linecode import Linecode  # noqa: F401,E501
 from swagger_server.models.load import Load  # noqa: F401,E501
 from swagger_server.models.photovoltaic import Photovoltaic  # noqa: F401,E501
 from swagger_server.models.powerline import Powerline  # noqa: F401,E501
@@ -22,7 +23,7 @@ class Grid(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, grid_id: str=None, coordinates: Coordinates=None, loads: List[Load]=None, transformer: Transformer=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None):  # noqa: E501
+    def __init__(self, grid_id: str=None, coordinates: Coordinates=None, loads: List[Load]=None, transformer: Transformer=None, power_lines: List[Powerline]=None, linecode: List[Linecode]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None):  # noqa: E501
         """Grid - a model defined in Swagger
 
         :param grid_id: The grid_id of this Grid.  # noqa: E501
@@ -35,6 +36,8 @@ class Grid(Model):
         :type transformer: Transformer
         :param power_lines: The power_lines of this Grid.  # noqa: E501
         :type power_lines: List[Powerline]
+        :param linecode: The linecode of this Grid.  # noqa: E501
+        :type linecode: List[Linecode]
         :param photovoltaics: The photovoltaics of this Grid.  # noqa: E501
         :type photovoltaics: List[Photovoltaic]
         :param storage_units: The storage_units of this Grid.  # noqa: E501
@@ -48,6 +51,7 @@ class Grid(Model):
             'loads': List[Load],
             'transformer': Transformer,
             'power_lines': List[Powerline],
+            'linecode': List[Linecode],
             'photovoltaics': List[Photovoltaic],
             'storage_units': List[Storage],
             'charging_points': List[ChargingPoint]
@@ -59,6 +63,7 @@ class Grid(Model):
             'loads': 'loads',
             'transformer': 'transformer',
             'power_lines': 'powerLines',
+            'linecode': 'linecode',
             'photovoltaics': 'photovoltaics',
             'storage_units': 'storageUnits',
             'charging_points': 'chargingPoints'
@@ -69,6 +74,7 @@ class Grid(Model):
         self._loads = loads
         self._transformer = transformer
         self._power_lines = power_lines
+        self._linecode = linecode
         self._photovoltaics = photovoltaics
         self._storage_units = storage_units
         self._charging_points = charging_points
@@ -188,6 +194,27 @@ class Grid(Model):
         """
 
         self._power_lines = power_lines
+
+    @property
+    def linecode(self) -> List[Linecode]:
+        """Gets the linecode of this Grid.
+
+
+        :return: The linecode of this Grid.
+        :rtype: List[Linecode]
+        """
+        return self._linecode
+
+    @linecode.setter
+    def linecode(self, linecode: List[Linecode]):
+        """Sets the linecode of this Grid.
+
+
+        :param linecode: The linecode of this Grid.
+        :type linecode: List[Linecode]
+        """
+
+        self._linecode = linecode
 
     @property
     def photovoltaics(self) -> List[Photovoltaic]:

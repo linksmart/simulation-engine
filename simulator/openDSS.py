@@ -242,13 +242,73 @@ class OpenDSS:
         logger.debug(dss_string)
         dss.run_command(dss_string)
 
+    def setLineCodes(self, lines):
+        logger.info("Setting up the linecodes")
+        try:
+            for element in lines:
+                id = None
+                r1 = None
+                x1 = None
+                c0 = None
+                units = None
+                for key, value in element.items():
+                    logger.debug("Key: " + str(key) + " Value: " + str (value))
+                    if key == "id":
+                        id = value
+                    if key == "r1":
+                        r1 = value
+                    if key == "x1":
+                        x1 = value
+                    if key == "c0":
+                        c0 = value
+                    if key == "units":
+                        units = value
+                self.setLineCode(id, r1, x1, c0, units)
+                dss.run_command("Solve")
+                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+        except Exception as e:
+            logger.error(e)
+
+    def setLineCode(self, id, r1, x1, c0, units):
+        # new Linecode.underground_95mm R1=0.193 X1=0.08 C0=0 Units=km
+        dss_string = "new Linecode.{id} R1={r1} X1={x1} C0={c0} Units={units}".format(
+            id = id,
+            r1 = r1,
+            x1 = x1,
+            c0 = c0,
+            units = units
+        )
+        logger.info(dss_string)
+        dss.run_command(dss_string)
+
     def setPowerLines(self, lines):
         logger.info("Setting up the powerlines")
         try:
             for element in lines:
+                id = None
+                node1 = None
+                node2 = None
+                phases = None
+                length = None
+                unit = None
+                linecode = None
                 for key, value in element.items():
                     logger.debug("Key: " + str(key) + " Value: " + str(value))
-                self.setPowerLine()
+                    if key == "id":
+                        id = value
+                    if key == "node1":
+                        node1 = value
+                    if key == "node2":
+                        node2 = value
+                    if key == "phases":
+                        phases = value
+                    if key == "length":
+                        length = value
+                    if key == "unitlength":
+                        unit = value
+                    if key == "linecode":
+                        linecode = value
+                self.setPowerLine(id, node1, node2, phases, length, unit, linecode)
                 dss.run_command('Solve')
                 logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
         except Exception as e:
@@ -256,4 +316,14 @@ class OpenDSS:
 
     def setPowerLine(self, id, node1, node2, phases, length, unit, linecode):
         # New line.82876 bus1=225875 bus2=107558 phases=3  length=0.007 units=km linecode=underground_95mm
-        dss_string = "New Line.82876 bus1=225875 bus2=107558 phases=3  length=0.007 units=km linecode=underground_95mm"
+        dss_string = "New Line.{id} bus1={bus1} bus2={bus2} phases={phases} length={length} units={units} linecode={linecode}".format(
+            id = id,
+            bus1 = node1,
+            bus2 = node2,
+            phases = phases,
+            length = length,
+            units = unit,
+            linecode = linecode
+        )
+        logger.info(dss_string)
+        dss.run_command(dss_string)
