@@ -29,7 +29,7 @@ def create_grid(body):  # noqa: E501
         logger.info("This is the dictionary: "+ str(body))
         gridController= gControl()
         if "loads" in body.keys() and body["loads"] is not None:
-        #body=body.to_dict()
+            #body=body.to_dict()
             load=body["loads"]
             gridController.setLoads(load)
         if "transformer" in body.keys() and body["transformer"] is not None:
@@ -40,10 +40,15 @@ def create_grid(body):  # noqa: E501
             powerlines = body["power_lines"]
             linecodes =  body["linecode"]
             gridController.setPowerLines(powerlines, linecodes)
-        if "photovoltaics" in body.keys() and body["photovoltaics"] is not None:
-        #body=body.to_dict()
-            photovoltaic=body["photovoltaics"]
-            gridController.setPhotovoltaic(photovoltaic)
+        if "photovoltaics" in body.keys() and body["photovoltaics"] is not None \
+                and "xycurves" in body.keys() and body["xycurves"] is not None \
+                and "loadshapes" in body.keys() and body["loadshapes"] is not None \
+                and "tshapes" in body.keys() and body["tshapes"] is not None:
+            photovoltaics = body["photovoltaics"]
+            xycurves = body["xycurves"]
+            loadshapes = body["loadshapes"]
+            tshapes = body["tshapes"]
+            gridController.setPhotovoltaic(photovoltaics, xycurves, loadshapes, tshapes)
         if "storageUnits" in body.keys() and body["storageUnits"] is not None:
         #body=body.to_dict()
             storage=body["storageUnits"]
