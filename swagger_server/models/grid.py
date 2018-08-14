@@ -10,10 +10,13 @@ from swagger_server.models.charging_point import ChargingPoint  # noqa: F401,E50
 from swagger_server.models.coordinates import Coordinates  # noqa: F401,E501
 from swagger_server.models.linecode import Linecode  # noqa: F401,E501
 from swagger_server.models.load import Load  # noqa: F401,E501
+from swagger_server.models.loadshape import Loadshape  # noqa: F401,E501
 from swagger_server.models.photovoltaic import Photovoltaic  # noqa: F401,E501
 from swagger_server.models.powerline import Powerline  # noqa: F401,E501
 from swagger_server.models.storage import Storage  # noqa: F401,E501
 from swagger_server.models.transformer import Transformer  # noqa: F401,E501
+from swagger_server.models.tshape import Tshape  # noqa: F401,E501
+from swagger_server.models.xy_curve import XYCurve  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -23,7 +26,7 @@ class Grid(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, grid_id: str=None, coordinates: Coordinates=None, loads: List[Load]=None, transformer: Transformer=None, power_lines: List[Powerline]=None, linecode: List[Linecode]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None):  # noqa: E501
+    def __init__(self, grid_id: str=None, coordinates: Coordinates=None, loads: List[Load]=None, transformer: Transformer=None, power_lines: List[Powerline]=None, linecode: List[Linecode]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None):  # noqa: E501
         """Grid - a model defined in Swagger
 
         :param grid_id: The grid_id of this Grid.  # noqa: E501
@@ -38,6 +41,12 @@ class Grid(Model):
         :type power_lines: List[Powerline]
         :param linecode: The linecode of this Grid.  # noqa: E501
         :type linecode: List[Linecode]
+        :param xycurves: The xycurves of this Grid.  # noqa: E501
+        :type xycurves: List[XYCurve]
+        :param loadshapes: The loadshapes of this Grid.  # noqa: E501
+        :type loadshapes: List[Loadshape]
+        :param tshapes: The tshapes of this Grid.  # noqa: E501
+        :type tshapes: List[Tshape]
         :param photovoltaics: The photovoltaics of this Grid.  # noqa: E501
         :type photovoltaics: List[Photovoltaic]
         :param storage_units: The storage_units of this Grid.  # noqa: E501
@@ -52,6 +61,9 @@ class Grid(Model):
             'transformer': Transformer,
             'power_lines': List[Powerline],
             'linecode': List[Linecode],
+            'xycurves': List[XYCurve],
+            'loadshapes': List[Loadshape],
+            'tshapes': List[Tshape],
             'photovoltaics': List[Photovoltaic],
             'storage_units': List[Storage],
             'charging_points': List[ChargingPoint]
@@ -64,6 +76,9 @@ class Grid(Model):
             'transformer': 'transformer',
             'power_lines': 'powerLines',
             'linecode': 'linecode',
+            'xycurves': 'xycurves',
+            'loadshapes': 'loadshapes',
+            'tshapes': 'tshapes',
             'photovoltaics': 'photovoltaics',
             'storage_units': 'storageUnits',
             'charging_points': 'chargingPoints'
@@ -75,6 +90,9 @@ class Grid(Model):
         self._transformer = transformer
         self._power_lines = power_lines
         self._linecode = linecode
+        self._xycurves = xycurves
+        self._loadshapes = loadshapes
+        self._tshapes = tshapes
         self._photovoltaics = photovoltaics
         self._storage_units = storage_units
         self._charging_points = charging_points
@@ -215,6 +233,69 @@ class Grid(Model):
         """
 
         self._linecode = linecode
+
+    @property
+    def xycurves(self) -> List[XYCurve]:
+        """Gets the xycurves of this Grid.
+
+
+        :return: The xycurves of this Grid.
+        :rtype: List[XYCurve]
+        """
+        return self._xycurves
+
+    @xycurves.setter
+    def xycurves(self, xycurves: List[XYCurve]):
+        """Sets the xycurves of this Grid.
+
+
+        :param xycurves: The xycurves of this Grid.
+        :type xycurves: List[XYCurve]
+        """
+
+        self._xycurves = xycurves
+
+    @property
+    def loadshapes(self) -> List[Loadshape]:
+        """Gets the loadshapes of this Grid.
+
+
+        :return: The loadshapes of this Grid.
+        :rtype: List[Loadshape]
+        """
+        return self._loadshapes
+
+    @loadshapes.setter
+    def loadshapes(self, loadshapes: List[Loadshape]):
+        """Sets the loadshapes of this Grid.
+
+
+        :param loadshapes: The loadshapes of this Grid.
+        :type loadshapes: List[Loadshape]
+        """
+
+        self._loadshapes = loadshapes
+
+    @property
+    def tshapes(self) -> List[Tshape]:
+        """Gets the tshapes of this Grid.
+
+
+        :return: The tshapes of this Grid.
+        :rtype: List[Tshape]
+        """
+        return self._tshapes
+
+    @tshapes.setter
+    def tshapes(self, tshapes: List[Tshape]):
+        """Sets the tshapes of this Grid.
+
+
+        :param tshapes: The tshapes of this Grid.
+        :type tshapes: List[Tshape]
+        """
+
+        self._tshapes = tshapes
 
     @property
     def photovoltaics(self) -> List[Photovoltaic]:
