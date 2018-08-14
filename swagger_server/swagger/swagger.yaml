@@ -171,6 +171,18 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Linecode"
+      xycurves:
+        type: "array"
+        items:
+          $ref: "#/definitions/XYCurve"
+      loadshapes:
+        type: "array"
+        items:
+          $ref: "#/definitions/Loadshape"
+      tshapes:
+        type: "array"
+        items:
+          $ref: "#/definitions/Tshape"
       photovoltaics:
         type: "array"
         items:
@@ -183,7 +195,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/ChargingPoint"
-
     xml:
       name: "Grid"
 
@@ -229,6 +240,7 @@ definitions:
         $ref: "#/definitions/PowerProfile"
     xml:
       name: "Load"
+
   PowerProfile:
     type: "array"
     items:
@@ -289,6 +301,65 @@ definitions:
     xml:
       name: "Linecode"
 
+  XYCurve:
+    type: "object"
+    required:
+      - "id"
+      - "npts"
+      - "xarray"
+      - "yarray"
+    properties:
+      id:
+        type: "string"
+      npts:
+        type: "integer"
+      xarray:
+        type: "array"
+        items:
+          type: "number"
+      yarray:
+        type: "array"
+        items:
+          type: "number"
+
+  Loadshape:
+    type: "object"
+    required:
+      - "id"
+      - "npts"
+      - "interval"
+      - "mult"
+    properties:
+      id:
+        type: "string"
+      npts:
+        type: "integer"
+      interval:
+        type: "integer"
+      mult:
+        type: "array"
+        items:
+          type: "number"
+
+  Tshape:
+    type: "object"
+    required:
+      - "id"
+      - "npts"
+      - "interval"
+      - "temp"
+    properties:
+      id:
+        type: "string"
+      npts:
+        type: "integer"
+      interval:
+        type: "integer"
+      temp:
+        type: "array"
+        items:
+          type: "number"
+
   Storage:
     type: "object"
     required:
@@ -328,23 +399,42 @@ definitions:
     type: "object"
     required:
     - "id"
-    - "node"
+    - "phases"
+    - "bus1"
+    - "voltage"
     - "power"
+    - "effcurve"
+    - "ptcurve"
+    - "daily"
+    - "tdaily"
+    - "pf"
     properties:
       id:
         type: "string"
+      phases:
+        type: "integer"
+      bus1:
+        type: "string"
+      voltage:
+        type: "number"
+      power:
+        type: "number"
+      effcurve:
+        type: "string"
+      ptcurve:
+        type: "string"
+      daily:
+        type: "string"
+      tdaily:
+        type: "string"
+      pf:
+        type: "number"
       node:
         type: "string"
       inverterEfficiency:
         type: "number"
-      phases:
-        type: "integer"
-      voltage:
-        type: "number"
       voltageunit:
         type: "string"
-      power:
-        type: "number"
       powerunit:
         type: "string"
       powerfactor:
