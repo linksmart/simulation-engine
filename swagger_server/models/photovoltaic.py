@@ -15,23 +15,35 @@ class Photovoltaic(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, node: str=None, inverter_efficiency: float=None, phases: int=None, voltage: float=None, voltageunit: str=None, power: float=None, powerunit: str=None, powerfactor: float=None):  # noqa: E501
+    def __init__(self, id: str=None, phases: int=None, bus1: str=None, voltage: float=None, power: float=None, effcurve: str=None, ptcurve: str=None, daily: str=None, tdaily: str=None, pf: float=None, node: str=None, inverter_efficiency: float=None, voltageunit: str=None, powerunit: str=None, powerfactor: float=None):  # noqa: E501
         """Photovoltaic - a model defined in Swagger
 
         :param id: The id of this Photovoltaic.  # noqa: E501
         :type id: str
+        :param phases: The phases of this Photovoltaic.  # noqa: E501
+        :type phases: int
+        :param bus1: The bus1 of this Photovoltaic.  # noqa: E501
+        :type bus1: str
+        :param voltage: The voltage of this Photovoltaic.  # noqa: E501
+        :type voltage: float
+        :param power: The power of this Photovoltaic.  # noqa: E501
+        :type power: float
+        :param effcurve: The effcurve of this Photovoltaic.  # noqa: E501
+        :type effcurve: str
+        :param ptcurve: The ptcurve of this Photovoltaic.  # noqa: E501
+        :type ptcurve: str
+        :param daily: The daily of this Photovoltaic.  # noqa: E501
+        :type daily: str
+        :param tdaily: The tdaily of this Photovoltaic.  # noqa: E501
+        :type tdaily: str
+        :param pf: The pf of this Photovoltaic.  # noqa: E501
+        :type pf: float
         :param node: The node of this Photovoltaic.  # noqa: E501
         :type node: str
         :param inverter_efficiency: The inverter_efficiency of this Photovoltaic.  # noqa: E501
         :type inverter_efficiency: float
-        :param phases: The phases of this Photovoltaic.  # noqa: E501
-        :type phases: int
-        :param voltage: The voltage of this Photovoltaic.  # noqa: E501
-        :type voltage: float
         :param voltageunit: The voltageunit of this Photovoltaic.  # noqa: E501
         :type voltageunit: str
-        :param power: The power of this Photovoltaic.  # noqa: E501
-        :type power: float
         :param powerunit: The powerunit of this Photovoltaic.  # noqa: E501
         :type powerunit: str
         :param powerfactor: The powerfactor of this Photovoltaic.  # noqa: E501
@@ -39,35 +51,53 @@ class Photovoltaic(Model):
         """
         self.swagger_types = {
             'id': str,
+            'phases': int,
+            'bus1': str,
+            'voltage': float,
+            'power': float,
+            'effcurve': str,
+            'ptcurve': str,
+            'daily': str,
+            'tdaily': str,
+            'pf': float,
             'node': str,
             'inverter_efficiency': float,
-            'phases': int,
-            'voltage': float,
             'voltageunit': str,
-            'power': float,
             'powerunit': str,
             'powerfactor': float
         }
 
         self.attribute_map = {
             'id': 'id',
+            'phases': 'phases',
+            'bus1': 'bus1',
+            'voltage': 'voltage',
+            'power': 'power',
+            'effcurve': 'effcurve',
+            'ptcurve': 'ptcurve',
+            'daily': 'daily',
+            'tdaily': 'tdaily',
+            'pf': 'pf',
             'node': 'node',
             'inverter_efficiency': 'inverterEfficiency',
-            'phases': 'phases',
-            'voltage': 'voltage',
             'voltageunit': 'voltageunit',
-            'power': 'power',
             'powerunit': 'powerunit',
             'powerfactor': 'powerfactor'
         }
 
         self._id = id
+        self._phases = phases
+        self._bus1 = bus1
+        self._voltage = voltage
+        self._power = power
+        self._effcurve = effcurve
+        self._ptcurve = ptcurve
+        self._daily = daily
+        self._tdaily = tdaily
+        self._pf = pf
         self._node = node
         self._inverter_efficiency = inverter_efficiency
-        self._phases = phases
-        self._voltage = voltage
         self._voltageunit = voltageunit
-        self._power = power
         self._powerunit = powerunit
         self._powerfactor = powerfactor
 
@@ -106,6 +136,213 @@ class Photovoltaic(Model):
         self._id = id
 
     @property
+    def phases(self) -> int:
+        """Gets the phases of this Photovoltaic.
+
+
+        :return: The phases of this Photovoltaic.
+        :rtype: int
+        """
+        return self._phases
+
+    @phases.setter
+    def phases(self, phases: int):
+        """Sets the phases of this Photovoltaic.
+
+
+        :param phases: The phases of this Photovoltaic.
+        :type phases: int
+        """
+        if phases is None:
+            raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501
+
+        self._phases = phases
+
+    @property
+    def bus1(self) -> str:
+        """Gets the bus1 of this Photovoltaic.
+
+
+        :return: The bus1 of this Photovoltaic.
+        :rtype: str
+        """
+        return self._bus1
+
+    @bus1.setter
+    def bus1(self, bus1: str):
+        """Sets the bus1 of this Photovoltaic.
+
+
+        :param bus1: The bus1 of this Photovoltaic.
+        :type bus1: str
+        """
+        if bus1 is None:
+            raise ValueError("Invalid value for `bus1`, must not be `None`")  # noqa: E501
+
+        self._bus1 = bus1
+
+    @property
+    def voltage(self) -> float:
+        """Gets the voltage of this Photovoltaic.
+
+
+        :return: The voltage of this Photovoltaic.
+        :rtype: float
+        """
+        return self._voltage
+
+    @voltage.setter
+    def voltage(self, voltage: float):
+        """Sets the voltage of this Photovoltaic.
+
+
+        :param voltage: The voltage of this Photovoltaic.
+        :type voltage: float
+        """
+        if voltage is None:
+            raise ValueError("Invalid value for `voltage`, must not be `None`")  # noqa: E501
+
+        self._voltage = voltage
+
+    @property
+    def power(self) -> float:
+        """Gets the power of this Photovoltaic.
+
+
+        :return: The power of this Photovoltaic.
+        :rtype: float
+        """
+        return self._power
+
+    @power.setter
+    def power(self, power: float):
+        """Sets the power of this Photovoltaic.
+
+
+        :param power: The power of this Photovoltaic.
+        :type power: float
+        """
+        if power is None:
+            raise ValueError("Invalid value for `power`, must not be `None`")  # noqa: E501
+
+        self._power = power
+
+    @property
+    def effcurve(self) -> str:
+        """Gets the effcurve of this Photovoltaic.
+
+
+        :return: The effcurve of this Photovoltaic.
+        :rtype: str
+        """
+        return self._effcurve
+
+    @effcurve.setter
+    def effcurve(self, effcurve: str):
+        """Sets the effcurve of this Photovoltaic.
+
+
+        :param effcurve: The effcurve of this Photovoltaic.
+        :type effcurve: str
+        """
+        if effcurve is None:
+            raise ValueError("Invalid value for `effcurve`, must not be `None`")  # noqa: E501
+
+        self._effcurve = effcurve
+
+    @property
+    def ptcurve(self) -> str:
+        """Gets the ptcurve of this Photovoltaic.
+
+
+        :return: The ptcurve of this Photovoltaic.
+        :rtype: str
+        """
+        return self._ptcurve
+
+    @ptcurve.setter
+    def ptcurve(self, ptcurve: str):
+        """Sets the ptcurve of this Photovoltaic.
+
+
+        :param ptcurve: The ptcurve of this Photovoltaic.
+        :type ptcurve: str
+        """
+        if ptcurve is None:
+            raise ValueError("Invalid value for `ptcurve`, must not be `None`")  # noqa: E501
+
+        self._ptcurve = ptcurve
+
+    @property
+    def daily(self) -> str:
+        """Gets the daily of this Photovoltaic.
+
+
+        :return: The daily of this Photovoltaic.
+        :rtype: str
+        """
+        return self._daily
+
+    @daily.setter
+    def daily(self, daily: str):
+        """Sets the daily of this Photovoltaic.
+
+
+        :param daily: The daily of this Photovoltaic.
+        :type daily: str
+        """
+        if daily is None:
+            raise ValueError("Invalid value for `daily`, must not be `None`")  # noqa: E501
+
+        self._daily = daily
+
+    @property
+    def tdaily(self) -> str:
+        """Gets the tdaily of this Photovoltaic.
+
+
+        :return: The tdaily of this Photovoltaic.
+        :rtype: str
+        """
+        return self._tdaily
+
+    @tdaily.setter
+    def tdaily(self, tdaily: str):
+        """Sets the tdaily of this Photovoltaic.
+
+
+        :param tdaily: The tdaily of this Photovoltaic.
+        :type tdaily: str
+        """
+        if tdaily is None:
+            raise ValueError("Invalid value for `tdaily`, must not be `None`")  # noqa: E501
+
+        self._tdaily = tdaily
+
+    @property
+    def pf(self) -> float:
+        """Gets the pf of this Photovoltaic.
+
+
+        :return: The pf of this Photovoltaic.
+        :rtype: float
+        """
+        return self._pf
+
+    @pf.setter
+    def pf(self, pf: float):
+        """Sets the pf of this Photovoltaic.
+
+
+        :param pf: The pf of this Photovoltaic.
+        :type pf: float
+        """
+        if pf is None:
+            raise ValueError("Invalid value for `pf`, must not be `None`")  # noqa: E501
+
+        self._pf = pf
+
+    @property
     def node(self) -> str:
         """Gets the node of this Photovoltaic.
 
@@ -123,8 +360,6 @@ class Photovoltaic(Model):
         :param node: The node of this Photovoltaic.
         :type node: str
         """
-        if node is None:
-            raise ValueError("Invalid value for `node`, must not be `None`")  # noqa: E501
 
         self._node = node
 
@@ -150,48 +385,6 @@ class Photovoltaic(Model):
         self._inverter_efficiency = inverter_efficiency
 
     @property
-    def phases(self) -> int:
-        """Gets the phases of this Photovoltaic.
-
-
-        :return: The phases of this Photovoltaic.
-        :rtype: int
-        """
-        return self._phases
-
-    @phases.setter
-    def phases(self, phases: int):
-        """Sets the phases of this Photovoltaic.
-
-
-        :param phases: The phases of this Photovoltaic.
-        :type phases: int
-        """
-
-        self._phases = phases
-
-    @property
-    def voltage(self) -> float:
-        """Gets the voltage of this Photovoltaic.
-
-
-        :return: The voltage of this Photovoltaic.
-        :rtype: float
-        """
-        return self._voltage
-
-    @voltage.setter
-    def voltage(self, voltage: float):
-        """Sets the voltage of this Photovoltaic.
-
-
-        :param voltage: The voltage of this Photovoltaic.
-        :type voltage: float
-        """
-
-        self._voltage = voltage
-
-    @property
     def voltageunit(self) -> str:
         """Gets the voltageunit of this Photovoltaic.
 
@@ -211,29 +404,6 @@ class Photovoltaic(Model):
         """
 
         self._voltageunit = voltageunit
-
-    @property
-    def power(self) -> float:
-        """Gets the power of this Photovoltaic.
-
-
-        :return: The power of this Photovoltaic.
-        :rtype: float
-        """
-        return self._power
-
-    @power.setter
-    def power(self, power: float):
-        """Sets the power of this Photovoltaic.
-
-
-        :param power: The power of this Photovoltaic.
-        :type power: float
-        """
-        if power is None:
-            raise ValueError("Invalid value for `power`, must not be `None`")  # noqa: E501
-
-        self._power = power
 
     @property
     def powerunit(self) -> str:
