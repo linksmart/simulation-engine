@@ -327,3 +327,109 @@ class OpenDSS:
         )
         logger.info(dss_string)
         dss.run_command(dss_string)
+
+    def setXYCurves(self, xycurves):
+        logger.info("Setting up the XYCurves")
+        try:
+            for element in xycurves:
+                id = None
+                npts = None
+                xarray = None
+                yarray = None
+                for key, value in element.items():
+                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    if key == "id":
+                        id = value
+                    if key == "npts":
+                        npts = value
+                    if key == "xarray":
+                        xarray = value
+                    if key == "yarray":
+                        yarray = value
+                self.setXYCurve(id, npts, xarray, yarray)
+                dss.run_command('Solve')
+                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+        except Exception as e:
+            logger.error(e)
+
+    def setXYCurve(self, id, npts, xarray, yarray):
+        # New XYCurve.panel_temp_eff npts=4  xarray=[0  25  75  100]  yarray=[1.2 1.0 0.8  0.6]
+        # New XYCurve.panel_absorb_eff npts=4  xarray=[.1  .2  .4  1.0]  yarray=[.86  .9  .93  .97]
+        dss_string = "New XYCurve.{id} npts={npts} xarray=[{xarray}] yarray=[{yarray}]".format(
+            id = id,
+            npts = npts,
+            xarray = ','.join(['{:f}'.format(x) for x in xarray]),
+            yarray = ','.join(['{:f}'.format(x) for x in yarray])
+        )
+        logger.info(dss_string)
+        dss.run_command(dss_string)
+
+    def setLoadshapes(self, loadshapes):
+        logger.info("Setting up the Loadings")
+        try:
+            for element in loadshapes:
+                id = None
+                npts = None
+                interval = None
+                mult = None
+                for key, value in element.items():
+                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    if key == "id":
+                        id = value
+                    if key == "npts":
+                        npts = value
+                    if key == "interval":
+                        interval = value
+                    if key == "mult":
+                        mult = value
+                self.setLoadshape(id, npts, interval, mult)
+                dss.run_command('Solve')
+                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+        except Exception as e:
+            logger.error(e)
+
+    def setLoadshape(self, id, npts, interval, mult):
+        # New Loadshape.assumed_irrad npts=24 interval=1 mult=[0 0 0 0 0 0 .1 .2 .3  .5  .8  .9  1.0  1.0  .99  .9  .7  .4  .1 0  0  0  0  0]
+        dss_string = "New Loadshape.{id} npts={npts} interval={interval} mult=[{mult}]".format(
+            id=id,
+            npts=npts,
+            interval=interval,
+            mult=','.join(['{:f}'.format(x) for x in mult])
+        )
+        logger.info(dss_string)
+        dss.run_command(dss_string)
+
+    def setTshapes(self, tshapes):
+        logger.info("Setting up the TShapes")
+        try:
+            for element in tshapes:
+                id = None
+                npts = None
+                interval = None
+                temp = None
+                for key, value in element.items():
+                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    if key == "id":
+                        id = value
+                    if key == "npts":
+                        npts = value
+                    if key == "interval":
+                        interval = value
+                    if key == "temp":
+                        temp = value
+                self.setTshape(id, npts, interval, temp)
+                dss.run_command('Solve')
+                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+        except Exception as e:
+            logger.error(e)
+
+    def setTshape(self, id, npts, interval, temp):
+        # New Tshape.assumed_Temp npts=24 interval=1 temp=[10, 10, 10, 10, 10, 10, 12, 15, 20, 25, 30, 30  32 32  30 28  27  26  25 20 18 15 13 12]
+        dss_string = "New Tshape.{id} npts={npts} interval={interval} temp=[{temp}]".format(
+            id=id,
+            npts=npts,
+            interval=interval,
+            temp=','.join(['{:f}'.format(x) for x in temp])
+        )
+        logger.info(dss_string)
+        dss.run_command(dss_string)

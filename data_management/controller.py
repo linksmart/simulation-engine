@@ -33,7 +33,10 @@ class gridController:
 
     def setPhotovoltaic(self, photovoltaics, xycurves, loadshapes, tshapes):
         logger.debug("Charging the photovoltaics into the simulator")
-        self.sim.setPhotovoltaics(photovoltaics, xycurves, loadshapes, tshapes)
+        self.sim.setXYCurves(xycurves)
+        self.sim.setLoadshapes(loadshapes)
+        self.sim.setTshapes(tshapes)
+        self.sim.setPhotovoltaics(photovoltaics)
         logger.debug("Photovoltaics charged")
 
     def setStorage(self,object):
