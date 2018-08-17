@@ -408,6 +408,9 @@ definitions:
     - "daily"
     - "tdaily"
     - "pf"
+    - "temperature"
+    - "irrad"
+    - "pmpp"
     properties:
       id:
         type: "string"
@@ -428,6 +431,12 @@ definitions:
       tdaily:
         type: "string"
       pf:
+        type: "number"
+      temperature:
+        type: "number"
+      irrad:
+        type: "number"
+      pmpp:
         type: "number"
       node:
         type: "string"

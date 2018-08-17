@@ -433,3 +433,47 @@ class OpenDSS:
         )
         logger.info(dss_string)
         dss.run_command(dss_string)
+
+    def setPhotovoltaics(self, photovoltaics):
+        logger.info("Setting up the Photovoltaics")
+        try:
+            for element in photovoltaics:
+                id = None
+                npts = None
+                interval = None
+                temp = None
+                for key, value in element.items():
+                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    if key == "id":
+                        id = value
+                    if key == "npts":
+                        npts = value
+                    if key == "interval":
+                        interval = value
+                    if key == "temp":
+                        temp = value
+                self.setPhotovoltaic(id, npts, interval, temp)
+                dss.run_command('Solve')
+                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+        except Exception as e:
+            logger.error(e)
+
+    def setPhotovoltaic(self, id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp):
+        # New PVSystem.PV_Menapace phases=3 bus1=121117 kV=0.4  kVA=10  effcurve=panel_absorb_eff  P-TCurve=panel_temp_eff Daily=assumed_irrad TDaily=assumed_Temp PF=0.96 temperature=25 irrad=0.8  Pmpp=10
+        dss_string = "New PVSystem.{id} phases={phases} bus1={bus1} kV={voltage} kVA={power} effcurve={effcurve} P-TCurve={ptcurve} Daily={daily} TDaily={tdaily} PF={pf} temperature={temperature} irrad={irrad} Pmpp={pmpp}".format(
+            id=id,
+            phases=phases,
+            bus1=bus1,
+            voltage=voltage,
+            power=power,
+            effcurve=effcurve,
+            ptcurve=ptcurve,
+            daily=daily,
+            tdaily=tdaily,
+            pf=pf,
+            temperature=temperature,
+            irrad=irrad,
+            pmpp=pmpp
+        )
+        logger.info(dss_string)
+        dss.run_command(dss_string)
