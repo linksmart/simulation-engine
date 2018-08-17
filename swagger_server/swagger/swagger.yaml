@@ -363,10 +363,13 @@ definitions:
   Storage:
     type: "object"
     required:
-    - "DoD"
-    - "SoC"
-    - "id"
-    - "node"
+      - "id"
+      - "phases"
+      - "node"
+      - "voltage"
+      - "power"
+      - "kwhrated"
+      - "kwrated"
     properties:
       id:
         type: "string"
@@ -393,6 +396,10 @@ definitions:
       powerunit:
         type: "string"
       powerfactor:
+        type: "number"
+      kwhrated:
+        type: "number"
+      kwrated:
         type: "number"
 
   Photovoltaic:

@@ -15,7 +15,7 @@ class Photovoltaic(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, phases: int=None, bus1: str=None, voltage: float=None, power: float=None, effcurve: str=None, ptcurve: str=None, daily: str=None, tdaily: str=None, pf: float=None, node: str=None, inverter_efficiency: float=None, voltageunit: str=None, powerunit: str=None, powerfactor: float=None):  # noqa: E501
+    def __init__(self, id: str=None, phases: int=None, bus1: str=None, voltage: float=None, power: float=None, effcurve: str=None, ptcurve: str=None, daily: str=None, tdaily: str=None, pf: float=None, temperature: float=None, irrad: float=None, pmpp: float=None, node: str=None, inverter_efficiency: float=None, voltageunit: str=None, powerunit: str=None, powerfactor: float=None):  # noqa: E501
         """Photovoltaic - a model defined in Swagger
 
         :param id: The id of this Photovoltaic.  # noqa: E501
@@ -38,6 +38,12 @@ class Photovoltaic(Model):
         :type tdaily: str
         :param pf: The pf of this Photovoltaic.  # noqa: E501
         :type pf: float
+        :param temperature: The temperature of this Photovoltaic.  # noqa: E501
+        :type temperature: float
+        :param irrad: The irrad of this Photovoltaic.  # noqa: E501
+        :type irrad: float
+        :param pmpp: The pmpp of this Photovoltaic.  # noqa: E501
+        :type pmpp: float
         :param node: The node of this Photovoltaic.  # noqa: E501
         :type node: str
         :param inverter_efficiency: The inverter_efficiency of this Photovoltaic.  # noqa: E501
@@ -60,6 +66,9 @@ class Photovoltaic(Model):
             'daily': str,
             'tdaily': str,
             'pf': float,
+            'temperature': float,
+            'irrad': float,
+            'pmpp': float,
             'node': str,
             'inverter_efficiency': float,
             'voltageunit': str,
@@ -78,6 +87,9 @@ class Photovoltaic(Model):
             'daily': 'daily',
             'tdaily': 'tdaily',
             'pf': 'pf',
+            'temperature': 'temperature',
+            'irrad': 'irrad',
+            'pmpp': 'pmpp',
             'node': 'node',
             'inverter_efficiency': 'inverterEfficiency',
             'voltageunit': 'voltageunit',
@@ -95,6 +107,9 @@ class Photovoltaic(Model):
         self._daily = daily
         self._tdaily = tdaily
         self._pf = pf
+        self._temperature = temperature
+        self._irrad = irrad
+        self._pmpp = pmpp
         self._node = node
         self._inverter_efficiency = inverter_efficiency
         self._voltageunit = voltageunit
@@ -341,6 +356,75 @@ class Photovoltaic(Model):
             raise ValueError("Invalid value for `pf`, must not be `None`")  # noqa: E501
 
         self._pf = pf
+
+    @property
+    def temperature(self) -> float:
+        """Gets the temperature of this Photovoltaic.
+
+
+        :return: The temperature of this Photovoltaic.
+        :rtype: float
+        """
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, temperature: float):
+        """Sets the temperature of this Photovoltaic.
+
+
+        :param temperature: The temperature of this Photovoltaic.
+        :type temperature: float
+        """
+        if temperature is None:
+            raise ValueError("Invalid value for `temperature`, must not be `None`")  # noqa: E501
+
+        self._temperature = temperature
+
+    @property
+    def irrad(self) -> float:
+        """Gets the irrad of this Photovoltaic.
+
+
+        :return: The irrad of this Photovoltaic.
+        :rtype: float
+        """
+        return self._irrad
+
+    @irrad.setter
+    def irrad(self, irrad: float):
+        """Sets the irrad of this Photovoltaic.
+
+
+        :param irrad: The irrad of this Photovoltaic.
+        :type irrad: float
+        """
+        if irrad is None:
+            raise ValueError("Invalid value for `irrad`, must not be `None`")  # noqa: E501
+
+        self._irrad = irrad
+
+    @property
+    def pmpp(self) -> float:
+        """Gets the pmpp of this Photovoltaic.
+
+
+        :return: The pmpp of this Photovoltaic.
+        :rtype: float
+        """
+        return self._pmpp
+
+    @pmpp.setter
+    def pmpp(self, pmpp: float):
+        """Sets the pmpp of this Photovoltaic.
+
+
+        :param pmpp: The pmpp of this Photovoltaic.
+        :type pmpp: float
+        """
+        if pmpp is None:
+            raise ValueError("Invalid value for `pmpp`, must not be `None`")  # noqa: E501
+
+        self._pmpp = pmpp
 
     @property
     def node(self) -> str:

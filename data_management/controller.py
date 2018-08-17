@@ -39,10 +39,9 @@ class gridController:
         self.sim.setPhotovoltaics(photovoltaics)
         logger.debug("Photovoltaics charged")
 
-    def setStorage(self,object):
+    def setStorage(self, storage):
         logger.debug("Charging the ESS into the simulator")
-        self.object = object
-        self.sim.setStorage(self.object)
+        self.sim.setStorages(storage)
         logger.debug("ESS charged")
 
     def setChargingPoints(self,object):
