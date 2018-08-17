@@ -15,7 +15,7 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, node: str=None, so_c: float=None, do_d: float=None, so_h: float=None, energy: float=None, inverter_efficiency: float=None, phases: int=None, voltage: float=None, voltageunit: str=None, power: float=None, powerunit: str=None, powerfactor: float=None):  # noqa: E501
+    def __init__(self, id: str=None, node: str=None, so_c: float=None, do_d: float=None, so_h: float=None, energy: float=None, inverter_efficiency: float=None, phases: int=None, voltage: float=None, voltageunit: str=None, power: float=None, powerunit: str=None, powerfactor: float=None, kwhrated: float=None, kwrated: float=None):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501
@@ -44,6 +44,10 @@ class Storage(Model):
         :type powerunit: str
         :param powerfactor: The powerfactor of this Storage.  # noqa: E501
         :type powerfactor: float
+        :param kwhrated: The kwhrated of this Storage.  # noqa: E501
+        :type kwhrated: float
+        :param kwrated: The kwrated of this Storage.  # noqa: E501
+        :type kwrated: float
         """
         self.swagger_types = {
             'id': str,
@@ -58,7 +62,9 @@ class Storage(Model):
             'voltageunit': str,
             'power': float,
             'powerunit': str,
-            'powerfactor': float
+            'powerfactor': float,
+            'kwhrated': float,
+            'kwrated': float
         }
 
         self.attribute_map = {
@@ -74,7 +80,9 @@ class Storage(Model):
             'voltageunit': 'voltageunit',
             'power': 'power',
             'powerunit': 'powerunit',
-            'powerfactor': 'powerfactor'
+            'powerfactor': 'powerfactor',
+            'kwhrated': 'kwhrated',
+            'kwrated': 'kwrated'
         }
 
         self._id = id
@@ -90,6 +98,8 @@ class Storage(Model):
         self._power = power
         self._powerunit = powerunit
         self._powerfactor = powerfactor
+        self._kwhrated = kwhrated
+        self._kwrated = kwrated
 
     @classmethod
     def from_dict(cls, dikt) -> 'Storage':
@@ -166,8 +176,6 @@ class Storage(Model):
         :param so_c: The so_c of this Storage.
         :type so_c: float
         """
-        if so_c is None:
-            raise ValueError("Invalid value for `so_c`, must not be `None`")  # noqa: E501
 
         self._so_c = so_c
 
@@ -189,8 +197,6 @@ class Storage(Model):
         :param do_d: The do_d of this Storage.
         :type do_d: float
         """
-        if do_d is None:
-            raise ValueError("Invalid value for `do_d`, must not be `None`")  # noqa: E501
 
         self._do_d = do_d
 
@@ -275,6 +281,8 @@ class Storage(Model):
         :param phases: The phases of this Storage.
         :type phases: int
         """
+        if phases is None:
+            raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501
 
         self._phases = phases
 
@@ -296,6 +304,8 @@ class Storage(Model):
         :param voltage: The voltage of this Storage.
         :type voltage: float
         """
+        if voltage is None:
+            raise ValueError("Invalid value for `voltage`, must not be `None`")  # noqa: E501
 
         self._voltage = voltage
 
@@ -338,6 +348,8 @@ class Storage(Model):
         :param power: The power of this Storage.
         :type power: float
         """
+        if power is None:
+            raise ValueError("Invalid value for `power`, must not be `None`")  # noqa: E501
 
         self._power = power
 
@@ -382,3 +394,49 @@ class Storage(Model):
         """
 
         self._powerfactor = powerfactor
+
+    @property
+    def kwhrated(self) -> float:
+        """Gets the kwhrated of this Storage.
+
+
+        :return: The kwhrated of this Storage.
+        :rtype: float
+        """
+        return self._kwhrated
+
+    @kwhrated.setter
+    def kwhrated(self, kwhrated: float):
+        """Sets the kwhrated of this Storage.
+
+
+        :param kwhrated: The kwhrated of this Storage.
+        :type kwhrated: float
+        """
+        if kwhrated is None:
+            raise ValueError("Invalid value for `kwhrated`, must not be `None`")  # noqa: E501
+
+        self._kwhrated = kwhrated
+
+    @property
+    def kwrated(self) -> float:
+        """Gets the kwrated of this Storage.
+
+
+        :return: The kwrated of this Storage.
+        :rtype: float
+        """
+        return self._kwrated
+
+    @kwrated.setter
+    def kwrated(self, kwrated: float):
+        """Sets the kwrated of this Storage.
+
+
+        :param kwrated: The kwrated of this Storage.
+        :type kwrated: float
+        """
+        if kwrated is None:
+            raise ValueError("Invalid value for `kwrated`, must not be `None`")  # noqa: E501
+
+        self._kwrated = kwrated

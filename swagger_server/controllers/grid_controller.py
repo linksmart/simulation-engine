@@ -49,9 +49,9 @@ def create_grid(body):  # noqa: E501
             loadshapes = body["loadshapes"]
             tshapes = body["tshapes"]
             gridController.setPhotovoltaic(photovoltaics, xycurves, loadshapes, tshapes)
-        if "storageUnits" in body.keys() and body["storageUnits"] is not None:
+        if "storage_units" in body.keys() and body["storage_units"] is not None:
         #body=body.to_dict()
-            storage=body["storageUnits"]
+            storage=body["storage_units"]
             gridController.setStorage(storage)
         if "chargingPoints" in body.keys() and body["chargingPoints"] is not None:
         #body=body.to_dict()

@@ -439,20 +439,47 @@ class OpenDSS:
         try:
             for element in photovoltaics:
                 id = None
-                npts = None
-                interval = None
-                temp = None
+                phases = None
+                bus1 = None
+                voltage = None
+                power = None
+                effcurve = None
+                ptcurve = None
+                daily = None
+                tdaily = None
+                pf = None
+                temperature = None
+                irrad = None
+                pmpp = None
                 for key, value in element.items():
                     logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
-                    if key == "npts":
-                        npts = value
-                    if key == "interval":
-                        interval = value
-                    if key == "temp":
-                        temp = value
-                self.setPhotovoltaic(id, npts, interval, temp)
+                    if key == "phases":
+                        phases = value
+                    if key == "bus1":
+                        bus1 = value
+                    if key == "voltage":
+                        voltage = value
+                    if key == "power":
+                        power = value
+                    if key == "effcurve":
+                        effcurve = value
+                    if key == "ptcurve":
+                        ptcurve = value
+                    if key == "daily":
+                        daily = value
+                    if key == "tdaily":
+                        tdaily = value
+                    if key == "pf":
+                        pf = value
+                    if key == "temperature":
+                        temperature = value
+                    if key == "irrad":
+                        irrad = value
+                    if key == "pmpp":
+                            pmpp = value
+                self.setPhotovoltaic(id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp)
                 dss.run_command('Solve')
                 logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
         except Exception as e:
@@ -474,6 +501,53 @@ class OpenDSS:
             temperature=temperature,
             irrad=irrad,
             pmpp=pmpp
+        )
+        logger.info(dss_string)
+        dss.run_command(dss_string)
+
+    def setStorages(self, storage):
+        logger.info("Setting up the Storages")
+        try:
+            for element in storage:
+                id = None
+                phases = None
+                node = None
+                voltage = None
+                power = None
+                kwhrated = None
+                kwrated = None
+                for key, value in element.items():
+                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    if key == "id":
+                        id = value
+                    if key == "phases":
+                        phases = value
+                    if key == "node":
+                        node = value
+                    if key == "voltage":
+                        voltage = value
+                    if key == "power":
+                        power = value
+                    if key == "kwhrated":
+                        kwhrated = value
+                    if key == "kwrated":
+                        kwrated = value
+                self.setStorage(id, phases, node, voltage, power, kwhrated, kwrated)
+                dss.run_command('Solve')
+                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+        except Exception as e:
+            logger.error(e)
+
+    def setStorage(self, id, phases, node, voltage, power, kwhrated, kwrated):
+        # New Storage.AtPVNode phases=3 bus1=121117 kV=0.4  kva=5 kWhrated=9.6 kwrated=6.4
+        dss_string = "New Storage.{id} phases={phases} bus1={node} kV={voltage} kVA={power} kWhrated={kwhrated} kwrated={kwrated}".format(
+            id=id,
+            phases=phases,
+            node=node,
+            voltage=voltage,
+            power=power,
+            kwhrated=kwhrated,
+            kwrated=kwrated
         )
         logger.info(dss_string)
         dss.run_command(dss_string)
