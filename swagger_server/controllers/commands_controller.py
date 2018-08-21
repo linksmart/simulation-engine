@@ -17,7 +17,18 @@ from  more_itertools import unique_everseen
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
-	
+
+def abort_simulation():  # noqa: E501
+    """Aborts a running simulation
+
+    If the user of the professional GUI decides to abort a running simulation this call will be triggered # noqa: E501
+
+
+    :rtype: None
+    """
+    return 'do some magic!'
+
+
 def run_simulation(body):  # noqa: E501
     """Runs a simulation
 
