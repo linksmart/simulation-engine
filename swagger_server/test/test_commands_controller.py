@@ -13,6 +13,17 @@ from swagger_server.test import BaseTestCase
 class TestCommandsController(BaseTestCase):
     """CommandsController integration test stubs"""
 
+    def test_abort_simulation(self):
+        """Test case for abort_simulation
+
+        Aborts a running simulation
+        """
+        response = self.client.open(
+            '/se/commands/abort',
+            method='GET')
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
     def test_run_simulation(self):
         """Test case for run_simulation
 
