@@ -265,7 +265,7 @@ class OpenDSS:
                         units = value
                 self.setLineCode(id, r1, x1, c0, units)
                 dss.run_command("Solve")
-                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+                logger.debug("Line codes: " + str(dss.LineCodes.AllNames()))
         except Exception as e:
             logger.error(e)
 
@@ -310,7 +310,7 @@ class OpenDSS:
                         linecode = value
                 self.setPowerLine(id, node1, node2, phases, length, unit, linecode)
                 dss.run_command('Solve')
-                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+                logger.debug("Power lines: " + str(dss.Lines.AllNames()))
         except Exception as e:
             logger.error(e)
 
@@ -348,7 +348,7 @@ class OpenDSS:
                         yarray = value
                 self.setXYCurve(id, npts, xarray, yarray)
                 dss.run_command('Solve')
-                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+
         except Exception as e:
             logger.error(e)
 
@@ -365,7 +365,7 @@ class OpenDSS:
         dss.run_command(dss_string)
 
     def setLoadshapes(self, loadshapes):
-        logger.info("Setting up the Loadings")
+        logger.debug("Setting up the Loadshapes")
         try:
             for element in loadshapes:
                 id = None
@@ -384,7 +384,7 @@ class OpenDSS:
                         mult = value
                 self.setLoadshape(id, npts, interval, mult)
                 dss.run_command('Solve')
-                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+                logger.debug("Loadshape names: " + str(dss.LoadShape.AllNames()))
         except Exception as e:
             logger.error(e)
 
@@ -419,7 +419,7 @@ class OpenDSS:
                         temp = value
                 self.setTshape(id, npts, interval, temp)
                 dss.run_command('Solve')
-                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+                logger.info("TShape names: " + str(dss.LoadShape.AllNames()))
         except Exception as e:
             logger.error(e)
 
@@ -435,7 +435,7 @@ class OpenDSS:
         dss.run_command(dss_string)
 
     def setPhotovoltaics(self, photovoltaics):
-        logger.info("Setting up the Photovoltaics")
+        logger.debug("Setting up the Photovoltaics")
         try:
             for element in photovoltaics:
                 id = None
@@ -481,7 +481,7 @@ class OpenDSS:
                             pmpp = value
                 self.setPhotovoltaic(id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp)
                 dss.run_command('Solve')
-                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+                logger.debug("Photovoltaics: " + str(dss.PVsystems.AllNames()))
         except Exception as e:
             logger.error(e)
 
@@ -534,7 +534,7 @@ class OpenDSS:
                         kwrated = value
                 self.setStorage(id, phases, node, voltage, power, kwhrated, kwrated)
                 dss.run_command('Solve')
-                logger.info("Load names: " + str(dss.Circuit.AllNodeNames()))
+                logger.info("Storage names: " + str(dss.Circuit.AllNodeNames()))
         except Exception as e:
             logger.error(e)
 
