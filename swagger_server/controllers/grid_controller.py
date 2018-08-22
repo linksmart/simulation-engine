@@ -6,7 +6,7 @@ from swagger_server.models.coordinates import Coordinates  # noqa: E501
 from swagger_server.models.grid import Grid  # noqa: E501
 from swagger_server import util
 
-from data_management.controller import gridController as gControl
+
 
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
