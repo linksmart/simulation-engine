@@ -2,7 +2,7 @@ import connexion
 import six
 import logging
 
-from swagger_server.models.transformer import Transformer  # noqa: E501
+#from swagger_server.models.transformer import Transformer  # noqa: E501
 from swagger_server import util
 
 
