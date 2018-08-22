@@ -1,8 +1,13 @@
 import connexion
-import six
+import six, logging
 
 from swagger_server.models.radial import Radial  # noqa: E501
 from swagger_server import util
+
+from data_management.controller import gridController as gControl
+
+logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__file__)
 
 
 xycurves=[
@@ -143,16 +148,17 @@ def add_radial(body):  # noqa: E501
             linecodes =  body["linecode"]
             gridController.setPowerLines(powerlines, linecodes)
         if "photovoltaics" in body.keys() and body["photovoltaics"] is not None:
-                """and "xycurves" in body.keys() and body["xycurves"] is not None 
-                and "loadshapes" in body.keys() and body["loadshapes"] is not None 
-                and "tshapes" in body.keys() and body["tshapes"] is not None: 
-                """
+
             photovoltaics = body["photovoltaics"]
             #xycurves = body["xycurves"]
             #loadshapes = body["loadshapes"]
             #tshapes = body["tshapes"]
             gridController.setPhotovoltaic(photovoltaics, xycurves, loadshapes, tshapes)
-
+        """
+        and "xycurves" in body.keys() and body["xycurves"] is not None 
+                        and "loadshapes" in body.keys() and body["loadshapes"] is not None 
+                        and "tshapes" in body.keys() and body["tshapes"] is not None: 
+        """
         if "storage_units" in body.keys() and body["storage_units"] is not None:
         #body=body.to_dict()
             storage=body["storage_units"]
