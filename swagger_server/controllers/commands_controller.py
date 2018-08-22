@@ -4,7 +4,6 @@ import logging
 from flask import json
 
 from swagger_server.models.simulation import Simulation  # noqa: E501
-from swagger_server.models.simulation_result import SimulationResult  # noqa: E501
 from swagger_server import util
 from data_management.controller import gridController as gControl
 from swagger_server.models.simulation_result import SimulationResult
