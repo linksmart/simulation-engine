@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.voltage import Voltage  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,31 +15,31 @@ class Error(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, threshold_high: Voltage=None, threshold_medium: Voltage=None, threshold_low: Voltage=None):  # noqa: E501
+    def __init__(self, voltage_r: bool=None, voltage_s: bool=None, voltage_t: bool=None):  # noqa: E501
         """Error - a model defined in Swagger
 
-        :param threshold_high: The threshold_high of this Error.  # noqa: E501
-        :type threshold_high: Voltage
-        :param threshold_medium: The threshold_medium of this Error.  # noqa: E501
-        :type threshold_medium: Voltage
-        :param threshold_low: The threshold_low of this Error.  # noqa: E501
-        :type threshold_low: Voltage
+        :param voltage_r: The voltage_r of this Error.  # noqa: E501
+        :type voltage_r: bool
+        :param voltage_s: The voltage_s of this Error.  # noqa: E501
+        :type voltage_s: bool
+        :param voltage_t: The voltage_t of this Error.  # noqa: E501
+        :type voltage_t: bool
         """
         self.swagger_types = {
-            'threshold_high': Voltage,
-            'threshold_medium': Voltage,
-            'threshold_low': Voltage
+            'voltage_r': bool,
+            'voltage_s': bool,
+            'voltage_t': bool
         }
 
         self.attribute_map = {
-            'threshold_high': 'thresholdHigh',
-            'threshold_medium': 'thresholdMedium',
-            'threshold_low': 'thresholdLow'
+            'voltage_r': 'voltageR',
+            'voltage_s': 'voltageS',
+            'voltage_t': 'voltageT'
         }
 
-        self._threshold_high = threshold_high
-        self._threshold_medium = threshold_medium
-        self._threshold_low = threshold_low
+        self._voltage_r = voltage_r
+        self._voltage_s = voltage_s
+        self._voltage_t = voltage_t
 
     @classmethod
     def from_dict(cls, dikt) -> 'Error':
@@ -54,64 +53,64 @@ class Error(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def threshold_high(self) -> Voltage:
-        """Gets the threshold_high of this Error.
+    def voltage_r(self) -> bool:
+        """Gets the voltage_r of this Error.
 
 
-        :return: The threshold_high of this Error.
-        :rtype: Voltage
+        :return: The voltage_r of this Error.
+        :rtype: bool
         """
-        return self._threshold_high
+        return self._voltage_r
 
-    @threshold_high.setter
-    def threshold_high(self, threshold_high: Voltage):
-        """Sets the threshold_high of this Error.
+    @voltage_r.setter
+    def voltage_r(self, voltage_r: bool):
+        """Sets the voltage_r of this Error.
 
 
-        :param threshold_high: The threshold_high of this Error.
-        :type threshold_high: Voltage
+        :param voltage_r: The voltage_r of this Error.
+        :type voltage_r: bool
         """
 
-        self._threshold_high = threshold_high
+        self._voltage_r = voltage_r
 
     @property
-    def threshold_medium(self) -> Voltage:
-        """Gets the threshold_medium of this Error.
+    def voltage_s(self) -> bool:
+        """Gets the voltage_s of this Error.
 
 
-        :return: The threshold_medium of this Error.
-        :rtype: Voltage
+        :return: The voltage_s of this Error.
+        :rtype: bool
         """
-        return self._threshold_medium
+        return self._voltage_s
 
-    @threshold_medium.setter
-    def threshold_medium(self, threshold_medium: Voltage):
-        """Sets the threshold_medium of this Error.
+    @voltage_s.setter
+    def voltage_s(self, voltage_s: bool):
+        """Sets the voltage_s of this Error.
 
 
-        :param threshold_medium: The threshold_medium of this Error.
-        :type threshold_medium: Voltage
+        :param voltage_s: The voltage_s of this Error.
+        :type voltage_s: bool
         """
 
-        self._threshold_medium = threshold_medium
+        self._voltage_s = voltage_s
 
     @property
-    def threshold_low(self) -> Voltage:
-        """Gets the threshold_low of this Error.
+    def voltage_t(self) -> bool:
+        """Gets the voltage_t of this Error.
 
 
-        :return: The threshold_low of this Error.
-        :rtype: Voltage
+        :return: The voltage_t of this Error.
+        :rtype: bool
         """
-        return self._threshold_low
+        return self._voltage_t
 
-    @threshold_low.setter
-    def threshold_low(self, threshold_low: Voltage):
-        """Sets the threshold_low of this Error.
+    @voltage_t.setter
+    def voltage_t(self, voltage_t: bool):
+        """Sets the voltage_t of this Error.
 
 
-        :param threshold_low: The threshold_low of this Error.
-        :type threshold_low: Voltage
+        :param voltage_t: The voltage_t of this Error.
+        :type voltage_t: bool
         """
 
-        self._threshold_low = threshold_low
+        self._voltage_t = voltage_t

@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
+from swagger_server.models.coordinates import Coordinates  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -15,31 +16,26 @@ class Node(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, latitude: int=None, longitude: int=None):  # noqa: E501
+    def __init__(self, id: str=None, coordinates: Coordinates=None):  # noqa: E501
         """Node - a model defined in Swagger
 
         :param id: The id of this Node.  # noqa: E501
         :type id: str
-        :param latitude: The latitude of this Node.  # noqa: E501
-        :type latitude: int
-        :param longitude: The longitude of this Node.  # noqa: E501
-        :type longitude: int
+        :param coordinates: The coordinates of this Node.  # noqa: E501
+        :type coordinates: Coordinates
         """
         self.swagger_types = {
             'id': str,
-            'latitude': int,
-            'longitude': int
+            'coordinates': Coordinates
         }
 
         self.attribute_map = {
             'id': 'id',
-            'latitude': 'latitude',
-            'longitude': 'longitude'
+            'coordinates': 'coordinates'
         }
 
         self._id = id
-        self._latitude = latitude
-        self._longitude = longitude
+        self._coordinates = coordinates
 
     @classmethod
     def from_dict(cls, dikt) -> 'Node':
@@ -76,43 +72,22 @@ class Node(Model):
         self._id = id
 
     @property
-    def latitude(self) -> int:
-        """Gets the latitude of this Node.
+    def coordinates(self) -> Coordinates:
+        """Gets the coordinates of this Node.
 
 
-        :return: The latitude of this Node.
-        :rtype: int
+        :return: The coordinates of this Node.
+        :rtype: Coordinates
         """
-        return self._latitude
+        return self._coordinates
 
-    @latitude.setter
-    def latitude(self, latitude: int):
-        """Sets the latitude of this Node.
-
-
-        :param latitude: The latitude of this Node.
-        :type latitude: int
-        """
-
-        self._latitude = latitude
-
-    @property
-    def longitude(self) -> int:
-        """Gets the longitude of this Node.
+    @coordinates.setter
+    def coordinates(self, coordinates: Coordinates):
+        """Sets the coordinates of this Node.
 
 
-        :return: The longitude of this Node.
-        :rtype: int
-        """
-        return self._longitude
-
-    @longitude.setter
-    def longitude(self, longitude: int):
-        """Sets the longitude of this Node.
-
-
-        :param longitude: The longitude of this Node.
-        :type longitude: int
+        :param coordinates: The coordinates of this Node.
+        :type coordinates: Coordinates
         """
 
-        self._longitude = longitude
+        self._coordinates = coordinates

@@ -6,6 +6,8 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
+from swagger_server.models.coordinates import Coordinates  # noqa: F401,E501
+from swagger_server.models.radial import Radial  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -15,15 +17,15 @@ class Transformer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, latitude: int=None, longitude: int=None, phases: int=None, winding: int=None, xhl: float=None, kvs: List[float]=None, kvas: List[float]=None, wdg: int=None, bus: str=None, kv: float=None, voltage_primary: float=None, voltage_secondary: float=None, voltage_base_primary: float=None, voltage_base_secondary: float=None, power_primary: int=None, power_secondary: int=None, connection: str='wye', node_hv: str=None, node_lv: str=None, no_load_loss: float=None, req: float=None, xeq: float=None, ceq_total: float=None, monitor: int=None, control: int=None, tap_level: float=None, voltageunit: str=None, frequency: int=None, unitpower: str=None):  # noqa: E501
+    def __init__(self, id: str=None, coordinates: Coordinates=None, radials: List[Radial]=None, phases: int=None, winding: int=None, xhl: float=None, kvs: List[float]=None, kvas: List[float]=None, wdg: int=None, bus: str=None, kv: float=None, voltage_primary: float=None, voltage_secondary: float=None, voltage_base_primary: float=None, voltage_base_secondary: float=None, power_primary: int=None, power_secondary: int=None, connection: str='wye', node_hv: str=None, node_lv: str=None, no_load_loss: float=None, req: float=None, xeq: float=None, ceq_total: float=None, monitor: int=None, control: int=None, tap_level: float=None, voltageunit: str=None, frequency: int=None, unitpower: str=None):  # noqa: E501
         """Transformer - a model defined in Swagger
 
         :param id: The id of this Transformer.  # noqa: E501
         :type id: str
-        :param latitude: The latitude of this Transformer.  # noqa: E501
-        :type latitude: int
-        :param longitude: The longitude of this Transformer.  # noqa: E501
-        :type longitude: int
+        :param coordinates: The coordinates of this Transformer.  # noqa: E501
+        :type coordinates: Coordinates
+        :param radials: The radials of this Transformer.  # noqa: E501
+        :type radials: List[Radial]
         :param phases: The phases of this Transformer.  # noqa: E501
         :type phases: int
         :param winding: The winding of this Transformer.  # noqa: E501
@@ -81,8 +83,8 @@ class Transformer(Model):
         """
         self.swagger_types = {
             'id': str,
-            'latitude': int,
-            'longitude': int,
+            'coordinates': Coordinates,
+            'radials': List[Radial],
             'phases': int,
             'winding': int,
             'xhl': float,
@@ -114,8 +116,8 @@ class Transformer(Model):
 
         self.attribute_map = {
             'id': 'id',
-            'latitude': 'latitude',
-            'longitude': 'longitude',
+            'coordinates': 'coordinates',
+            'radials': 'radials',
             'phases': 'phases',
             'winding': 'winding',
             'xhl': 'xhl',
@@ -146,8 +148,8 @@ class Transformer(Model):
         }
 
         self._id = id
-        self._latitude = latitude
-        self._longitude = longitude
+        self._coordinates = coordinates
+        self._radials = radials
         self._phases = phases
         self._winding = winding
         self._xhl = xhl
@@ -211,46 +213,46 @@ class Transformer(Model):
         self._id = id
 
     @property
-    def latitude(self) -> int:
-        """Gets the latitude of this Transformer.
+    def coordinates(self) -> Coordinates:
+        """Gets the coordinates of this Transformer.
 
 
-        :return: The latitude of this Transformer.
-        :rtype: int
+        :return: The coordinates of this Transformer.
+        :rtype: Coordinates
         """
-        return self._latitude
+        return self._coordinates
 
-    @latitude.setter
-    def latitude(self, latitude: int):
-        """Sets the latitude of this Transformer.
+    @coordinates.setter
+    def coordinates(self, coordinates: Coordinates):
+        """Sets the coordinates of this Transformer.
 
 
-        :param latitude: The latitude of this Transformer.
-        :type latitude: int
+        :param coordinates: The coordinates of this Transformer.
+        :type coordinates: Coordinates
         """
 
-        self._latitude = latitude
+        self._coordinates = coordinates
 
     @property
-    def longitude(self) -> int:
-        """Gets the longitude of this Transformer.
+    def radials(self) -> List[Radial]:
+        """Gets the radials of this Transformer.
 
 
-        :return: The longitude of this Transformer.
-        :rtype: int
+        :return: The radials of this Transformer.
+        :rtype: List[Radial]
         """
-        return self._longitude
+        return self._radials
 
-    @longitude.setter
-    def longitude(self, longitude: int):
-        """Sets the longitude of this Transformer.
+    @radials.setter
+    def radials(self, radials: List[Radial]):
+        """Sets the radials of this Transformer.
 
 
-        :param longitude: The longitude of this Transformer.
-        :type longitude: int
+        :param radials: The radials of this Transformer.
+        :type radials: List[Radial]
         """
 
-        self._longitude = longitude
+        self._radials = radials
 
     @property
     def phases(self) -> int:

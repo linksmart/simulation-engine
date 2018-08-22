@@ -74,6 +74,7 @@ class ChargingPoint(Model):
     def node(self) -> str:
         """Gets the node of this ChargingPoint.
 
+        ID for the connected node  # noqa: E501
 
         :return: The node of this ChargingPoint.
         :rtype: str
@@ -84,6 +85,7 @@ class ChargingPoint(Model):
     def node(self, node: str):
         """Sets the node of this ChargingPoint.
 
+        ID for the connected node  # noqa: E501
 
         :param node: The node of this ChargingPoint.
         :type node: str
