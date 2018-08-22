@@ -16,13 +16,13 @@ class Load(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, node1: str=None, phases: int=None, voltage: float=None, powerfactor: float=None, power_profile: PowerProfile=None):  # noqa: E501
+    def __init__(self, id: str=None, node: str=None, phases: int=None, voltage: float=None, powerfactor: float=None, power_profile: PowerProfile=None):  # noqa: E501
         """Load - a model defined in Swagger
 
         :param id: The id of this Load.  # noqa: E501
         :type id: str
-        :param node1: The node1 of this Load.  # noqa: E501
-        :type node1: str
+        :param node: The node of this Load.  # noqa: E501
+        :type node: str
         :param phases: The phases of this Load.  # noqa: E501
         :type phases: int
         :param voltage: The voltage of this Load.  # noqa: E501
@@ -34,7 +34,7 @@ class Load(Model):
         """
         self.swagger_types = {
             'id': str,
-            'node1': str,
+            'node': str,
             'phases': int,
             'voltage': float,
             'powerfactor': float,
@@ -43,7 +43,7 @@ class Load(Model):
 
         self.attribute_map = {
             'id': 'id',
-            'node1': 'node1',
+            'node': 'node',
             'phases': 'phases',
             'voltage': 'voltage',
             'powerfactor': 'powerfactor',
@@ -51,7 +51,7 @@ class Load(Model):
         }
 
         self._id = id
-        self._node1 = node1
+        self._node = node
         self._phases = phases
         self._voltage = voltage
         self._powerfactor = powerfactor
@@ -92,27 +92,29 @@ class Load(Model):
         self._id = id
 
     @property
-    def node1(self) -> str:
-        """Gets the node1 of this Load.
+    def node(self) -> str:
+        """Gets the node of this Load.
 
+        ID for the connected node  # noqa: E501
 
-        :return: The node1 of this Load.
+        :return: The node of this Load.
         :rtype: str
         """
-        return self._node1
+        return self._node
 
-    @node1.setter
-    def node1(self, node1: str):
-        """Sets the node1 of this Load.
+    @node.setter
+    def node(self, node: str):
+        """Sets the node of this Load.
 
+        ID for the connected node  # noqa: E501
 
-        :param node1: The node1 of this Load.
-        :type node1: str
+        :param node: The node of this Load.
+        :type node: str
         """
-        if node1 is None:
-            raise ValueError("Invalid value for `node1`, must not be `None`")  # noqa: E501
+        if node is None:
+            raise ValueError("Invalid value for `node`, must not be `None`")  # noqa: E501
 
-        self._node1 = node1
+        self._node = node
 
     @property
     def phases(self) -> int:

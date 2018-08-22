@@ -114,6 +114,7 @@ class Powerline(Model):
     def node1(self) -> str:
         """Gets the node1 of this Powerline.
 
+        ID for the connected node  # noqa: E501
 
         :return: The node1 of this Powerline.
         :rtype: str
@@ -124,6 +125,7 @@ class Powerline(Model):
     def node1(self, node1: str):
         """Sets the node1 of this Powerline.
 
+        ID for the connected node  # noqa: E501
 
         :param node1: The node1 of this Powerline.
         :type node1: str
@@ -137,6 +139,7 @@ class Powerline(Model):
     def node2(self) -> str:
         """Gets the node2 of this Powerline.
 
+        ID for the connected node  # noqa: E501
 
         :return: The node2 of this Powerline.
         :rtype: str
@@ -147,6 +150,7 @@ class Powerline(Model):
     def node2(self, node2: str):
         """Sets the node2 of this Powerline.
 
+        ID for the connected node  # noqa: E501
 
         :param node2: The node2 of this Powerline.
         :type node2: str
