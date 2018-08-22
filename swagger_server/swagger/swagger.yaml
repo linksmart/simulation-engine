@@ -3,7 +3,7 @@ swagger: "2.0"
 info:
   description: "Sample version of DSF-SE API for communication with the professional\
     \ UI"
-  version: "0.0.2"
+  version: "0.0.4"
   title: "DSF-SE API"
   contact:
     email: "sisay.adugna.chala@fit.fraunhofer.de"
@@ -12,114 +12,100 @@ basePath: "/se"
 tags:
 - name: "grid"
   description: "Grid topology"
+- name: "radial"
+  description: "Radial"
 - name: "commands"
   description: "Commands for the simulation engine"
 schemes:
 - "http"
 paths:
-  /grid:
+  /radial:
     post:
       tags:
-      - "grid"
-      summary: "Insert grid components"
-      operationId: "create_grid"
+      - "radial"
+      summary: "Send a single radial to the simulation engine for simulation"
+      operationId: "add_radial"
       produces:
       - "application/json"
       parameters:
       - in: "body"
         name: "body"
-        description: "Created grid. gridID = 0 because it is generated server-side"
+        description: "Radial to be simulated"
         required: true
         schema:
-          $ref: "#/definitions/Grid"
+          $ref: "#/definitions/Radial"
       responses:
         default:
           description: "successful operation"
       x-swagger-router-controller: "swagger_server.controllers.grid_controller"
-  /grid/{id}:
+  /radial/{radialId}:
+    put:
+      tags:
+      - "radial"
+      summary: "Update a single radial"
+      operationId: "update_radial"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "radialId"
+        in: "path"
+        description: "Id of the radial"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Updated"
+        required: true
+        schema:
+          $ref: "#/definitions/Radial"
+      responses:
+        default:
+          description: "successful operation"
+      x-swagger-router-controller: "swagger_server.controllers.grid_controller"
+    delete:
+      tags:
+      - "radial"
+      summary: "Delete a radial"
+      operationId: "delete_radial"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "radialId"
+        in: "path"
+        description: "Id of the radial"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+      x-swagger-router-controller: "swagger_server.controllers.radial_controller"
+  /grid/{locationName}:
     get:
       tags:
       - "grid"
-      summary: "Get a grid topology"
-      description: "Get a grid topology by the coordinates of its entry point transformer"
+      summary: "Get the full grid topology"
+      description: "Get a grid topology (all transformers) for a specific geolocation\
+        \ (e.g. Fur)"
       operationId: "get_grid"
       produces:
       - "application/json"
       parameters:
-      - name: "id"
+      - name: "locationName"
         in: "path"
-        description: "Id of the grid"
+        description: "Textual identifier for the geolocation (e.g. Fur)"
         required: true
-        type: "integer"
-        format: "int64"
-      - in: "body"
-        name: "coordinates"
-        description: "The latitude and longitude coordinates for this grids entry\
-          \ point"
-        required: false
-        schema:
-          $ref: "#/definitions/Coordinates"
+        type: "string"
       responses:
         200:
-          description: "successful operation"
+          description: "returns an array of transformers for this location"
           schema:
-            $ref: "#/definitions/Grid"
+            type: "array"
+            items:
+              $ref: "#/definitions/Transformer"
         400:
           description: "Invalid parameters supplied"
         404:
           description: "Grid not found"
-      x-swagger-router-controller: "swagger_server.controllers.grid_controller"
-    put:
-      tags:
-      - "grid"
-      summary: "Updated storage"
-      description: ""
-      operationId: "update_storage"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        description: "Id of the grid"
-        required: true
-        type: "integer"
-        format: "int64"
-      - in: "body"
-        name: "body"
-        description: "Updated grid components"
-        required: true
-        schema:
-          $ref: "#/definitions/Grid"
-      responses:
-        400:
-          description: "Invalid storage object supplied"
-      x-swagger-router-controller: "swagger_server.controllers.grid_controller"
-    delete:
-      tags:
-      - "grid"
-      summary: "Delete storage"
-      description: ""
-      operationId: "delete_storage"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "id"
-        in: "path"
-        description: "Id of the grid"
-        required: true
-        type: "integer"
-        format: "int64"
-      - in: "body"
-        name: "body"
-        description: "Deleted grid components"
-        required: true
-        schema:
-          $ref: "#/definitions/Grid"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Storage not found"
       x-swagger-router-controller: "swagger_server.controllers.grid_controller"
   /commands/run:
     post:
@@ -149,24 +135,67 @@ paths:
         404:
           description: "User not found"
       x-swagger-router-controller: "swagger_server.controllers.commands_controller"
+  /commands/abort:
+    get:
+      tags:
+      - "commands"
+      summary: "Aborts a running simulation"
+      description: "If the user of the professional GUI decides to abort a running\
+        \ simulation this call will be triggered"
+      operationId: "abort_simulation"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+      x-swagger-router-controller: "swagger_server.controllers.commands_controller"
 definitions:
-  Grid:
+  Location:
     type: "object"
     properties:
-      gridId:
+      name:
         type: "string"
+        description: "A textual identifier for the location e.g. Fur, Bolzano"
       coordinates:
         $ref: "#/definitions/Coordinates"
+      transformers:
+        type: "array"
+        items:
+          $ref: "#/definitions/Transformer"
+  Radial:
+    type: "object"
+    properties:
+      radialId:
+        type: "string"
+      nodes:
+        type: "array"
+        items:
+          $ref: "#/definitions/Node"
+      transformer:
+        type: "array"
+        items:
+          $ref: "#/definitions/Transformer"
       loads:
         type: "array"
         items:
           $ref: "#/definitions/Load"
-      transformer:
-        $ref: "#/definitions/Transformer"
       powerLines:
         type: "array"
         items:
           $ref: "#/definitions/Powerline"
+      photovoltaics:
+        type: "array"
+        items:
+          $ref: "#/definitions/Photovoltaic"
+      storageUnits:
+        type: "array"
+        items:
+          $ref: "#/definitions/Storage"
+      chargingPoints:
+        type: "array"
+        items:
+          $ref: "#/definitions/ChargingPoint"
       linecode:
         type: "array"
         items:
@@ -183,21 +212,247 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Tshape"
-      photovoltaics:
-        type: "array"
-        items:
-          $ref: "#/definitions/Photovoltaic"
+    example:
+      xycurves:
+      - xarray:
+        - 0.202532411323639305322785730822943150997161865234375
+        - 0.202532411323639305322785730822943150997161865234375
+        npts: 4
+        yarray:
+        - 6.6284642750877420525057459599338471889495849609375
+        - 6.6284642750877420525057459599338471889495849609375
+        id: "id"
+      - xarray:
+        - 0.202532411323639305322785730822943150997161865234375
+        - 0.202532411323639305322785730822943150997161865234375
+        npts: 4
+        yarray:
+        - 6.6284642750877420525057459599338471889495849609375
+        - 6.6284642750877420525057459599338471889495849609375
+        id: "id"
+      linecode:
+      - x1: 5.5332583970349862312332334113307297229766845703125
+        id: "id"
+        units: "units"
+        c0: 3
+        r1: 7.04836565559697003635619694250635802745819091796875
+      - x1: 5.5332583970349862312332334113307297229766845703125
+        id: "id"
+        units: "units"
+        c0: 3
+        r1: 7.04836565559697003635619694250635802745819091796875
+      tshapes:
+      - npts: 7
+        temp:
+        - 0.8774076871421565559927557842456735670566558837890625
+        - 0.8774076871421565559927557842456735670566558837890625
+        interval: 9
+        id: "id"
+      - npts: 7
+        temp:
+        - 0.8774076871421565559927557842456735670566558837890625
+        - 0.8774076871421565559927557842456735670566558837890625
+        interval: 9
+        id: "id"
+      nodes:
+      - coordinates:
+          latitude: 0
+          longitude: 6
+        id: "id"
+      - coordinates:
+          latitude: 0
+          longitude: 6
+        id: "id"
+      loadshapes:
+      - npts: 4
+        mult:
+        - 4.67894798900584873990737833082675933837890625
+        - 4.67894798900584873990737833082675933837890625
+        interval: 1
+        id: "id"
+      - npts: 4
+        mult:
+        - 4.67894798900584873990737833082675933837890625
+        - 4.67894798900584873990737833082675933837890625
+        interval: 1
+        id: "id"
+      radialId: "radialId"
+      transformer:
+      - bus: "bus"
+        voltagePrimary: 2.027123023002321833274663731572218239307403564453125
+        Xeq: 1.173074250955943309548956676735542714595794677734375
+        unitpower: "unitpower"
+        radials:
+        - null
+        - null
+        nodeLV: "nodeLV"
+        voltageunit: "voltageunit"
+        frequency: 6
+        nodeHV: "nodeHV"
+        noLoadLoss: 6.8468526983526398765889098285697400569915771484375
+        connection: "wye"
+        id: "id"
+        phases: 1
+        tapLevel: 9.3693102714106686335071572102606296539306640625
+        voltageSecondary: 4.1456080298839363962315474054776132106781005859375
+        coordinates:
+          latitude: 0
+          longitude: 6
+        kvs:
+        - 2.3021358869347654518833223846741020679473876953125
+        - 2.3021358869347654518833223846741020679473876953125
+        monitor: 5
+        control: 9
+        kv: 3.61607674925191080461672754609026014804840087890625
+        voltageBaseSecondary: 1.231513536777255612975068288506008684635162353515625
+        kvas:
+        - 7.061401241503109105224211816675961017608642578125
+        - 7.061401241503109105224211816675961017608642578125
+        winding: 5
+        voltageBasePrimary: 7.3862819483858839220147274318151175975799560546875
+        wdg: 9
+        xhl: 5.63737665663332876420099637471139430999755859375
+        powerPrimary: 1
+        powerSecondary: 1
+        CeqTotal: 4.9652184929849543237878606305457651615142822265625
+        Req: 7.4577447736837658709418974467553198337554931640625
+      - bus: "bus"
+        voltagePrimary: 2.027123023002321833274663731572218239307403564453125
+        Xeq: 1.173074250955943309548956676735542714595794677734375
+        unitpower: "unitpower"
+        radials:
+        - null
+        - null
+        nodeLV: "nodeLV"
+        voltageunit: "voltageunit"
+        frequency: 6
+        nodeHV: "nodeHV"
+        noLoadLoss: 6.8468526983526398765889098285697400569915771484375
+        connection: "wye"
+        id: "id"
+        phases: 1
+        tapLevel: 9.3693102714106686335071572102606296539306640625
+        voltageSecondary: 4.1456080298839363962315474054776132106781005859375
+        coordinates:
+          latitude: 0
+          longitude: 6
+        kvs:
+        - 2.3021358869347654518833223846741020679473876953125
+        - 2.3021358869347654518833223846741020679473876953125
+        monitor: 5
+        control: 9
+        kv: 3.61607674925191080461672754609026014804840087890625
+        voltageBaseSecondary: 1.231513536777255612975068288506008684635162353515625
+        kvas:
+        - 7.061401241503109105224211816675961017608642578125
+        - 7.061401241503109105224211816675961017608642578125
+        winding: 5
+        voltageBasePrimary: 7.3862819483858839220147274318151175975799560546875
+        wdg: 9
+        xhl: 5.63737665663332876420099637471139430999755859375
+        powerPrimary: 1
+        powerSecondary: 1
+        CeqTotal: 4.9652184929849543237878606305457651615142822265625
+        Req: 7.4577447736837658709418974467553198337554931640625
+      loads:
+      - node: "node"
+        powerfactor: 0.6438423552598546706349225132726132869720458984375
+        power_profile: ""
+        id: "id"
+        phases: 8
+        voltage: 9.0183481860707832566959041287191212177276611328125
+      - node: "node"
+        powerfactor: 0.6438423552598546706349225132726132869720458984375
+        power_profile: ""
+        id: "id"
+        phases: 8
+        voltage: 9.0183481860707832566959041287191212177276611328125
       storageUnits:
-        type: "array"
-        items:
-          $ref: "#/definitions/Storage"
+      - inverterEfficiency: 4.6523964329332461176136348512955009937286376953125
+        SoC: 0.885137473901165261480628032586537301540374755859375
+        powerunit: "powerunit"
+        SoH: 6.51918095101838179772357761976309120655059814453125
+        voltageunit: "voltageunit"
+        voltage: 7.7403518187411730622216055053286254405975341796875
+        node: "node"
+        powerfactor: 3.05761002410493443193217899533919990062713623046875
+        DoD: 7.05877035158235610623478351044468581676483154296875
+        id: "id"
+        power: 3.02057969929162428712743349024094641208648681640625
+        phases: 8
+        energy: 0.10263654006109401706225980888120830059051513671875
+      - inverterEfficiency: 4.6523964329332461176136348512955009937286376953125
+        SoC: 0.885137473901165261480628032586537301540374755859375
+        powerunit: "powerunit"
+        SoH: 6.51918095101838179772357761976309120655059814453125
+        voltageunit: "voltageunit"
+        voltage: 7.7403518187411730622216055053286254405975341796875
+        node: "node"
+        powerfactor: 3.05761002410493443193217899533919990062713623046875
+        DoD: 7.05877035158235610623478351044468581676483154296875
+        id: "id"
+        power: 3.02057969929162428712743349024094641208648681640625
+        phases: 8
+        energy: 0.10263654006109401706225980888120830059051513671875
+      powerLines:
+      - linecode: "linecode"
+        node2: "node2"
+        CeqTot: 1.2846590061165319429647979632136411964893341064453125
+        Xeq: 6.96511769763884558415156789124011993408203125
+        length: 6.77832496304801335185175048536621034145355224609375
+        id: "id"
+        node1: "node1"
+        phases: 2
+        unitlength: "unitlength"
+        Req: 3.557195227068097320710649000830017030239105224609375
+      - linecode: "linecode"
+        node2: "node2"
+        CeqTot: 1.2846590061165319429647979632136411964893341064453125
+        Xeq: 6.96511769763884558415156789124011993408203125
+        length: 6.77832496304801335185175048536621034145355224609375
+        id: "id"
+        node1: "node1"
+        phases: 2
+        unitlength: "unitlength"
+        Req: 3.557195227068097320710649000830017030239105224609375
       chargingPoints:
-        type: "array"
-        items:
-          $ref: "#/definitions/ChargingPoint"
+      - node: "node"
+        id: "id"
+      - node: "node"
+        id: "id"
+      photovoltaics:
+      - effcurve: "effcurve"
+        inverterEfficiency: 6.87805222012787620400331434211693704128265380859375
+        tdaily: "tdaily"
+        powerunit: "powerunit"
+        voltageunit: "voltageunit"
+        voltage: 3.093745262666447448651751983561553061008453369140625
+        node: "node"
+        powerfactor: 3.35319334701124294184637619764544069766998291015625
+        pf: 7.14353804701230643559028976596891880035400390625
+        daily: "daily"
+        id: "id"
+        power: 6.70401929795003592715829654480330646038055419921875
+        ptcurve: "ptcurve"
+        phases: 5
+        bus1: "bus1"
+      - effcurve: "effcurve"
+        inverterEfficiency: 6.87805222012787620400331434211693704128265380859375
+        tdaily: "tdaily"
+        powerunit: "powerunit"
+        voltageunit: "voltageunit"
+        voltage: 3.093745262666447448651751983561553061008453369140625
+        node: "node"
+        powerfactor: 3.35319334701124294184637619764544069766998291015625
+        pf: 7.14353804701230643559028976596891880035400390625
+        daily: "daily"
+        id: "id"
+        power: 6.70401929795003592715829654480330646038055419921875
+        ptcurve: "ptcurve"
+        phases: 5
+        bus1: "bus1"
     xml:
       name: "Grid"
-
   Node:
     type: "object"
     required:
@@ -205,11 +460,13 @@ definitions:
     properties:
       id:
         type: "string"
-      latitude:
-        type: "integer"
-      longitude:
-        type: "integer"
-
+      coordinates:
+        $ref: "#/definitions/Coordinates"
+    example:
+      coordinates:
+        latitude: 0
+        longitude: 6
+      id: "id"
   Coordinates:
     type: "object"
     properties:
@@ -217,17 +474,20 @@ definitions:
         type: "integer"
       longitude:
         type: "integer"
-
+    example:
+      latitude: 0
+      longitude: 6
   Load:
     type: "object"
     required:
     - "id"
-    - "node1"
+    - "node"
     properties:
       id:
         type: "string"
-      node1:
+      node:
         type: "string"
+        description: "ID for the connected node"
       phases:
         type: "integer"
         format: "int32"
@@ -238,14 +498,19 @@ definitions:
         maximum: 1
       power_profile:
         $ref: "#/definitions/PowerProfile"
+    example:
+      node: "node"
+      powerfactor: 0.6438423552598546706349225132726132869720458984375
+      power_profile: ""
+      id: "id"
+      phases: 8
+      voltage: 9.0183481860707832566959041287191212177276611328125
     xml:
       name: "Load"
-
   PowerProfile:
     type: "array"
     items:
       type: "number"
-
   Powerline:
     type: "object"
     required:
@@ -259,8 +524,10 @@ definitions:
         type: "string"
       node1:
         type: "string"
+        description: "ID for the connected node"
       node2:
         type: "string"
+        description: "ID for the connected node"
       Req:
         type: "number"
       Xeq:
@@ -276,17 +543,27 @@ definitions:
         type: "string"
       linecode:
         type: "string"
+    example:
+      linecode: "linecode"
+      node2: "node2"
+      CeqTot: 1.2846590061165319429647979632136411964893341064453125
+      Xeq: 6.96511769763884558415156789124011993408203125
+      length: 6.77832496304801335185175048536621034145355224609375
+      id: "id"
+      node1: "node1"
+      phases: 2
+      unitlength: "unitlength"
+      Req: 3.557195227068097320710649000830017030239105224609375
     xml:
       name: "Powerline"
-
   Linecode:
     type: "object"
     required:
-      - "id"
-      - "r1"
-      - "x1"
-      - "c0"
-      - "units"
+    - "c0"
+    - "id"
+    - "r1"
+    - "units"
+    - "x1"
     properties:
       id:
         type: "string"
@@ -298,16 +575,21 @@ definitions:
         type: "integer"
       units:
         type: "string"
+    example:
+      x1: 5.5332583970349862312332334113307297229766845703125
+      id: "id"
+      units: "units"
+      c0: 3
+      r1: 7.04836565559697003635619694250635802745819091796875
     xml:
       name: "Linecode"
-
   XYCurve:
     type: "object"
     required:
-      - "id"
-      - "npts"
-      - "xarray"
-      - "yarray"
+    - "id"
+    - "npts"
+    - "xarray"
+    - "yarray"
     properties:
       id:
         type: "string"
@@ -321,14 +603,22 @@ definitions:
         type: "array"
         items:
           type: "number"
-
+    example:
+      xarray:
+      - 0.202532411323639305322785730822943150997161865234375
+      - 0.202532411323639305322785730822943150997161865234375
+      npts: 4
+      yarray:
+      - 6.6284642750877420525057459599338471889495849609375
+      - 6.6284642750877420525057459599338471889495849609375
+      id: "id"
   Loadshape:
     type: "object"
     required:
-      - "id"
-      - "npts"
-      - "interval"
-      - "mult"
+    - "id"
+    - "interval"
+    - "mult"
+    - "npts"
     properties:
       id:
         type: "string"
@@ -340,14 +630,20 @@ definitions:
         type: "array"
         items:
           type: "number"
-
+    example:
+      npts: 4
+      mult:
+      - 4.67894798900584873990737833082675933837890625
+      - 4.67894798900584873990737833082675933837890625
+      interval: 1
+      id: "id"
   Tshape:
     type: "object"
     required:
-      - "id"
-      - "npts"
-      - "interval"
-      - "temp"
+    - "id"
+    - "interval"
+    - "npts"
+    - "temp"
     properties:
       id:
         type: "string"
@@ -359,22 +655,26 @@ definitions:
         type: "array"
         items:
           type: "number"
-
+    example:
+      npts: 7
+      temp:
+      - 0.8774076871421565559927557842456735670566558837890625
+      - 0.8774076871421565559927557842456735670566558837890625
+      interval: 9
+      id: "id"
   Storage:
     type: "object"
     required:
-      - "id"
-      - "phases"
-      - "node"
-      - "voltage"
-      - "power"
-      - "kwhrated"
-      - "kwrated"
+    - "DoD"
+    - "SoC"
+    - "id"
+    - "node"
     properties:
       id:
         type: "string"
       node:
         type: "string"
+        description: "ID for the connected node"
       SoC:
         type: "number"
       DoD:
@@ -397,37 +697,52 @@ definitions:
         type: "string"
       powerfactor:
         type: "number"
-      kwhrated:
-        type: "number"
-      kwrated:
-        type: "number"
-
+    example:
+      inverterEfficiency: 4.6523964329332461176136348512955009937286376953125
+      SoC: 0.885137473901165261480628032586537301540374755859375
+      powerunit: "powerunit"
+      SoH: 6.51918095101838179772357761976309120655059814453125
+      voltageunit: "voltageunit"
+      voltage: 7.7403518187411730622216055053286254405975341796875
+      node: "node"
+      powerfactor: 3.05761002410493443193217899533919990062713623046875
+      DoD: 7.05877035158235610623478351044468581676483154296875
+      id: "id"
+      power: 3.02057969929162428712743349024094641208648681640625
+      phases: 8
+      energy: 0.10263654006109401706225980888120830059051513671875
   Photovoltaic:
     type: "object"
     required:
-    - "id"
-    - "phases"
     - "bus1"
-    - "voltage"
-    - "power"
-    - "effcurve"
-    - "ptcurve"
     - "daily"
-    - "tdaily"
+    - "effcurve"
+    - "id"
+    - "node"
     - "pf"
-    - "temperature"
-    - "irrad"
-    - "pmpp"
+    - "phases"
+    - "power"
+    - "ptcurve"
+    - "voltage"
     properties:
       id:
         type: "string"
+      node:
+        type: "string"
+        description: "ID for the connected node"
+      inverterEfficiency:
+        type: "number"
       phases:
         type: "integer"
+      power:
+        type: "number"
+      powerunit:
+        type: "string"
+      powerfactor:
+        type: "number"
       bus1:
         type: "string"
       voltage:
-        type: "number"
-      power:
         type: "number"
       effcurve:
         type: "string"
@@ -439,23 +754,24 @@ definitions:
         type: "string"
       pf:
         type: "number"
-      temperature:
-        type: "number"
-      irrad:
-        type: "number"
-      pmpp:
-        type: "number"
-      node:
-        type: "string"
-      inverterEfficiency:
-        type: "number"
       voltageunit:
         type: "string"
-      powerunit:
-        type: "string"
-      powerfactor:
-        type: "number"
-
+    example:
+      effcurve: "effcurve"
+      inverterEfficiency: 6.87805222012787620400331434211693704128265380859375
+      tdaily: "tdaily"
+      powerunit: "powerunit"
+      voltageunit: "voltageunit"
+      voltage: 3.093745262666447448651751983561553061008453369140625
+      node: "node"
+      powerfactor: 3.35319334701124294184637619764544069766998291015625
+      pf: 7.14353804701230643559028976596891880035400390625
+      daily: "daily"
+      id: "id"
+      power: 6.70401929795003592715829654480330646038055419921875
+      ptcurve: "ptcurve"
+      phases: 5
+      bus1: "bus1"
   ChargingPoint:
     type: "object"
     required:
@@ -466,7 +782,10 @@ definitions:
         type: "string"
       node:
         type: "string"
-
+        description: "ID for the connected node"
+    example:
+      node: "node"
+      id: "id"
   Transformer:
     type: "object"
     required:
@@ -474,24 +793,25 @@ definitions:
     properties:
       id:
         type: "string"
-      latitude:
-        type: "integer"
-      longitude:
-        type: "integer"
+      coordinates:
+        $ref: "#/definitions/Coordinates"
+      radials:
+        type: "array"
+        items:
+          $ref: "#/definitions/Radial"
       phases:
         type: "integer"
         description: "Number of Phases"
-        default: 3
       winding:
         type: "integer"
         description: "Number of windings"
-        default: 2
       xhl:
         type: "number"
         description: "Percent reactance high-to-low (winding 1 to winding 2)"
       kvs:
         type: "array"
-        description: "Array of kV ratings following rules started above for the kV file for windings"
+        description: "Array of kV ratings following rules started above for the kV\
+          \ file for windings"
         items:
           type: "number"
       kvas:
@@ -501,10 +821,12 @@ definitions:
           type: "number"
       wdg:
         type: "integer"
-        description: "Integer representing the winding witch will become the active winding for subsequent data"
+        description: "Integer representing the winding witch will become the active\
+          \ winding for subsequent data"
       bus:
         type: "string"
-        description: "Definition for the connector of this winding (each winding is connected to one terminal of the transformator and, hence, to one bus"
+        description: "Definition for the connector of this winding (each winding is\
+          \ connected to one terminal of the transformator and, hence, to one bus"
       kv:
         type: "number"
         description: "Rated voltage of this winding, kV"
@@ -548,7 +870,45 @@ definitions:
         type: "integer"
       unitpower:
         type: "string"
-
+    example:
+      bus: "bus"
+      voltagePrimary: 2.027123023002321833274663731572218239307403564453125
+      Xeq: 1.173074250955943309548956676735542714595794677734375
+      unitpower: "unitpower"
+      radials:
+      - null
+      - null
+      nodeLV: "nodeLV"
+      voltageunit: "voltageunit"
+      frequency: 6
+      nodeHV: "nodeHV"
+      noLoadLoss: 6.8468526983526398765889098285697400569915771484375
+      connection: "wye"
+      id: "id"
+      phases: 1
+      tapLevel: 9.3693102714106686335071572102606296539306640625
+      voltageSecondary: 4.1456080298839363962315474054776132106781005859375
+      coordinates:
+        latitude: 0
+        longitude: 6
+      kvs:
+      - 2.3021358869347654518833223846741020679473876953125
+      - 2.3021358869347654518833223846741020679473876953125
+      monitor: 5
+      control: 9
+      kv: 3.61607674925191080461672754609026014804840087890625
+      voltageBaseSecondary: 1.231513536777255612975068288506008684635162353515625
+      kvas:
+      - 7.061401241503109105224211816675961017608642578125
+      - 7.061401241503109105224211816675961017608642578125
+      winding: 5
+      voltageBasePrimary: 7.3862819483858839220147274318151175975799560546875
+      wdg: 9
+      xhl: 5.63737665663332876420099637471139430999755859375
+      powerPrimary: 1
+      powerSecondary: 1
+      CeqTotal: 4.9652184929849543237878606305457651615142822265625
+      Req: 7.4577447736837658709418974467553198337554931640625
   Duration:
     type: "object"
     properties:
@@ -561,7 +921,10 @@ definitions:
       year:
         type: "integer"
         format: "int32"
-
+    example:
+      month: 6
+      year: 1
+      day: 0
   Simulation:
     type: "object"
     properties:
@@ -581,7 +944,15 @@ definitions:
         type: "number"
         format: "float"
         description: "Maximum threshold in % for voltage error"
-
+    example:
+      duration:
+        month: 6
+        year: 1
+        day: 0
+      thresholdMedium: 5.63737699999999986033571985899470746517181396484375
+      gridId: "gridId"
+      thresholdHigh: 2.30213599999999996015276337857358157634735107421875
+      thresholdLow: 5.96213399999999982270537657313980162143707275390625
   SimulationResult:
     type: "object"
     required:
@@ -594,7 +965,16 @@ definitions:
         $ref: "#/definitions/Voltage"
       error:
         $ref: "#/definitions/Error"
-
+    example:
+      error:
+        voltageT: true
+        voltageR: true
+        voltageS: true
+      nodeId: "nodeId"
+      voltage:
+        voltageT: 1
+        voltageR: 0
+        voltageS: 6
   Voltage:
     type: "object"
     properties:
@@ -607,17 +987,23 @@ definitions:
       voltageT:
         type: "integer"
         format: "int64"
-
+    example:
+      voltageT: 1
+      voltageR: 0
+      voltageS: 6
   Error:
     type: "object"
     properties:
-      thresholdHigh:
-        $ref: "#/definitions/Voltage"
-      thresholdMedium:
-        $ref: "#/definitions/Voltage"
-      thresholdLow:
-        $ref: "#/definitions/Voltage"
-
+      voltageR:
+        type: "boolean"
+      voltageS:
+        type: "boolean"
+      voltageT:
+        type: "boolean"
+    example:
+      voltageT: true
+      voltageR: true
+      voltageS: true
 externalDocs:
   description: "Find out more about Storage4Grid"
   url: "http://www.storage4grid.eu/pages/index.html"
