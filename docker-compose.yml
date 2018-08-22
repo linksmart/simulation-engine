@@ -1,13 +1,15 @@
 version: '3'
 services:
   bgw:
-    image: "docker.linksmart.eu/bgw:latest"
+    image: "docker.linksmart.eu/bgw:snapshot"
     #network_mode: "host"
     container_name: "bgw"
     networks:
       - bgw_nw
     ports:
       - "443:443"
+      - "9228:9228"
+      - "9229:9229"
     volumes:
       - "/home/garagon/dsf_se/bgw/config:/bgw/config"
     logging:
@@ -15,7 +17,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
-   # restart: "always"
+    restart: "always"
   nginx:
     image: "nginx"
     container_name: "nginx"
