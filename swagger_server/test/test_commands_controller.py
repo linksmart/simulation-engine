@@ -19,8 +19,8 @@ class TestCommandsController(BaseTestCase):
         Aborts a running simulation
         """
         response = self.client.open(
-            '/se/commands/abort',
-            method='GET')
+            '/se/commands/abort/{id}'.format(id='id_example'),
+            method='POST')
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
@@ -31,7 +31,7 @@ class TestCommandsController(BaseTestCase):
         """
         body = Simulation()
         response = self.client.open(
-            '/se/commands/run',
+            '/se/commands/run/{id}'.format(id='id_example'),
             method='POST',
             data=json.dumps(body),
             content_type='application/json')
