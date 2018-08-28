@@ -1,7 +1,11 @@
 import connexion
 import six
-import logging
-from flask import json
+import logging, time
+#from flask import json
+import pickle
+import json
+import jsonpickle
+
 
 from swagger_server.models.simulation import Simulation  # noqa: E501
 from swagger_server import util
@@ -9,6 +13,8 @@ from data_management.controller import gridController as gControl
 from swagger_server.models.simulation_result import SimulationResult
 from swagger_server.models.voltage import Voltage
 from swagger_server.models.error import Error
+from data_management.redisDB import RedisDB
+from swagger_server.controllers.threadFactory import ThreadFactory
 
 from  more_itertools import unique_everseen
 
@@ -17,7 +23,113 @@ logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', le
 logger = logging.getLogger(__file__)
 
 
-def abort_simulation():  # noqa: E501
+
+class CommandController:
+
+    def __init__(self):
+        self.factory = {}
+        self.redisDB=RedisDB()
+        self.statusThread = {}
+        self.running = {}
+
+    def set_isRunning(self, id, bool):
+        self.running[id] = bool
+
+    def set(self, id, object):
+        logger.debug("Object in set: "+str(object))
+        try:
+            self.factory[id] = object
+        except Exception as e:
+            logger.debug(e)
+
+    def get(self, id):
+        return self.factory[id]
+
+    def isRunningExists(self):
+        logger.debug("IsRunning exists: " + str(len(self.running)))
+        if len(self.running):
+            return True
+        else:
+            return False
+
+    def get_isRunning(self, id):
+        if id in self.running.keys():
+            return self.running[id]
+        else:
+            return False
+
+    def get_running(self):
+        return self.running
+
+    def get_statusThread(self, id):
+        return self.statusThread[id]
+
+    def run(self, id, json_object):
+        logger.debug("Run in command controller started")
+        self.id = id
+        self.duration = json_object.duration
+        logger.debug("Duration: "+str(self.duration))
+        #gridController = gControl()
+        #self.factory= jsonpickle.decode(self.redisDB.get("factory: "+id))
+        #self.redisDB.get("factory: " + id)
+        #logger.debug("This is the factory for command controller: "+str(self.factory))
+        #self.set(self.id, self.redisDB.get("factory: " + id))
+        #gridController.setParameters(id,)
+        #logger.debug("Thread set")
+        #
+        try:
+            self.redisDB.set("run:" + self.id, "running")
+            logger.debug("Status: "+str(self.redisDB.get("run:" + self.id)))
+            logger.debug("Thread: " + str(self.get(self.id)))
+            listNames, listValues = self.get(self.id).startController(self.duration)
+            self.redisDB.set("run:" + self.id, "stop")
+            return buildAnswer(listNames, listValues, json_object.threshold_high, json_object.threshold_medium,
+                               json_object.threshold_low)
+
+        except Exception as e:
+            logger.error(e)
+            return e
+        #self.set_isRunning(self.id, True)
+        #logger.debug("Flag isRunning set to True")
+        #logger.info("running status " + str(self.running))
+
+        #logger.info("running status " + str(self.redisDB.get("run:" + self.id)))
+        #logger.debug("from redis: "+str(self.factory)+" type: "+str(type(self.factory)))
+        #self.factory=ThreadFactory()
+        #logger.debug("Normal: " + str(self.factory) + " type: " + str(type(self.factory)))
+        #listNames, listValues = self.factory.startController()
+
+        #return "started"
+        #return (listNames, listValues)
+        #return buildAnswer(listNames, listValues, json_object.threshold_high, json_object.threshold_medium, json_object.threshold_low)
+
+    def abort(self, id):
+        logger.debug("Abort signal received")
+        logger.debug("This is the factory object: " + str(self.get(id)))
+        if self.factory[id]:
+            self.factory[id].stopControllerThread()
+            self.set_isRunning(id, False)
+            message = "System stopped succesfully"
+            logger.debug(message)
+        else:
+            message = "No threads found"
+            logger.debug(message)
+
+    def run_status(self, id):
+        while True:
+            status = self.get(id).is_running()
+            flag = self.redisDB.get("run:" + id)
+            logger.debug("Control run_status: "+str(flag))
+            if not status or (flag is not None and flag == "stop"):
+                logger.debug("Control run_status: "+str(flag))
+                self.redisDB.remove("run:" + id)
+                self.stop(id)
+                break
+            time.sleep(1)
+
+variable = CommandController()
+
+def abort_simulation(id):  # noqa: E501
     """Aborts a running simulation
 
     If the user of the professional GUI decides to abort a running simulation this call will be triggered # noqa: E501
@@ -25,10 +137,29 @@ def abort_simulation():  # noqa: E501
 
     :rtype: None
     """
-    return 'do some magic!'
+
+    try:
+        redis_db = RedisDB()
+        flag = redis_db.get("run:" + id)
+        message = ""
+        if flag is not None and flag == "running":
+            logger.debug("System running and trying to stop")
+            redis_db.set("run:" + id, "stop")
+            time.sleep(1)
+            flag = redis_db.get("run:" + id)
+            if flag is None:
+                logger.debug("System stopped succesfully")
+                message = "System stopped succesfully"
+        elif flag is None:
+            logger.debug("System already stopped")
+            message = "System already stopped"
+    except Exception as e:
+        logger.error(e)
+        message = "Error stoping the system"
+    return message
 
 
-def run_simulation(body):  # noqa: E501
+def run_simulation(id, body):  # noqa: E501
     """Runs a simulation
 
      # noqa: E501
@@ -41,9 +172,30 @@ def run_simulation(body):  # noqa: E501
     if connexion.request.is_json:
         logger.info("Start command")
         body = Simulation.from_dict(connexion.request.get_json())  # noqa: E501
-        gridController = gControl()
-        listNames, listValues = gridController.runSimulation(body.grid_id,body.duration)
-        response = buildAnswer(listNames,listValues,body.threshold_high,body.threshold_medium,body.threshold_low)
+
+        try:
+            redis_db = RedisDB()
+            flag = redis_db.get(id)
+            if flag is not None and flag == "created":
+                if variable.isRunningExists():
+                    logger.debug("isRunning exists")
+                    if not variable.get_isRunning(id):
+                        response = variable.run(id, body)
+                        return response
+                    else:
+                        logger.debug("System already running")
+                        return "System already running"
+                else:
+                    logger.debug("isRunning not created yet")
+                    response = variable.run(id, body)
+                    return response
+            else:
+                response = "Id not existing"
+
+        except Exception as e:
+            logger.debug("e")
+            response = e
+
     return response
 
 
