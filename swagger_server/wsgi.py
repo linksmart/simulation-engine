@@ -35,7 +35,7 @@ class StandaloneApplication(gunicorn.app.base.BaseApplication):
 def main():
     options = {
         'bind': '%s:%s' % ('0.0.0.0', '9090'),
-        'workers': 8,
+        'workers': 1,
     }
     StandaloneApplication(web(), options).run()
     logger.debug("Number of cores: "+str(number_of_workers()))
