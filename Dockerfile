@@ -11,7 +11,7 @@ WORKDIR /usr/src/app
 
 COPY requirements.txt /usr/src/app/
 RUN pip3 install -r requirements.txt
-
+RUN pip3 install -U redis
 # Copy the current directory contents into the container usr/src/app
 COPY main.py /usr/src/app/
 
