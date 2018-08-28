@@ -3,7 +3,6 @@ services:
   bgw:
     image: "docker.linksmart.eu/bgw:snapshot"
     #network_mode: "host"
-    container_name: "bgw"
     networks:
       - bgw_nw
     ports:
@@ -20,7 +19,6 @@ services:
     restart: "always"
   nginx:
     image: "nginx"
-    container_name: "nginx"
     #ports:
       #- "8085:8085"
     #environment:
@@ -37,15 +35,23 @@ services:
     depends_on:
       - se
      # - bgw
+  redis:
+    image: redis:latest
+    command: redis-server
+    networks:
+      - se_nw
+    ports:
+      - "6379:6379"
   se:
     build:
       context: ""
       dockerfile: Dockerfile
     image: "simulation_engine"
     #network_mode: "host"
-    container_name: "se"
     networks:
       - se_nw
+    depends_on:
+      - redis
     ports:
         - "9090:9090"
     command: ["python3", "-u", "main.py"]
