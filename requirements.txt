@@ -2,3 +2,4 @@ connexion
 gunicorn
 psutil
 more_itertools
+jsonpickle
