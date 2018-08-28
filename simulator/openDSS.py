@@ -19,8 +19,31 @@ class OpenDSS:
         logger.info("OpenDSS version: " + dss.__version__)
         self.grid_name=grid_name
         dss.run_command("Clear")
-        dss.Basic.NewCircuit("Test 1")
+        #dss.Basic.NewCircuit("Test 1")
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
+
+    def setNewCircuit(self, name):
+        #dss.run_command("New circuit.{circuit_name}".format(circuit_name= name))
+        dss.Basic.NewCircuit(name)
+        logger.debug("Name of the active circuit: "+str(self.getActiveCircuit()))
+
+    def getActiveCircuit(self):
+        return dss.Circuit.Name()
+
+    def enableCircuit(self, name):
+        logger.debug("Circuits available: " + str(dss.Basic.NumCircuits()))
+        #dss.Circuit.Enable(str(name))
+        dss.run_command(
+            "Set Circuit = Circuit.{name}".format(name=name))
+        logger.debug("Circuit "+str(name)+" activated")
+        logger.debug("Name of the active circuit: " + str(self.getActiveCircuit()))
+
+    def disableCircuit(self, name):
+        dss.Circuit.Disable(name)
+        logger.debug("Circuit "+str(name)+" disabled")
+        logger.debug("Name of the active circuit: " + str(self.getActiveCircuit()))
+        #dss.Circuit.Enable(name)
+        #logger.debug("Name of the active circuit: " + str(self.getActiveCircuit()))
 
     def runNode13(self):
         dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEE13Nodeckt.dss')
@@ -104,10 +127,10 @@ class OpenDSS:
         try:
             for element in self.loads:
                 for key, value in element.items():
-                    logger.debug("Key: "+str(key)+" Value: "+str(value))
+                    #logger.debug("Key: "+str(key)+" Value: "+str(value))
                     if key=="id":
                         load_name=value
-                    elif key=="node1":
+                    elif key=="node":
                         bus_name=value
                     elif key=="phases":
                         num_phases=value
@@ -243,7 +266,8 @@ class OpenDSS:
         dss.run_command(dss_string)
 
     def setLineCodes(self, lines):
-        logger.info("Setting up the linecodes")
+        logger.info("Setting up the linecodes: "+str(lines))
+        logger.debug("Type of lines: "+str(type(lines)))
         try:
             for element in lines:
                 id = None
@@ -252,7 +276,7 @@ class OpenDSS:
                 c0 = None
                 units = None
                 for key, value in element.items():
-                    logger.debug("Key: " + str(key) + " Value: " + str (value))
+                    #logger.debug("Key: " + str(key) + " Value: " + str (value))
                     if key == "id":
                         id = value
                     if key == "r1":
@@ -265,7 +289,7 @@ class OpenDSS:
                         units = value
                 self.setLineCode(id, r1, x1, c0, units)
                 dss.run_command("Solve")
-                logger.debug("Line codes: " + str(dss.LineCodes.AllNames()))
+                logger.debug("Finished adding linecodes")
         except Exception as e:
             logger.error(e)
 
@@ -293,7 +317,7 @@ class OpenDSS:
                 unit = None
                 linecode = None
                 for key, value in element.items():
-                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    #logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
                     if key == "node1":
@@ -330,6 +354,7 @@ class OpenDSS:
 
     def setXYCurves(self, xycurves):
         logger.info("Setting up the XYCurves")
+        logger.debug("XY Curve in OpenDSS: " + str(xycurves))
         try:
             for element in xycurves:
                 id = None
@@ -337,7 +362,7 @@ class OpenDSS:
                 xarray = None
                 yarray = None
                 for key, value in element.items():
-                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    #logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
                     if key == "npts":
@@ -366,6 +391,7 @@ class OpenDSS:
 
     def setLoadshapes(self, loadshapes):
         logger.debug("Setting up the Loadshapes")
+        logger.debug("Loadshape in OpenDSS: " + str(loadshapes))
         try:
             for element in loadshapes:
                 id = None
@@ -373,7 +399,7 @@ class OpenDSS:
                 interval = None
                 mult = None
                 for key, value in element.items():
-                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    #logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
                     if key == "npts":
@@ -401,6 +427,7 @@ class OpenDSS:
 
     def setTshapes(self, tshapes):
         logger.info("Setting up the TShapes")
+        logger.debug("Tshape in OpenDSS: "+str(tshapes))
         try:
             for element in tshapes:
                 id = None
@@ -408,7 +435,7 @@ class OpenDSS:
                 interval = None
                 temp = None
                 for key, value in element.items():
-                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    #logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
                     if key == "npts":
@@ -425,7 +452,7 @@ class OpenDSS:
 
     def setTshape(self, id, npts, interval, temp):
         # New Tshape.assumed_Temp npts=24 interval=1 temp=[10, 10, 10, 10, 10, 10, 12, 15, 20, 25, 30, 30  32 32  30 28  27  26  25 20 18 15 13 12]
-        dss_string = "New Tshape.{id} npts={npts} interval={interval} temp=[{temp}]".format(
+        dss_string = "New Loadshape.{id} npts={npts} interval={interval} temp=[{temp}]".format(
             id=id,
             npts=npts,
             interval=interval,
@@ -452,7 +479,7 @@ class OpenDSS:
                 irrad = None
                 pmpp = None
                 for key, value in element.items():
-                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    #logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
                     if key == "phases":
