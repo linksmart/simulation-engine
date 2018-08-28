@@ -15,13 +15,13 @@ class XYCurve(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, npts: int=None, xarray: List[float]=None, yarray: List[float]=None):  # noqa: E501
+    def __init__(self, id: str=None, npts: float=None, xarray: List[float]=None, yarray: List[float]=None):  # noqa: E501
         """XYCurve - a model defined in Swagger
 
         :param id: The id of this XYCurve.  # noqa: E501
         :type id: str
         :param npts: The npts of this XYCurve.  # noqa: E501
-        :type npts: int
+        :type npts: float
         :param xarray: The xarray of this XYCurve.  # noqa: E501
         :type xarray: List[float]
         :param yarray: The yarray of this XYCurve.  # noqa: E501
@@ -29,7 +29,7 @@ class XYCurve(Model):
         """
         self.swagger_types = {
             'id': str,
-            'npts': int,
+            'npts': float,
             'xarray': List[float],
             'yarray': List[float]
         }
@@ -81,22 +81,22 @@ class XYCurve(Model):
         self._id = id
 
     @property
-    def npts(self) -> int:
+    def npts(self) -> float:
         """Gets the npts of this XYCurve.
 
 
         :return: The npts of this XYCurve.
-        :rtype: int
+        :rtype: float
         """
         return self._npts
 
     @npts.setter
-    def npts(self, npts: int):
+    def npts(self, npts: float):
         """Sets the npts of this XYCurve.
 
 
         :param npts: The npts of this XYCurve.
-        :type npts: int
+        :type npts: float
         """
         if npts is None:
             raise ValueError("Invalid value for `npts`, must not be `None`")  # noqa: E501
