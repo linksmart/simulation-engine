@@ -15,7 +15,7 @@ class Linecode(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, r1: float=None, x1: float=None, c0: int=None, units: str=None):  # noqa: E501
+    def __init__(self, id: str=None, r1: float=None, x1: float=None, c0: float=None, units: str=None):  # noqa: E501
         """Linecode - a model defined in Swagger
 
         :param id: The id of this Linecode.  # noqa: E501
@@ -25,7 +25,7 @@ class Linecode(Model):
         :param x1: The x1 of this Linecode.  # noqa: E501
         :type x1: float
         :param c0: The c0 of this Linecode.  # noqa: E501
-        :type c0: int
+        :type c0: float
         :param units: The units of this Linecode.  # noqa: E501
         :type units: str
         """
@@ -33,7 +33,7 @@ class Linecode(Model):
             'id': str,
             'r1': float,
             'x1': float,
-            'c0': int,
+            'c0': float,
             'units': str
         }
 
@@ -132,22 +132,22 @@ class Linecode(Model):
         self._x1 = x1
 
     @property
-    def c0(self) -> int:
+    def c0(self) -> float:
         """Gets the c0 of this Linecode.
 
 
         :return: The c0 of this Linecode.
-        :rtype: int
+        :rtype: float
         """
         return self._c0
 
     @c0.setter
-    def c0(self, c0: int):
+    def c0(self, c0: float):
         """Sets the c0 of this Linecode.
 
 
         :param c0: The c0 of this Linecode.
-        :type c0: int
+        :type c0: float
         """
         if c0 is None:
             raise ValueError("Invalid value for `c0`, must not be `None`")  # noqa: E501

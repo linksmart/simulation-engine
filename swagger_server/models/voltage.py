@@ -15,20 +15,20 @@ class Voltage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, voltage_r: int=None, voltage_s: int=None, voltage_t: int=None):  # noqa: E501
+    def __init__(self, voltage_r: float=None, voltage_s: float=None, voltage_t: float=None):  # noqa: E501
         """Voltage - a model defined in Swagger
 
         :param voltage_r: The voltage_r of this Voltage.  # noqa: E501
-        :type voltage_r: int
+        :type voltage_r: float
         :param voltage_s: The voltage_s of this Voltage.  # noqa: E501
-        :type voltage_s: int
+        :type voltage_s: float
         :param voltage_t: The voltage_t of this Voltage.  # noqa: E501
-        :type voltage_t: int
+        :type voltage_t: float
         """
         self.swagger_types = {
-            'voltage_r': int,
-            'voltage_s': int,
-            'voltage_t': int
+            'voltage_r': float,
+            'voltage_s': float,
+            'voltage_t': float
         }
 
         self.attribute_map = {
@@ -53,64 +53,64 @@ class Voltage(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def voltage_r(self) -> int:
+    def voltage_r(self) -> float:
         """Gets the voltage_r of this Voltage.
 
 
         :return: The voltage_r of this Voltage.
-        :rtype: int
+        :rtype: float
         """
         return self._voltage_r
 
     @voltage_r.setter
-    def voltage_r(self, voltage_r: int):
+    def voltage_r(self, voltage_r: float):
         """Sets the voltage_r of this Voltage.
 
 
         :param voltage_r: The voltage_r of this Voltage.
-        :type voltage_r: int
+        :type voltage_r: float
         """
 
         self._voltage_r = voltage_r
 
     @property
-    def voltage_s(self) -> int:
+    def voltage_s(self) -> float:
         """Gets the voltage_s of this Voltage.
 
 
         :return: The voltage_s of this Voltage.
-        :rtype: int
+        :rtype: float
         """
         return self._voltage_s
 
     @voltage_s.setter
-    def voltage_s(self, voltage_s: int):
+    def voltage_s(self, voltage_s: float):
         """Sets the voltage_s of this Voltage.
 
 
         :param voltage_s: The voltage_s of this Voltage.
-        :type voltage_s: int
+        :type voltage_s: float
         """
 
         self._voltage_s = voltage_s
 
     @property
-    def voltage_t(self) -> int:
+    def voltage_t(self) -> float:
         """Gets the voltage_t of this Voltage.
 
 
         :return: The voltage_t of this Voltage.
-        :rtype: int
+        :rtype: float
         """
         return self._voltage_t
 
     @voltage_t.setter
-    def voltage_t(self, voltage_t: int):
+    def voltage_t(self, voltage_t: float):
         """Sets the voltage_t of this Voltage.
 
 
         :param voltage_t: The voltage_t of this Voltage.
-        :type voltage_t: int
+        :type voltage_t: float
         """
 
         self._voltage_t = voltage_t

@@ -15,22 +15,22 @@ class Loadshape(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, npts: int=None, interval: int=None, mult: List[float]=None):  # noqa: E501
+    def __init__(self, id: str=None, npts: float=None, interval: float=None, mult: List[float]=None):  # noqa: E501
         """Loadshape - a model defined in Swagger
 
         :param id: The id of this Loadshape.  # noqa: E501
         :type id: str
         :param npts: The npts of this Loadshape.  # noqa: E501
-        :type npts: int
+        :type npts: float
         :param interval: The interval of this Loadshape.  # noqa: E501
-        :type interval: int
+        :type interval: float
         :param mult: The mult of this Loadshape.  # noqa: E501
         :type mult: List[float]
         """
         self.swagger_types = {
             'id': str,
-            'npts': int,
-            'interval': int,
+            'npts': float,
+            'interval': float,
             'mult': List[float]
         }
 
@@ -81,22 +81,22 @@ class Loadshape(Model):
         self._id = id
 
     @property
-    def npts(self) -> int:
+    def npts(self) -> float:
         """Gets the npts of this Loadshape.
 
 
         :return: The npts of this Loadshape.
-        :rtype: int
+        :rtype: float
         """
         return self._npts
 
     @npts.setter
-    def npts(self, npts: int):
+    def npts(self, npts: float):
         """Sets the npts of this Loadshape.
 
 
         :param npts: The npts of this Loadshape.
-        :type npts: int
+        :type npts: float
         """
         if npts is None:
             raise ValueError("Invalid value for `npts`, must not be `None`")  # noqa: E501
@@ -104,22 +104,22 @@ class Loadshape(Model):
         self._npts = npts
 
     @property
-    def interval(self) -> int:
+    def interval(self) -> float:
         """Gets the interval of this Loadshape.
 
 
         :return: The interval of this Loadshape.
-        :rtype: int
+        :rtype: float
         """
         return self._interval
 
     @interval.setter
-    def interval(self, interval: int):
+    def interval(self, interval: float):
         """Sets the interval of this Loadshape.
 
 
         :param interval: The interval of this Loadshape.
-        :type interval: int
+        :type interval: float
         """
         if interval is None:
             raise ValueError("Invalid value for `interval`, must not be `None`")  # noqa: E501

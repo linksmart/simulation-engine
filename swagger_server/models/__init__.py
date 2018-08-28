@@ -4,13 +4,12 @@
 from __future__ import absolute_import
 # import models into model package
 from swagger_server.models.charging_point import ChargingPoint
-from swagger_server.models.coordinates import Coordinates
 from swagger_server.models.duration import Duration
 from swagger_server.models.error import Error
+from swagger_server.models.grid import Grid
 from swagger_server.models.linecode import Linecode
 from swagger_server.models.load import Load
 from swagger_server.models.loadshape import Loadshape
-from swagger_server.models.location import Location
 from swagger_server.models.node import Node
 from swagger_server.models.photovoltaic import Photovoltaic
 from swagger_server.models.power_profile import PowerProfile

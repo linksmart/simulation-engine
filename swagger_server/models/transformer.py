@@ -6,8 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.coordinates import Coordinates  # noqa: F401,E501
-from swagger_server.models.radial import Radial  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -17,15 +15,13 @@ class Transformer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, coordinates: Coordinates=None, radials: List[Radial]=None, phases: int=None, winding: int=None, xhl: float=None, kvs: List[float]=None, kvas: List[float]=None, wdg: int=None, bus: str=None, kv: float=None, voltage_primary: float=None, voltage_secondary: float=None, voltage_base_primary: float=None, voltage_base_secondary: float=None, power_primary: int=None, power_secondary: int=None, connection: str='wye', node_hv: str=None, node_lv: str=None, no_load_loss: float=None, req: float=None, xeq: float=None, ceq_total: float=None, monitor: int=None, control: int=None, tap_level: float=None, voltageunit: str=None, frequency: int=None, unitpower: str=None):  # noqa: E501
+    def __init__(self, id: str=None, radials: List[str]=None, phases: int=None, winding: int=None, xhl: float=None, kvs: List[float]=None, kvas: List[float]=None, wdg: int=None, bus: str=None, kv: float=None, voltage_primary: float=None, voltage_secondary: float=None, voltage_base_primary: float=None, voltage_base_secondary: float=None, power_primary: float=None, power_secondary: float=None, connection: str='wye', node_hv: str=None, node_lv: str=None, no_load_loss: float=None, req: float=None, xeq: float=None, ceq_total: float=None, monitor: float=None, control: float=None, tap_level: float=None, voltageunit: str=None, frequency: float=None, unitpower: str=None):  # noqa: E501
         """Transformer - a model defined in Swagger
 
         :param id: The id of this Transformer.  # noqa: E501
         :type id: str
-        :param coordinates: The coordinates of this Transformer.  # noqa: E501
-        :type coordinates: Coordinates
         :param radials: The radials of this Transformer.  # noqa: E501
-        :type radials: List[Radial]
+        :type radials: List[str]
         :param phases: The phases of this Transformer.  # noqa: E501
         :type phases: int
         :param winding: The winding of this Transformer.  # noqa: E501
@@ -51,9 +47,9 @@ class Transformer(Model):
         :param voltage_base_secondary: The voltage_base_secondary of this Transformer.  # noqa: E501
         :type voltage_base_secondary: float
         :param power_primary: The power_primary of this Transformer.  # noqa: E501
-        :type power_primary: int
+        :type power_primary: float
         :param power_secondary: The power_secondary of this Transformer.  # noqa: E501
-        :type power_secondary: int
+        :type power_secondary: float
         :param connection: The connection of this Transformer.  # noqa: E501
         :type connection: str
         :param node_hv: The node_hv of this Transformer.  # noqa: E501
@@ -69,22 +65,21 @@ class Transformer(Model):
         :param ceq_total: The ceq_total of this Transformer.  # noqa: E501
         :type ceq_total: float
         :param monitor: The monitor of this Transformer.  # noqa: E501
-        :type monitor: int
+        :type monitor: float
         :param control: The control of this Transformer.  # noqa: E501
-        :type control: int
+        :type control: float
         :param tap_level: The tap_level of this Transformer.  # noqa: E501
         :type tap_level: float
         :param voltageunit: The voltageunit of this Transformer.  # noqa: E501
         :type voltageunit: str
         :param frequency: The frequency of this Transformer.  # noqa: E501
-        :type frequency: int
+        :type frequency: float
         :param unitpower: The unitpower of this Transformer.  # noqa: E501
         :type unitpower: str
         """
         self.swagger_types = {
             'id': str,
-            'coordinates': Coordinates,
-            'radials': List[Radial],
+            'radials': List[str],
             'phases': int,
             'winding': int,
             'xhl': float,
@@ -97,8 +92,8 @@ class Transformer(Model):
             'voltage_secondary': float,
             'voltage_base_primary': float,
             'voltage_base_secondary': float,
-            'power_primary': int,
-            'power_secondary': int,
+            'power_primary': float,
+            'power_secondary': float,
             'connection': str,
             'node_hv': str,
             'node_lv': str,
@@ -106,17 +101,16 @@ class Transformer(Model):
             'req': float,
             'xeq': float,
             'ceq_total': float,
-            'monitor': int,
-            'control': int,
+            'monitor': float,
+            'control': float,
             'tap_level': float,
             'voltageunit': str,
-            'frequency': int,
+            'frequency': float,
             'unitpower': str
         }
 
         self.attribute_map = {
             'id': 'id',
-            'coordinates': 'coordinates',
             'radials': 'radials',
             'phases': 'phases',
             'winding': 'winding',
@@ -148,7 +142,6 @@ class Transformer(Model):
         }
 
         self._id = id
-        self._coordinates = coordinates
         self._radials = radials
         self._phases = phases
         self._winding = winding
@@ -213,43 +206,22 @@ class Transformer(Model):
         self._id = id
 
     @property
-    def coordinates(self) -> Coordinates:
-        """Gets the coordinates of this Transformer.
-
-
-        :return: The coordinates of this Transformer.
-        :rtype: Coordinates
-        """
-        return self._coordinates
-
-    @coordinates.setter
-    def coordinates(self, coordinates: Coordinates):
-        """Sets the coordinates of this Transformer.
-
-
-        :param coordinates: The coordinates of this Transformer.
-        :type coordinates: Coordinates
-        """
-
-        self._coordinates = coordinates
-
-    @property
-    def radials(self) -> List[Radial]:
+    def radials(self) -> List[str]:
         """Gets the radials of this Transformer.
 
 
         :return: The radials of this Transformer.
-        :rtype: List[Radial]
+        :rtype: List[str]
         """
         return self._radials
 
     @radials.setter
-    def radials(self, radials: List[Radial]):
+    def radials(self, radials: List[str]):
         """Sets the radials of this Transformer.
 
 
         :param radials: The radials of this Transformer.
-        :type radials: List[Radial]
+        :type radials: List[str]
         """
 
         self._radials = radials
@@ -523,43 +495,43 @@ class Transformer(Model):
         self._voltage_base_secondary = voltage_base_secondary
 
     @property
-    def power_primary(self) -> int:
+    def power_primary(self) -> float:
         """Gets the power_primary of this Transformer.
 
 
         :return: The power_primary of this Transformer.
-        :rtype: int
+        :rtype: float
         """
         return self._power_primary
 
     @power_primary.setter
-    def power_primary(self, power_primary: int):
+    def power_primary(self, power_primary: float):
         """Sets the power_primary of this Transformer.
 
 
         :param power_primary: The power_primary of this Transformer.
-        :type power_primary: int
+        :type power_primary: float
         """
 
         self._power_primary = power_primary
 
     @property
-    def power_secondary(self) -> int:
+    def power_secondary(self) -> float:
         """Gets the power_secondary of this Transformer.
 
 
         :return: The power_secondary of this Transformer.
-        :rtype: int
+        :rtype: float
         """
         return self._power_secondary
 
     @power_secondary.setter
-    def power_secondary(self, power_secondary: int):
+    def power_secondary(self, power_secondary: float):
         """Sets the power_secondary of this Transformer.
 
 
         :param power_secondary: The power_secondary of this Transformer.
-        :type power_secondary: int
+        :type power_secondary: float
         """
 
         self._power_secondary = power_secondary
@@ -714,43 +686,43 @@ class Transformer(Model):
         self._ceq_total = ceq_total
 
     @property
-    def monitor(self) -> int:
+    def monitor(self) -> float:
         """Gets the monitor of this Transformer.
 
 
         :return: The monitor of this Transformer.
-        :rtype: int
+        :rtype: float
         """
         return self._monitor
 
     @monitor.setter
-    def monitor(self, monitor: int):
+    def monitor(self, monitor: float):
         """Sets the monitor of this Transformer.
 
 
         :param monitor: The monitor of this Transformer.
-        :type monitor: int
+        :type monitor: float
         """
 
         self._monitor = monitor
 
     @property
-    def control(self) -> int:
+    def control(self) -> float:
         """Gets the control of this Transformer.
 
 
         :return: The control of this Transformer.
-        :rtype: int
+        :rtype: float
         """
         return self._control
 
     @control.setter
-    def control(self, control: int):
+    def control(self, control: float):
         """Sets the control of this Transformer.
 
 
         :param control: The control of this Transformer.
-        :type control: int
+        :type control: float
         """
 
         self._control = control
@@ -798,22 +770,22 @@ class Transformer(Model):
         self._voltageunit = voltageunit
 
     @property
-    def frequency(self) -> int:
+    def frequency(self) -> float:
         """Gets the frequency of this Transformer.
 
 
         :return: The frequency of this Transformer.
-        :rtype: int
+        :rtype: float
         """
         return self._frequency
 
     @frequency.setter
-    def frequency(self, frequency: int):
+    def frequency(self, frequency: float):
         """Sets the frequency of this Transformer.
 
 
         :param frequency: The frequency of this Transformer.
-        :type frequency: int
+        :type frequency: float
         """
 
         self._frequency = frequency

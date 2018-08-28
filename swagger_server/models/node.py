@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.coordinates import Coordinates  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,26 +15,21 @@ class Node(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, coordinates: Coordinates=None):  # noqa: E501
+    def __init__(self, id: str=None):  # noqa: E501
         """Node - a model defined in Swagger
 
         :param id: The id of this Node.  # noqa: E501
         :type id: str
-        :param coordinates: The coordinates of this Node.  # noqa: E501
-        :type coordinates: Coordinates
         """
         self.swagger_types = {
-            'id': str,
-            'coordinates': Coordinates
+            'id': str
         }
 
         self.attribute_map = {
-            'id': 'id',
-            'coordinates': 'coordinates'
+            'id': 'id'
         }
 
         self._id = id
-        self._coordinates = coordinates
 
     @classmethod
     def from_dict(cls, dikt) -> 'Node':
@@ -70,24 +64,3 @@ class Node(Model):
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
-
-    @property
-    def coordinates(self) -> Coordinates:
-        """Gets the coordinates of this Node.
-
-
-        :return: The coordinates of this Node.
-        :rtype: Coordinates
-        """
-        return self._coordinates
-
-    @coordinates.setter
-    def coordinates(self, coordinates: Coordinates):
-        """Sets the coordinates of this Node.
-
-
-        :param coordinates: The coordinates of this Node.
-        :type coordinates: Coordinates
-        """
-
-        self._coordinates = coordinates
