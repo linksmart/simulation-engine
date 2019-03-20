@@ -6,13 +6,15 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
+from swagger_server.models.capacitor import Capacitor  # noqa: F401,E501
 from swagger_server.models.charging_point import ChargingPoint  # noqa: F401,E501
 from swagger_server.models.linecode import Linecode  # noqa: F401,E501
 from swagger_server.models.load import Load  # noqa: F401,E501
 from swagger_server.models.loadshape import Loadshape  # noqa: F401,E501
-from swagger_server.models.node import Node  # noqa: F401,E501
 from swagger_server.models.photovoltaic import Photovoltaic  # noqa: F401,E501
+from swagger_server.models.power_profile import PowerProfile  # noqa: F401,E501
 from swagger_server.models.powerline import Powerline  # noqa: F401,E501
+from swagger_server.models.reg_control import RegControl  # noqa: F401,E501
 from swagger_server.models.storage import Storage  # noqa: F401,E501
 from swagger_server.models.transformer import Transformer  # noqa: F401,E501
 from swagger_server.models.tshape import Tshape  # noqa: F401,E501
@@ -26,17 +28,17 @@ class Radial(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, radial_id: str=None, nodes: List[Node]=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None, linecode: List[Linecode]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None):  # noqa: E501
+    def __init__(self, radial_id: str=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_profile: List[PowerProfile]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None, linecode: List[Linecode]=None, capacitor: List[Capacitor]=None, voltage_regulator: List[RegControl]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None):  # noqa: E501
         """Radial - a model defined in Swagger
 
         :param radial_id: The radial_id of this Radial.  # noqa: E501
         :type radial_id: str
-        :param nodes: The nodes of this Radial.  # noqa: E501
-        :type nodes: List[Node]
         :param transformer: The transformer of this Radial.  # noqa: E501
         :type transformer: List[Transformer]
         :param loads: The loads of this Radial.  # noqa: E501
         :type loads: List[Load]
+        :param power_profile: The power_profile of this Radial.  # noqa: E501
+        :type power_profile: List[PowerProfile]
         :param power_lines: The power_lines of this Radial.  # noqa: E501
         :type power_lines: List[Powerline]
         :param photovoltaics: The photovoltaics of this Radial.  # noqa: E501
@@ -47,6 +49,10 @@ class Radial(Model):
         :type charging_points: List[ChargingPoint]
         :param linecode: The linecode of this Radial.  # noqa: E501
         :type linecode: List[Linecode]
+        :param capacitor: The capacitor of this Radial.  # noqa: E501
+        :type capacitor: List[Capacitor]
+        :param voltage_regulator: The voltage_regulator of this Radial.  # noqa: E501
+        :type voltage_regulator: List[RegControl]
         :param xycurves: The xycurves of this Radial.  # noqa: E501
         :type xycurves: List[XYCurve]
         :param loadshapes: The loadshapes of this Radial.  # noqa: E501
@@ -56,14 +62,16 @@ class Radial(Model):
         """
         self.swagger_types = {
             'radial_id': str,
-            'nodes': List[Node],
             'transformer': List[Transformer],
             'loads': List[Load],
+            'power_profile': List[PowerProfile],
             'power_lines': List[Powerline],
             'photovoltaics': List[Photovoltaic],
             'storage_units': List[Storage],
             'charging_points': List[ChargingPoint],
             'linecode': List[Linecode],
+            'capacitor': List[Capacitor],
+            'voltage_regulator': List[RegControl],
             'xycurves': List[XYCurve],
             'loadshapes': List[Loadshape],
             'tshapes': List[Tshape]
@@ -71,28 +79,32 @@ class Radial(Model):
 
         self.attribute_map = {
             'radial_id': 'radialId',
-            'nodes': 'nodes',
             'transformer': 'transformer',
             'loads': 'loads',
+            'power_profile': 'powerProfile',
             'power_lines': 'powerLines',
             'photovoltaics': 'photovoltaics',
             'storage_units': 'storageUnits',
             'charging_points': 'chargingPoints',
             'linecode': 'linecode',
+            'capacitor': 'capacitor',
+            'voltage_regulator': 'voltage_regulator',
             'xycurves': 'xycurves',
             'loadshapes': 'loadshapes',
             'tshapes': 'tshapes'
         }
 
         self._radial_id = radial_id
-        self._nodes = nodes
         self._transformer = transformer
         self._loads = loads
+        self._power_profile = power_profile
         self._power_lines = power_lines
         self._photovoltaics = photovoltaics
         self._storage_units = storage_units
         self._charging_points = charging_points
         self._linecode = linecode
+        self._capacitor = capacitor
+        self._voltage_regulator = voltage_regulator
         self._xycurves = xycurves
         self._loadshapes = loadshapes
         self._tshapes = tshapes
@@ -128,27 +140,6 @@ class Radial(Model):
         """
 
         self._radial_id = radial_id
-
-    @property
-    def nodes(self) -> List[Node]:
-        """Gets the nodes of this Radial.
-
-
-        :return: The nodes of this Radial.
-        :rtype: List[Node]
-        """
-        return self._nodes
-
-    @nodes.setter
-    def nodes(self, nodes: List[Node]):
-        """Sets the nodes of this Radial.
-
-
-        :param nodes: The nodes of this Radial.
-        :type nodes: List[Node]
-        """
-
-        self._nodes = nodes
 
     @property
     def transformer(self) -> List[Transformer]:
@@ -191,6 +182,27 @@ class Radial(Model):
         """
 
         self._loads = loads
+
+    @property
+    def power_profile(self) -> List[PowerProfile]:
+        """Gets the power_profile of this Radial.
+
+
+        :return: The power_profile of this Radial.
+        :rtype: List[PowerProfile]
+        """
+        return self._power_profile
+
+    @power_profile.setter
+    def power_profile(self, power_profile: List[PowerProfile]):
+        """Sets the power_profile of this Radial.
+
+
+        :param power_profile: The power_profile of this Radial.
+        :type power_profile: List[PowerProfile]
+        """
+
+        self._power_profile = power_profile
 
     @property
     def power_lines(self) -> List[Powerline]:
@@ -296,6 +308,48 @@ class Radial(Model):
         """
 
         self._linecode = linecode
+
+    @property
+    def capacitor(self) -> List[Capacitor]:
+        """Gets the capacitor of this Radial.
+
+
+        :return: The capacitor of this Radial.
+        :rtype: List[Capacitor]
+        """
+        return self._capacitor
+
+    @capacitor.setter
+    def capacitor(self, capacitor: List[Capacitor]):
+        """Sets the capacitor of this Radial.
+
+
+        :param capacitor: The capacitor of this Radial.
+        :type capacitor: List[Capacitor]
+        """
+
+        self._capacitor = capacitor
+
+    @property
+    def voltage_regulator(self) -> List[RegControl]:
+        """Gets the voltage_regulator of this Radial.
+
+
+        :return: The voltage_regulator of this Radial.
+        :rtype: List[RegControl]
+        """
+        return self._voltage_regulator
+
+    @voltage_regulator.setter
+    def voltage_regulator(self, voltage_regulator: List[RegControl]):
+        """Sets the voltage_regulator of this Radial.
+
+
+        :param voltage_regulator: The voltage_regulator of this Radial.
+        :type voltage_regulator: List[RegControl]
+        """
+
+        self._voltage_regulator = voltage_regulator
 
     @property
     def xycurves(self) -> List[XYCurve]:

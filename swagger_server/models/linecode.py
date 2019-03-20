@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
+from swagger_server.models.linecode_r_matrix import LinecodeRMatrix  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -15,41 +16,76 @@ class Linecode(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, r1: float=None, x1: float=None, c0: float=None, units: str=None):  # noqa: E501
+    def __init__(self, id: str=None, r1: float=None, r0: float=None, x1: float=None, x0: float=None, c1: float=None, c0: float=None, r_matrix: LinecodeRMatrix=None, x_matrix: LinecodeRMatrix=None, c_matrix: LinecodeRMatrix=None, units: str=None, base_frequency: float=None):  # noqa: E501
         """Linecode - a model defined in Swagger
 
         :param id: The id of this Linecode.  # noqa: E501
         :type id: str
         :param r1: The r1 of this Linecode.  # noqa: E501
         :type r1: float
+        :param r0: The r0 of this Linecode.  # noqa: E501
+        :type r0: float
         :param x1: The x1 of this Linecode.  # noqa: E501
         :type x1: float
+        :param x0: The x0 of this Linecode.  # noqa: E501
+        :type x0: float
+        :param c1: The c1 of this Linecode.  # noqa: E501
+        :type c1: float
         :param c0: The c0 of this Linecode.  # noqa: E501
         :type c0: float
+        :param r_matrix: The r_matrix of this Linecode.  # noqa: E501
+        :type r_matrix: LinecodeRMatrix
+        :param x_matrix: The x_matrix of this Linecode.  # noqa: E501
+        :type x_matrix: LinecodeRMatrix
+        :param c_matrix: The c_matrix of this Linecode.  # noqa: E501
+        :type c_matrix: LinecodeRMatrix
         :param units: The units of this Linecode.  # noqa: E501
         :type units: str
+        :param base_frequency: The base_frequency of this Linecode.  # noqa: E501
+        :type base_frequency: float
         """
         self.swagger_types = {
             'id': str,
             'r1': float,
+            'r0': float,
             'x1': float,
+            'x0': float,
+            'c1': float,
             'c0': float,
-            'units': str
+            'r_matrix': LinecodeRMatrix,
+            'x_matrix': LinecodeRMatrix,
+            'c_matrix': LinecodeRMatrix,
+            'units': str,
+            'base_frequency': float
         }
 
         self.attribute_map = {
             'id': 'id',
-            'r1': 'r1',
-            'x1': 'x1',
-            'c0': 'c0',
-            'units': 'units'
+            'r1': 'R1',
+            'r0': 'R0',
+            'x1': 'X1',
+            'x0': 'X0',
+            'c1': 'C1',
+            'c0': 'C0',
+            'r_matrix': 'R_Matrix',
+            'x_matrix': 'X_Matrix',
+            'c_matrix': 'C_Matrix',
+            'units': 'units',
+            'base_frequency': 'base_frequency'
         }
 
         self._id = id
         self._r1 = r1
+        self._r0 = r0
         self._x1 = x1
+        self._x0 = x0
+        self._c1 = c1
         self._c0 = c0
+        self._r_matrix = r_matrix
+        self._x_matrix = x_matrix
+        self._c_matrix = c_matrix
         self._units = units
+        self._base_frequency = base_frequency
 
     @classmethod
     def from_dict(cls, dikt) -> 'Linecode':
@@ -103,10 +139,29 @@ class Linecode(Model):
         :param r1: The r1 of this Linecode.
         :type r1: float
         """
-        if r1 is None:
-            raise ValueError("Invalid value for `r1`, must not be `None`")  # noqa: E501
 
         self._r1 = r1
+
+    @property
+    def r0(self) -> float:
+        """Gets the r0 of this Linecode.
+
+
+        :return: The r0 of this Linecode.
+        :rtype: float
+        """
+        return self._r0
+
+    @r0.setter
+    def r0(self, r0: float):
+        """Sets the r0 of this Linecode.
+
+
+        :param r0: The r0 of this Linecode.
+        :type r0: float
+        """
+
+        self._r0 = r0
 
     @property
     def x1(self) -> float:
@@ -126,10 +181,50 @@ class Linecode(Model):
         :param x1: The x1 of this Linecode.
         :type x1: float
         """
-        if x1 is None:
-            raise ValueError("Invalid value for `x1`, must not be `None`")  # noqa: E501
 
         self._x1 = x1
+
+    @property
+    def x0(self) -> float:
+        """Gets the x0 of this Linecode.
+
+
+        :return: The x0 of this Linecode.
+        :rtype: float
+        """
+        return self._x0
+
+    @x0.setter
+    def x0(self, x0: float):
+        """Sets the x0 of this Linecode.
+
+
+        :param x0: The x0 of this Linecode.
+        :type x0: float
+        """
+
+        self._x0 = x0
+
+    @property
+    def c1(self) -> float:
+        """Gets the c1 of this Linecode.
+
+
+        :return: The c1 of this Linecode.
+        :rtype: float
+        """
+        return self._c1
+
+    @c1.setter
+    def c1(self, c1: float):
+        """Sets the c1 of this Linecode.
+
+
+        :param c1: The c1 of this Linecode.
+        :type c1: float
+        """
+
+        self._c1 = c1
 
     @property
     def c0(self) -> float:
@@ -149,10 +244,71 @@ class Linecode(Model):
         :param c0: The c0 of this Linecode.
         :type c0: float
         """
-        if c0 is None:
-            raise ValueError("Invalid value for `c0`, must not be `None`")  # noqa: E501
 
         self._c0 = c0
+
+    @property
+    def r_matrix(self) -> LinecodeRMatrix:
+        """Gets the r_matrix of this Linecode.
+
+
+        :return: The r_matrix of this Linecode.
+        :rtype: LinecodeRMatrix
+        """
+        return self._r_matrix
+
+    @r_matrix.setter
+    def r_matrix(self, r_matrix: LinecodeRMatrix):
+        """Sets the r_matrix of this Linecode.
+
+
+        :param r_matrix: The r_matrix of this Linecode.
+        :type r_matrix: LinecodeRMatrix
+        """
+
+        self._r_matrix = r_matrix
+
+    @property
+    def x_matrix(self) -> LinecodeRMatrix:
+        """Gets the x_matrix of this Linecode.
+
+
+        :return: The x_matrix of this Linecode.
+        :rtype: LinecodeRMatrix
+        """
+        return self._x_matrix
+
+    @x_matrix.setter
+    def x_matrix(self, x_matrix: LinecodeRMatrix):
+        """Sets the x_matrix of this Linecode.
+
+
+        :param x_matrix: The x_matrix of this Linecode.
+        :type x_matrix: LinecodeRMatrix
+        """
+
+        self._x_matrix = x_matrix
+
+    @property
+    def c_matrix(self) -> LinecodeRMatrix:
+        """Gets the c_matrix of this Linecode.
+
+
+        :return: The c_matrix of this Linecode.
+        :rtype: LinecodeRMatrix
+        """
+        return self._c_matrix
+
+    @c_matrix.setter
+    def c_matrix(self, c_matrix: LinecodeRMatrix):
+        """Sets the c_matrix of this Linecode.
+
+
+        :param c_matrix: The c_matrix of this Linecode.
+        :type c_matrix: LinecodeRMatrix
+        """
+
+        self._c_matrix = c_matrix
 
     @property
     def units(self) -> str:
@@ -176,3 +332,24 @@ class Linecode(Model):
             raise ValueError("Invalid value for `units`, must not be `None`")  # noqa: E501
 
         self._units = units
+
+    @property
+    def base_frequency(self) -> float:
+        """Gets the base_frequency of this Linecode.
+
+
+        :return: The base_frequency of this Linecode.
+        :rtype: float
+        """
+        return self._base_frequency
+
+    @base_frequency.setter
+    def base_frequency(self, base_frequency: float):
+        """Sets the base_frequency of this Linecode.
+
+
+        :param base_frequency: The base_frequency of this Linecode.
+        :type base_frequency: float
+        """
+
+        self._base_frequency = base_frequency

@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
+from swagger_server.models.errorunknown import ERRORUNKNOWN  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -15,15 +16,26 @@ class PowerProfile(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self):  # noqa: E501
+    def __init__(self, id: str=None, values: ERRORUNKNOWN=None):  # noqa: E501
         """PowerProfile - a model defined in Swagger
 
+        :param id: The id of this PowerProfile.  # noqa: E501
+        :type id: str
+        :param values: The values of this PowerProfile.  # noqa: E501
+        :type values: ERRORUNKNOWN
         """
         self.swagger_types = {
+            'id': str,
+            'values': ERRORUNKNOWN
         }
 
         self.attribute_map = {
+            'id': 'id',
+            'values': 'values'
         }
+
+        self._id = id
+        self._values = values
 
     @classmethod
     def from_dict(cls, dikt) -> 'PowerProfile':
@@ -35,3 +47,45 @@ class PowerProfile(Model):
         :rtype: PowerProfile
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def id(self) -> str:
+        """Gets the id of this PowerProfile.
+
+
+        :return: The id of this PowerProfile.
+        :rtype: str
+        """
+        return self._id
+
+    @id.setter
+    def id(self, id: str):
+        """Sets the id of this PowerProfile.
+
+
+        :param id: The id of this PowerProfile.
+        :type id: str
+        """
+
+        self._id = id
+
+    @property
+    def values(self) -> ERRORUNKNOWN:
+        """Gets the values of this PowerProfile.
+
+
+        :return: The values of this PowerProfile.
+        :rtype: ERRORUNKNOWN
+        """
+        return self._values
+
+    @values.setter
+    def values(self, values: ERRORUNKNOWN):
+        """Sets the values of this PowerProfile.
+
+
+        :param values: The values of this PowerProfile.
+        :type values: ERRORUNKNOWN
+        """
+
+        self._values = values
