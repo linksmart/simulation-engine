@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
+from swagger_server.models.phases import Phases  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -15,66 +16,81 @@ class Powerline(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, node1: str=None, node2: str=None, req: float=None, xeq: float=None, ceq_tot: float=None, phases: int=None, length: float=None, unitlength: str=None, linecode: str=None):  # noqa: E501
+    def __init__(self, id: str=None, bus1: Phases=None, bus2: Phases=None, length: float=None, unitlength: str=None, linecode: str=None, r1: float=None, r0: float=None, x1: float=None, x0: float=None, c1: float=None, c0: float=None, switch: bool=False):  # noqa: E501
         """Powerline - a model defined in Swagger
 
         :param id: The id of this Powerline.  # noqa: E501
         :type id: str
-        :param node1: The node1 of this Powerline.  # noqa: E501
-        :type node1: str
-        :param node2: The node2 of this Powerline.  # noqa: E501
-        :type node2: str
-        :param req: The req of this Powerline.  # noqa: E501
-        :type req: float
-        :param xeq: The xeq of this Powerline.  # noqa: E501
-        :type xeq: float
-        :param ceq_tot: The ceq_tot of this Powerline.  # noqa: E501
-        :type ceq_tot: float
-        :param phases: The phases of this Powerline.  # noqa: E501
-        :type phases: int
+        :param bus1: The bus1 of this Powerline.  # noqa: E501
+        :type bus1: Phases
+        :param bus2: The bus2 of this Powerline.  # noqa: E501
+        :type bus2: Phases
         :param length: The length of this Powerline.  # noqa: E501
         :type length: float
         :param unitlength: The unitlength of this Powerline.  # noqa: E501
         :type unitlength: str
         :param linecode: The linecode of this Powerline.  # noqa: E501
         :type linecode: str
+        :param r1: The r1 of this Powerline.  # noqa: E501
+        :type r1: float
+        :param r0: The r0 of this Powerline.  # noqa: E501
+        :type r0: float
+        :param x1: The x1 of this Powerline.  # noqa: E501
+        :type x1: float
+        :param x0: The x0 of this Powerline.  # noqa: E501
+        :type x0: float
+        :param c1: The c1 of this Powerline.  # noqa: E501
+        :type c1: float
+        :param c0: The c0 of this Powerline.  # noqa: E501
+        :type c0: float
+        :param switch: The switch of this Powerline.  # noqa: E501
+        :type switch: bool
         """
         self.swagger_types = {
             'id': str,
-            'node1': str,
-            'node2': str,
-            'req': float,
-            'xeq': float,
-            'ceq_tot': float,
-            'phases': int,
+            'bus1': Phases,
+            'bus2': Phases,
             'length': float,
             'unitlength': str,
-            'linecode': str
+            'linecode': str,
+            'r1': float,
+            'r0': float,
+            'x1': float,
+            'x0': float,
+            'c1': float,
+            'c0': float,
+            'switch': bool
         }
 
         self.attribute_map = {
             'id': 'id',
-            'node1': 'node1',
-            'node2': 'node2',
-            'req': 'Req',
-            'xeq': 'Xeq',
-            'ceq_tot': 'CeqTot',
-            'phases': 'phases',
+            'bus1': 'bus1',
+            'bus2': 'bus2',
             'length': 'length',
             'unitlength': 'unitlength',
-            'linecode': 'linecode'
+            'linecode': 'linecode',
+            'r1': 'R1',
+            'r0': 'R0',
+            'x1': 'X1',
+            'x0': 'X0',
+            'c1': 'C1',
+            'c0': 'C0',
+            'switch': 'switch'
         }
 
         self._id = id
-        self._node1 = node1
-        self._node2 = node2
-        self._req = req
-        self._xeq = xeq
-        self._ceq_tot = ceq_tot
-        self._phases = phases
+        self._bus1 = bus1
+        self._bus2 = bus2
         self._length = length
         self._unitlength = unitlength
         self._linecode = linecode
+        self._r1 = r1
+        self._r0 = r0
+        self._x1 = x1
+        self._x0 = x0
+        self._c1 = c1
+        self._c0 = c0
+        self._switch = switch
 
     @classmethod
     def from_dict(cls, dikt) -> 'Powerline':
@@ -111,138 +127,50 @@ class Powerline(Model):
         self._id = id
 
     @property
-    def node1(self) -> str:
-        """Gets the node1 of this Powerline.
+    def bus1(self) -> Phases:
+        """Gets the bus1 of this Powerline.
 
         ID for the connected node  # noqa: E501
 
-        :return: The node1 of this Powerline.
-        :rtype: str
+        :return: The bus1 of this Powerline.
+        :rtype: Phases
         """
-        return self._node1
+        return self._bus1
 
-    @node1.setter
-    def node1(self, node1: str):
-        """Sets the node1 of this Powerline.
+    @bus1.setter
+    def bus1(self, bus1: Phases):
+        """Sets the bus1 of this Powerline.
 
         ID for the connected node  # noqa: E501
 
-        :param node1: The node1 of this Powerline.
-        :type node1: str
+        :param bus1: The bus1 of this Powerline.
+        :type bus1: Phases
         """
-        if node1 is None:
-            raise ValueError("Invalid value for `node1`, must not be `None`")  # noqa: E501
 
-        self._node1 = node1
+        self._bus1 = bus1
 
     @property
-    def node2(self) -> str:
-        """Gets the node2 of this Powerline.
+    def bus2(self) -> Phases:
+        """Gets the bus2 of this Powerline.
 
         ID for the connected node  # noqa: E501
 
-        :return: The node2 of this Powerline.
-        :rtype: str
+        :return: The bus2 of this Powerline.
+        :rtype: Phases
         """
-        return self._node2
+        return self._bus2
 
-    @node2.setter
-    def node2(self, node2: str):
-        """Sets the node2 of this Powerline.
+    @bus2.setter
+    def bus2(self, bus2: Phases):
+        """Sets the bus2 of this Powerline.
 
         ID for the connected node  # noqa: E501
 
-        :param node2: The node2 of this Powerline.
-        :type node2: str
-        """
-        if node2 is None:
-            raise ValueError("Invalid value for `node2`, must not be `None`")  # noqa: E501
-
-        self._node2 = node2
-
-    @property
-    def req(self) -> float:
-        """Gets the req of this Powerline.
-
-
-        :return: The req of this Powerline.
-        :rtype: float
-        """
-        return self._req
-
-    @req.setter
-    def req(self, req: float):
-        """Sets the req of this Powerline.
-
-
-        :param req: The req of this Powerline.
-        :type req: float
+        :param bus2: The bus2 of this Powerline.
+        :type bus2: Phases
         """
 
-        self._req = req
-
-    @property
-    def xeq(self) -> float:
-        """Gets the xeq of this Powerline.
-
-
-        :return: The xeq of this Powerline.
-        :rtype: float
-        """
-        return self._xeq
-
-    @xeq.setter
-    def xeq(self, xeq: float):
-        """Sets the xeq of this Powerline.
-
-
-        :param xeq: The xeq of this Powerline.
-        :type xeq: float
-        """
-
-        self._xeq = xeq
-
-    @property
-    def ceq_tot(self) -> float:
-        """Gets the ceq_tot of this Powerline.
-
-
-        :return: The ceq_tot of this Powerline.
-        :rtype: float
-        """
-        return self._ceq_tot
-
-    @ceq_tot.setter
-    def ceq_tot(self, ceq_tot: float):
-        """Sets the ceq_tot of this Powerline.
-
-
-        :param ceq_tot: The ceq_tot of this Powerline.
-        :type ceq_tot: float
-        """
-
-        self._ceq_tot = ceq_tot
-
-    @property
-    def phases(self) -> int:
-        """Gets the phases of this Powerline.
-
-
-        :return: The phases of this Powerline.
-        :rtype: int
-        """
-        return self._phases
-
-    @phases.setter
-    def phases(self, phases: int):
-        """Sets the phases of this Powerline.
-
-
-        :param phases: The phases of this Powerline.
-        :type phases: int
-        """
-
-        self._phases = phases
+        self._bus2 = bus2
 
     @property
     def length(self) -> float:
@@ -310,3 +238,150 @@ class Powerline(Model):
         """
 
         self._linecode = linecode
+
+    @property
+    def r1(self) -> float:
+        """Gets the r1 of this Powerline.
+
+
+        :return: The r1 of this Powerline.
+        :rtype: float
+        """
+        return self._r1
+
+    @r1.setter
+    def r1(self, r1: float):
+        """Sets the r1 of this Powerline.
+
+
+        :param r1: The r1 of this Powerline.
+        :type r1: float
+        """
+
+        self._r1 = r1
+
+    @property
+    def r0(self) -> float:
+        """Gets the r0 of this Powerline.
+
+
+        :return: The r0 of this Powerline.
+        :rtype: float
+        """
+        return self._r0
+
+    @r0.setter
+    def r0(self, r0: float):
+        """Sets the r0 of this Powerline.
+
+
+        :param r0: The r0 of this Powerline.
+        :type r0: float
+        """
+
+        self._r0 = r0
+
+    @property
+    def x1(self) -> float:
+        """Gets the x1 of this Powerline.
+
+
+        :return: The x1 of this Powerline.
+        :rtype: float
+        """
+        return self._x1
+
+    @x1.setter
+    def x1(self, x1: float):
+        """Sets the x1 of this Powerline.
+
+
+        :param x1: The x1 of this Powerline.
+        :type x1: float
+        """
+
+        self._x1 = x1
+
+    @property
+    def x0(self) -> float:
+        """Gets the x0 of this Powerline.
+
+
+        :return: The x0 of this Powerline.
+        :rtype: float
+        """
+        return self._x0
+
+    @x0.setter
+    def x0(self, x0: float):
+        """Sets the x0 of this Powerline.
+
+
+        :param x0: The x0 of this Powerline.
+        :type x0: float
+        """
+
+        self._x0 = x0
+
+    @property
+    def c1(self) -> float:
+        """Gets the c1 of this Powerline.
+
+
+        :return: The c1 of this Powerline.
+        :rtype: float
+        """
+        return self._c1
+
+    @c1.setter
+    def c1(self, c1: float):
+        """Sets the c1 of this Powerline.
+
+
+        :param c1: The c1 of this Powerline.
+        :type c1: float
+        """
+
+        self._c1 = c1
+
+    @property
+    def c0(self) -> float:
+        """Gets the c0 of this Powerline.
+
+
+        :return: The c0 of this Powerline.
+        :rtype: float
+        """
+        return self._c0
+
+    @c0.setter
+    def c0(self, c0: float):
+        """Sets the c0 of this Powerline.
+
+
+        :param c0: The c0 of this Powerline.
+        :type c0: float
+        """
+
+        self._c0 = c0
+
+    @property
+    def switch(self) -> bool:
+        """Gets the switch of this Powerline.
+
+
+        :return: The switch of this Powerline.
+        :rtype: bool
+        """
+        return self._switch
+
+    @switch.setter
+    def switch(self, switch: bool):
+        """Sets the switch of this Powerline.
+
+
+        :param switch: The switch of this Powerline.
+        :type switch: bool
+        """
+
+        self._switch = switch

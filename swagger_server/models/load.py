@@ -6,7 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.power_profile import PowerProfile  # noqa: F401,E501
+from swagger_server.models.phases import Phases  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,46 +16,66 @@ class Load(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, node: str=None, phases: int=None, voltage: float=None, powerfactor: float=None, power_profile: PowerProfile=None):  # noqa: E501
+    def __init__(self, id: str=None, bus: str=None, phases: Phases=None, connection_type: str=None, model: int=None, k_v: float=None, k_w: float=None, k_var: float=None, powerfactor: float=None, power_profile_id: str=None):  # noqa: E501
         """Load - a model defined in Swagger
 
         :param id: The id of this Load.  # noqa: E501
         :type id: str
-        :param node: The node of this Load.  # noqa: E501
-        :type node: str
+        :param bus: The bus of this Load.  # noqa: E501
+        :type bus: str
         :param phases: The phases of this Load.  # noqa: E501
-        :type phases: int
-        :param voltage: The voltage of this Load.  # noqa: E501
-        :type voltage: float
+        :type phases: Phases
+        :param connection_type: The connection_type of this Load.  # noqa: E501
+        :type connection_type: str
+        :param model: The model of this Load.  # noqa: E501
+        :type model: int
+        :param k_v: The k_v of this Load.  # noqa: E501
+        :type k_v: float
+        :param k_w: The k_w of this Load.  # noqa: E501
+        :type k_w: float
+        :param k_var: The k_var of this Load.  # noqa: E501
+        :type k_var: float
         :param powerfactor: The powerfactor of this Load.  # noqa: E501
         :type powerfactor: float
-        :param power_profile: The power_profile of this Load.  # noqa: E501
-        :type power_profile: PowerProfile
+        :param power_profile_id: The power_profile_id of this Load.  # noqa: E501
+        :type power_profile_id: str
         """
         self.swagger_types = {
             'id': str,
-            'node': str,
-            'phases': int,
-            'voltage': float,
+            'bus': str,
+            'phases': Phases,
+            'connection_type': str,
+            'model': int,
+            'k_v': float,
+            'k_w': float,
+            'k_var': float,
             'powerfactor': float,
-            'power_profile': PowerProfile
+            'power_profile_id': str
         }
 
         self.attribute_map = {
             'id': 'id',
-            'node': 'node',
+            'bus': 'bus',
             'phases': 'phases',
-            'voltage': 'voltage',
+            'connection_type': 'connection_type',
+            'model': 'model',
+            'k_v': 'kV',
+            'k_w': 'kW',
+            'k_var': 'kVar',
             'powerfactor': 'powerfactor',
-            'power_profile': 'power_profile'
+            'power_profile_id': 'power_profile_id'
         }
 
         self._id = id
-        self._node = node
+        self._bus = bus
         self._phases = phases
-        self._voltage = voltage
+        self._connection_type = connection_type
+        self._model = model
+        self._k_v = k_v
+        self._k_w = k_w
+        self._k_var = k_var
         self._powerfactor = powerfactor
-        self._power_profile = power_profile
+        self._power_profile_id = power_profile_id
 
     @classmethod
     def from_dict(cls, dikt) -> 'Load':
@@ -92,71 +112,165 @@ class Load(Model):
         self._id = id
 
     @property
-    def node(self) -> str:
-        """Gets the node of this Load.
+    def bus(self) -> str:
+        """Gets the bus of this Load.
 
         ID for the connected node  # noqa: E501
 
-        :return: The node of this Load.
+        :return: The bus of this Load.
         :rtype: str
         """
-        return self._node
+        return self._bus
 
-    @node.setter
-    def node(self, node: str):
-        """Sets the node of this Load.
+    @bus.setter
+    def bus(self, bus: str):
+        """Sets the bus of this Load.
 
         ID for the connected node  # noqa: E501
 
-        :param node: The node of this Load.
-        :type node: str
+        :param bus: The bus of this Load.
+        :type bus: str
         """
-        if node is None:
-            raise ValueError("Invalid value for `node`, must not be `None`")  # noqa: E501
+        if bus is None:
+            raise ValueError("Invalid value for `bus`, must not be `None`")  # noqa: E501
 
-        self._node = node
+        self._bus = bus
 
     @property
-    def phases(self) -> int:
+    def phases(self) -> Phases:
         """Gets the phases of this Load.
 
 
         :return: The phases of this Load.
-        :rtype: int
+        :rtype: Phases
         """
         return self._phases
 
     @phases.setter
-    def phases(self, phases: int):
+    def phases(self, phases: Phases):
         """Sets the phases of this Load.
 
 
         :param phases: The phases of this Load.
-        :type phases: int
+        :type phases: Phases
         """
+        if phases is None:
+            raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501
 
         self._phases = phases
 
     @property
-    def voltage(self) -> float:
-        """Gets the voltage of this Load.
+    def connection_type(self) -> str:
+        """Gets the connection_type of this Load.
 
 
-        :return: The voltage of this Load.
+        :return: The connection_type of this Load.
+        :rtype: str
+        """
+        return self._connection_type
+
+    @connection_type.setter
+    def connection_type(self, connection_type: str):
+        """Sets the connection_type of this Load.
+
+
+        :param connection_type: The connection_type of this Load.
+        :type connection_type: str
+        """
+
+        self._connection_type = connection_type
+
+    @property
+    def model(self) -> int:
+        """Gets the model of this Load.
+
+        Defining load models for openDSS  # noqa: E501
+
+        :return: The model of this Load.
+        :rtype: int
+        """
+        return self._model
+
+    @model.setter
+    def model(self, model: int):
+        """Sets the model of this Load.
+
+        Defining load models for openDSS  # noqa: E501
+
+        :param model: The model of this Load.
+        :type model: int
+        """
+        if model is not None and model > 8:  # noqa: E501
+            raise ValueError("Invalid value for `model`, must be a value less than or equal to `8`")  # noqa: E501
+        if model is not None and model < 1:  # noqa: E501
+            raise ValueError("Invalid value for `model`, must be a value greater than or equal to `1`")  # noqa: E501
+
+        self._model = model
+
+    @property
+    def k_v(self) -> float:
+        """Gets the k_v of this Load.
+
+
+        :return: The k_v of this Load.
         :rtype: float
         """
-        return self._voltage
+        return self._k_v
 
-    @voltage.setter
-    def voltage(self, voltage: float):
-        """Sets the voltage of this Load.
+    @k_v.setter
+    def k_v(self, k_v: float):
+        """Sets the k_v of this Load.
 
 
-        :param voltage: The voltage of this Load.
-        :type voltage: float
+        :param k_v: The k_v of this Load.
+        :type k_v: float
+        """
+        if k_v is None:
+            raise ValueError("Invalid value for `k_v`, must not be `None`")  # noqa: E501
+
+        self._k_v = k_v
+
+    @property
+    def k_w(self) -> float:
+        """Gets the k_w of this Load.
+
+
+        :return: The k_w of this Load.
+        :rtype: float
+        """
+        return self._k_w
+
+    @k_w.setter
+    def k_w(self, k_w: float):
+        """Sets the k_w of this Load.
+
+
+        :param k_w: The k_w of this Load.
+        :type k_w: float
         """
 
-        self._voltage = voltage
+        self._k_w = k_w
+
+    @property
+    def k_var(self) -> float:
+        """Gets the k_var of this Load.
+
+
+        :return: The k_var of this Load.
+        :rtype: float
+        """
+        return self._k_var
+
+    @k_var.setter
+    def k_var(self, k_var: float):
+        """Sets the k_var of this Load.
+
+
+        :param k_var: The k_var of this Load.
+        :type k_var: float
+        """
+
+        self._k_var = k_var
 
     @property
     def powerfactor(self) -> float:
@@ -182,22 +296,22 @@ class Load(Model):
         self._powerfactor = powerfactor
 
     @property
-    def power_profile(self) -> PowerProfile:
-        """Gets the power_profile of this Load.
+    def power_profile_id(self) -> str:
+        """Gets the power_profile_id of this Load.
 
 
-        :return: The power_profile of this Load.
-        :rtype: PowerProfile
+        :return: The power_profile_id of this Load.
+        :rtype: str
         """
-        return self._power_profile
+        return self._power_profile_id
 
-    @power_profile.setter
-    def power_profile(self, power_profile: PowerProfile):
-        """Sets the power_profile of this Load.
+    @power_profile_id.setter
+    def power_profile_id(self, power_profile_id: str):
+        """Sets the power_profile_id of this Load.
 
 
-        :param power_profile: The power_profile of this Load.
-        :type power_profile: PowerProfile
+        :param power_profile_id: The power_profile_id of this Load.
+        :type power_profile_id: str
         """
 
-        self._power_profile = power_profile
+        self._power_profile_id = power_profile_id

@@ -187,10 +187,10 @@ def create_simulation(body):  # noqa: E501
             if "transformer" in values.keys() and values["transformer"] is not None:
                 transformer = values["transformer"]
                 factory.gridController.setTransformers(transformer)
-            if "power_lines" in values.keys() and values["power_lines"] is not None:
-                powerlines = values["power_lines"]
+            if "powerLines" in values.keys() and values["powerLines"] is not None:
+                powerLines = values["powerLines"]
                 #linecodes = values["linecode"]
-                factory.gridController.setPowerLines(id, powerlines, linecodes)
+                factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
             """and "linecode" in values.keys() and values["linecode"] is not None:"""
 
             if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
@@ -205,26 +205,44 @@ def create_simulation(body):  # noqa: E501
                             and "loadshapes" in radial.values.keys()s() and radial["loadshapes"] is not None 
                             and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
             """
-            if "storage_units" in values.keys() and values["storage_units"] is not None:
+            if "storageUnits" in values.keys() and values["storageUnits"] is not None:
                 # radial=radial.to_dict()
-                storage = values["storage_units"]
+                storage = values["storageUnits"]
                 factory.gridController.setStorage(id, storage)
             """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
                 # radial=radial.to_dict()
                 chargingPoints = values["chargingPoints"]
                 gridController.setChargingPoints(id, chargingPoints)
             """
-                
-                
-            
-
-
+            if "powerProfile" in values.keys() and values["powerProfile"] is not None:
+                powerProfile = values["powerProfile"]
+                factory.gridController.setPowerProfile(id, powerProfile)
+             if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
+                chargingPoints = values["chargingPoints"]
+                factory.gridController.setChargingPoints(id, chargingPoints)               
+             if "linecode" in values.keys() and values["linecode"] is not None:
+                linecode = values["linecode"]
+                factory.gridController.setLineCode(id, linecode)   
+             if "capacitor" in values.keys() and values["capacitor"] is not None:
+                capacitor = values["capacitor"]
+                factory.gridController.setCapacitor(id, capacitor) 
+             if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:
+                voltage_regulator = values["voltage_regulator"]
+                factory.gridController.setVoltageRegulator(id, voltage_regulator) 
+             if "xycurves" in values.keys() and values["xycurves"] is not None:
+                xycurves = values["xycurves"]
+                factory.gridController.setXYCurve(id, xycurve) 
+             if "loadshapes" in values.keys() and values["loadshapes"] is not None:
+                loadshapes = values["loadshapes"]
+                factory.gridController.setLoadShape(id, loadshapes) 
+             if "tshapes" in values.keys() and values["tshapes"] is not None:
+                tshapes = values["tshapes"]
+                factory.gridController.setTShape(id, tshapes)                 
         ######Disables circuits untilo the run simulation is started
         factory.gridController.disableCircuit(id)
         return str(id)
     else:
         return "Bad JSON Format"
-
 
 def delete_simulation(id):  # noqa: E501
     """Delete a simulation and its data

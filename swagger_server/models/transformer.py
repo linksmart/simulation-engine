@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
+from swagger_server.models.transformer_windings import TransformerWindings  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -15,7 +16,7 @@ class Transformer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, radials: List[str]=None, phases: int=None, winding: int=None, xhl: float=None, kvs: List[float]=None, kvas: List[float]=None, wdg: int=None, bus: str=None, kv: float=None, voltage_primary: float=None, voltage_secondary: float=None, voltage_base_primary: float=None, voltage_base_secondary: float=None, power_primary: float=None, power_secondary: float=None, connection: str='wye', node_hv: str=None, node_lv: str=None, no_load_loss: float=None, req: float=None, xeq: float=None, ceq_total: float=None, monitor: float=None, control: float=None, tap_level: float=None, voltageunit: str=None, frequency: float=None, unitpower: str=None):  # noqa: E501
+    def __init__(self, id: str=None, radials: List[str]=None, phases: int=None, windings: TransformerWindings=None, xhl: float=None, xlt: float=None, xht: float=None, percent_load_loss: float=None, bank: str=None, tap_level: float=None, base_frequency: float=None):  # noqa: E501
         """Transformer - a model defined in Swagger
 
         :param id: The id of this Transformer.  # noqa: E501
@@ -24,152 +25,62 @@ class Transformer(Model):
         :type radials: List[str]
         :param phases: The phases of this Transformer.  # noqa: E501
         :type phases: int
-        :param winding: The winding of this Transformer.  # noqa: E501
-        :type winding: int
+        :param windings: The windings of this Transformer.  # noqa: E501
+        :type windings: TransformerWindings
         :param xhl: The xhl of this Transformer.  # noqa: E501
         :type xhl: float
-        :param kvs: The kvs of this Transformer.  # noqa: E501
-        :type kvs: List[float]
-        :param kvas: The kvas of this Transformer.  # noqa: E501
-        :type kvas: List[float]
-        :param wdg: The wdg of this Transformer.  # noqa: E501
-        :type wdg: int
-        :param bus: The bus of this Transformer.  # noqa: E501
-        :type bus: str
-        :param kv: The kv of this Transformer.  # noqa: E501
-        :type kv: float
-        :param voltage_primary: The voltage_primary of this Transformer.  # noqa: E501
-        :type voltage_primary: float
-        :param voltage_secondary: The voltage_secondary of this Transformer.  # noqa: E501
-        :type voltage_secondary: float
-        :param voltage_base_primary: The voltage_base_primary of this Transformer.  # noqa: E501
-        :type voltage_base_primary: float
-        :param voltage_base_secondary: The voltage_base_secondary of this Transformer.  # noqa: E501
-        :type voltage_base_secondary: float
-        :param power_primary: The power_primary of this Transformer.  # noqa: E501
-        :type power_primary: float
-        :param power_secondary: The power_secondary of this Transformer.  # noqa: E501
-        :type power_secondary: float
-        :param connection: The connection of this Transformer.  # noqa: E501
-        :type connection: str
-        :param node_hv: The node_hv of this Transformer.  # noqa: E501
-        :type node_hv: str
-        :param node_lv: The node_lv of this Transformer.  # noqa: E501
-        :type node_lv: str
-        :param no_load_loss: The no_load_loss of this Transformer.  # noqa: E501
-        :type no_load_loss: float
-        :param req: The req of this Transformer.  # noqa: E501
-        :type req: float
-        :param xeq: The xeq of this Transformer.  # noqa: E501
-        :type xeq: float
-        :param ceq_total: The ceq_total of this Transformer.  # noqa: E501
-        :type ceq_total: float
-        :param monitor: The monitor of this Transformer.  # noqa: E501
-        :type monitor: float
-        :param control: The control of this Transformer.  # noqa: E501
-        :type control: float
+        :param xlt: The xlt of this Transformer.  # noqa: E501
+        :type xlt: float
+        :param xht: The xht of this Transformer.  # noqa: E501
+        :type xht: float
+        :param percent_load_loss: The percent_load_loss of this Transformer.  # noqa: E501
+        :type percent_load_loss: float
+        :param bank: The bank of this Transformer.  # noqa: E501
+        :type bank: str
         :param tap_level: The tap_level of this Transformer.  # noqa: E501
         :type tap_level: float
-        :param voltageunit: The voltageunit of this Transformer.  # noqa: E501
-        :type voltageunit: str
-        :param frequency: The frequency of this Transformer.  # noqa: E501
-        :type frequency: float
-        :param unitpower: The unitpower of this Transformer.  # noqa: E501
-        :type unitpower: str
+        :param base_frequency: The base_frequency of this Transformer.  # noqa: E501
+        :type base_frequency: float
         """
         self.swagger_types = {
             'id': str,
             'radials': List[str],
             'phases': int,
-            'winding': int,
+            'windings': TransformerWindings,
             'xhl': float,
-            'kvs': List[float],
-            'kvas': List[float],
-            'wdg': int,
-            'bus': str,
-            'kv': float,
-            'voltage_primary': float,
-            'voltage_secondary': float,
-            'voltage_base_primary': float,
-            'voltage_base_secondary': float,
-            'power_primary': float,
-            'power_secondary': float,
-            'connection': str,
-            'node_hv': str,
-            'node_lv': str,
-            'no_load_loss': float,
-            'req': float,
-            'xeq': float,
-            'ceq_total': float,
-            'monitor': float,
-            'control': float,
+            'xlt': float,
+            'xht': float,
+            'percent_load_loss': float,
+            'bank': str,
             'tap_level': float,
-            'voltageunit': str,
-            'frequency': float,
-            'unitpower': str
+            'base_frequency': float
         }
 
         self.attribute_map = {
             'id': 'id',
             'radials': 'radials',
             'phases': 'phases',
-            'winding': 'winding',
+            'windings': 'windings',
             'xhl': 'xhl',
-            'kvs': 'kvs',
-            'kvas': 'kvas',
-            'wdg': 'wdg',
-            'bus': 'bus',
-            'kv': 'kv',
-            'voltage_primary': 'voltagePrimary',
-            'voltage_secondary': 'voltageSecondary',
-            'voltage_base_primary': 'voltageBasePrimary',
-            'voltage_base_secondary': 'voltageBaseSecondary',
-            'power_primary': 'powerPrimary',
-            'power_secondary': 'powerSecondary',
-            'connection': 'connection',
-            'node_hv': 'nodeHV',
-            'node_lv': 'nodeLV',
-            'no_load_loss': 'noLoadLoss',
-            'req': 'Req',
-            'xeq': 'Xeq',
-            'ceq_total': 'CeqTotal',
-            'monitor': 'monitor',
-            'control': 'control',
+            'xlt': 'xlt',
+            'xht': 'xht',
+            'percent_load_loss': 'percent_load_loss',
+            'bank': 'bank',
             'tap_level': 'tapLevel',
-            'voltageunit': 'voltageunit',
-            'frequency': 'frequency',
-            'unitpower': 'unitpower'
+            'base_frequency': 'base_frequency'
         }
 
         self._id = id
         self._radials = radials
         self._phases = phases
-        self._winding = winding
+        self._windings = windings
         self._xhl = xhl
-        self._kvs = kvs
-        self._kvas = kvas
-        self._wdg = wdg
-        self._bus = bus
-        self._kv = kv
-        self._voltage_primary = voltage_primary
-        self._voltage_secondary = voltage_secondary
-        self._voltage_base_primary = voltage_base_primary
-        self._voltage_base_secondary = voltage_base_secondary
-        self._power_primary = power_primary
-        self._power_secondary = power_secondary
-        self._connection = connection
-        self._node_hv = node_hv
-        self._node_lv = node_lv
-        self._no_load_loss = no_load_loss
-        self._req = req
-        self._xeq = xeq
-        self._ceq_total = ceq_total
-        self._monitor = monitor
-        self._control = control
+        self._xlt = xlt
+        self._xht = xht
+        self._percent_load_loss = percent_load_loss
+        self._bank = bank
         self._tap_level = tap_level
-        self._voltageunit = voltageunit
-        self._frequency = frequency
-        self._unitpower = unitpower
+        self._base_frequency = base_frequency
 
     @classmethod
     def from_dict(cls, dikt) -> 'Transformer':
@@ -246,31 +157,33 @@ class Transformer(Model):
         :param phases: The phases of this Transformer.
         :type phases: int
         """
+        if phases is None:
+            raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501
 
         self._phases = phases
 
     @property
-    def winding(self) -> int:
-        """Gets the winding of this Transformer.
+    def windings(self) -> TransformerWindings:
+        """Gets the windings of this Transformer.
 
-        Number of windings  # noqa: E501
 
-        :return: The winding of this Transformer.
-        :rtype: int
+        :return: The windings of this Transformer.
+        :rtype: TransformerWindings
         """
-        return self._winding
+        return self._windings
 
-    @winding.setter
-    def winding(self, winding: int):
-        """Sets the winding of this Transformer.
+    @windings.setter
+    def windings(self, windings: TransformerWindings):
+        """Sets the windings of this Transformer.
 
-        Number of windings  # noqa: E501
 
-        :param winding: The winding of this Transformer.
-        :type winding: int
+        :param windings: The windings of this Transformer.
+        :type windings: TransformerWindings
         """
+        if windings is None:
+            raise ValueError("Invalid value for `windings`, must not be `None`")  # noqa: E501
 
-        self._winding = winding
+        self._windings = windings
 
     @property
     def xhl(self) -> float:
@@ -292,440 +205,106 @@ class Transformer(Model):
         :param xhl: The xhl of this Transformer.
         :type xhl: float
         """
+        if xhl is None:
+            raise ValueError("Invalid value for `xhl`, must not be `None`")  # noqa: E501
 
         self._xhl = xhl
 
     @property
-    def kvs(self) -> List[float]:
-        """Gets the kvs of this Transformer.
+    def xlt(self) -> float:
+        """Gets the xlt of this Transformer.
 
-        Array of kV ratings following rules started above for the kV file for windings  # noqa: E501
+        Percent reactance high-to-low (winding 2 to winding 3)  # noqa: E501
 
-        :return: The kvs of this Transformer.
-        :rtype: List[float]
+        :return: The xlt of this Transformer.
+        :rtype: float
         """
-        return self._kvs
+        return self._xlt
 
-    @kvs.setter
-    def kvs(self, kvs: List[float]):
-        """Sets the kvs of this Transformer.
+    @xlt.setter
+    def xlt(self, xlt: float):
+        """Sets the xlt of this Transformer.
 
-        Array of kV ratings following rules started above for the kV file for windings  # noqa: E501
+        Percent reactance high-to-low (winding 2 to winding 3)  # noqa: E501
 
-        :param kvs: The kvs of this Transformer.
-        :type kvs: List[float]
+        :param xlt: The xlt of this Transformer.
+        :type xlt: float
         """
 
-        self._kvs = kvs
+        self._xlt = xlt
 
     @property
-    def kvas(self) -> List[float]:
-        """Gets the kvas of this Transformer.
+    def xht(self) -> float:
+        """Gets the xht of this Transformer.
 
-        Array of base kVA rating for windings  # noqa: E501
+        Percent reactance high-to-low (winding 1 to winding 3)  # noqa: E501
 
-        :return: The kvas of this Transformer.
-        :rtype: List[float]
+        :return: The xht of this Transformer.
+        :rtype: float
         """
-        return self._kvas
+        return self._xht
 
-    @kvas.setter
-    def kvas(self, kvas: List[float]):
-        """Sets the kvas of this Transformer.
+    @xht.setter
+    def xht(self, xht: float):
+        """Sets the xht of this Transformer.
 
-        Array of base kVA rating for windings  # noqa: E501
+        Percent reactance high-to-low (winding 1 to winding 3)  # noqa: E501
 
-        :param kvas: The kvas of this Transformer.
-        :type kvas: List[float]
+        :param xht: The xht of this Transformer.
+        :type xht: float
         """
 
-        self._kvas = kvas
+        self._xht = xht
 
     @property
-    def wdg(self) -> int:
-        """Gets the wdg of this Transformer.
+    def percent_load_loss(self) -> float:
+        """Gets the percent_load_loss of this Transformer.
 
-        Integer representing the winding witch will become the active winding for subsequent data  # noqa: E501
+        Percent reactance high-to-low (winding 1 to winding 3)  # noqa: E501
 
-        :return: The wdg of this Transformer.
-        :rtype: int
+        :return: The percent_load_loss of this Transformer.
+        :rtype: float
         """
-        return self._wdg
+        return self._percent_load_loss
 
-    @wdg.setter
-    def wdg(self, wdg: int):
-        """Sets the wdg of this Transformer.
+    @percent_load_loss.setter
+    def percent_load_loss(self, percent_load_loss: float):
+        """Sets the percent_load_loss of this Transformer.
 
-        Integer representing the winding witch will become the active winding for subsequent data  # noqa: E501
+        Percent reactance high-to-low (winding 1 to winding 3)  # noqa: E501
 
-        :param wdg: The wdg of this Transformer.
-        :type wdg: int
+        :param percent_load_loss: The percent_load_loss of this Transformer.
+        :type percent_load_loss: float
         """
+        if percent_load_loss is not None and percent_load_loss > 1:  # noqa: E501
+            raise ValueError("Invalid value for `percent_load_loss`, must be a value less than or equal to `1`")  # noqa: E501
+        if percent_load_loss is not None and percent_load_loss < 0:  # noqa: E501
+            raise ValueError("Invalid value for `percent_load_loss`, must be a value greater than or equal to `0`")  # noqa: E501
 
-        self._wdg = wdg
+        self._percent_load_loss = percent_load_loss
 
     @property
-    def bus(self) -> str:
-        """Gets the bus of this Transformer.
+    def bank(self) -> str:
+        """Gets the bank of this Transformer.
 
-        Definition for the connector of this winding (each winding is connected to one terminal of the transformator and, hence, to one bus  # noqa: E501
+        Name of the bank this transformer is part of  # noqa: E501
 
-        :return: The bus of this Transformer.
+        :return: The bank of this Transformer.
         :rtype: str
         """
-        return self._bus
+        return self._bank
 
-    @bus.setter
-    def bus(self, bus: str):
-        """Sets the bus of this Transformer.
+    @bank.setter
+    def bank(self, bank: str):
+        """Sets the bank of this Transformer.
 
-        Definition for the connector of this winding (each winding is connected to one terminal of the transformator and, hence, to one bus  # noqa: E501
+        Name of the bank this transformer is part of  # noqa: E501
 
-        :param bus: The bus of this Transformer.
-        :type bus: str
+        :param bank: The bank of this Transformer.
+        :type bank: str
         """
 
-        self._bus = bus
-
-    @property
-    def kv(self) -> float:
-        """Gets the kv of this Transformer.
-
-        Rated voltage of this winding, kV  # noqa: E501
-
-        :return: The kv of this Transformer.
-        :rtype: float
-        """
-        return self._kv
-
-    @kv.setter
-    def kv(self, kv: float):
-        """Sets the kv of this Transformer.
-
-        Rated voltage of this winding, kV  # noqa: E501
-
-        :param kv: The kv of this Transformer.
-        :type kv: float
-        """
-
-        self._kv = kv
-
-    @property
-    def voltage_primary(self) -> float:
-        """Gets the voltage_primary of this Transformer.
-
-
-        :return: The voltage_primary of this Transformer.
-        :rtype: float
-        """
-        return self._voltage_primary
-
-    @voltage_primary.setter
-    def voltage_primary(self, voltage_primary: float):
-        """Sets the voltage_primary of this Transformer.
-
-
-        :param voltage_primary: The voltage_primary of this Transformer.
-        :type voltage_primary: float
-        """
-
-        self._voltage_primary = voltage_primary
-
-    @property
-    def voltage_secondary(self) -> float:
-        """Gets the voltage_secondary of this Transformer.
-
-
-        :return: The voltage_secondary of this Transformer.
-        :rtype: float
-        """
-        return self._voltage_secondary
-
-    @voltage_secondary.setter
-    def voltage_secondary(self, voltage_secondary: float):
-        """Sets the voltage_secondary of this Transformer.
-
-
-        :param voltage_secondary: The voltage_secondary of this Transformer.
-        :type voltage_secondary: float
-        """
-
-        self._voltage_secondary = voltage_secondary
-
-    @property
-    def voltage_base_primary(self) -> float:
-        """Gets the voltage_base_primary of this Transformer.
-
-
-        :return: The voltage_base_primary of this Transformer.
-        :rtype: float
-        """
-        return self._voltage_base_primary
-
-    @voltage_base_primary.setter
-    def voltage_base_primary(self, voltage_base_primary: float):
-        """Sets the voltage_base_primary of this Transformer.
-
-
-        :param voltage_base_primary: The voltage_base_primary of this Transformer.
-        :type voltage_base_primary: float
-        """
-
-        self._voltage_base_primary = voltage_base_primary
-
-    @property
-    def voltage_base_secondary(self) -> float:
-        """Gets the voltage_base_secondary of this Transformer.
-
-
-        :return: The voltage_base_secondary of this Transformer.
-        :rtype: float
-        """
-        return self._voltage_base_secondary
-
-    @voltage_base_secondary.setter
-    def voltage_base_secondary(self, voltage_base_secondary: float):
-        """Sets the voltage_base_secondary of this Transformer.
-
-
-        :param voltage_base_secondary: The voltage_base_secondary of this Transformer.
-        :type voltage_base_secondary: float
-        """
-
-        self._voltage_base_secondary = voltage_base_secondary
-
-    @property
-    def power_primary(self) -> float:
-        """Gets the power_primary of this Transformer.
-
-
-        :return: The power_primary of this Transformer.
-        :rtype: float
-        """
-        return self._power_primary
-
-    @power_primary.setter
-    def power_primary(self, power_primary: float):
-        """Sets the power_primary of this Transformer.
-
-
-        :param power_primary: The power_primary of this Transformer.
-        :type power_primary: float
-        """
-
-        self._power_primary = power_primary
-
-    @property
-    def power_secondary(self) -> float:
-        """Gets the power_secondary of this Transformer.
-
-
-        :return: The power_secondary of this Transformer.
-        :rtype: float
-        """
-        return self._power_secondary
-
-    @power_secondary.setter
-    def power_secondary(self, power_secondary: float):
-        """Sets the power_secondary of this Transformer.
-
-
-        :param power_secondary: The power_secondary of this Transformer.
-        :type power_secondary: float
-        """
-
-        self._power_secondary = power_secondary
-
-    @property
-    def connection(self) -> str:
-        """Gets the connection of this Transformer.
-
-        Connection of this winding.  # noqa: E501
-
-        :return: The connection of this Transformer.
-        :rtype: str
-        """
-        return self._connection
-
-    @connection.setter
-    def connection(self, connection: str):
-        """Sets the connection of this Transformer.
-
-        Connection of this winding.  # noqa: E501
-
-        :param connection: The connection of this Transformer.
-        :type connection: str
-        """
-
-        self._connection = connection
-
-    @property
-    def node_hv(self) -> str:
-        """Gets the node_hv of this Transformer.
-
-
-        :return: The node_hv of this Transformer.
-        :rtype: str
-        """
-        return self._node_hv
-
-    @node_hv.setter
-    def node_hv(self, node_hv: str):
-        """Sets the node_hv of this Transformer.
-
-
-        :param node_hv: The node_hv of this Transformer.
-        :type node_hv: str
-        """
-
-        self._node_hv = node_hv
-
-    @property
-    def node_lv(self) -> str:
-        """Gets the node_lv of this Transformer.
-
-
-        :return: The node_lv of this Transformer.
-        :rtype: str
-        """
-        return self._node_lv
-
-    @node_lv.setter
-    def node_lv(self, node_lv: str):
-        """Sets the node_lv of this Transformer.
-
-
-        :param node_lv: The node_lv of this Transformer.
-        :type node_lv: str
-        """
-
-        self._node_lv = node_lv
-
-    @property
-    def no_load_loss(self) -> float:
-        """Gets the no_load_loss of this Transformer.
-
-
-        :return: The no_load_loss of this Transformer.
-        :rtype: float
-        """
-        return self._no_load_loss
-
-    @no_load_loss.setter
-    def no_load_loss(self, no_load_loss: float):
-        """Sets the no_load_loss of this Transformer.
-
-
-        :param no_load_loss: The no_load_loss of this Transformer.
-        :type no_load_loss: float
-        """
-
-        self._no_load_loss = no_load_loss
-
-    @property
-    def req(self) -> float:
-        """Gets the req of this Transformer.
-
-
-        :return: The req of this Transformer.
-        :rtype: float
-        """
-        return self._req
-
-    @req.setter
-    def req(self, req: float):
-        """Sets the req of this Transformer.
-
-
-        :param req: The req of this Transformer.
-        :type req: float
-        """
-
-        self._req = req
-
-    @property
-    def xeq(self) -> float:
-        """Gets the xeq of this Transformer.
-
-
-        :return: The xeq of this Transformer.
-        :rtype: float
-        """
-        return self._xeq
-
-    @xeq.setter
-    def xeq(self, xeq: float):
-        """Sets the xeq of this Transformer.
-
-
-        :param xeq: The xeq of this Transformer.
-        :type xeq: float
-        """
-
-        self._xeq = xeq
-
-    @property
-    def ceq_total(self) -> float:
-        """Gets the ceq_total of this Transformer.
-
-
-        :return: The ceq_total of this Transformer.
-        :rtype: float
-        """
-        return self._ceq_total
-
-    @ceq_total.setter
-    def ceq_total(self, ceq_total: float):
-        """Sets the ceq_total of this Transformer.
-
-
-        :param ceq_total: The ceq_total of this Transformer.
-        :type ceq_total: float
-        """
-
-        self._ceq_total = ceq_total
-
-    @property
-    def monitor(self) -> float:
-        """Gets the monitor of this Transformer.
-
-
-        :return: The monitor of this Transformer.
-        :rtype: float
-        """
-        return self._monitor
-
-    @monitor.setter
-    def monitor(self, monitor: float):
-        """Sets the monitor of this Transformer.
-
-
-        :param monitor: The monitor of this Transformer.
-        :type monitor: float
-        """
-
-        self._monitor = monitor
-
-    @property
-    def control(self) -> float:
-        """Gets the control of this Transformer.
-
-
-        :return: The control of this Transformer.
-        :rtype: float
-        """
-        return self._control
-
-    @control.setter
-    def control(self, control: float):
-        """Sets the control of this Transformer.
-
-
-        :param control: The control of this Transformer.
-        :type control: float
-        """
-
-        self._control = control
+        self._bank = bank
 
     @property
     def tap_level(self) -> float:
@@ -749,64 +328,22 @@ class Transformer(Model):
         self._tap_level = tap_level
 
     @property
-    def voltageunit(self) -> str:
-        """Gets the voltageunit of this Transformer.
+    def base_frequency(self) -> float:
+        """Gets the base_frequency of this Transformer.
 
 
-        :return: The voltageunit of this Transformer.
-        :rtype: str
-        """
-        return self._voltageunit
-
-    @voltageunit.setter
-    def voltageunit(self, voltageunit: str):
-        """Sets the voltageunit of this Transformer.
-
-
-        :param voltageunit: The voltageunit of this Transformer.
-        :type voltageunit: str
-        """
-
-        self._voltageunit = voltageunit
-
-    @property
-    def frequency(self) -> float:
-        """Gets the frequency of this Transformer.
-
-
-        :return: The frequency of this Transformer.
+        :return: The base_frequency of this Transformer.
         :rtype: float
         """
-        return self._frequency
+        return self._base_frequency
 
-    @frequency.setter
-    def frequency(self, frequency: float):
-        """Sets the frequency of this Transformer.
+    @base_frequency.setter
+    def base_frequency(self, base_frequency: float):
+        """Sets the base_frequency of this Transformer.
 
 
-        :param frequency: The frequency of this Transformer.
-        :type frequency: float
+        :param base_frequency: The base_frequency of this Transformer.
+        :type base_frequency: float
         """
 
-        self._frequency = frequency
-
-    @property
-    def unitpower(self) -> str:
-        """Gets the unitpower of this Transformer.
-
-
-        :return: The unitpower of this Transformer.
-        :rtype: str
-        """
-        return self._unitpower
-
-    @unitpower.setter
-    def unitpower(self, unitpower: str):
-        """Sets the unitpower of this Transformer.
-
-
-        :param unitpower: The unitpower of this Transformer.
-        :type unitpower: str
-        """
-
-        self._unitpower = unitpower
+        self._base_frequency = base_frequency
