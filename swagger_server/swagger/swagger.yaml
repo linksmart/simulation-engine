@@ -3,7 +3,7 @@ swagger: "2.0"
 info:
   description: "Sample version of DSF-SE API for communication with the professional\
     \ UI"
-  version: "0.0.6"
+  version: "0.0.7"
   title: "DSF-SE API"
   contact:
     email: "sisay.adugna.chala@fit.fraunhofer.de"
@@ -164,7 +164,7 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Load"
-      powerProfile:
+      powerProfiles:
         type: "array"
         items:
           $ref: "#/definitions/PowerProfile"
@@ -315,7 +315,8 @@ definitions:
     properties:
       id:
         type: "string"
-      values: {}
+      items:
+        type: "number"
   Powerline:
     type: "object"
     required:

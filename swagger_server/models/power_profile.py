@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.errorunknown import ERRORUNKNOWN  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,26 +15,26 @@ class PowerProfile(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, values: ERRORUNKNOWN=None):  # noqa: E501
+    def __init__(self, id: str=None, items: float=None):  # noqa: E501
         """PowerProfile - a model defined in Swagger
 
         :param id: The id of this PowerProfile.  # noqa: E501
         :type id: str
-        :param values: The values of this PowerProfile.  # noqa: E501
-        :type values: ERRORUNKNOWN
+        :param items: The items of this PowerProfile.  # noqa: E501
+        :type items: float
         """
         self.swagger_types = {
             'id': str,
-            'values': ERRORUNKNOWN
+            'items': float
         }
 
         self.attribute_map = {
             'id': 'id',
-            'values': 'values'
+            'items': 'items'
         }
 
         self._id = id
-        self._values = values
+        self._items = items
 
     @classmethod
     def from_dict(cls, dikt) -> 'PowerProfile':
@@ -70,22 +69,22 @@ class PowerProfile(Model):
         self._id = id
 
     @property
-    def values(self) -> ERRORUNKNOWN:
-        """Gets the values of this PowerProfile.
+    def items(self) -> float:
+        """Gets the items of this PowerProfile.
 
 
-        :return: The values of this PowerProfile.
-        :rtype: ERRORUNKNOWN
+        :return: The items of this PowerProfile.
+        :rtype: float
         """
-        return self._values
+        return self._items
 
-    @values.setter
-    def values(self, values: ERRORUNKNOWN):
-        """Sets the values of this PowerProfile.
+    @items.setter
+    def items(self, items: float):
+        """Sets the items of this PowerProfile.
 
 
-        :param values: The values of this PowerProfile.
-        :type values: ERRORUNKNOWN
+        :param items: The items of this PowerProfile.
+        :type items: float
         """
 
-        self._values = values
+        self._items = items

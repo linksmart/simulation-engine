@@ -28,7 +28,7 @@ class Radial(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, radial_id: str=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_profile: List[PowerProfile]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None, linecode: List[Linecode]=None, capacitor: List[Capacitor]=None, voltage_regulator: List[RegControl]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None):  # noqa: E501
+    def __init__(self, radial_id: str=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_profiles: List[PowerProfile]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None, linecode: List[Linecode]=None, capacitor: List[Capacitor]=None, voltage_regulator: List[RegControl]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None):  # noqa: E501
         """Radial - a model defined in Swagger
 
         :param radial_id: The radial_id of this Radial.  # noqa: E501
@@ -37,8 +37,8 @@ class Radial(Model):
         :type transformer: List[Transformer]
         :param loads: The loads of this Radial.  # noqa: E501
         :type loads: List[Load]
-        :param power_profile: The power_profile of this Radial.  # noqa: E501
-        :type power_profile: List[PowerProfile]
+        :param power_profiles: The power_profiles of this Radial.  # noqa: E501
+        :type power_profiles: List[PowerProfile]
         :param power_lines: The power_lines of this Radial.  # noqa: E501
         :type power_lines: List[Powerline]
         :param photovoltaics: The photovoltaics of this Radial.  # noqa: E501
@@ -64,7 +64,7 @@ class Radial(Model):
             'radial_id': str,
             'transformer': List[Transformer],
             'loads': List[Load],
-            'power_profile': List[PowerProfile],
+            'power_profiles': List[PowerProfile],
             'power_lines': List[Powerline],
             'photovoltaics': List[Photovoltaic],
             'storage_units': List[Storage],
@@ -81,7 +81,7 @@ class Radial(Model):
             'radial_id': 'radialId',
             'transformer': 'transformer',
             'loads': 'loads',
-            'power_profile': 'powerProfile',
+            'power_profiles': 'powerProfiles',
             'power_lines': 'powerLines',
             'photovoltaics': 'photovoltaics',
             'storage_units': 'storageUnits',
@@ -97,7 +97,7 @@ class Radial(Model):
         self._radial_id = radial_id
         self._transformer = transformer
         self._loads = loads
-        self._power_profile = power_profile
+        self._power_profiles = power_profiles
         self._power_lines = power_lines
         self._photovoltaics = photovoltaics
         self._storage_units = storage_units
@@ -184,25 +184,25 @@ class Radial(Model):
         self._loads = loads
 
     @property
-    def power_profile(self) -> List[PowerProfile]:
-        """Gets the power_profile of this Radial.
+    def power_profiles(self) -> List[PowerProfile]:
+        """Gets the power_profiles of this Radial.
 
 
-        :return: The power_profile of this Radial.
+        :return: The power_profiles of this Radial.
         :rtype: List[PowerProfile]
         """
-        return self._power_profile
+        return self._power_profiles
 
-    @power_profile.setter
-    def power_profile(self, power_profile: List[PowerProfile]):
-        """Sets the power_profile of this Radial.
+    @power_profiles.setter
+    def power_profiles(self, power_profiles: List[PowerProfile]):
+        """Sets the power_profiles of this Radial.
 
 
-        :param power_profile: The power_profile of this Radial.
-        :type power_profile: List[PowerProfile]
+        :param power_profiles: The power_profiles of this Radial.
+        :type power_profiles: List[PowerProfile]
         """
 
-        self._power_profile = power_profile
+        self._power_profiles = power_profiles
 
     @property
     def power_lines(self) -> List[Powerline]:
