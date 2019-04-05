@@ -2,13 +2,12 @@
 """
 Created on Fri Mar 16 15:05:36 2018
 
-@author: garagon
+@author: Gustavo Aragon & Sisay Chala
 """
 
 
 import logging
 import opendssdirect as dss
-
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -19,6 +18,7 @@ class OpenDSS:
         logger.info("OpenDSS version: " + dss.__version__)
         self.grid_name=grid_name
         dss.run_command("Clear")
+        dss.run_command("Set DefaultBaseFrequency=60")
         #dss.Basic.NewCircuit("Test 1")
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
 
@@ -50,7 +50,7 @@ class OpenDSS:
 
     def solveCircuitSolution(self):
         dss.Solution.Solve()
-        #logger.info("Loads names: "+str(dss.Loads.AllNames()))
+        logger.info("Loads names: "+str(dss.Loads.AllNames()))
         #logger.info("Bus names: " + str(dss.Circuit.AllBusNames()))
         #logger.info("All Node names: " + str(dss.Circuit.AllNodeNames()))
         #logger.info("Length of Node Names: " + str(len(dss.Circuit.AllNodeNames())))
@@ -121,54 +121,70 @@ class OpenDSS:
         logger.debug("Simulation number " + str(dss.Solution.Number()))
         #dss.run_command("Set number =" + self.number)
 
-    def setLoads(self, loads):
-        logger.debug("Setting up the loads")
-        self.loads=loads
+    def setTransformers(self, transformers):
+        #logger.debug("Setting up the transformers")
+        self.transformers=transformers
         try:
-            for element in self.loads:
+            for element in self.transformers:
                 for key, value in element.items():
                     #logger.debug("Key: "+str(key)+" Value: "+str(value))
                     if key=="id":
-                        load_name=value
-                    elif key=="node":
-                        bus_name=value
+                        transformer_id=value
+                    elif key=="radials":
+                        radials=value
                     elif key=="phases":
-                        num_phases=value
-                    elif key == "voltage":
-                        voltage_kV = value
-                    elif key == "powerfactor":
-                        power_factor = value
-                    elif key == "power_profile":
-                        power_profile = value
+                        phases="3" 
+                    elif key == "windings":
+                        windings = value
+                    elif key == "xht":
+                        xht = value
+                    elif key == "xlt": 
+                        xlt = value
+                    elif key == "xhl":
+                        xhl = value
+                    elif key == "percent_load_loss":
+                        percent_load_loss = value
+                    elif key == "bank":
+                        bank = value
+                    elif key == "tap_level":
+                        tap_level = value
+                    elif key == "base_frequency":
+                        base_frequency = value
                     else:
                         break
-                self.setLoad(load_name, bus_name, num_phases, voltage_kV, power_factor, power_profile)
-
-            dss.run_command('Solve')
-
-            logger.info("Load names: " + str(dss.Loads.AllNames()))
+                self._id = transformer_id
+                self._radials = radials
+                self._phases = phases
+                self._windings = windings
+                self._xhl = xhl
+                self._xlt = xlt
+                self._xht = xht
+                self._percent_load_loss = percent_load_loss
+                self._bank = bank
+                self._tap_level = tap_level
+                self._base_frequency = base_frequency
+                
+                dss.run_command("New Transformer.{transformer_name} Phases={phases} Windings={winding} XHL={xhl} xlt=[{xlt}] xht=[{xht}] %LoadLoss=[{percent_load_loss}] bank=[{bank}] tap_level=[{tap_level}] base_frequency=[{base_frequency}]".format(
+                transformer_name = self._id,
+                # = self._radials,
+                phases = self._phases,
+                winding = self._windings,
+                xhl = self._xhl,
+                xlt = self._xlt,
+                xht = self._xht,
+                percent_load_loss = self._percent_load_loss,
+                bank = self._bank,
+                tap_level = self._tap_level,
+                base_frequency = self._base_frequency
+                ))
+            logger.debug("Transformer_names: " + str(dss.Transformers.AllNames()))
+            dss.run_command('Solve') #How do we get the result?
+            #logger.debug("Load SOLVED") #It does not get here. This is now good
+            #logger.info("Load names: " + str(dss.Loads.AllNames())) #listed load names
         except Exception as e:
             logger.error(e)
 
-    def setLoad(self, load_name, bus_name, num_phases=3, voltage_kV=0.4, power_factor=1, power_profile=None):
-        self.load_name=load_name
-        self.bus_name=bus_name
-        self.num_phases=num_phases
-        self.voltage_kV=voltage_kV
-        self.power_factor=power_factor
-        self.power_profile=power_profile
-
-        dss.run_command(
-            "New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn=Delta Model=1 kV={voltage_kV}   pf={power_factor} Daily={shape}".format(
-                load_name=self.load_name,
-                bus_name=self.bus_name,
-                num_phases=self.num_phases,
-                voltage_kV=self.voltage_kV,
-                power_factor=self.power_factor,
-                shape=self.power_profile
-            ))
-
-    def setTransformers(self, transformers):
+    """def setTransformers(self, transformers):
         logger.debug("Setting up the transformers")
         try:
             id = None
@@ -263,7 +279,182 @@ class OpenDSS:
                 kv = kv
             )
         logger.debug(dss_string)
-        dss.run_command(dss_string)
+        dss.run_command(dss_string)"""
+        
+    def setLoads(self, loads):
+        #logger.debug("Setting up the loads")
+        self.loads=loads
+        try:
+            for element in self.loads:
+                for key, value in element.items():
+                    #logger.debug("Key: "+str(key)+" Value: "+str(value))
+                    if key=="id":
+                        load_name=value
+                    elif key=="bus":
+                        bus_name=value
+                    elif key=="phases":
+                        #temp = value #json.loads("\""+str(value)+"\"")
+                        #i = 0
+                        #for k, v in temp.items():
+                            #if k == "phase_R": #if k=="phase_R" and v==True, then i=i+1
+                                #val = 1
+                            #elif k == "phase_S":
+                                #val = 2
+                            #elif k == "phase_T":
+                                #val = 3
+                        num_phases=value #num_phases=i
+                    elif key == "connection_type":
+                        connection_type = value
+                    elif key == "model":
+                        model = value
+                    elif key == "k_v": #elif key == "voltage": 
+                        voltage_kV = value
+                    elif key == "k_w":
+                        voltage_kW = value
+                    elif key == "k_var":
+                        voltage_kVar = value
+                    elif key == "powerfactor":
+                        power_factor = value
+                    elif key == "power_profile_id":
+                        power_profile_id = value
+                    else:
+                        break
+                self.load_name=load_name
+                self.bus_name=bus_name
+                self.num_phases=num_phases
+                self.connection_type = connection_type
+                self.model = model
+                self.k_v=voltage_kV
+                self.k_w=voltage_kW
+                self.k_var=voltage_kVar
+                self.power_factor=power_factor
+                self.power_profile_id=power_profile_id
+                
+                dss.run_command("New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW} kVar={voltage_kVar} pf={power_factor} power_profile_id={shape}".format(
+                load_name=self.load_name,
+                bus_name=self.bus_name,
+                num_phases=self.num_phases,
+                conn=self.connection_type,
+                model=self.model,
+                voltage_kV=self.k_v,
+                voltage_kW=self.k_w,
+                voltage_kVar=self.k_var,
+                power_factor=self.power_factor,
+                shape=self.power_profile_id
+                ))
+
+                """logger.debug(#See if the values are loaded to the command. This is good :)
+                " load_name 1: "+str(load_name) + 
+                " bus_name = "+str(bus_name)+
+                " num_phases = " +str(num_phases)+
+                " conn = " +connection_type+
+                " model = " +str(model)+
+                " k_v = " +str(voltage_kV)+
+                " k_w = " + str(voltage_kW)+
+                " k_var = " + str(voltage_kVar)+
+                " power_factor = "+str(power_factor)+
+                " shape = " + power_profile_id
+                )""" 
+                dss.run_command('Solve') #How do we get the result?
+                #logger.debug("Load SOLVED") #It does not get here. This is now good
+                logger.info("Load names: " + str(dss.Loads.AllNames())) #listed load names
+        except Exception as e:
+            logger.error(e)
+    """def setLoads(self, loads):
+        logger.debug("Setting up the loads")
+        self.loads=loads
+        try:
+            for element in self.loads:
+                for key, value in element.items():
+                    #logger.debug("Key: "+str(key)+" Value: "+str(value))
+                    if key=="id":
+                        load_name=value
+                    elif key=="bus":
+                        bus_name=value
+                    elif key=="phases":
+                        #temp = value #json.loads("\""+str(value)+"\"")
+                        i = 0
+                        #for k, v in temp.items():
+                            #if k == "phase_R": #if k=="phase_R" and v==True, then i=i+1
+                                #val = 1
+                            #elif k == "phase_S":
+                                #val = 2
+                            #elif k == "phase_T":
+                                #val = 3
+                        num_phases="3" #num_phases=i
+                    elif key == "connection_type":
+                        connection_type = value
+                    elif key == "model":
+                        model = value
+                    elif key == "k_v": #elif key == "voltage": 
+                        voltage_kV = value
+                    elif key == "k_w":
+                        voltage_kW = value
+                    elif key == "k_var":
+                        voltage_kVar = value
+                    elif key == "powerfactor":
+                        power_factor = value
+                    elif key == "power_profile_id":
+                        power_profile_id = value
+                    else:
+                        break
+                logger.debug(#See if the values are loaded to the command. This is good :)
+                " load_name 1: "+str(load_name) + 
+                " bus_name = "+str(bus_name)+
+                " num_phases = " +str(num_phases)+
+                " conn = " +connection_type+
+                " model = " +str(model)+
+                " k_v = " +str(voltage_kV)+
+                " k_w = " + str(voltage_kW)+
+                " k_var = " + str(voltage_kVar)+
+                " power_factor = "+str(power_factor)+
+                " shape = " + power_profile_id
+                ) 
+                self.setLoad(load_name, bus_name, num_phases, connection_type, model, voltage_kV, voltage_kW, voltage_kVar, power_factor, power_profile_id)
+            dss.run_command('Solve') #How do we get the result?
+            #logger.debug("Load SOLVED") #It does not get here. This is now good
+            #logger.info("Load names: " + str(dss.Loads.AllNames())) #listed load names
+        except Exception as e:
+            logger.error(e)
+
+    def setLoad(self, load_name, bus_name, num_phases, connection_type, model, voltage_kV, voltage_kW, voltage_kVar, power_factor, power_profile_id): #(self, load_name, bus_name, connection_type, model, voltage_kW, voltage_kVar, num_phases=3, voltage_kV=0.4, power_factor=1, power_profile_id=None)
+        self.load_name=load_name
+        self.bus_name=bus_name
+        self.num_phases=num_phases
+        self.connection_type = connection_type
+        self.model = model
+        self.k_v=voltage_kV
+        self.k_w=voltage_kW
+        self.k_var=voltage_kVar
+        self.power_factor=power_factor
+        self.power_profile_id=power_profile_id
+        dss.run_command(
+            #"New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn=Delta Model=1 kV={voltage_kV}   pf={power_factor} Daily={shape}".format(
+            "New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW} kVar={voltage_kVar} pf={power_factor} power_profile_id={shape}".format(
+                load_name=self.load_name,
+                bus_name=self.bus_name,
+                num_phases=self.num_phases,
+                conn=self.connection_type,
+                model=self.model,
+                voltage_kV=self.k_v,
+                voltage_kW=self.k_w,
+                voltage_kVar=self.k_var,
+                power_factor=self.power_factor,
+                shape=self.power_profile_id
+                ))
+        logger.debug(#See if the values are loaded to the command. This is good now
+                " load_name: "+str(self.load_name) + 
+                " bus_name = "+str(self.bus_name)+
+                " num_phases = " +str(self.num_phases)+
+                " conn = " +self.connection_type+
+                " model = " +str(self.model)+
+                " k_v = " +str(self.k_v)+
+                " k_w = " + str(self.k_w)+
+                " k_var = " + str(self.k_var)+
+                " power_factor = "+str(self.power_factor)+
+                " shape = " + self.power_profile_id
+                ) 
+        #logger.debug("Load SOLVED 2") # It works up to here. Where will the output be sent?"""
 
     def setLineCodes(self, lines):
         logger.info("Setting up the linecodes: "+str(lines))
@@ -304,9 +495,101 @@ class OpenDSS:
         )
         logger.info(dss_string)
         dss.run_command(dss_string)
-
+        
     def setPowerLines(self, lines):
+        #logger.debug("Setting up the powerlines")
+        self.lines=lines
+        try:
+            for element in self.lines:
+                for key, value in element.items():
+                    #logger.debug("Key: "+str(key)+" Value: "+str(value))
+                    if key=="id":
+                        line_id=value
+                    elif key=="bus1":
+                        bus1=value
+                    elif key=="bus2":
+                        bus2=value
+                    elif key=="phases":
+                        phases=value
+                    elif key == "linecode":
+                        linecode = value
+                    elif key == "length":
+                        length = value
+                    elif key == "unitlength":
+                        unitlength = value
+                    elif key == "r1":
+                        r1 = value
+                    elif key == "r0":
+                        r0 = value
+                    elif key == "x1":
+                        x1 = value
+                    elif key == "x0":
+                        x0 = value
+                    elif key == "c1":
+                        c1 = value
+                    elif key == "c0":
+                        c0 = value
+                    elif key == "switch":
+                        switch = value
+                    else:
+                        break
+                self._id = line_id
+                self._phases = phases
+                self._bus1 = bus1
+                self._bus2 = bus2
+                self._linecode = linecode
+                self._length = length
+                self._unitlength = unitlength
+                self._r1 = r1
+                self._r0 = r0
+                self._x1 = x1
+                self._x0 = x0
+                self._c1 = c1
+                self._c0 = c0
+                self._switch = switch
+                
+                dss.run_command("New Line.{line_id} bus1={bus1} bus2={bus2} phases={phases} length={length} units={unitlength} linecode={linecode} r1={r1} r0={r0} x1={x1} x0={x0} c1={c1}  c0={c0}  switch={switch} ".format(
+                line_id = self._id,
+                phases=self._phases, 
+                bus1=self._bus1, 
+                bus2=self._bus2,
+                linecode=self._linecode,
+                length=self._length,
+                unitlength=self._unitlength,
+                r1=self._r1,
+                r0=self._r0,
+                x1=self._x1,
+                x0=self._x0,
+                c1=self._c1,
+                c0=self._c0,
+                switch=self._switch
+                ))
+
+                """logger.debug(#See if the values are loaded to the command. This is good :)
+                "line_id = "+str(self._id)+
+                "phases="+str(self._phases)+ 
+                "bus1="+str(self._bus1)+
+                "bus2="+str(self._bus2)+
+                "linecode="+str(self._linecode)+
+                "length="+str(self._length)+
+                "unitlength="+str(self._unitlength)+
+                "r1="+str(self._r1)+
+                "r0="+str(self._r0)+
+                "x1="+str(self._x1)+
+                "x0="+str(self._x0)+
+                "c1="+str(self._c1)+
+                "c0="+str(self._c0)+
+                "switch="+str(self._switch)
+                )""" 
+            dss.run_command('Solve') #How do we get the result?
+            #logger.debug("Load SOLVED") #It does not get here. This is now good
+            logger.info("Power lines: " + str(dss.Lines.AllNames())) #listed load names
+        except Exception as e:
+            logger.error(e)
+        
+    """def setPowerLines(self, lines):
         logger.info("Setting up the powerlines")
+        self.lines=lines
         try:
             for element in lines:
                 id = None
@@ -320,15 +603,15 @@ class OpenDSS:
                     #logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
-                    if key == "node1":
+                    if key == "bus1":
                         node1 = value
-                    if key == "node2":
+                    if key == "bus2":
                         node2 = value
                     if key == "phases":
                         phases = value
                     if key == "length":
                         length = value
-                    if key == "unitlength":
+                    if key == "unit":
                         unit = value
                     if key == "linecode":
                         linecode = value
@@ -350,7 +633,7 @@ class OpenDSS:
             linecode = linecode
         )
         logger.info(dss_string)
-        dss.run_command(dss_string)
+        dss.run_command(dss_string)"""
 
     def setXYCurves(self, xycurves):
         logger.info("Setting up the XYCurves")

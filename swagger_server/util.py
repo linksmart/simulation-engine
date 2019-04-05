@@ -1,8 +1,10 @@
 import datetime
 
-import six
+import six, logging
 import typing
 
+logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__file__)
 
 def _deserialize(data, klass):
     """Deserializes dict, list, str into an object.
@@ -104,14 +106,15 @@ def deserialize_model(data, klass):
         return data
 
     for attr, attr_type in six.iteritems(instance.swagger_types):
+        #logger.debug(" Data: "+str(data)+"\n")
+        #logger.debug(" instance.attribute_map[attr]: "+str(instance.attribute_map[attr])+"\n")
+       # logger.debug("isinstance(data, (list, dict))"+str(isinstance(data, (list, dict)))+"\n")
         if data is not None \
                 and instance.attribute_map[attr] in data \
                 and isinstance(data, (list, dict)):
             value = data[instance.attribute_map[attr]]
             setattr(instance, attr, _deserialize(value, attr_type))
-
     return instance
-
 
 def _deserialize_list(data, boxed_type):
     """Deserializes a list and its elements.

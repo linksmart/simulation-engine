@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.phases import Phases  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,7 +15,7 @@ class Load(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus: str=None, phases: Phases=None, connection_type: str=None, model: int=None, k_v: float=None, k_w: float=None, k_var: float=None, powerfactor: float=None, power_profile_id: str=None):  # noqa: E501
+    def __init__(self, id: str=None, bus: str=None, phases: int=None, connection_type: str=None, model: int=None, k_v: float=None, k_w: float=None, k_var: float=None, powerfactor: float=None, power_profile_id: str=None):  # noqa: E501
         """Load - a model defined in Swagger
 
         :param id: The id of this Load.  # noqa: E501
@@ -24,7 +23,7 @@ class Load(Model):
         :param bus: The bus of this Load.  # noqa: E501
         :type bus: str
         :param phases: The phases of this Load.  # noqa: E501
-        :type phases: Phases
+        :type phases: int
         :param connection_type: The connection_type of this Load.  # noqa: E501
         :type connection_type: str
         :param model: The model of this Load.  # noqa: E501
@@ -43,7 +42,7 @@ class Load(Model):
         self.swagger_types = {
             'id': str,
             'bus': str,
-            'phases': Phases,
+            'phases': int,
             'connection_type': str,
             'model': int,
             'k_v': float,
@@ -137,22 +136,22 @@ class Load(Model):
         self._bus = bus
 
     @property
-    def phases(self) -> Phases:
+    def phases(self) -> int:
         """Gets the phases of this Load.
 
 
         :return: The phases of this Load.
-        :rtype: Phases
+        :rtype: int
         """
         return self._phases
 
     @phases.setter
-    def phases(self, phases: Phases):
+    def phases(self, phases: int):
         """Sets the phases of this Load.
 
 
         :param phases: The phases of this Load.
-        :type phases: Phases
+        :type phases: int
         """
         if phases is None:
             raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501

@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.phases import Phases  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,7 +15,7 @@ class GridDefinition(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: Phases=None, bus: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None):  # noqa: E501
+    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None):  # noqa: E501
         """GridDefinition - a model defined in Swagger
 
         :param id: The id of this GridDefinition.  # noqa: E501
@@ -26,9 +25,9 @@ class GridDefinition(Model):
         :param per_unit: The per_unit of this GridDefinition.  # noqa: E501
         :type per_unit: float
         :param phases: The phases of this GridDefinition.  # noqa: E501
-        :type phases: Phases
-        :param bus: The bus of this GridDefinition.  # noqa: E501
-        :type bus: str
+        :type phases: int
+        :param bus1: The bus1 of this GridDefinition.  # noqa: E501
+        :type bus1: str
         :param angle: The angle of this GridDefinition.  # noqa: E501
         :type angle: int
         :param mv_asc3: The mv_asc3 of this GridDefinition.  # noqa: E501
@@ -40,8 +39,8 @@ class GridDefinition(Model):
             'id': str,
             'base_k_v': float,
             'per_unit': float,
-            'phases': Phases,
-            'bus': str,
+            'phases': int,
+            'bus1': str,
             'angle': int,
             'mv_asc3': float,
             'mv_asc1': float
@@ -52,7 +51,7 @@ class GridDefinition(Model):
             'base_k_v': 'base_kV',
             'per_unit': 'per_unit',
             'phases': 'phases',
-            'bus': 'bus',
+            'bus1': 'bus1',
             'angle': 'angle',
             'mv_asc3': 'MVAsc3',
             'mv_asc1': 'MVAsc1'
@@ -62,7 +61,7 @@ class GridDefinition(Model):
         self._base_k_v = base_k_v
         self._per_unit = per_unit
         self._phases = phases
-        self._bus = bus
+        self._bus1 = bus1
         self._angle = angle
         self._mv_asc3 = mv_asc3
         self._mv_asc1 = mv_asc1
@@ -142,46 +141,46 @@ class GridDefinition(Model):
         self._per_unit = per_unit
 
     @property
-    def phases(self) -> Phases:
+    def phases(self) -> int:
         """Gets the phases of this GridDefinition.
 
 
         :return: The phases of this GridDefinition.
-        :rtype: Phases
+        :rtype: int
         """
         return self._phases
 
     @phases.setter
-    def phases(self, phases: Phases):
+    def phases(self, phases: int):
         """Sets the phases of this GridDefinition.
 
 
         :param phases: The phases of this GridDefinition.
-        :type phases: Phases
+        :type phases: int
         """
 
         self._phases = phases
 
     @property
-    def bus(self) -> str:
-        """Gets the bus of this GridDefinition.
+    def bus1(self) -> str:
+        """Gets the bus1 of this GridDefinition.
 
 
-        :return: The bus of this GridDefinition.
+        :return: The bus1 of this GridDefinition.
         :rtype: str
         """
-        return self._bus
+        return self._bus1
 
-    @bus.setter
-    def bus(self, bus: str):
-        """Sets the bus of this GridDefinition.
+    @bus1.setter
+    def bus1(self, bus1: str):
+        """Sets the bus1 of this GridDefinition.
 
 
-        :param bus: The bus of this GridDefinition.
-        :type bus: str
+        :param bus1: The bus1 of this GridDefinition.
+        :type bus1: str
         """
 
-        self._bus = bus
+        self._bus1 = bus1
 
     @property
     def angle(self) -> int:

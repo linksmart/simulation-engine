@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.phases import Phases  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,7 +15,7 @@ class Capacitor(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus: str=None, phases: Phases=None, k_var: float=None, k_v: float=None):  # noqa: E501
+    def __init__(self, id: str=None, bus: str=None, phases: int=None, k_var: float=None, k_v: float=None):  # noqa: E501
         """Capacitor - a model defined in Swagger
 
         :param id: The id of this Capacitor.  # noqa: E501
@@ -24,7 +23,7 @@ class Capacitor(Model):
         :param bus: The bus of this Capacitor.  # noqa: E501
         :type bus: str
         :param phases: The phases of this Capacitor.  # noqa: E501
-        :type phases: Phases
+        :type phases: int
         :param k_var: The k_var of this Capacitor.  # noqa: E501
         :type k_var: float
         :param k_v: The k_v of this Capacitor.  # noqa: E501
@@ -33,7 +32,7 @@ class Capacitor(Model):
         self.swagger_types = {
             'id': str,
             'bus': str,
-            'phases': Phases,
+            'phases': int,
             'k_var': float,
             'k_v': float
         }
@@ -112,22 +111,22 @@ class Capacitor(Model):
         self._bus = bus
 
     @property
-    def phases(self) -> Phases:
+    def phases(self) -> int:
         """Gets the phases of this Capacitor.
 
 
         :return: The phases of this Capacitor.
-        :rtype: Phases
+        :rtype: int
         """
         return self._phases
 
     @phases.setter
-    def phases(self, phases: Phases):
+    def phases(self, phases: int):
         """Sets the phases of this Capacitor.
 
 
         :param phases: The phases of this Capacitor.
-        :type phases: Phases
+        :type phases: int
         """
         if phases is None:
             raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501
