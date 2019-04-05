@@ -3,7 +3,7 @@ swagger: "2.0"
 info:
   description: "Sample version of DSF-SE API for communication with the professional\
     \ UI"
-  version: "0.0.7"
+  version: "2"
   title: "DSF-SE API"
   contact:
     email: "sisay.adugna.chala@fit.fraunhofer.de"
@@ -142,8 +142,8 @@ definitions:
       per_unit:
         type: "number"
       phases:
-        $ref: "#/definitions/Phases"
-      bus:
+        type: "integer"
+      bus1:
         type: "string"
       angle:
         type: "integer"
@@ -272,7 +272,7 @@ definitions:
         type: "string"
         description: "ID for the connected node"
       phases:
-        $ref: "#/definitions/Phases"
+        type: "integer"
       kVAR:
         type: "number"
       kV:
@@ -280,10 +280,8 @@ definitions:
   Load:
     type: "object"
     required:
-    - "bus"
     - "id"
     - "kV"
-    - "phases"
     properties:
       id:
         type: "string"
@@ -291,7 +289,7 @@ definitions:
         type: "string"
         description: "ID for the connected node"
       phases:
-        $ref: "#/definitions/Phases"
+        type: "integer"
       connection_type:
         type: "string"
       model:
@@ -321,17 +319,17 @@ definitions:
     type: "object"
     required:
     - "id"
-    - "length"
-    - "unitlength"
     properties:
       id:
         type: "string"
       bus1:
+        type: "string"
         description: "ID for the connected node"
-        $ref: "#/definitions/Phases"
+      phases:
+        type: "integer"
       bus2:
+        type: "string"
         description: "ID for the connected node"
-        $ref: "#/definitions/Phases"
       length:
         type: "number"
       unitlength:

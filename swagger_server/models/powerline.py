@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.phases import Phases  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,15 +15,17 @@ class Powerline(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus1: Phases=None, bus2: Phases=None, length: float=None, unitlength: str=None, linecode: str=None, r1: float=None, r0: float=None, x1: float=None, x0: float=None, c1: float=None, c0: float=None, switch: bool=False):  # noqa: E501
+    def __init__(self, id: str=None, bus1: str=None, phases: int=None, bus2: str=None, length: float=None, unitlength: str=None, linecode: str=None, r1: float=None, r0: float=None, x1: float=None, x0: float=None, c1: float=None, c0: float=None, switch: bool=False):  # noqa: E501
         """Powerline - a model defined in Swagger
 
         :param id: The id of this Powerline.  # noqa: E501
         :type id: str
         :param bus1: The bus1 of this Powerline.  # noqa: E501
-        :type bus1: Phases
+        :type bus1: str
+        :param phases: The phases of this Powerline.  # noqa: E501
+        :type phases: int
         :param bus2: The bus2 of this Powerline.  # noqa: E501
-        :type bus2: Phases
+        :type bus2: str
         :param length: The length of this Powerline.  # noqa: E501
         :type length: float
         :param unitlength: The unitlength of this Powerline.  # noqa: E501
@@ -48,8 +49,9 @@ class Powerline(Model):
         """
         self.swagger_types = {
             'id': str,
-            'bus1': Phases,
-            'bus2': Phases,
+            'bus1': str,
+            'phases': int,
+            'bus2': str,
             'length': float,
             'unitlength': str,
             'linecode': str,
@@ -65,25 +67,27 @@ class Powerline(Model):
         self.attribute_map = {
             'id': 'id',
             'bus1': 'bus1',
+            'phases': 'phases',
             'bus2': 'bus2',
             'length': 'length',
             'unitlength': 'unitlength',
             'linecode': 'linecode',
-            'r1': 'R1',
-            'r0': 'R0',
-            'x1': 'X1',
-            'x0': 'X0',
-            'c1': 'C1',
-            'c0': 'C0',
+            'r1': 'r1',
+            'r0': 'r0',
+            'x1': 'x1',
+            'x0': 'x0',
+            'c1': 'c1',
+            'c0': 'c0',
             'switch': 'switch'
         }
 
         self._id = id
+        self._phases = phases
         self._bus1 = bus1
         self._bus2 = bus2
+        self._linecode = linecode
         self._length = length
         self._unitlength = unitlength
-        self._linecode = linecode
         self._r1 = r1
         self._r0 = r0
         self._x1 = x1
@@ -127,47 +131,68 @@ class Powerline(Model):
         self._id = id
 
     @property
-    def bus1(self) -> Phases:
+    def bus1(self) -> str:
         """Gets the bus1 of this Powerline.
 
         ID for the connected node  # noqa: E501
 
         :return: The bus1 of this Powerline.
-        :rtype: Phases
+        :rtype: str
         """
         return self._bus1
 
     @bus1.setter
-    def bus1(self, bus1: Phases):
+    def bus1(self, bus1: str):
         """Sets the bus1 of this Powerline.
 
         ID for the connected node  # noqa: E501
 
         :param bus1: The bus1 of this Powerline.
-        :type bus1: Phases
+        :type bus1: str
         """
 
         self._bus1 = bus1
 
     @property
-    def bus2(self) -> Phases:
+    def phases(self) -> int:
+        """Gets the phases of this Powerline.
+
+
+        :return: The phases of this Powerline.
+        :rtype: int
+        """
+        return self._phases
+
+    @phases.setter
+    def phases(self, phases: int):
+        """Sets the phases of this Powerline.
+
+
+        :param phases: The phases of this Powerline.
+        :type phases: int
+        """
+
+        self._phases = phases
+
+    @property
+    def bus2(self) -> str:
         """Gets the bus2 of this Powerline.
 
         ID for the connected node  # noqa: E501
 
         :return: The bus2 of this Powerline.
-        :rtype: Phases
+        :rtype: str
         """
         return self._bus2
 
     @bus2.setter
-    def bus2(self, bus2: Phases):
+    def bus2(self, bus2: str):
         """Sets the bus2 of this Powerline.
 
         ID for the connected node  # noqa: E501
 
         :param bus2: The bus2 of this Powerline.
-        :type bus2: Phases
+        :type bus2: str
         """
 
         self._bus2 = bus2

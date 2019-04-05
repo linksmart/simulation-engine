@@ -11,10 +11,7 @@ class constant:
     {
         "id":"underground_95mm",
         "r1":0.193,
-        "r0":??,
         "x1":0.08,
-        "x0":??,
-        "c1":??
         "c0":0,
         "units": "km"
     },

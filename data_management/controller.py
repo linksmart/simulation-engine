@@ -54,11 +54,18 @@ class gridController:
         self.sim.setTransformers(self.object)
         logger.debug("Transformers charged")
 
-    def setPowerLines(self, id, powerlines, linecodes):
+    def setPowerLines(self, id, powerlines): #(self, id, powerlines, linecodes):
         logger.debug("Charging the power lines into the simulator")
-        self.sim.setLineCodes(linecodes)
+        #self.sim.setLineCodes(linecodes)
         self.sim.setPowerLines(powerlines)
         logger.debug("Power lines charged")
+
+    def setXYCurve(self, id, npts, xarray, yarray):
+        logger.debug("Setting the XYCurve into the simulator")
+        self.object = object
+        self.sim.setXYCurve(self.object)
+        logger.debug("XYCurve set")
+
 
     def setPhotovoltaic(self, id, photovoltaics, xycurves, loadshapes, tshapes):
         logger.debug("Charging the photovoltaics into the simulator")
@@ -87,7 +94,7 @@ class gridController:
         logger.debug("Simulation of grid " + self.id + " started")
         logger.debug("These are the parameters")
         logger.debug("GridID: "+str(self.id))
-        logger.debug("Duration: "+str(self.duration))
+        """logger.debug("Duration: "+str(self.duration))
 
         day = self.duration.to_dict()["day"]
         logger.debug("Days: "+str(day))
@@ -104,16 +111,16 @@ class gridController:
         elif year > 0:
             numSteps = 365
 
-        #self.sim.runNode13()
+        #self.sim.runNode13()"""
         self.sim.enableCircuit(self.id)
 
-        logger.debug("Active circuit"+str(self.sim.getActiveCircuit()))
-        return "ok"
+        logger.debug("Active circuit: "+str(self.sim.getActiveCircuit()))
+        #return "ok"
         ##################################################################################PROBLEM################################
         logger.info("Solution mode: "+str(self.sim.getMode()))
         logger.info("Solution step size: " + str(self.sim.getStepSize()))
         logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
-        logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
+        logger.info("Voltage bases: " + str(self.sim.getVoltageBases())) #where does this get the voltage bases?
         self.sim.setMode("daily")
         logger.info("Solution mode 2: " + str(self.sim.getMode()))
         #self.sim.setStepSize("minutes")
@@ -124,11 +131,13 @@ class gridController:
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
         #self.sim.setVoltageBases()
-        numSteps=100
+        numSteps=3 #100
         logger.info("Number of steps: "+str(numSteps))
         for i in range(numSteps):
             listNames, listValues = self.sim.solveCircuitSolution()
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
+        logger.info("Listnames: "+ str(listNames))
+        logger.info("ListValues: " + str(listValues))
         return (listNames, listValues)
         #self.finish_status = True
         #return "OK"

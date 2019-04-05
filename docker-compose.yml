@@ -1,22 +1,5 @@
 version: '3'
 services:
-  bgw:
-    image: "docker.linksmart.eu/bgw:snapshot"
-    #network_mode: "host"
-    networks:
-      - bgw_nw
-    ports:
-      - "443:443"
-      - "9228:9228"
-      - "9229:9229"
-    volumes:
-      - "./bgw/config:/bgw/config"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "10"
-    restart: "always"
   nginx:
     image: "nginx"
     #ports:
@@ -50,8 +33,6 @@ services:
     #network_mode: "host"
     networks:
       - se_nw
-    depends_on:
-      - redis
     ports:
         - "9090:9090"
     command: ["python3", "-u", "main.py"]
