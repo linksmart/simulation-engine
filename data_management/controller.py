@@ -44,28 +44,33 @@ class gridController:
 
     def setLoads(self, id, object):
         self.object=object
-        logger.debug("Charging the loads into the simulator")
+        logger.debug("Charging loads into the simulator")
         self.sim.setLoads(self.object)
         logger.debug("Loads charged")
 
     def setTransformers(self, id, object):
-        logger.debug("Charging the transformers into the simulator")
+        logger.debug("Charging transformers into the simulator")
         self.object = object
         self.sim.setTransformers(self.object)
         logger.debug("Transformers charged")
 
     def setPowerLines(self, id, powerlines): #(self, id, powerlines, linecodes):
-        logger.debug("Charging the power lines into the simulator")
+        logger.debug("Charging power lines into the simulator")
         #self.sim.setLineCodes(linecodes)
         self.sim.setPowerLines(powerlines)
         logger.debug("Power lines charged")
+        
+    def setCapacitors(self, id, capacitors):
+        logger.debug("Charging capacitors into the simulator")
+        self.object = object
+        self.sim.setCapacitors(self.object)
+        logger.debug("Capacitor charged")
 
     def setXYCurve(self, id, npts, xarray, yarray):
         logger.debug("Setting the XYCurve into the simulator")
         self.object = object
         self.sim.setXYCurve(self.object)
         logger.debug("XYCurve set")
-
 
     def setPhotovoltaic(self, id, photovoltaics, xycurves, loadshapes, tshapes):
         logger.debug("Charging the photovoltaics into the simulator")
@@ -120,7 +125,7 @@ class gridController:
         logger.info("Solution mode: "+str(self.sim.getMode()))
         logger.info("Solution step size: " + str(self.sim.getStepSize()))
         logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
-        logger.info("Voltage bases: " + str(self.sim.getVoltageBases())) #where does this get the voltage bases?
+        logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         self.sim.setMode("daily")
         logger.info("Solution mode 2: " + str(self.sim.getMode()))
         #self.sim.setStepSize("minutes")
@@ -148,6 +153,7 @@ class gridController:
         self.sim.setStartingHour(0)
         self.sim.setVoltageBases(0.4,16)
 """
+
         #for i in range(numSteps):
             #self.sim.solveCircuitSolution()
             #setStorageControl()

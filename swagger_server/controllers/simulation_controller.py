@@ -57,7 +57,7 @@ def create_simulation(body):  # noqa: E501
 
         #logger.info("These are the radials: "+ str(radial))
 
-        linecodes = [c().linecodes[0]]
+        #linecodes = [c().linecodes[0]]
         #logger.debug("Linecode: "+str(linecodes))
         #gridController= gControl()
         factory= ThreadFactory(id)
@@ -81,37 +81,36 @@ def create_simulation(body):  # noqa: E501
                 logger.debug("Transformers" + str(transformer))
                 factory.gridController.setTransformers(id,transformer)
                 
-            if "loads" in values.keys() and values["loads"] is not None:
+            """if "loads" in values.keys() and values["loads"] is not None:
                 logger.debug("---------------Setting Loads-------------------------")
                 # radial=radial.to_dict()
                 load = values["loads"]
                 logger.debug("Loads" + str(transformer))
-                factory.gridController.setLoads(id, load)
+                factory.gridController.setLoads(id, load)"""
 
-            if "power_lines" in values.keys() and values["power_lines"] is not None:
+            """if "power_lines" in values.keys() and values["power_lines"] is not None:
                 logger.debug("---------------Setting Powerlines-------------------------")
                 powerLines = values["power_lines"]
                 #linecodes = values["linecode"]
                 #factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
                 logger.debug("Powerlines" + str(powerLines))
-                factory.gridController.setPowerLines(id, powerLines)
-                """and "linecode" in values.keys() and values["linecode"] is not None:"""
+                factory.gridController.setPowerLines(id, powerLines)"""
 
-            if "powerProfile" in values.keys() and values["powerProfile"] is not None:
+            """if "powerProfile" in values.keys() and values["powerProfile"] is not None:
                 powerProfile = values["powerProfile"]
                 #logger.debug("Powerprofile" + str(powerProfile))
-                factory.gridController.setPowerProfile(id, powerProfile)
+                factory.gridController.setPowerProfile(id, powerProfile)"""
 
-            #if "xycurves" in values.keys() and values["xycurves"] is not None:#TORemove
-            #    xycurves = values["xycurves"]#TORemove
-            #    factory.gridController.setXYCurve(id, xycurves) #TORemove
+            if "xycurves" in values.keys() and values["xycurves"] is not None:
+                xycurves = values["xycurves"]#TORemove
+                factory.gridController.setXYCurve(id, xycurves) 
 
-            #if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:#TORemove
-            #    photovoltaics = values["photovoltaics"]#TORemove
-                # xycurves = radial["xycurves"]
-                # loadshapes = radial["loadshapes"]
-                # tshapes = radial["tshapes"]
-            #    factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)#TORemove
+            if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
+                photovoltaics = values["photovoltaics"]
+                xycurves = radial["xycurves"]
+                loadshapes = radial["loadshapes"]
+                tshapes = radial["tshapes"]
+                factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)
 
             """
             and "xycurves" in radial.values.keys()s() and radial["xycurves"] is not None 
@@ -130,24 +129,35 @@ def create_simulation(body):  # noqa: E501
             if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
                 chargingPoints = values["chargingPoints"]
                 factory.gridController.setChargingPoints(id, chargingPoints)               
-            #if "linecode" in values.keys() and values["linecode"] is not None:#TORemove
-            #    linecode = values["linecode"]#TORemove
-            #    factory.gridController.setLineCode(id, linecode)   #TORemove
-            #if "capacitor" in values.keys() and values["capacitor"] is not None:#TORemove
-            #    capacitor = values["capacitor"]#TORemove
-            #    factory.gridController.setCapacitor(id, capacitor) #TORemove
-            #if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:#TORemove
-            #    voltage_regulator = values["voltage_regulator"]#TORemove
-            #    factory.gridController.setVoltageRegulator(id, voltage_regulator) #TORemove
-            #if "loadshapes" in values.keys() and values["loadshapes"] is not None:#TORemove
-            #    loadshapes = values["loadshapes"]#TORemove
-            #    factory.gridController.setLoadShape(id, loadshapes) #TORemove
-            #if "tshapes" in values.keys() and values["tshapes"] is not None:#TORemove
-            #    tshapes = values["tshapes"]#TORemove
-            #    factory.gridController.setTShape(id, tshapes)                 #TORemove
+            if "linecode" in values.keys() and values["linecode"] is not None:
+                logger.debug("---------------Setting LineCode-------------------------")
+                linecode = values["linecode"]
+                logger.debug("LineCode: " + str(linecode))
+                factory.gridController.setLineCode(id, linecode)   
+            if "capacitor" in values.keys() and values["capacitor"] is not None:
+                logger.debug("---------------Setting Capacitors-------------------------")
+                capacitor = values["capacitor"]
+                logger.debug("Capacitors: " + str(capacitor))
+                factory.gridController.setCapacitors(id, capacitor) 
+                
+            if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:
+                logger.debug("---------------Setting Voltage regulator-------------------------")
+                voltage_regulator = values["voltage_regulator"]
+                logger.debug("Voltage Regulator: " + str(voltage_regulator))
+                factory.gridController.setVoltageRegulator(id, voltage_regulator) 
+            if "loadshapes" in values.keys() and values["loadshapes"] is not None:
+                logger.debug("---------------Setting loadshapes-------------------------")
+                loadshapes = values["loadshapes"]
+                logger.debug("Load Shapes: " + str(loadshapes))
+                factory.gridController.setLoadShape(id, loadshapes) 
+            if "tshapes" in values.keys() and values["tshapes"] is not None:
+                logger.debug("---------------Setting tshapes-------------------------")
+                tshapes = values["tshapes"]
+                logger.debug("Tshapes: " + str(tshapes))
+                factory.gridController.setTShape(id, tshapes)                 
         ######Disables circuits untilo the run simulation is started
-        #factory.gridController.disableCircuit(id)#TORemove
-        factory.gridController.run()
+        #factory.gridController.disableCircuit(id)
+        #factory.gridController.run()
         return str(id)
     else:
         return "Bad JSON Format"
