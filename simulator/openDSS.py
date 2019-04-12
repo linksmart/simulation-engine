@@ -130,10 +130,8 @@ class OpenDSS:
                     #logger.debug("Key: "+str(key)+" Value: "+str(value))
                     if key=="id":
                         transformer_id=value
-                    elif key=="radials":
-                        radials=value
                     elif key=="phases":
-                        phases="3" 
+                        phases= value 
                     elif key == "windings":
                         windings = value
                     elif key == "xht":
@@ -153,7 +151,6 @@ class OpenDSS:
                     else:
                         break
                 self._id = transformer_id
-                self._radials = radials
                 self._phases = phases
                 self._windings = windings
                 self._xhl = xhl
@@ -762,7 +759,6 @@ class OpenDSS:
                 irrad = None
                 pmpp = None
                 for key, value in element.items():
-                    #logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
                     if key == "phases":
@@ -796,7 +792,6 @@ class OpenDSS:
             logger.error(e)
 
     def setPhotovoltaic(self, id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp):
-        # New PVSystem.PV_Menapace phases=3 bus1=121117 kV=0.4  kVA=10  effcurve=panel_absorb_eff  P-TCurve=panel_temp_eff Daily=assumed_irrad TDaily=assumed_Temp PF=0.96 temperature=25 irrad=0.8  Pmpp=10
         dss_string = "New PVSystem.{id} phases={phases} bus1={bus1} kV={voltage} kVA={power} effcurve={effcurve} P-TCurve={ptcurve} Daily={daily} TDaily={tdaily} PF={pf} temperature={temperature} irrad={irrad} Pmpp={pmpp}".format(
             id=id,
             phases=phases,
@@ -861,3 +856,72 @@ class OpenDSS:
         )
         logger.info(dss_string)
         dss.run_command(dss_string)
+        
+    def setCapacitors(self, capacitors):
+        logger.info("Setting up the capacitors")
+        self.capacitors=capacitors
+        try:
+            for element in self.capacitors:
+                for key, value in element.items():
+                    #logger.debug("Key: "+str(key)+" Value: "+str(value))
+                    if key=="id":
+                        load_name=value
+                    elif key=="bus":
+                        bus_name=value
+                    elif key=="phases":
+                        num_phases=value 
+                    elif key == "connection_type":
+                        connection_type = value
+                    elif key == "model":
+                        model = value
+                    elif key == "k_v": #elif key == "voltage": 
+                        voltage_kV = value
+                    elif key == "k_w":
+                        voltage_kW = value
+                    elif key == "k_var":
+                        voltage_kVar = value
+                    elif key == "powerfactor":
+                        power_factor = value
+                    elif key == "power_profile_id":
+                        power_profile_id = value
+                    else:
+                        break
+                self.load_name=load_name
+                self.bus_name=bus_name
+                self.num_phases=num_phases
+                self.connection_type = connection_type
+                self.model = model
+                self.k_v=voltage_kV
+                self.k_w=voltage_kW
+                self.k_var=voltage_kVar
+                self.power_factor=power_factor
+                self.power_profile_id=power_profile_id
+                
+                dss.run_command("New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW} kVar={voltage_kVar} pf={power_factor} power_profile_id={shape}".format(
+                load_name=self.load_name,
+                bus_name=self.bus_name,
+                num_phases=self.num_phases,
+                conn=self.connection_type,
+                model=self.model,
+                voltage_kV=self.k_v,
+                voltage_kW=self.k_w,
+                voltage_kVar=self.k_var,
+                power_factor=self.power_factor,
+                shape=self.power_profile_id
+            ))
+
+                """ logger.debug(#See if the values are loaded to the command. This is good :)
+                " load_name 1: "+str(load_name) + 
+                " bus_name = "+str(bus_name)+
+                " num_phases = " +str(num_phases)+
+                " conn = " +connection_type+
+                " model = " +str(model)+
+                " k_v = " +str(voltage_kV)+
+                " k_w = " + str(voltage_kW)+
+                " k_var = " + str(voltage_kVar)+
+                " power_factor = "+str(power_factor)+
+                " shape = " + power_profile_id
+                ) """
+            dss.run_command('Solve') 
+        except Exception as e:
+            logger.error(e)

@@ -3,7 +3,7 @@ swagger: "2.0"
 info:
   description: "Sample version of DSF-SE API for communication with the professional\
     \ UI"
-  version: "2"
+  version: "3"
   title: "DSF-SE API"
   contact:
     email: "sisay.adugna.chala@fit.fraunhofer.de"
@@ -280,8 +280,10 @@ definitions:
   Load:
     type: "object"
     required:
+    - "bus"
     - "id"
     - "kV"
+    - "phases"
     properties:
       id:
         type: "string"
@@ -319,6 +321,7 @@ definitions:
     type: "object"
     required:
     - "id"
+    - "unitlength"
     properties:
       id:
         type: "string"
@@ -336,17 +339,17 @@ definitions:
         type: "string"
       linecode:
         type: "string"
-      R1:
+      r1:
         type: "number"
-      R0:
+      r0:
         type: "number"
-      X1:
+      x1:
         type: "number"
-      X0:
+      x0:
         type: "number"
-      C1:
+      c1:
         type: "number"
-      C0:
+      c0:
         type: "number"
       switch:
         type: "boolean"
@@ -567,6 +570,10 @@ definitions:
         description: "base kVA rating for windings"
       percent_resistance:
         type: "number"
+      xlt:
+        type: "integer"
+      xht:
+        type: "integer"
     example:
       wdg: 1
       bus: "SourceBus"
@@ -578,21 +585,31 @@ definitions:
     type: "object"
     required:
     - "id"
-    - "phases"
-    - "windings"
-    - "xhl"
     properties:
       id:
         type: "string"
-      radials:
-        type: "array"
-        items:
-          type: "string"
       phases:
         type: "integer"
         description: "Number of Phases"
       windings:
-        $ref: "#/definitions/Transformer_windings"
+        type: "integer"
+        description: "number of windings"
+      kvas:
+        type: "array"
+        items:
+          type: "number"
+      buses:
+        type: "array"
+        items:
+          type: "string"
+      kvs:
+        type: "array"
+        items:
+          type: "number"
+      wdgs:
+        $ref: "#/definitions/Transformer_wdgs"
+      regcontrol:
+        $ref: "#/definitions/Transformer_regcontrol"
       xhl:
         type: "number"
         description: "Percent reactance high-to-low (winding 1 to winding 2)"
@@ -714,14 +731,18 @@ definitions:
         $ref: "#/definitions/Impedance"
       phase_T:
         $ref: "#/definitions/Impedance"
-  Transformer_windings:
+  Transformer_wdgs:
     properties:
-      number:
-        type: "integer"
       struct:
         type: "array"
         items:
           $ref: "#/definitions/Winding"
+  Transformer_regcontrol:
+    properties:
+      struct:
+        type: "array"
+        items:
+          $ref: "#/definitions/RegControl"
 externalDocs:
   description: "Find out more about Storage4Grid"
   url: "http://www.storage4grid.eu/pages/index.html"

@@ -6,7 +6,8 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.transformer_windings import TransformerWindings  # noqa: F401,E501
+from swagger_server.models.transformer_regcontrol import TransformerRegcontrol  # noqa: F401,E501
+from swagger_server.models.transformer_wdgs import TransformerWdgs  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,17 +17,25 @@ class Transformer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, radials: List[str]=None, phases: int=None, windings: TransformerWindings=None, xhl: float=None, xlt: float=None, xht: float=None, percent_load_loss: float=None, bank: str=None, tap_level: float=None, base_frequency: float=None):  # noqa: E501
+    def __init__(self, id: str=None, phases: int=None, windings: int=None, kvas: List[float]=None, buses: List[str]=None, kvs: List[float]=None, wdgs: TransformerWdgs=None, regcontrol: TransformerRegcontrol=None, xhl: float=None, xlt: float=None, xht: float=None, percent_load_loss: float=None, bank: str=None, tap_level: float=None, base_frequency: float=None):  # noqa: E501
         """Transformer - a model defined in Swagger
 
         :param id: The id of this Transformer.  # noqa: E501
         :type id: str
-        :param radials: The radials of this Transformer.  # noqa: E501
-        :type radials: List[str]
         :param phases: The phases of this Transformer.  # noqa: E501
         :type phases: int
         :param windings: The windings of this Transformer.  # noqa: E501
-        :type windings: TransformerWindings
+        :type windings: int
+        :param kvas: The kvas of this Transformer.  # noqa: E501
+        :type kvas: List[float]
+        :param buses: The buses of this Transformer.  # noqa: E501
+        :type buses: List[str]
+        :param kvs: The kvs of this Transformer.  # noqa: E501
+        :type kvs: List[float]
+        :param wdgs: The wdgs of this Transformer.  # noqa: E501
+        :type wdgs: TransformerWdgs
+        :param regcontrol: The regcontrol of this Transformer.  # noqa: E501
+        :type regcontrol: TransformerRegcontrol
         :param xhl: The xhl of this Transformer.  # noqa: E501
         :type xhl: float
         :param xlt: The xlt of this Transformer.  # noqa: E501
@@ -44,9 +53,13 @@ class Transformer(Model):
         """
         self.swagger_types = {
             'id': str,
-            'radials': List[str],
             'phases': int,
-            'windings': TransformerWindings,
+            'windings': int,
+            'kvas': List[float],
+            'buses': List[str],
+            'kvs': List[float],
+            'wdgs': TransformerWdgs,
+            'regcontrol': TransformerRegcontrol,
             'xhl': float,
             'xlt': float,
             'xht': float,
@@ -58,9 +71,13 @@ class Transformer(Model):
 
         self.attribute_map = {
             'id': 'id',
-            'radials': 'radials',
             'phases': 'phases',
             'windings': 'windings',
+            'kvas': 'kvas',
+            'buses': 'buses',
+            'kvs': 'kvs',
+            'wdgs': 'wdgs',
+            'regcontrol': 'regcontrol',
             'xhl': 'xhl',
             'xlt': 'xlt',
             'xht': 'xht',
@@ -71,9 +88,13 @@ class Transformer(Model):
         }
 
         self._id = id
-        self._radials = radials
         self._phases = phases
         self._windings = windings
+        self._kvas = kvas
+        self._buses = buses
+        self._kvs = kvs
+        self._wdgs = wdgs
+        self._regcontrol = regcontrol
         self._xhl = xhl
         self._xlt = xlt
         self._xht = xht
@@ -117,27 +138,6 @@ class Transformer(Model):
         self._id = id
 
     @property
-    def radials(self) -> List[str]:
-        """Gets the radials of this Transformer.
-
-
-        :return: The radials of this Transformer.
-        :rtype: List[str]
-        """
-        return self._radials
-
-    @radials.setter
-    def radials(self, radials: List[str]):
-        """Sets the radials of this Transformer.
-
-
-        :param radials: The radials of this Transformer.
-        :type radials: List[str]
-        """
-
-        self._radials = radials
-
-    @property
     def phases(self) -> int:
         """Gets the phases of this Transformer.
 
@@ -163,27 +163,134 @@ class Transformer(Model):
         self._phases = phases
 
     @property
-    def windings(self) -> TransformerWindings:
+    def windings(self) -> int:
         """Gets the windings of this Transformer.
 
+        number of windings  # noqa: E501
 
         :return: The windings of this Transformer.
-        :rtype: TransformerWindings
+        :rtype: int
         """
         return self._windings
 
     @windings.setter
-    def windings(self, windings: TransformerWindings):
+    def windings(self, windings: int):
         """Sets the windings of this Transformer.
 
+        number of windings  # noqa: E501
 
         :param windings: The windings of this Transformer.
-        :type windings: TransformerWindings
+        :type windings: int
         """
         if windings is None:
             raise ValueError("Invalid value for `windings`, must not be `None`")  # noqa: E501
 
         self._windings = windings
+
+    @property
+    def kvas(self) -> List[float]:
+        """Gets the kvas of this Transformer.
+
+
+        :return: The kvas of this Transformer.
+        :rtype: List[float]
+        """
+        return self._kvas
+
+    @kvas.setter
+    def kvas(self, kvas: List[float]):
+        """Sets the kvas of this Transformer.
+
+
+        :param kvas: The kvas of this Transformer.
+        :type kvas: List[float]
+        """
+
+        self._kvas = kvas
+
+    @property
+    def buses(self) -> List[str]:
+        """Gets the buses of this Transformer.
+
+
+        :return: The buses of this Transformer.
+        :rtype: List[str]
+        """
+        return self._buses
+
+    @buses.setter
+    def buses(self, buses: List[str]):
+        """Sets the buses of this Transformer.
+
+
+        :param buses: The buses of this Transformer.
+        :type buses: List[str]
+        """
+
+        self._buses = buses
+
+    @property
+    def kvs(self) -> List[float]:
+        """Gets the kvs of this Transformer.
+
+
+        :return: The kvs of this Transformer.
+        :rtype: List[float]
+        """
+        return self._kvs
+
+    @kvs.setter
+    def kvs(self, kvs: List[float]):
+        """Sets the kvs of this Transformer.
+
+
+        :param kvs: The kvs of this Transformer.
+        :type kvs: List[float]
+        """
+
+        self._kvs = kvs
+
+    @property
+    def wdgs(self) -> TransformerWdgs:
+        """Gets the wdgs of this Transformer.
+
+
+        :return: The wdgs of this Transformer.
+        :rtype: TransformerWdgs
+        """
+        return self._wdgs
+
+    @wdgs.setter
+    def wdgs(self, wdgs: TransformerWdgs):
+        """Sets the wdgs of this Transformer.
+
+
+        :param wdgs: The wdgs of this Transformer.
+        :type wdgs: TransformerWdgs
+        """
+
+        self._wdgs = wdgs
+
+    @property
+    def regcontrol(self) -> TransformerRegcontrol:
+        """Gets the regcontrol of this Transformer.
+
+
+        :return: The regcontrol of this Transformer.
+        :rtype: TransformerRegcontrol
+        """
+        return self._regcontrol
+
+    @regcontrol.setter
+    def regcontrol(self, regcontrol: TransformerRegcontrol):
+        """Sets the regcontrol of this Transformer.
+
+
+        :param regcontrol: The regcontrol of this Transformer.
+        :type regcontrol: TransformerRegcontrol
+        """
+
+        self._regcontrol = regcontrol
 
     @property
     def xhl(self) -> float:
