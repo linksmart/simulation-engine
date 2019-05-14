@@ -27,43 +27,43 @@ Once the simulation engine starts running, you can send simulation requests via 
 BaseURL: http://<<ip>>:port/se
 
 #### Create Simulation
-Method: post
-End Point: /simulation
-Input: JSON file of GRID definition
-Output: Simulation id
+- Method: post
+- End Point: /simulation
+- Input: JSON file of GRID definition
+- Output: Simulation id
 
 
 #### Run Simulation
 once simulation is successfully created, you can run the simulation
-Method: post 
-End Point: /commands/run/<<simulation id>>
-Input: simulation id
-Output: 
-     Simulation result (at the moment: array of 
-	Node Names
-	Voltage MagPus
+- Method: post 
+- End Point: /commands/run/<<simulation id>>
+- Input: simulation id
+- Output: 
+	- Simulation result (at the moment: array of 
+	- Node Names
+	- Voltage MagPus
 Simulation id returned after creating simulation is used as a parameter to run the simulation
 
 #### Get Simulation Result
 once simulation is successfully run, you can obtain the simulation results
-Method: get
-End Point: /simulationResult/<<simulation id>>
-Input: Simulation id
-Output: Result of simulation, i.e., Returns result of “Run Simulation” to client
+- Method: get
+- End Point: /simulationResult/<<simulation id>>
+- Input: Simulation id
+- Output: Result of simulation, i.e., Returns result of “Run Simulation” to client
 
-#### Abort Simulation
-Method: post
-End Point: /commands/abort/<<simulation id>> 
+#### Abort Simulation 
+- Method: post
+- End Point: /commands/abort/<<simulation id>> 
 Note: you can abort a running simulation
 
 
 #### update Simulation
-Method: put
-End Point: simulation/<<simulation id>> 
+- Method: put
+- End Point: simulation/<<simulation id>> 
 Note: Simulation id is the id returned by the successfull creation of simulation in the above step
 
 #### Delete Simulation
-Method: delete
-End Point: /simulation/<<simulation id>> 
+- Method: delete
+- End Point: /simulation/<<simulation id>> 
 Note: simulation id is the id returned by the successfull creation of simulation in the above step
 
