@@ -1,13 +1,11 @@
 # DSF Simulation Engine API
-DSF Simulation Engine (DSF-SE) API is a web-based API to that enables online interaction with power simulator, i.e., OpenDSS.
+DSF Simulation Engine (DSF-SE) API is a web-based API to that enables online interaction with power simulator, i.e., OpenDSS. These instructions will get you a copy of the project up and running for development and testing purposes.
 
-## Getting Started
-These instructions will get you a copy of the project up and running for development and testing purposes.
-###Getting the Source from the Repository
+### Getting the Source from the Repository
 $git clone https://sisay.chala@code.linksmart.eu/scm/se/dsf_se.git
 
 ### Modifying the code
-modify swagger definition on swager editor,
+Modify swagger definition on swager editor,
 generate code from swagger
 download the generated model and replace the existing model
 replace the existing swagger file with the new one
@@ -34,7 +32,7 @@ BaseURL: http://ip:port/se
 
 
 #### Run Simulation
-once simulation is successfully created, you can run the simulation
+Once simulation is successfully created, you can run the simulation
 - Method: post 
 - End Point: /commands/run/simulation_id
 - Input: simulation id
@@ -44,7 +42,7 @@ once simulation is successfully created, you can run the simulation
 Simulation id returned after creating simulation is used as a parameter to run the simulation
 
 #### Get Simulation Result
-once simulation is successfully run, you can obtain the simulation results
+Once simulation is successfully run, you can obtain the simulation results
 - Method: get
 - End Point: /simulationResult/simulation_id
 - Input: Simulation id
