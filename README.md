@@ -45,7 +45,10 @@ once simulation is successfully created, you can run the simulation
 
 
 
+
 Simulation id returned after creating simulation is used as a parameter to run the simulation
+
+
 
 #### Get Simulation Result
 once simulation is successfully run, you can obtain the simulation results
@@ -55,10 +58,13 @@ once simulation is successfully run, you can obtain the simulation results
 - Output: Result of simulation, i.e., Returns result of “Run Simulation” to client
 
 
+
 #### Abort Simulation 
 - Method: post
 - End Point: /commands/abort/<<simulation id>> 
 Note: you can abort a running simulation
+
+
 
 
 #### update Simulation
@@ -67,8 +73,9 @@ Note: you can abort a running simulation
 Note: Simulation id is the id returned by the successfull creation of simulation in the above step
 
 
+
+
 #### Delete Simulation
 - Method: delete
 - End Point: /simulation/<<simulation id>> 
 Note: simulation id is the id returned by the successfull creation of simulation in the above step
-
