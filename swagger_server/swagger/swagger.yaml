@@ -37,6 +37,29 @@ paths:
             type: "string"
       x-swagger-router-controller: "swagger_server.controllers.simulation_controller"
   /simulation/{id}:
+    get:
+      tags:
+      - "simulation"
+      summary: "Get result of simulation"
+      operationId: "get_simulation_result"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of the simulation"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Results of successful simulation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/SimulationResult"
+        400:
+          description: "Invalid simulation configuration data supplied"
+        404:
+          description: "Simulation ID not found"
+      x-swagger-router-controller: "swagger_server.controllers.simulation_controller"
     put:
       tags:
       - "simulation"

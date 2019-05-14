@@ -1,5 +1,5 @@
 import logging
-
+import json
 
 from simulator.openDSS import OpenDSS
 #from simulation_management import simulation_management as SM
@@ -13,9 +13,12 @@ class gridController:
     def __init__(self, id):
         super(gridController, self).__init__()
         logger.info("Initializing simulation controller")
-        self.sim = OpenDSS("Test 1")
+        self.sim = OpenDSS("S4G Simulation")
         self.id = id
-
+        self.nodeNames =[]
+        self.allBusMagPu=[]
+        self.yCurrent = []
+        self.losses = []
 
     def setNewCircuit(self, name):
         logger.debug("Creating a new circuit with the name: "+str(name))
@@ -126,33 +129,50 @@ class gridController:
         logger.info("Solution step size: " + str(self.sim.getStepSize()))
         logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
-        self.sim.setMode("daily")
+        self.sim.setMode("snap")
         logger.info("Solution mode 2: " + str(self.sim.getMode()))
-        #self.sim.setStepSize("minutes")
+        self.sim.setStepSize("minutes")
         #logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         self.sim.setNumberSimulations(1)
         logger.info("Number simulations 2: " + str(self.sim.getNumberSimulations()))
         self.sim.setVoltageBases(115,4.16,0.48)
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        #self.sim.setVoltageBases()
-        numSteps=3 #100
+        self.sim.setVoltageBases()
+        numSteps= 100
         logger.info("Number of steps: "+str(numSteps))
         for i in range(numSteps):
-            listNames, listValues = self.sim.solveCircuitSolution()
+            nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
-        logger.info("Listnames: "+ str(listNames))
-        logger.info("ListValues: " + str(listValues))
-        return (listNames, listValues)
+        logger.info("Node Names: "+ str(nodeNames))
+        logger.info("All Bus MagPus: " + str(allBusMagPu))
+        #!TODO: return node names, voltage and current in json
+        #data = {"NodeNames": nodeNames, "Voltage": allBusMagPu}
+        #return json.dumps(data)
+        logger.info("YCurrent: " + str(yCurrent))
+        logger.info("losses: " + str(losses))
+        #return ("Nodes: " + str(nodeNames), "\nVoltages " + str(allBusMagPu))
+        #return (nodeNames, allBusMagPu)
+        #filename = str(id)+"_results.txt"
+        filename = '/usr/src/app/tests/results/results.txt'
+        f = open(filename, 'w')
+        f.writelines("Nodes: " + str(nodeNames)+"\n")
+        f.writelines("Voltages: " + str(allBusMagPu))
+        
+        logger.info("File "+filename+" written")
+        f.close()
+        return id
+    
+    #def results(self):   
+        #return (self.nodeNames, self.allBusMagPu)
         #self.finish_status = True
         #return "OK"
         """#ToDo test with snap and daily
         self.sim.setMode("daily")
         self.sim.setStepSize("minutes")
-        self.sim.numberSimulations(1)
+        self.sim.setNumberSimulations(1)
         self.sim.setStartingHour(0)
         self.sim.setVoltageBases(0.4,16)
-"""
 
         #for i in range(numSteps):
             #self.sim.solveCircuitSolution()
@@ -160,4 +180,4 @@ class gridController:
             #If
             #DSSSolution.Converged
             #Then
-            #V = DSSCircuit.AllBusVmagPu
+            #V = DSSCircuit.AllBusVmagPu"""
