@@ -169,6 +169,7 @@ def run_simulation(id, body):  # noqa: E501
 
     :rtype: List[SimulationResult]
     """
+    logger.info("Running Simulation ...")
     if connexion.request.is_json:
         logger.info("Start command")
         body = Simulation.from_dict(connexion.request.get_json())  # noqa: E501

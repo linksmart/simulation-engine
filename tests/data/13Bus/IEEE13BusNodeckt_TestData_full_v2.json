@@ -1,0 +1,461 @@
+{
+    "common": {
+        "id": "IEEE13Nodeckt",
+        "base_kV": 115,
+        "per_unit": 1.0001,
+        "phases": 3,
+        "bus1": "SourceBus",
+        "angle": 30,
+        "MVAsc3": 20000,
+        "MVAsc1": 21000
+    },
+    "radials": [
+        {
+            "radialId": "IEEE13Nodeckt",
+            "transformer": [
+                {
+                    "id": "Sub",
+                    "radials": [
+                        "string"
+                    ],
+                    "phases": 3,
+                    "windings": {
+                        "number": 2,
+                        "struct": [
+                            {
+                                "wdg": 1,
+                                "bus": "SourceBus",
+                                "connection_type": "delta",
+                                "kV": 115,
+                                "kVA": 5000,
+                                "percent_resistance": 0.0005
+                            },
+                            {
+                                "wdg": 2,
+                                "bus": "SourceBus",
+                                "connection_type": "wye",
+                                "kV": 4.16,
+                                "kVA": 5000,
+                                "percent_resistance": 0.0005
+                            }
+                        ]
+                    },
+                    "xhl": 2,
+                    "xlt": 1,
+                    "xht": 1,
+                    "percent_load_loss": 0.55,
+                    "bank": "reg1",
+                    "tapLevel": 0,
+                    "base_frequency": 0
+                }
+            ],
+            "loads": [
+                {
+                    "id": "671",
+                    "Bus": "671.1.2.3",
+                    "Phases": "3",
+                    "Conn": "Delta",
+                    "Model": "1",
+                    "kV": 4.16,
+                    "kW": 1155,
+                    "kvar": 660,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "634a",
+                    "Bus": "634.1",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 0.277,
+                    "kW": 160,
+                    "kvar": 110,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "634b",
+                    "Bus": "634.2",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 0.277,
+                    "kW": 120,
+                    "kvar": 90,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "634c",
+                    "Bus": "634.3",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 0.277,
+                    "kW": 120,
+                    "kvar": 90,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "645",
+                    "Bus": "645.2",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 2.4,
+                    "kW": 170,
+                    "kvar": 125,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "646",
+                    "Bus": "646.2.3",
+                    "Phases": "1",
+                    "Conn": "Delta",
+                    "Model": "2",
+                    "kV": 4.16,
+                    "kW": 230,
+                    "kvar": 132,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "692",
+                    "Bus": "692.3.1",
+                    "Phases": "1",
+                    "Conn": "Delta",
+                    "Model": "5",
+                    "kV": 4.16,
+                    "kW": 170,
+                    "kvar": 151,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "675a",
+                    "Bus": "675.1",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 2.4,
+                    "kW": 485,
+                    "kvar": 190,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "675b",
+                    "Bus": "675.2",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 2.4,
+                    "kW": 68,
+                    "kvar": 60,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "675c",
+                    "Bus": "675.3",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 2.4,
+                    "kW": 290,
+                    "kvar": 212,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "611",
+                    "Bus": "611.3",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "5",
+                    "kV": 2.4,
+                    "kW": 170,
+                    "kvar": 80,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "652",
+                    "Bus": "652.1",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "2",
+                    "kV": 2.4,
+                    "kW": 128,
+                    "kvar": 86,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "670a",
+                    "Bus": "670.1",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 2.4,
+                    "kW": 17,
+                    "kvar": 10,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "670b",
+                    "Bus": "670.2",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 2.4,
+                    "kW": 66,
+                    "kvar": 38,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "670c",
+                    "Bus": "670.3",
+                    "Phases": "1",
+                    "Conn": "Wye",
+                    "Model": "1",
+                    "kV": 2.4,
+                    "kW": 117,
+                    "kvar": 68,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                }            ],
+            "powerProfiles": [
+                {
+                    "id": "string",
+                    "items": 0
+                }
+            ],
+            "powerLines": [
+                {
+                    "id": "string",
+phases: int,
+                    "bus1": {
+                        "phase_R": true,
+                        "phase_S": true,
+                        "phase_T": true
+                    },
+                    "bus2": {
+                        "phase_R": true,
+                        "phase_S": true,
+                        "phase_T": true
+                    },
+                    "length": 0,
+                    "unitlength": "string",
+                    "linecode": "string",
+                    "R1": 0,
+                    "R0": 0,
+                    "X1": 0,
+                    "X0": 0,
+                    "C1": 0,
+                    "C0": 0,
+                    "switch": false
+                }
+            ],
+            "photovoltaics": [
+                {
+                    "id": "string",
+                    "node": "string",
+                    "inverterEfficiency": 0,
+                    "phases": 0,
+                    "power": 0,
+                    "powerunit": "string",
+                    "powerfactor": 0,
+                    "bus1": "string",
+                    "voltage": 0,
+                    "effcurve": "string",
+                    "ptcurve": "string",
+                    "daily": "string",
+                    "tdaily": "string",
+                    "pf": 0,
+                    "voltageunit": "string"
+                }
+            ],
+            "storageUnits": [
+                {
+                    "id": "string",
+                    "node": "string",
+                    "SoC": 0,
+                    "DoD": 0,
+                    "SoH": 0,
+                    "energy": 0,
+                    "inverterEfficiency": 0,
+                    "phases": 0,
+                    "voltage": 0,
+                    "voltageunit": "string",
+                    "power": 0,
+                    "powerunit": "string",
+                    "powerfactor": 0
+                }
+            ],
+            "chargingPoints": [
+                {
+                    "node": "node",
+                    "id": "id"
+                }
+            ],
+            "linecode": [
+                {
+                    "id": "string",
+                    "R1": 0,
+                    "R0": 0,
+                    "X1": 0,
+                    "X0": 0,
+                    "C1": 0,
+                    "C0": 0,
+                    "R_Matrix": {
+                        "phase_R": {
+                            "R1": 0,
+                            "R0": 0,
+                            "X1": 0,
+                            "X0": 0,
+                            "C1": 0,
+                            "C0": 0
+                        },
+                        "phase_S": {
+                            "R1": 0,
+                            "R0": 0,
+                            "X1": 0,
+                            "X0": 0,
+                            "C1": 0,
+                            "C0": 0
+                        },
+                        "phase_T": {
+                            "R1": 0,
+                            "R0": 0,
+                            "X1": 0,
+                            "X0": 0,
+                            "C1": 0,
+                            "C0": 0
+                        }
+                    },
+                    "X_Matrix": {
+                        "phase_R": {
+                            "R1": 0,
+                            "R0": 0,
+                            "X1": 0,
+                            "X0": 0,
+                            "C1": 0,
+                            "C0": 0
+                        },
+                        "phase_S": {
+                            "R1": 0,
+                            "R0": 0,
+                            "X1": 0,
+                            "X0": 0,
+                            "C1": 0,
+                            "C0": 0
+                        },
+                        "phase_T": {
+                            "R1": 0,
+                            "R0": 0,
+                            "X1": 0,
+                            "X0": 0,
+                            "C1": 0,
+                            "C0": 0
+                        }
+                    },
+                    "C_Matrix": {
+                        "phase_R": {
+                            "R1": 0,
+                            "R0": 0,
+                            "X1": 0,
+                            "X0": 0,
+                            "C1": 0,
+                            "C0": 0
+                        },
+                        "phase_S": {
+                            "R1": 0,
+                            "R0": 0,
+                            "X1": 0,
+                            "X0": 0,
+                            "C1": 0,
+                            "C0": 0
+                        },
+                        "phase_T": {
+                            "R1": 0,
+                            "R0": 0,
+                            "X1": 0,
+                            "X0": 0,
+                            "C1": 0,
+                            "C0": 0
+                        }
+                    },
+                    "units": "string",
+                    "base_frequency": 0
+                }
+            ],
+            "capacitor": [
+                {
+                    "id": "Cap1",
+                    "bus": "675",
+                    "phases": 3,
+                    "kVAR": 600,
+                    "kV": 4.16
+                },
+                {
+                    "id": "Cap2",
+                    "bus": "611.3",
+                    "phases": 1,
+                    "kVAR": 100,
+                    "kV": 2.4
+                }
+            ],
+            "voltage_regulator": [
+                {
+                    "id": "string",
+                    "transformer_id": "string",
+                    "winding_id": "string",
+                    "voltage_setting": 0,
+                    "bandwidth_Volt": 0,
+                    "PT_Ratio": 0,
+                    "CT_primary_rating_Amp": 0,
+                    "line_drop_compensator_R_Volt": 0,
+                    "line_drop_compensator_X_Volt": 0
+                }
+            ],
+            "xycurves": [
+                {
+                    "id": "string",
+                    "npts": 0,
+                    "xarray": [
+                        0
+                    ],
+                    "yarray": [
+                        0
+                    ]
+                }
+            ],
+            "loadshapes": [
+                {
+                    "id": "string",
+                    "npts": 0,
+                    "interval": 0,
+                    "mult": [
+                        0
+                    ]
+                }
+            ],
+            "tshapes": [
+                {
+                    "id": "string",
+                    "npts": 0,
+                    "interval": 0,
+                    "temp": [
+                        0
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,235 @@
+{
+    "common": {
+        "id": "IEEE13Nodeckt",
+        "base_kV": 115,
+        "per_unit": 1.0001,
+        "phases": 3,
+        "bus1": "SourceBus",
+        "angle": 30,
+        "MVAsc3": 20000,
+        "MVAsc1": 21000
+    },
+    "radials": [
+        {
+            "radialId": "string",
+            "transformer": [
+                {
+                    "id": "Sub",
+                    "phases": 3,
+                    "windings": 2,
+                    "xhl": 0.008,
+                    "wdgs": [
+                        {
+                            "wdg1": 1,
+                            "bus": "SourceBus",
+                            "connection_type": "delta",
+                            "kv": 115,
+                            "kva": 5000,
+                            "percent_r": 0.0005
+                        },
+                        {
+                            "wdg1": 2,
+                            "bus": 650,
+                            "connection_type": "wye",
+                            "kv": 4.16,
+                            "kva": 5000,
+                            "percent_r": 0.0005
+                        }
+                    ]
+                },
+                {
+                    "id": "Reg1",
+                    "phases": 1,
+                    "bank": "reg1",
+                    "xhl": 0.01,
+                    "kvas": [
+                        1666,
+                        1666
+                    ],
+                    "buses": [
+                        "650.1",
+                        "RG60.1"
+                    ],
+                    "KVs": [
+                        2.4,
+                        2.4
+                    ],
+                    "percent_load_loss": 0.01,
+                    "regcontrol": {
+                        "id": "Reg1",
+                        "transformer": "Reg1",
+                        "winding": 2,
+                        "vreg": 122,
+                        "band": 2,
+                        "ptration": 20,
+                        "ctprim": 700,
+                        "r": 3,
+                        "x": 9
+                    }
+                },
+                {
+                    "id": "Reg2",
+                    "phases": 1,
+                    "bank": "reg1",
+                    "xhl": 0.01,
+                    "kvas": [
+                        1666,
+                        1666
+                    ],
+                    "buses": [
+                        "650.2",
+                        "RG60.2"
+                    ],
+                    "KVs": [
+                        2.4,
+                        2.4
+                    ],
+                    "percent_load_loss": 0.01,
+                    "regcontrol": {
+                        "id": "Reg2",
+                        "transformer": "Reg2",
+                        "winding": 2,
+                        "vreg": 122,
+                        "band": 2,
+                        "ptration": 20,
+                        "ctprim": 700,
+                        "r": 3,
+                        "x": 9
+                    }
+                },
+                {
+                    "id": "Reg3",
+                    "phases": 1,
+                    "bank": "reg1",
+                    "xhl": 0.01,
+                    "kvas": [
+                        1666,
+                        1666
+                    ],
+                    "Buses": [
+                        "650.3",
+                        "RG60.3"
+                    ],
+                    "KVs": [
+                        2.4,
+                        2.4
+                    ],
+                    "percent_load_loss": 0.01,
+                    "regcontrol": {
+                        "id": "Reg3",
+                        "transformer": "Reg3",
+                        "winding": 2,
+                        "vreg": 122,
+                        "band": 2,
+                        "ptration": 20,
+                        "ctprim": 700,
+                        "r": 3,
+                        "x": 9
+                    }
+                },
+                {
+                    "id": "XFMI",
+                    "phases": 3,
+                    "windings": 2,
+                    "xhl": 2,
+                    "wdgs": [
+                        {
+                            "wdg1": 1,
+                            "bus": 633,
+                            "connection_type": "Wye",
+                            "kv": 4.16,
+                            "kva": 500,
+                            "percent_r": 0.55,
+                            "xht": 1
+                        },
+                        {
+                            "wdg1": 2,
+                            "bus": 634,
+                            "connection_type": "Wye",
+                            "kv": 0.48,
+                            "kva": 500,
+                            "percent_r": 0.55,
+                            "xlt": 1
+                        }
+                    ]
+                }
+            ],
+            "loads": [
+                {
+                    "id": "645",
+                    "bus": "645.2",
+                    "phases": 1,
+                    "connection_type": "Wye",
+                    "model": 1,
+                    "kV": 2.4,
+                    "kW": 170,
+                    "kVar": 125,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                },
+                {
+                    "id": "646",
+                    "bus": "646.2.3",
+                    "phases": 1,
+                    "connection_type": "Delta",
+                    "Model": 2,
+                    "kV": 4.16,
+                    "kW": 230,
+                    "kVar": 132,
+                    "powerfactor": 0,
+                    "power_profile_id": "string"
+                }
+            ],
+            "powerLines": [
+                {
+                    "id": "650632",
+                    "phases": 3,
+                    "bus1": "RG60.1.2.3",
+                    "bus2": "632.1.2.3",
+                    "linecode": "mtx601",
+                    "length": 2000,
+                    "unitlength": "ft",
+                    "r1": 0,
+                    "r0": 0,
+                    "x1": 0,
+                    "x0": 0,
+                    "c1": 0,
+                    "c0": 0,
+                    "switch": false
+                },
+                {
+                    "id": "632645",
+                    "phases": 2,
+                    "bus1": "632.3.2",
+                    "bus2": "645.3.2",
+                    "linecode": "mtx603",
+                    "length": 500,
+                    "unitlength": "ft",
+                    "r1": 0.0001,
+                    "r0": 0.0001,
+                    "x1": 0,
+                    "x0": 0,
+                    "c1": 0,
+                    "c0": 0,
+                    "switch": false
+                }
+            ],
+            "capacitor": [
+                {
+                    "id": "Cap1",
+                    "bus": "675",
+                    "phases": 3,
+                    "kVAR": 600,
+                    "kV": 4.16
+                },
+                {
+                    "id": "Cap2",
+                    "bus": "611.3",
+                    "phases": 1,
+                    "kVAR": 100,
+                    "kV": 2.4
+                }
+            ]
+        }
+    ]
+}

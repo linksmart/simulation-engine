@@ -81,25 +81,25 @@ def create_simulation(body):  # noqa: E501
                 logger.debug("Transformers" + str(transformer))
                 factory.gridController.setTransformers(id,transformer)
                 
-            """if "loads" in values.keys() and values["loads"] is not None:
+            if "loads" in values.keys() and values["loads"] is not None:
                 logger.debug("---------------Setting Loads-------------------------")
                 # radial=radial.to_dict()
                 load = values["loads"]
                 logger.debug("Loads" + str(transformer))
-                factory.gridController.setLoads(id, load)"""
+                factory.gridController.setLoads(id, load)
 
-            """if "power_lines" in values.keys() and values["power_lines"] is not None:
+            if "power_lines" in values.keys() and values["power_lines"] is not None:
                 logger.debug("---------------Setting Powerlines-------------------------")
                 powerLines = values["power_lines"]
                 #linecodes = values["linecode"]
                 #factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
                 logger.debug("Powerlines" + str(powerLines))
-                factory.gridController.setPowerLines(id, powerLines)"""
+                factory.gridController.setPowerLines(id, powerLines)
 
-            """if "powerProfile" in values.keys() and values["powerProfile"] is not None:
+            if "powerProfile" in values.keys() and values["powerProfile"] is not None:
                 powerProfile = values["powerProfile"]
                 #logger.debug("Powerprofile" + str(powerProfile))
-                factory.gridController.setPowerProfile(id, powerProfile)"""
+                factory.gridController.setPowerProfile(id, powerProfile)
 
             if "xycurves" in values.keys() and values["xycurves"] is not None:
                 xycurves = values["xycurves"]#TORemove
@@ -137,7 +137,7 @@ def create_simulation(body):  # noqa: E501
             if "capacitor" in values.keys() and values["capacitor"] is not None:
                 logger.debug("---------------Setting Capacitors-------------------------")
                 capacitor = values["capacitor"]
-                logger.debug("Capacitors: " + str(capacitor))
+                #logger.debug("Capacitors: " + str(capacitor))
                 factory.gridController.setCapacitors(id, capacitor) 
                 
             if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:
@@ -157,10 +157,35 @@ def create_simulation(body):  # noqa: E501
                 factory.gridController.setTShape(id, tshapes)                 
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)
+        result = factory.gridController.run()
         #factory.gridController.run()
-        return str(id)
+        #return str(result) 
+        return id 
+        #return " Result: " + str(result)
     else:
         return "Bad JSON Format"
+    
+def get_simulation_result(id):  # noqa: E501
+    """Get a simulation result
+
+     # noqa: E501
+
+    :param id: ID of the simulation
+    :type id: str
+
+    :rtype: Simulation result - array of nodes, and corresponding voltage
+    """
+    #factory= ThreadFactory(id)
+    #variable.set(id, factory)
+    #result = factory.gridController.results()
+    try:
+        f = open('/usr/src/app/tests/results/results.txt') #open(str(id)+"_results.txt")
+        result = f.readlines()
+        logger.debug(result)
+        f.close()
+    except:
+        result = "None"
+    return result
 
 def delete_simulation(id):  # noqa: E501
     """Delete a simulation and its data
@@ -172,7 +197,7 @@ def delete_simulation(id):  # noqa: E501
 
     :rtype: None
     """
-    return 'do some magic!'
+    return 'Simulation ' + id + ' deleted!'
 
 
 def update_simulation(id, body):  # noqa: E501
@@ -189,5 +214,4 @@ def update_simulation(id, body):  # noqa: E501
     """
     if connexion.request.is_json:
         body = Grid.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
-
+    return 'Simulation ' + id + ' updated!'
