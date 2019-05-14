@@ -42,7 +42,9 @@ once simulation is successfully created, you can run the simulation
 	- Simulation result (at the moment: array of 
 	- Node Names
 	- Voltage MagPus
-[//]: # End of list
+
+
+
 Simulation id returned after creating simulation is used as a parameter to run the simulation
 
 #### Get Simulation Result
@@ -52,19 +54,19 @@ once simulation is successfully run, you can obtain the simulation results
 - Input: Simulation id
 - Output: Result of simulation, i.e., Returns result of “Run Simulation” to client
 
-[//]: # End of list
+
 #### Abort Simulation 
 - Method: post
 - End Point: /commands/abort/<<simulation id>> 
 Note: you can abort a running simulation
 
-[//]: # End of list
+
 #### update Simulation
 - Method: put
 - End Point: simulation/<<simulation id>> 
 Note: Simulation id is the id returned by the successfull creation of simulation in the above step
 
-[//]: # End of list
+
 #### Delete Simulation
 - Method: delete
 - End Point: /simulation/<<simulation id>> 
