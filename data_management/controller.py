@@ -65,7 +65,7 @@ class gridController:
         
     def setCapacitors(self, id, capacitors):
         logger.debug("Charging capacitors into the simulator")
-        self.object = object
+        self.object = capacitors
         self.sim.setCapacitors(self.object)
         logger.debug("Capacitor charged")
 

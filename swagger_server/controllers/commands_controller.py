@@ -171,12 +171,13 @@ def run_simulation(id, body):  # noqa: E501
     """
     logger.info("Running Simulation ...")
     if connexion.request.is_json:
-        logger.info("Start command")
+        logger.info("Start command for simulation ID:" + id)
         body = Simulation.from_dict(connexion.request.get_json())  # noqa: E501
 
         try:
             redis_db = RedisDB()
             flag = redis_db.get(id)
+            logger.info("flag: " + flag)
             if flag is not None and flag == "created":
                 if variable.isRunningExists():
                     logger.debug("isRunning exists")
