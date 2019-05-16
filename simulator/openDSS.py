@@ -928,9 +928,9 @@ class OpenDSS:
         self.capacitors=capacitors
         try:
             for element in self.capacitors:
-                #!logger.debug("Element: "+str(element))
+                logger.debug("Element: "+str(element))
                 for key, value in element.items():
-                    #!logger.debug("Key: "+str(key)+" Value: "+str(value))
+                    logger.debug("Key: "+str(key)+" Value: "+str(value))
                     if key=="id":
                         id=value
                     elif key=="bus":
@@ -939,7 +939,7 @@ class OpenDSS:
                         phases=value 
                     elif key == "k_var":
                         voltage_kVar = value
-                    elif key == "k_v":  
+                    elif key == "k_v":
                         voltage_kV = value
                     else:
                         break
@@ -948,7 +948,9 @@ class OpenDSS:
                 self.num_phases=phases
                 self.k_v=voltage_kV
                 self.k_var=voltage_kVar
-                
+
+                logger.debug("Key: " + " voltage_kV " + " Value: " + str(self.k_v))
+
                 dss.run_command("New Capacitor.{capacitor_name} Bus1={bus_name}  Phases={num_phases} kV={voltage_kV} kVar={voltage_kVar}".format(
                 capacitor_name=self.capacitor_name,
                 bus_name=self.bus_name,
@@ -960,8 +962,8 @@ class OpenDSS:
                 " capacitor_name 1: "+str(self.capacitor_name) + 
                 " bus_name = "+str(self.bus_name)+
                 " num_phases = " +str(self.num_phases)+
-                " k_v = " +str(self.voltage_kV)+
-                " k_var = " + str(self.voltage_kVar)
+                " k_v = " +str(self.k_v)+
+                " k_var = " + str(self.k_var)
                 )
             #dss.run_command('Solve') 
         except Exception as e:

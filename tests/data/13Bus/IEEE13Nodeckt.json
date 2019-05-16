@@ -214,6 +214,23 @@
                     "switch": false
                 }
             ],
+            "storageUnits": [
+                {
+                  "id": "Bat1",
+                  "node": "string",
+                  "SoC": 0,
+                  "DoD": 0,
+                  "SoH": 0,
+                  "energy": 0,
+                  "inverterEfficiency": 0,
+                  "phases": 0,
+                  "voltage": 0,
+                  "voltageunit": "string",
+                  "power": 0,
+                  "powerunit": "string",
+                  "powerfactor": 0
+                }
+            ],
             "capacitor": [
                 {
                     "id": "Cap1",
