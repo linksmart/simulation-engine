@@ -481,38 +481,52 @@ definitions:
   Storage:
     type: "object"
     required:
-    - "DoD"
-    - "SoC"
+    - "bus1"
     - "id"
-    - "node"
+    - "kV"
+    - "kWrated"
     properties:
       id:
         type: "string"
-      node:
+      bus1:
         type: "string"
-        description: "ID for the connected node"
-      SoC:
-        type: "number"
-      DoD:
-        type: "number"
-      SoH:
-        type: "number"
-      energy:
-        type: "number"
-      inverterEfficiency:
-        type: "number"
+        description: "ID for the connected bus"
       phases:
         type: "integer"
-      voltage:
-        type: "number"
-      voltageunit:
+      connection:
         type: "string"
-      power:
+        description: "={wye|LN|delta|LL}. Default is wye. (openDSS Name: conn)"
+      SoC:
         type: "number"
-      powerunit:
-        type: "string"
+        description: "State of Charge in % of rated kWh (openDSS Name: %stored)"
+      DoD:
+        type: "number"
+        description: "Minimum Depth of Discharge recommended in % of rated kWh (openDSS\
+          \ Name: %reserve)"
+      kV:
+        type: "number"
+        description: "Nominal rated (1.0 per unit) voltage, kV, for Storage element."
+      kWrated:
+        type: "number"
+        description: "kW rating of power output. Side effect: Set KVA property."
+      kWhrated:
+        type: "number"
+        description: "Rated storage capacity in kWh. Default is 50."
+      kWhstored:
+        type: "number"
+        description: "Present amount of energy stored, kWh. Default is same as kWh\
+          \ rated."
+      chargeEfficiency:
+        type: "number"
+        description: "Percent efficiency for CHARGING the storage element. Default\
+          \ = 90. (SopenDSS Name: %EffCharge)"
+      dischargeEfficiency:
+        type: "number"
+        description: "Percent efficiency for DISCHARGING the storage element. Default\
+          \ =90. Idling losses are handled by %IdlingkW. (openDSS Name: %EffCharge)"
       powerfactor:
         type: "number"
+        description: "(openDSS Name: pf)"
   Photovoltaic:
     type: "object"
     required:
