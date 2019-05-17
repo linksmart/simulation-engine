@@ -15,80 +15,80 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, node: str=None, so_c: float=None, do_d: float=None, so_h: float=None, energy: float=None, inverter_efficiency: float=None, phases: int=None, voltage: float=None, voltageunit: str=None, power: float=None, powerunit: str=None, powerfactor: float=None):  # noqa: E501
+    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, so_c: float=None, do_d: float=None, k_v: float=None, k_wrated: float=None, k_whrated: float=None, k_whstored: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501
         :type id: str
-        :param node: The node of this Storage.  # noqa: E501
-        :type node: str
+        :param bus1: The bus1 of this Storage.  # noqa: E501
+        :type bus1: str
+        :param phases: The phases of this Storage.  # noqa: E501
+        :type phases: int
+        :param connection: The connection of this Storage.  # noqa: E501
+        :type connection: str
         :param so_c: The so_c of this Storage.  # noqa: E501
         :type so_c: float
         :param do_d: The do_d of this Storage.  # noqa: E501
         :type do_d: float
-        :param so_h: The so_h of this Storage.  # noqa: E501
-        :type so_h: float
-        :param energy: The energy of this Storage.  # noqa: E501
-        :type energy: float
-        :param inverter_efficiency: The inverter_efficiency of this Storage.  # noqa: E501
-        :type inverter_efficiency: float
-        :param phases: The phases of this Storage.  # noqa: E501
-        :type phases: int
-        :param voltage: The voltage of this Storage.  # noqa: E501
-        :type voltage: float
-        :param voltageunit: The voltageunit of this Storage.  # noqa: E501
-        :type voltageunit: str
-        :param power: The power of this Storage.  # noqa: E501
-        :type power: float
-        :param powerunit: The powerunit of this Storage.  # noqa: E501
-        :type powerunit: str
+        :param k_v: The k_v of this Storage.  # noqa: E501
+        :type k_v: float
+        :param k_wrated: The k_wrated of this Storage.  # noqa: E501
+        :type k_wrated: float
+        :param k_whrated: The k_whrated of this Storage.  # noqa: E501
+        :type k_whrated: float
+        :param k_whstored: The k_whstored of this Storage.  # noqa: E501
+        :type k_whstored: float
+        :param charge_efficiency: The charge_efficiency of this Storage.  # noqa: E501
+        :type charge_efficiency: float
+        :param discharge_efficiency: The discharge_efficiency of this Storage.  # noqa: E501
+        :type discharge_efficiency: float
         :param powerfactor: The powerfactor of this Storage.  # noqa: E501
         :type powerfactor: float
         """
         self.swagger_types = {
             'id': str,
-            'node': str,
+            'bus1': str,
+            'phases': int,
+            'connection': str,
             'so_c': float,
             'do_d': float,
-            'so_h': float,
-            'energy': float,
-            'inverter_efficiency': float,
-            'phases': int,
-            'voltage': float,
-            'voltageunit': str,
-            'power': float,
-            'powerunit': str,
+            'k_v': float,
+            'k_wrated': float,
+            'k_whrated': float,
+            'k_whstored': float,
+            'charge_efficiency': float,
+            'discharge_efficiency': float,
             'powerfactor': float
         }
 
         self.attribute_map = {
             'id': 'id',
-            'node': 'node',
+            'bus1': 'bus1',
+            'phases': 'phases',
+            'connection': 'connection',
             'so_c': 'SoC',
             'do_d': 'DoD',
-            'so_h': 'SoH',
-            'energy': 'energy',
-            'inverter_efficiency': 'inverterEfficiency',
-            'phases': 'phases',
-            'voltage': 'voltage',
-            'voltageunit': 'voltageunit',
-            'power': 'power',
-            'powerunit': 'powerunit',
+            'k_v': 'kV',
+            'k_wrated': 'kWrated',
+            'k_whrated': 'kWhrated',
+            'k_whstored': 'kWhstored',
+            'charge_efficiency': 'chargeEfficiency',
+            'discharge_efficiency': 'dischargeEfficiency',
             'powerfactor': 'powerfactor'
         }
 
         self._id = id
-        self._node = node
+        self._bus1 = bus1
+        self._phases = phases
+        self._connection = connection
         self._so_c = so_c
         self._do_d = do_d
-        self._so_h = so_h
-        self._energy = energy
-        self._inverter_efficiency = inverter_efficiency
-        self._phases = phases
-        self._voltage = voltage
-        self._voltageunit = voltageunit
-        self._power = power
-        self._powerunit = powerunit
+        self._k_v = k_v
+        self._k_wrated = k_wrated
+        self._k_whrated = k_whrated
+        self._k_whstored = k_whstored
+        self._charge_efficiency = charge_efficiency
+        self._discharge_efficiency = discharge_efficiency
         self._powerfactor = powerfactor
 
     @classmethod
@@ -126,138 +126,29 @@ class Storage(Model):
         self._id = id
 
     @property
-    def node(self) -> str:
-        """Gets the node of this Storage.
+    def bus1(self) -> str:
+        """Gets the bus1 of this Storage.
 
-        ID for the connected node  # noqa: E501
+        ID for the connected bus  # noqa: E501
 
-        :return: The node of this Storage.
+        :return: The bus1 of this Storage.
         :rtype: str
         """
-        return self._node
+        return self._bus1
 
-    @node.setter
-    def node(self, node: str):
-        """Sets the node of this Storage.
+    @bus1.setter
+    def bus1(self, bus1: str):
+        """Sets the bus1 of this Storage.
 
-        ID for the connected node  # noqa: E501
+        ID for the connected bus  # noqa: E501
 
-        :param node: The node of this Storage.
-        :type node: str
+        :param bus1: The bus1 of this Storage.
+        :type bus1: str
         """
-        if node is None:
-            raise ValueError("Invalid value for `node`, must not be `None`")  # noqa: E501
+        if bus1 is None:
+            raise ValueError("Invalid value for `bus1`, must not be `None`")  # noqa: E501
 
-        self._node = node
-
-    @property
-    def so_c(self) -> float:
-        """Gets the so_c of this Storage.
-
-
-        :return: The so_c of this Storage.
-        :rtype: float
-        """
-        return self._so_c
-
-    @so_c.setter
-    def so_c(self, so_c: float):
-        """Sets the so_c of this Storage.
-
-
-        :param so_c: The so_c of this Storage.
-        :type so_c: float
-        """
-        if so_c is None:
-            raise ValueError("Invalid value for `so_c`, must not be `None`")  # noqa: E501
-
-        self._so_c = so_c
-
-    @property
-    def do_d(self) -> float:
-        """Gets the do_d of this Storage.
-
-
-        :return: The do_d of this Storage.
-        :rtype: float
-        """
-        return self._do_d
-
-    @do_d.setter
-    def do_d(self, do_d: float):
-        """Sets the do_d of this Storage.
-
-
-        :param do_d: The do_d of this Storage.
-        :type do_d: float
-        """
-        if do_d is None:
-            raise ValueError("Invalid value for `do_d`, must not be `None`")  # noqa: E501
-
-        self._do_d = do_d
-
-    @property
-    def so_h(self) -> float:
-        """Gets the so_h of this Storage.
-
-
-        :return: The so_h of this Storage.
-        :rtype: float
-        """
-        return self._so_h
-
-    @so_h.setter
-    def so_h(self, so_h: float):
-        """Sets the so_h of this Storage.
-
-
-        :param so_h: The so_h of this Storage.
-        :type so_h: float
-        """
-
-        self._so_h = so_h
-
-    @property
-    def energy(self) -> float:
-        """Gets the energy of this Storage.
-
-
-        :return: The energy of this Storage.
-        :rtype: float
-        """
-        return self._energy
-
-    @energy.setter
-    def energy(self, energy: float):
-        """Sets the energy of this Storage.
-
-
-        :param energy: The energy of this Storage.
-        :type energy: float
-        """
-
-        self._energy = energy
-
-    @property
-    def inverter_efficiency(self) -> float:
-        """Gets the inverter_efficiency of this Storage.
-
-
-        :return: The inverter_efficiency of this Storage.
-        :rtype: float
-        """
-        return self._inverter_efficiency
-
-    @inverter_efficiency.setter
-    def inverter_efficiency(self, inverter_efficiency: float):
-        """Sets the inverter_efficiency of this Storage.
-
-
-        :param inverter_efficiency: The inverter_efficiency of this Storage.
-        :type inverter_efficiency: float
-        """
-
-        self._inverter_efficiency = inverter_efficiency
+        self._bus1 = bus1
 
     @property
     def phases(self) -> int:
@@ -281,93 +172,221 @@ class Storage(Model):
         self._phases = phases
 
     @property
-    def voltage(self) -> float:
-        """Gets the voltage of this Storage.
+    def connection(self) -> str:
+        """Gets the connection of this Storage.
 
+        ={wye|LN|delta|LL}. Default is wye. (openDSS Name: conn)  # noqa: E501
 
-        :return: The voltage of this Storage.
-        :rtype: float
-        """
-        return self._voltage
-
-    @voltage.setter
-    def voltage(self, voltage: float):
-        """Sets the voltage of this Storage.
-
-
-        :param voltage: The voltage of this Storage.
-        :type voltage: float
-        """
-
-        self._voltage = voltage
-
-    @property
-    def voltageunit(self) -> str:
-        """Gets the voltageunit of this Storage.
-
-
-        :return: The voltageunit of this Storage.
+        :return: The connection of this Storage.
         :rtype: str
         """
-        return self._voltageunit
+        return self._connection
 
-    @voltageunit.setter
-    def voltageunit(self, voltageunit: str):
-        """Sets the voltageunit of this Storage.
+    @connection.setter
+    def connection(self, connection: str):
+        """Sets the connection of this Storage.
 
+        ={wye|LN|delta|LL}. Default is wye. (openDSS Name: conn)  # noqa: E501
 
-        :param voltageunit: The voltageunit of this Storage.
-        :type voltageunit: str
+        :param connection: The connection of this Storage.
+        :type connection: str
         """
 
-        self._voltageunit = voltageunit
+        self._connection = connection
 
     @property
-    def power(self) -> float:
-        """Gets the power of this Storage.
+    def so_c(self) -> float:
+        """Gets the so_c of this Storage.
 
+        State of Charge in % of rated kWh (openDSS Name: %stored)  # noqa: E501
 
-        :return: The power of this Storage.
+        :return: The so_c of this Storage.
         :rtype: float
         """
-        return self._power
+        return self._so_c
 
-    @power.setter
-    def power(self, power: float):
-        """Sets the power of this Storage.
+    @so_c.setter
+    def so_c(self, so_c: float):
+        """Sets the so_c of this Storage.
 
+        State of Charge in % of rated kWh (openDSS Name: %stored)  # noqa: E501
 
-        :param power: The power of this Storage.
-        :type power: float
+        :param so_c: The so_c of this Storage.
+        :type so_c: float
         """
 
-        self._power = power
+        self._so_c = so_c
 
     @property
-    def powerunit(self) -> str:
-        """Gets the powerunit of this Storage.
+    def do_d(self) -> float:
+        """Gets the do_d of this Storage.
 
+        Minimum Depth of Discharge recommended in % of rated kWh (openDSS Name: %reserve)  # noqa: E501
 
-        :return: The powerunit of this Storage.
-        :rtype: str
+        :return: The do_d of this Storage.
+        :rtype: float
         """
-        return self._powerunit
+        return self._do_d
 
-    @powerunit.setter
-    def powerunit(self, powerunit: str):
-        """Sets the powerunit of this Storage.
+    @do_d.setter
+    def do_d(self, do_d: float):
+        """Sets the do_d of this Storage.
 
+        Minimum Depth of Discharge recommended in % of rated kWh (openDSS Name: %reserve)  # noqa: E501
 
-        :param powerunit: The powerunit of this Storage.
-        :type powerunit: str
+        :param do_d: The do_d of this Storage.
+        :type do_d: float
         """
 
-        self._powerunit = powerunit
+        self._do_d = do_d
+
+    @property
+    def k_v(self) -> float:
+        """Gets the k_v of this Storage.
+
+        Nominal rated (1.0 per unit) voltage, kV, for Storage element.  # noqa: E501
+
+        :return: The k_v of this Storage.
+        :rtype: float
+        """
+        return self._k_v
+
+    @k_v.setter
+    def k_v(self, k_v: float):
+        """Sets the k_v of this Storage.
+
+        Nominal rated (1.0 per unit) voltage, kV, for Storage element.  # noqa: E501
+
+        :param k_v: The k_v of this Storage.
+        :type k_v: float
+        """
+        if k_v is None:
+            raise ValueError("Invalid value for `k_v`, must not be `None`")  # noqa: E501
+
+        self._k_v = k_v
+
+    @property
+    def k_wrated(self) -> float:
+        """Gets the k_wrated of this Storage.
+
+        kW rating of power output. Side effect: Set KVA property.  # noqa: E501
+
+        :return: The k_wrated of this Storage.
+        :rtype: float
+        """
+        return self._k_wrated
+
+    @k_wrated.setter
+    def k_wrated(self, k_wrated: float):
+        """Sets the k_wrated of this Storage.
+
+        kW rating of power output. Side effect: Set KVA property.  # noqa: E501
+
+        :param k_wrated: The k_wrated of this Storage.
+        :type k_wrated: float
+        """
+        if k_wrated is None:
+            raise ValueError("Invalid value for `k_wrated`, must not be `None`")  # noqa: E501
+
+        self._k_wrated = k_wrated
+
+    @property
+    def k_whrated(self) -> float:
+        """Gets the k_whrated of this Storage.
+
+        Rated storage capacity in kWh. Default is 50.  # noqa: E501
+
+        :return: The k_whrated of this Storage.
+        :rtype: float
+        """
+        return self._k_whrated
+
+    @k_whrated.setter
+    def k_whrated(self, k_whrated: float):
+        """Sets the k_whrated of this Storage.
+
+        Rated storage capacity in kWh. Default is 50.  # noqa: E501
+
+        :param k_whrated: The k_whrated of this Storage.
+        :type k_whrated: float
+        """
+
+        self._k_whrated = k_whrated
+
+    @property
+    def k_whstored(self) -> float:
+        """Gets the k_whstored of this Storage.
+
+        Present amount of energy stored, kWh. Default is same as kWh rated.  # noqa: E501
+
+        :return: The k_whstored of this Storage.
+        :rtype: float
+        """
+        return self._k_whstored
+
+    @k_whstored.setter
+    def k_whstored(self, k_whstored: float):
+        """Sets the k_whstored of this Storage.
+
+        Present amount of energy stored, kWh. Default is same as kWh rated.  # noqa: E501
+
+        :param k_whstored: The k_whstored of this Storage.
+        :type k_whstored: float
+        """
+
+        self._k_whstored = k_whstored
+
+    @property
+    def charge_efficiency(self) -> float:
+        """Gets the charge_efficiency of this Storage.
+
+        Percent efficiency for CHARGING the storage element. Default = 90. (SopenDSS Name: %EffCharge)  # noqa: E501
+
+        :return: The charge_efficiency of this Storage.
+        :rtype: float
+        """
+        return self._charge_efficiency
+
+    @charge_efficiency.setter
+    def charge_efficiency(self, charge_efficiency: float):
+        """Sets the charge_efficiency of this Storage.
+
+        Percent efficiency for CHARGING the storage element. Default = 90. (SopenDSS Name: %EffCharge)  # noqa: E501
+
+        :param charge_efficiency: The charge_efficiency of this Storage.
+        :type charge_efficiency: float
+        """
+
+        self._charge_efficiency = charge_efficiency
+
+    @property
+    def discharge_efficiency(self) -> float:
+        """Gets the discharge_efficiency of this Storage.
+
+        Percent efficiency for DISCHARGING the storage element. Default =90. Idling losses are handled by %IdlingkW. (openDSS Name: %EffCharge)  # noqa: E501
+
+        :return: The discharge_efficiency of this Storage.
+        :rtype: float
+        """
+        return self._discharge_efficiency
+
+    @discharge_efficiency.setter
+    def discharge_efficiency(self, discharge_efficiency: float):
+        """Sets the discharge_efficiency of this Storage.
+
+        Percent efficiency for DISCHARGING the storage element. Default =90. Idling losses are handled by %IdlingkW. (openDSS Name: %EffCharge)  # noqa: E501
+
+        :param discharge_efficiency: The discharge_efficiency of this Storage.
+        :type discharge_efficiency: float
+        """
+
+        self._discharge_efficiency = discharge_efficiency
 
     @property
     def powerfactor(self) -> float:
         """Gets the powerfactor of this Storage.
 
+        (openDSS Name: pf)  # noqa: E501
 
         :return: The powerfactor of this Storage.
         :rtype: float
@@ -378,6 +397,7 @@ class Storage(Model):
     def powerfactor(self, powerfactor: float):
         """Sets the powerfactor of this Storage.
 
+        (openDSS Name: pf)  # noqa: E501
 
         :param powerfactor: The powerfactor of this Storage.
         :type powerfactor: float
