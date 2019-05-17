@@ -1,0 +1,22 @@
+version: '3'
+services:
+  redis:
+    image: redis:latest
+    command: redis-server
+    ports:
+      - "6379:6379"
+  se:
+    build:
+      context: ""
+      dockerfile: Dockerfile
+    image: "simulation_engine"
+    ports:
+        - "9090:9090"
+    command: ["python3", "-u", "main.py"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+   # restart: "always"
+
