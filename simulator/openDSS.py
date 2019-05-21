@@ -61,7 +61,7 @@ class OpenDSS:
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusVMag())))
         #logger.info("Just pu of Voltages: " + str(dss.Circuit.AllBusMagPu()))
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusMagPu())))
-        return (dss.Circuit.AllNodeNames(),dss.Circuit.AllBusMagPu(), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
+        return (dss.Circuit.AllNodeNames(),dss.Circuit.AllBusPuVoltage(), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
     #TODO: Return nodes, voltage and Current
     #def getVoltages(self):
 
