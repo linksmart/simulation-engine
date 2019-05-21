@@ -118,6 +118,7 @@ def create_simulation(body):  # noqa: E501
                             and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
             """
             if "storageUnits" in values.keys() and values["storageUnits"] is not None:
+                logger.debug("---------------Setting Storage-------------------------")
                 # radial=radial.to_dict()
                 storage = values["storageUnits"]
                 factory.gridController.setStorage(id, storage)
