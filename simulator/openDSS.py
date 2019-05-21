@@ -61,7 +61,7 @@ class OpenDSS:
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusVMag())))
         #logger.info("Just pu of Voltages: " + str(dss.Circuit.AllBusMagPu()))
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusMagPu())))
-        return (dss.Circuit.AllNodeNames(),dss.Circuit.AllBusPuVoltage(), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
+        return (dss.Circuit.AllNodeNames(),dss.Circuit.AllBusMagPu(), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
     #TODO: Return nodes, voltage and Current
     #def getVoltages(self):
 
@@ -492,46 +492,43 @@ class OpenDSS:
         )
         logger.info(dss_string)
         dss.run_command(dss_string)"""
-    def setLinecodes(self, lines):
-        logger.debug("Setting up the linecodes")
+    def setLineCodes(self, lines):
+        logger.debug("Setting up linecodes")
         self.linecodes=lines
         try:
             for element in self.linecodes:
                 for key, value in element.items():
-                    #logger.debug("Key: "+str(key)+" Value: "+str(value))
                     if key=="id":
                         linecode_name=value
                     elif key=="nphases":
+                        logger.debug(str(key))
                         num_phases=value 
-                    elif key == "BaseFreq":
+                    elif key == "base_frequency":
                         BaseFreq = value
-                    elif key == "rmatrix1":
-                        rmatrix1 = value
-                    elif key == "rmatrix2":
-                        rmatrix2 = value
-                    elif key == "rmatrix3":
-                        rmatrix3 = value
-                    elif key == "xmatrix1":
-                        xmatrix1 = value
-                    elif key == "xmatrix2":
-                        xmatrix2 = value
-                    elif key == "xmatrix3":
-                        xmatrix3 = value
+                    elif key == "rmatrix":
+                        rmatrix = value
+                    elif key == "xmatrix":
+                        xmatrix = value
                     elif key == "units": 
                         units = value
                     else:
                         break
                 self.id=linecode_name
                 self.nphases=num_phases
-                self.BaseFreq = BaseFreq
-                self.rmatrix1 = rmatrix1
-                self.rmatrix2 = rmatrix2
-                self.rmatrix3 = rmatrix3
-                self.xmatrix1 = rmatrix1
-                self.xmatrix2 = xmatrix2
-                self.xmatrix3 = xmatrix3 
+                self.base_frequency = BaseFreq
+                self.rmatrix = rmatrix
+                self.xmatrix = xmatrix 
                 self.units = units
-                dss.run_command("New linecode.{linecode_name} nhases={num_phases} BaseFreq={BaseFreq} rmatrix={(rmatrix1 + '|' rmatrix2 + '|' rmatrix3)} xmatrix={(xmatrix1 + '|' xmatrix2 + '|' xmatrix3)} units = {units}".format(
+                
+                dss.run_command("New linecode.{linecode_name} nhases={num_phases} BaseFreq={BaseFreq} rmatrix={rmatrix[0][0]} | {rmatrix[1][0]}  {rmatrix[1][1]} | {rmatrix[2][0]} {rmatrix[2][1]} {rmatrix[2][2]} xmatrix={xmatrix[0][0]} | {xmatrix[1][0]}  {xmatrix[1][1]} | {xmatrix[2][0]} {xmatrix[2][1]} {xmatrix[2][2]} units = {units}".format(
+                linecode_name = self.id,
+                num_phases = self.nphases,
+                BaseFreq = self.base_frequency,
+                rmatrix = self.rmatrix,
+                xmatrix = self.xmatrix,
+                units = self.units
+                ))
+                """dss.run_command("New linecode.{linecode_name} nhases={num_phases} BaseFreq={BaseFreq} rmatrix={(rmatrix1 + '|' rmatrix2 + '|' rmatrix3)} xmatrix={(xmatrix1 + '|' xmatrix2 + '|' xmatrix3)} units = {units}".format(
                 linecode_name = self.id,
                 num_phases = self.nphases,
                 BaseFreq = self.BaseFreq,
@@ -542,7 +539,7 @@ class OpenDSS:
                 xmatrix2 = self.xmatrix2,
                 xmatrix3 = self.xmatrix3,
                 units = self.units
-            ))
+            ))"""
                 """ logger.debug(#See if the values are loaded to the command. This is good :)
                 " load_name 1: "+str(load_name) + 
                 " bus_name = "+str(bus_name)+
@@ -956,13 +953,13 @@ class OpenDSS:
                 voltage_kV=self.k_v,
                 voltage_kVar=self.k_var
                 ))
-                logger.info(#See if the values are loaded to the command. This is good :)
+                """logger.info(#See if the values are loaded to the command. This is good :)
                 " capacitor_name 1: "+str(self.capacitor_name) + 
                 " bus_name = "+str(self.bus_name)+
                 " num_phases = " +str(self.num_phases)+
                 " k_v = " +str(self.voltage_kV)+
                 " k_var = " + str(self.voltage_kVar)
-                )
+                )"""
             #dss.run_command('Solve') 
         except Exception as e:
             logger.error(e)

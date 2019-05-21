@@ -65,9 +65,16 @@ class gridController:
         
     def setCapacitors(self, id, capacitors):
         logger.debug("Charging capacitors into the simulator")
-        self.object = object
-        self.sim.setCapacitors(self.object)
+        #self.object = object
+        #self.sim.setCapacitors(self.object)
+        self.sim.setCapacitors(capacitors)
         logger.debug("Capacitor charged")
+    def setLineCodes(self, id, linecode):
+        logger.debug("Charging LineCode into the simulator")
+        #self.object = object
+        #self.sim.setLineCodes(self.object)
+        self.sim.setLineCodes(linecode)
+        logger.debug("LineCode charged")
 
     def setXYCurve(self, id, npts, xarray, yarray):
         logger.debug("Setting the XYCurve into the simulator")
