@@ -483,8 +483,8 @@ definitions:
     required:
     - "bus1"
     - "id"
-    - "kV"
-    - "kWrated"
+    - "kv"
+    - "kw_rated"
     properties:
       id:
         type: "string"
@@ -496,34 +496,32 @@ definitions:
       connection:
         type: "string"
         description: "={wye|LN|delta|LL}. Default is wye. (openDSS Name: conn)"
-      SoC:
+      soc:
         type: "number"
         description: "State of Charge in % of rated kWh (openDSS Name: %stored)"
-      DoD:
+      dod:
         type: "number"
-        description: "Minimum Depth of Discharge recommended in % of rated kWh (openDSS\
-          \ Name: %reserve)"
-      kV:
+        description: "Minimum Depth of Discharge recommended in % of rated kWh (%reserve)"
+      kv:
         type: "number"
         description: "Nominal rated (1.0 per unit) voltage, kV, for Storage element."
-      kWrated:
+      kw_rated:
         type: "number"
         description: "kW rating of power output. Side effect: Set KVA property."
-      kWhrated:
+      kwh_rated:
         type: "number"
         description: "Rated storage capacity in kWh. Default is 50."
-      kWhstored:
+      kwh_stored:
         type: "number"
         description: "Present amount of energy stored, kWh. Default is same as kWh\
           \ rated."
-      chargeEfficiency:
+      charge_efficiency:
         type: "number"
-        description: "Percent efficiency for CHARGING the storage element. Default\
-          \ = 90. (SopenDSS Name: %EffCharge)"
-      dischargeEfficiency:
+        description: "Efficiency for CHARGING the storage element. Default=90%. (%EffCharge)"
+      discharge_efficiency:
         type: "number"
-        description: "Percent efficiency for DISCHARGING the storage element. Default\
-          \ =90. Idling losses are handled by %IdlingkW. (openDSS Name: %EffCharge)"
+        description: "Efficiency for DISCHARGING the storage element. Default=90%.\
+          \ Idling losses are handled by %IdlingkW. (%EffCharge)"
       powerfactor:
         type: "number"
         description: "(openDSS Name: pf)"
