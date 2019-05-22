@@ -134,7 +134,7 @@ def create_simulation(body):  # noqa: E501
                 logger.debug("---------------Setting LineCode-------------------------")
                 linecode = values["linecode"]
                 logger.debug("LineCode: " + str(linecode))
-                factory.gridController.setLineCode(id, linecode)   
+                factory.gridController.setLineCodes(id, linecode)   
             if "capacitor" in values.keys() and values["capacitor"] is not None:
                 logger.debug("---------------Setting Capacitors-------------------------")
                 capacitor = values["capacitor"]
@@ -198,7 +198,13 @@ def delete_simulation(id):  # noqa: E501
 
     :rtype: None
     """
-    return 'Simulation ' + id + ' deleted!'
+    factory= ThreadFactory(id)
+    try:
+        factory.gridController.disableCircuit(id)
+        status = 'Simulation ' + id + ' deleted!'
+    except:
+        status = "Could not delete Simulation " + id
+    return status
 
 
 def update_simulation(id, body):  # noqa: E501

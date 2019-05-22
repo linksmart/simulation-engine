@@ -379,48 +379,26 @@ definitions:
         default: false
   Linecode:
     type: "object"
-    required:
-    - "id"
-    - "units"
     properties:
       id:
         type: "string"
-      R1:
-        type: "number"
-      R0:
-        type: "number"
-      X1:
-        type: "number"
-      X0:
-        type: "number"
-      C1:
-        type: "number"
-      C0:
-        type: "number"
-      R_Matrix:
-        $ref: "#/definitions/Linecode_R_Matrix"
-      X_Matrix:
-        $ref: "#/definitions/Linecode_R_Matrix"
-      C_Matrix:
-        $ref: "#/definitions/Linecode_R_Matrix"
+      nphases:
+        type: number
+      rmatrix:
+        type: "array"
+        items:
+          type: "array"
+          items:
+            type: "number"
+      xmatrix:
+        type: "array"
+        items:
+          type: "array"
+          items:
+            type: "number"
       units:
         type: "string"
       base_frequency:
-        type: "number"
-  Impedance:
-    type: "object"
-    properties:
-      R1:
-        type: "number"
-      R0:
-        type: "number"
-      X1:
-        type: "number"
-      X0:
-        type: "number"
-      C1:
-        type: "number"
-      C0:
         type: "number"
   XYCurve:
     type: "object"
@@ -758,14 +736,6 @@ definitions:
       voltageT: true
       voltageR: true
       voltageS: true
-  Linecode_R_Matrix:
-    properties:
-      phase_R:
-        $ref: "#/definitions/Impedance"
-      phase_S:
-        $ref: "#/definitions/Impedance"
-      phase_T:
-        $ref: "#/definitions/Impedance"
   Transformer_wdgs:
     properties:
       struct:
