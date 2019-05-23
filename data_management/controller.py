@@ -138,18 +138,28 @@ class gridController:
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         self.sim.setMode("snap")
         logger.info("Solution mode 2: " + str(self.sim.getMode()))
-        self.sim.setStepSize("minutes")
+        self.sim.setStepSize("hours")
         #logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         self.sim.setNumberSimulations(1)
         logger.info("Number simulations 2: " + str(self.sim.getNumberSimulations()))
         self.sim.setVoltageBases(115,4.16,0.48)
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        self.sim.setVoltageBases()
-        numSteps= 100
-        logger.info("Number of steps: "+str(numSteps))
+        #self.sim.setVoltageBases()
+        numSteps= 10
+        #logger.info("Number of steps: "+str(numSteps))
+        #nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         for i in range(numSteps):
             nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
+        """df = self.sim.utils.lines_to_dataframe()
+        data = df[['Bus1', 'Bus2']].to_dict(orient="index")
+        for name in data:
+            self.sim.Circuit.SetActiveBus(f"{name}")
+            if phase in self.sim.Bus.Nodes():
+                index = self.sim.Bus.Nodes().index(phase)
+                re, im = self.sim.Bus.PuVoltage()[index:index+2]
+                V = abs(complex(re,im))
+        logger.info("Voltage: " + str(V))"""
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         logger.info("Node Names: "+ str(nodeNames))
         logger.info("All Bus MagPus: " + str(allBusMagPu))
@@ -163,11 +173,11 @@ class gridController:
         #filename = str(id)+"_results.txt"
         filename = '/usr/src/app/tests/results/results.txt'
         f = open(filename, 'w')
-        f.writelines("Nodes: " + str(nodeNames)+"\n")
-        f.writelines("Voltages: " + str(allBusMagPu))
-        
-        logger.info("File "+filename+" written")
+        #f.writelines("Nodes: " + str(nodeNames)+"\n")
+        f.writelines(str(allBusMagPu))
+        #f.writelines("VperPhase: " + str(vPerPhase))
         f.close()
+        #return allBusMagPu
         return id
     
     #def results(self):   

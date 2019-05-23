@@ -205,7 +205,6 @@ def delete_simulation(id):  # noqa: E501
         status = "Could not delete Simulation " + id
     return status
 
-
 def update_simulation(id, body):  # noqa: E501
     """Send new data to an existing simulation
 
