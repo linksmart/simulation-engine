@@ -56,12 +56,23 @@ class OpenDSS:
         #logger.info("Length of Node Names: " + str(len(dss.Circuit.AllNodeNames())))
         #logger.info("Voltages: "+str(dss.Circuit.AllBusVolts()))
         #logger.info("Length of Bus Voltages: "+str(len(dss.Circuit.AllBusVolts())))
-        #logger.info("Bus Voltages: "+ str(dss.Bus.Voltages()))
+        #logger.info("Bus Voltages: "+ str(dss.Bus.PuVoltage()))
+        #logger.info("Bus Voltages: " + str(dss.Circuit.AllBusVolts()))
         #logger.info("Just magnitude of Voltages: "+str(dss.Circuit.AllBusVMag()))
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusVMag())))
         #logger.info("Just pu of Voltages: " + str(dss.Circuit.AllBusMagPu()))
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusMagPu())))
-        return (dss.Circuit.AllNodeNames(),dss.Circuit.AllBusMagPu(), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
+        #dss.Circuit.AllNodeVmagPUByPhase(1),
+        #dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEE13Nodeckt.dss')
+        #dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEELineCodes.dss')
+        #logger.info(dss.utils.class_to_dataframe('Load'))
+        result = {}
+        nodeList = dss.Circuit.AllNodeNames()
+        puList = dss.Circuit.AllBusMagPu()
+        for i in range(len(nodeList)):
+            result[nodeList[i]] = puList[i]
+        return (dss.Circuit.AllNodeNames(), result, dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses())
+        #return (dss.Circuit.AllNodeNames(), dss.Circuit.AllNodeVmagPUByPhase(1), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
     #TODO: Return nodes, voltage and Current
     #def getVoltages(self):
 
@@ -355,6 +366,7 @@ class OpenDSS:
                 #dss.run_command('Solve') #How do we get the result?
                 #logger.debug("Load SOLVED") #It does not get here. This is now good
                 #!logger.info("Load names: " + str(dss.Loads.AllNames())) #listed load names
+                dss.run_command('Solve');
         except Exception as e:
             logger.error(e)
     """def setLoads(self, loads):
@@ -552,7 +564,7 @@ class OpenDSS:
                 " power_factor = "+str(power_factor)+
                 " shape = " + power_profile_id
                 ) """
-            #dss.run_command('Solve') #How do we get the result?
+            dss.run_command('Solve') 
             #logger.debug("Load SOLVED") #It does not get here. This is now good
             #logger.info("Load names: " + str(dss.Loads.AllNames())) #listed load names
         except Exception as e:
@@ -960,6 +972,6 @@ class OpenDSS:
                 " k_v = " +str(self.voltage_kV)+
                 " k_var = " + str(self.voltage_kVar)
                 )"""
-            #dss.run_command('Solve') 
+            dss.run_command('Solve') 
         except Exception as e:
             logger.error(e)
