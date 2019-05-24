@@ -886,52 +886,80 @@ class OpenDSS:
         dss.run_command(dss_string)
 
     def setStorages(self, storage):
-        #!logger.info("Setting up the Storages")
+
+        logger.info("Setting up the Storages")
         try:
             for element in storage:
                 id = None
+                bus1 = None
                 phases = None
-                node = None
-                voltage = None
-                power = None
-                kwhrated = None
-                kwrated = None
+                connection = "wye"
+                soc = 100 #! defalt value
+                dod = 20 #! defalt value
+                kv = None
+                kw_rated = None
+                kwh_rated = 50 #! defalt value
+                kwh_stored = 50 #! defalt value
+                charge_efficiency = 90 #! defalt value
+                discharge_efficiency = 90 #! defalt value
+                powerfactor = 1 #! defalt value
+
                 for key, value in element.items():
-                    #!logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
+                    if key == "bus1":
+                        bus1 = value
                     if key == "phases":
                         phases = value
-                    if key == "node":
-                        node = value
-                    if key == "voltage":
-                        voltage = value
-                    if key == "power":
-                        power = value
-                    if key == "kwhrated":
-                        kwhrated = value
-                    if key == "kwrated":
-                        kwrated = value
-                self.setStorage(id, phases, node, voltage, power, kwhrated, kwrated)
+                    if key == "connectio":
+                        connection = value
+                    if key == "soc":
+                        soc = value
+                    if key == "dod":
+                        dod = value
+                    if key == "kv":
+                        kv = value
+                    if key == "kw_rated":
+                        kw_rated = value
+                    if key == "kwh_rated":
+                        kwh_rated = value
+                    if key == "kwh_stored":
+                        kwh_stored = value
+                    if key == "charge_efficiency":
+                        charge_efficiency = value
+                    if key == "discharge_efficiency":
+                        discharge_efficiency = value
+                    if key == "powerfactor":
+                        powerfactor = value
+                self.setStorage(id, bus1, phases, connection, soc, dod, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor)
                 #!dss.run_command('Solve')
                 #!logger.info("Storage names: " + str(dss.Circuit.AllNodeNames()))
         except Exception as e:
             logger.error(e)
 
-    def setStorage(self, id, phases, node, voltage, power, kwhrated, kwrated):
+
+    def setStorage(self, id, bus1, phases, connection, soc, dod, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor):
+        logger.info("starting setStorage for ID: " + str(id))
         # New Storage.AtPVNode phases=3 bus1=121117 kV=0.4  kva=5 kWhrated=9.6 kwrated=6.4
-        dss_string = "New Storage.{id} phases={phases} bus1={node} kV={voltage} kVA={power} kWhrated={kwhrated} kwrated={kwrated}".format(
+        dss_string = "New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} kWhstored={kwh_stored} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
             id=id,
+            bus1=bus1,
             phases=phases,
-            node=node,
-            voltage=voltage,
-            power=power,
-            kwhrated=kwhrated,
-            kwrated=kwrated
+            connection=connection,
+            soc=soc,
+            dod=dod,
+            kv=kv,
+            kw_rated=kw_rated,
+            kwh_rated=kwh_rated,
+            kwh_stored=kwh_stored,
+            charge_efficiency=charge_efficiency,
+            discharge_efficiency=discharge_efficiency,
+            powerfactor=powerfactor
         )
-        #!logger.info(dss_string)
+        logger.info(dss_string)
         dss.run_command(dss_string)
-        
+
     def setCapacitors(self, capacitors):
         #!logger.info("Setting up the capacitors")
         self.capacitors=capacitors
