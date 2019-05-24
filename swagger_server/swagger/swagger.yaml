@@ -344,7 +344,6 @@ definitions:
     type: "object"
     required:
     - "id"
-    - "unitlength"
     properties:
       id:
         type: "string"
