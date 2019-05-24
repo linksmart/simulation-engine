@@ -56,12 +56,23 @@ class OpenDSS:
         #logger.info("Length of Node Names: " + str(len(dss.Circuit.AllNodeNames())))
         #logger.info("Voltages: "+str(dss.Circuit.AllBusVolts()))
         #logger.info("Length of Bus Voltages: "+str(len(dss.Circuit.AllBusVolts())))
-        #logger.info("Bus Voltages: "+ str(dss.Bus.Voltages()))
+        #logger.info("Bus Voltages: "+ str(dss.Bus.PuVoltage()))
+        #logger.info("Bus Voltages: " + str(dss.Circuit.AllBusVolts()))
         #logger.info("Just magnitude of Voltages: "+str(dss.Circuit.AllBusVMag()))
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusVMag())))
         #logger.info("Just pu of Voltages: " + str(dss.Circuit.AllBusMagPu()))
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusMagPu())))
-        return (dss.Circuit.AllNodeNames(),dss.Circuit.AllBusMagPu(), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
+        #dss.Circuit.AllNodeVmagPUByPhase(1),
+        #dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEE13Nodeckt.dss')
+        #dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEELineCodes.dss')
+        #logger.info(dss.utils.class_to_dataframe('Load'))
+        result = {}
+        nodeList = dss.Circuit.AllNodeNames()
+        puList = dss.Circuit.AllBusMagPu()
+        for i in range(len(nodeList)):
+            result[nodeList[i]] = puList[i]
+        return (dss.Circuit.AllNodeNames(), result, dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses())
+        #return (dss.Circuit.AllNodeNames(), dss.Circuit.AllNodeVmagPUByPhase(1), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
     #TODO: Return nodes, voltage and Current
     #def getVoltages(self):
 
@@ -355,6 +366,7 @@ class OpenDSS:
                 #dss.run_command('Solve') #How do we get the result?
                 #logger.debug("Load SOLVED") #It does not get here. This is now good
                 #!logger.info("Load names: " + str(dss.Loads.AllNames())) #listed load names
+                dss.run_command('Solve');
         except Exception as e:
             logger.error(e)
     """def setLoads(self, loads):
@@ -552,7 +564,7 @@ class OpenDSS:
                 " power_factor = "+str(power_factor)+
                 " shape = " + power_profile_id
                 ) """
-            #dss.run_command('Solve') #How do we get the result?
+            dss.run_command('Solve') 
             #logger.debug("Load SOLVED") #It does not get here. This is now good
             #logger.info("Load names: " + str(dss.Loads.AllNames())) #listed load names
         except Exception as e:
@@ -874,77 +886,50 @@ class OpenDSS:
         dss.run_command(dss_string)
 
     def setStorages(self, storage):
-
-        logger.info("Setting up the Storages")
+        #!logger.info("Setting up the Storages")
         try:
             for element in storage:
                 id = None
-                bus1 = None
                 phases = None
-                connection = "wye"
-                soc = 100 #! defalt value
-                dod = 20 #! defalt value
-                kv = None
-                kw_rated = None
-                kwh_rated = 50 #! defalt value
-                kwh_stored = 50 #! defalt value
-                charge_efficiency = 90 #! defalt value
-                discharge_efficiency = 90 #! defalt value
-                powerfactor = 1 #! defalt value
-
+                node = None
+                voltage = None
+                power = None
+                kwhrated = None
+                kwrated = None
                 for key, value in element.items():
-                    logger.debug("Key: " + str(key) + " Value: " + str(value))
+                    #!logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
-                    if key == "bus1":
-                        bus1 = value
                     if key == "phases":
                         phases = value
-                    if key == "connectio":
-                        connection = value
-                    if key == "soc":
-                        soc = value
-                    if key == "dod":
-                        dod = value
-                    if key == "kv":
-                        kv = value
-                    if key == "kw_rated":
-                        kw_rated = value
-                    if key == "kwh_rated":
-                        kwh_rated = value
-                    if key == "kwh_stored":
-                        kwh_stored = value
-                    if key == "charge_efficiency":
-                        charge_efficiency = value
-                    if key == "discharge_efficiency":
-                        discharge_efficiency = value
-                    if key == "powerfactor":
-                        powerfactor = value
-                self.setStorage(id, bus1, phases, connection, soc, dod, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor)
+                    if key == "node":
+                        node = value
+                    if key == "voltage":
+                        voltage = value
+                    if key == "power":
+                        power = value
+                    if key == "kwhrated":
+                        kwhrated = value
+                    if key == "kwrated":
+                        kwrated = value
+                self.setStorage(id, phases, node, voltage, power, kwhrated, kwrated)
                 #!dss.run_command('Solve')
                 #!logger.info("Storage names: " + str(dss.Circuit.AllNodeNames()))
         except Exception as e:
             logger.error(e)
 
-    def setStorage(self, id, bus1, phases, connection, soc, dod, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor):
-        logger.info("starting setStorage for ID: " + str(id))
+    def setStorage(self, id, phases, node, voltage, power, kwhrated, kwrated):
         # New Storage.AtPVNode phases=3 bus1=121117 kV=0.4  kva=5 kWhrated=9.6 kwrated=6.4
-        dss_string = "New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} kWhstored={kwh_stored} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
+        dss_string = "New Storage.{id} phases={phases} bus1={node} kV={voltage} kVA={power} kWhrated={kwhrated} kwrated={kwrated}".format(
             id=id,
-            bus1=bus1,
             phases=phases,
-            connection=connection,
-            soc=soc,
-            dod=dod,
-            kv=kv,
-            kw_rated=kw_rated,
-            kwh_rated=kwh_rated,
-            kwh_stored=kwh_stored,
-            charge_efficiency=charge_efficiency,
-            discharge_efficiency=discharge_efficiency,
-            powerfactor=powerfactor
+            node=node,
+            voltage=voltage,
+            power=power,
+            kwhrated=kwhrated,
+            kwrated=kwrated
         )
-        logger.info(dss_string)
+        #!logger.info(dss_string)
         dss.run_command(dss_string)
         
     def setCapacitors(self, capacitors):
@@ -952,9 +937,9 @@ class OpenDSS:
         self.capacitors=capacitors
         try:
             for element in self.capacitors:
-                logger.debug("Element: "+str(element))
+                #!logger.debug("Element: "+str(element))
                 for key, value in element.items():
-                    logger.debug("Key: "+str(key)+" Value: "+str(value))
+                    #!logger.debug("Key: "+str(key)+" Value: "+str(value))
                     if key=="id":
                         id=value
                     elif key=="bus":
@@ -963,7 +948,7 @@ class OpenDSS:
                         phases=value 
                     elif key == "k_var":
                         voltage_kVar = value
-                    elif key == "k_v":
+                    elif key == "k_v":  
                         voltage_kV = value
                     else:
                         break
@@ -972,7 +957,7 @@ class OpenDSS:
                 self.num_phases=phases
                 self.k_v=voltage_kV
                 self.k_var=voltage_kVar
-
+                
                 dss.run_command("New Capacitor.{capacitor_name} Bus1={bus_name}  Phases={num_phases} kV={voltage_kV} kVar={voltage_kVar}".format(
                 capacitor_name=self.capacitor_name,
                 bus_name=self.bus_name,
@@ -987,6 +972,6 @@ class OpenDSS:
                 " k_v = " +str(self.voltage_kV)+
                 " k_var = " + str(self.voltage_kVar)
                 )"""
-            #dss.run_command('Solve')
+            dss.run_command('Solve') 
         except Exception as e:
             logger.error(e)
