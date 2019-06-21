@@ -175,7 +175,7 @@ class Transformer(Model):
     def buses(self) -> List[str]:
         """Gets the buses of this Transformer.
 
-        Array of bus definitions for windings [1, 2. â€¦].  # noqa: E501
+        Array of bus definitions for windings [1, 2. …].  # noqa: E501
 
         :return: The buses of this Transformer.
         :rtype: List[str]
@@ -186,7 +186,7 @@ class Transformer(Model):
     def buses(self, buses: List[str]):
         """Sets the buses of this Transformer.
 
-        Array of bus definitions for windings [1, 2. â€¦].  # noqa: E501
+        Array of bus definitions for windings [1, 2. …].  # noqa: E501
 
         :param buses: The buses of this Transformer.
         :type buses: List[str]
@@ -198,7 +198,7 @@ class Transformer(Model):
     def kvas(self) -> List[float]:
         """Gets the kvas of this Transformer.
 
-        Array of base kVA ratings for windings [1,2,â€¦].  # noqa: E501
+        Array of base kVA ratings for windings [1,2,…].  # noqa: E501
 
         :return: The kvas of this Transformer.
         :rtype: List[float]
@@ -209,7 +209,7 @@ class Transformer(Model):
     def kvas(self, kvas: List[float]):
         """Sets the kvas of this Transformer.
 
-        Array of base kVA ratings for windings [1,2,â€¦].  # noqa: E501
+        Array of base kVA ratings for windings [1,2,…].  # noqa: E501
 
         :param kvas: The kvas of this Transformer.
         :type kvas: List[float]
@@ -221,7 +221,7 @@ class Transformer(Model):
     def kvs(self) -> List[float]:
         """Gets the kvs of this Transformer.
 
-        Array of kV ratings for the kV field for windings [1,2,â€¦].  # noqa: E501
+        Array of kV ratings for the kV field for windings [1,2,…].  # noqa: E501
 
         :return: The kvs of this Transformer.
         :rtype: List[float]
@@ -232,7 +232,7 @@ class Transformer(Model):
     def kvs(self, kvs: List[float]):
         """Sets the kvs of this Transformer.
 
-        Array of kV ratings for the kV field for windings [1,2,â€¦].  # noqa: E501
+        Array of kV ratings for the kV field for windings [1,2,…].  # noqa: E501
 
         :param kvs: The kvs of this Transformer.
         :type kvs: List[float]
@@ -244,7 +244,7 @@ class Transformer(Model):
     def conns(self) -> List[str]:
         """Gets the conns of this Transformer.
 
-        Array of winding connections for windings [1, 2. â€¦] <wye|delta>.  # noqa: E501
+        Array of winding connections for windings [1, 2. …] <wye|delta>.  # noqa: E501
 
         :return: The conns of this Transformer.
         :rtype: List[str]
@@ -255,7 +255,7 @@ class Transformer(Model):
     def conns(self, conns: List[str]):
         """Sets the conns of this Transformer.
 
-        Array of winding connections for windings [1, 2. â€¦] <wye|delta>.  # noqa: E501
+        Array of winding connections for windings [1, 2. …] <wye|delta>.  # noqa: E501
 
         :param conns: The conns of this Transformer.
         :type conns: List[str]
@@ -267,7 +267,7 @@ class Transformer(Model):
     def xsc_array(self) -> List[float]:
         """Gets the xsc_array of this Transformer.
 
-        Array of n*(n-1) /2 short circuit reactances in percent on the first windingâ€™s kVA base. â€œnâ€ is the number of windings. Order (12, 13, 14, â€¦1n, 23, 24, â€¦ 34, â€¦)  # noqa: E501
+        Array of n*(n-1) /2 short circuit reactances in percent on the first winding’s kVA base. “n” is the number of windings. Order (12, 13, 14, …1n, 23, 24, … 34, …)  # noqa: E501
 
         :return: The xsc_array of this Transformer.
         :rtype: List[float]
@@ -278,7 +278,7 @@ class Transformer(Model):
     def xsc_array(self, xsc_array: List[float]):
         """Sets the xsc_array of this Transformer.
 
-        Array of n*(n-1) /2 short circuit reactances in percent on the first windingâ€™s kVA base. â€œnâ€ is the number of windings. Order (12, 13, 14, â€¦1n, 23, 24, â€¦ 34, â€¦)  # noqa: E501
+        Array of n*(n-1) /2 short circuit reactances in percent on the first winding’s kVA base. “n” is the number of windings. Order (12, 13, 14, …1n, 23, 24, … 34, …)  # noqa: E501
 
         :param xsc_array: The xsc_array of this Transformer.
         :type xsc_array: List[float]
@@ -290,7 +290,7 @@ class Transformer(Model):
     def percent_rs(self) -> List[float]:
         """Gets the percent_rs of this Transformer.
 
-        Array of percent resistances for windings [1, 2. â€¦]  # noqa: E501
+        Array of percent resistances for windings [1, 2. …]  # noqa: E501
 
         :return: The percent_rs of this Transformer.
         :rtype: List[float]
@@ -301,7 +301,7 @@ class Transformer(Model):
     def percent_rs(self, percent_rs: List[float]):
         """Sets the percent_rs of this Transformer.
 
-        Array of percent resistances for windings [1, 2. â€¦]  # noqa: E501
+        Array of percent resistances for windings [1, 2. …]  # noqa: E501
 
         :param percent_rs: The percent_rs of this Transformer.
         :type percent_rs: List[float]
@@ -359,7 +359,7 @@ class Transformer(Model):
     def taps(self) -> List[float]:
         """Gets the taps of this Transformer.
 
-        Array of per unit taps for windings [1,2,â€¦].  # noqa: E501
+        Array of per unit taps for windings [1,2,…].  # noqa: E501
 
         :return: The taps of this Transformer.
         :rtype: List[float]
@@ -370,7 +370,7 @@ class Transformer(Model):
     def taps(self, taps: List[float]):
         """Sets the taps of this Transformer.
 
-        Array of per unit taps for windings [1,2,â€¦].  # noqa: E501
+        Array of per unit taps for windings [1,2,…].  # noqa: E501
 
         :param taps: The taps of this Transformer.
         :type taps: List[float]

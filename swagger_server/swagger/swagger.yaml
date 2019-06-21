@@ -606,34 +606,34 @@ definitions:
         description: "number of windings"
       buses:
         type: "array"
-        description: "Array of bus definitions for windings [1, 2. ‚Ä¶]."
+        description: "Array of bus definitions for windings [1, 2. Ö]."
         items:
           type: "string"
       kvas:
         type: "array"
-        description: "Array of base kVA ratings for windings [1,2,‚Ä¶]."
+        description: "Array of base kVA ratings for windings [1,2,Ö]."
         items:
           type: "number"
       kvs:
         type: "array"
-        description: "Array of kV ratings for the kV field for windings [1,2,‚Ä¶]."
+        description: "Array of kV ratings for the kV field for windings [1,2,Ö]."
         items:
           type: "number"
       conns:
         type: "array"
-        description: "Array of winding connections for windings [1, 2. ‚Ä¶] <wye|delta>."
+        description: "Array of winding connections for windings [1, 2. Ö] <wye|delta>."
         items:
           type: "string"
       xsc_array:
         type: "array"
         description: "Array of n*(n-1) /2 short circuit reactances in percent on the\
-          \ first winding‚Äôs kVA base. ‚Äún‚Äù is the number of windings. Order (12, 13,\
-          \ 14, ‚Ä¶1n, 23, 24, ‚Ä¶ 34, ‚Ä¶)"
+          \ first windingís kVA base. ìnî is the number of windings. Order (12, 13,\
+          \ 14, Ö1n, 23, 24, Ö 34, Ö)"
         items:
           type: "number"
       percent_rs:
         type: "array"
-        description: "Array of percent resistances for windings [1, 2. ‚Ä¶]"
+        description: "Array of percent resistances for windings [1, 2. Ö]"
         items:
           type: "number"
       percent_load_loss:
@@ -645,7 +645,7 @@ definitions:
         description: "Name of the bank this transformer is part of"
       taps:
         type: "array"
-        description: "Array of per unit taps for windings [1,2,‚Ä¶]."
+        description: "Array of per unit taps for windings [1,2,Ö]."
         items:
           type: "number"
           minimum: 0
