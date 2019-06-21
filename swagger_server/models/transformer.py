@@ -6,8 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.transformer_regcontrol import TransformerRegcontrol  # noqa: F401,E501
-from swagger_server.models.transformer_wdgs import TransformerWdgs  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -17,7 +15,7 @@ class Transformer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, phases: int=None, windings: int=None, kvas: List[float]=None, buses: List[str]=None, kvs: List[float]=None, wdgs: TransformerWdgs=None, regcontrol: TransformerRegcontrol=None, xhl: float=None, xlt: float=None, xht: float=None, percent_load_loss: float=None, bank: str=None, tap_level: float=None, base_frequency: float=None):  # noqa: E501
+    def __init__(self, id: str=None, phases: int=None, windings: int=None, buses: List[str]=None, kvas: List[float]=None, kvs: List[float]=None, conns: List[str]=None, xsc_array: List[float]=None, percent_rs: List[float]=None, percent_load_loss: float=None, bank: str=None, taps: List[float]=None, base_frequency: float=None):  # noqa: E501
         """Transformer - a model defined in Swagger
 
         :param id: The id of this Transformer.  # noqa: E501
@@ -26,28 +24,24 @@ class Transformer(Model):
         :type phases: int
         :param windings: The windings of this Transformer.  # noqa: E501
         :type windings: int
-        :param kvas: The kvas of this Transformer.  # noqa: E501
-        :type kvas: List[float]
         :param buses: The buses of this Transformer.  # noqa: E501
         :type buses: List[str]
+        :param kvas: The kvas of this Transformer.  # noqa: E501
+        :type kvas: List[float]
         :param kvs: The kvs of this Transformer.  # noqa: E501
         :type kvs: List[float]
-        :param wdgs: The wdgs of this Transformer.  # noqa: E501
-        :type wdgs: TransformerWdgs
-        :param regcontrol: The regcontrol of this Transformer.  # noqa: E501
-        :type regcontrol: TransformerRegcontrol
-        :param xhl: The xhl of this Transformer.  # noqa: E501
-        :type xhl: float
-        :param xlt: The xlt of this Transformer.  # noqa: E501
-        :type xlt: float
-        :param xht: The xht of this Transformer.  # noqa: E501
-        :type xht: float
+        :param conns: The conns of this Transformer.  # noqa: E501
+        :type conns: List[str]
+        :param xsc_array: The xsc_array of this Transformer.  # noqa: E501
+        :type xsc_array: List[float]
+        :param percent_rs: The percent_rs of this Transformer.  # noqa: E501
+        :type percent_rs: List[float]
         :param percent_load_loss: The percent_load_loss of this Transformer.  # noqa: E501
         :type percent_load_loss: float
         :param bank: The bank of this Transformer.  # noqa: E501
         :type bank: str
-        :param tap_level: The tap_level of this Transformer.  # noqa: E501
-        :type tap_level: float
+        :param taps: The taps of this Transformer.  # noqa: E501
+        :type taps: List[float]
         :param base_frequency: The base_frequency of this Transformer.  # noqa: E501
         :type base_frequency: float
         """
@@ -55,17 +49,15 @@ class Transformer(Model):
             'id': str,
             'phases': int,
             'windings': int,
-            'kvas': List[float],
             'buses': List[str],
+            'kvas': List[float],
             'kvs': List[float],
-            'wdgs': TransformerWdgs,
-            'regcontrol': TransformerRegcontrol,
-            'xhl': float,
-            'xlt': float,
-            'xht': float,
+            'conns': List[str],
+            'xsc_array': List[float],
+            'percent_rs': List[float],
             'percent_load_loss': float,
             'bank': str,
-            'tap_level': float,
+            'taps': List[float],
             'base_frequency': float
         }
 
@@ -73,34 +65,30 @@ class Transformer(Model):
             'id': 'id',
             'phases': 'phases',
             'windings': 'windings',
-            'kvas': 'kvas',
             'buses': 'buses',
+            'kvas': 'kvas',
             'kvs': 'kvs',
-            'wdgs': 'wdgs',
-            'regcontrol': 'regcontrol',
-            'xhl': 'xhl',
-            'xlt': 'xlt',
-            'xht': 'xht',
+            'conns': 'conns',
+            'xsc_array': 'xsc_array',
+            'percent_rs': 'percent_rs',
             'percent_load_loss': 'percent_load_loss',
             'bank': 'bank',
-            'tap_level': 'tapLevel',
+            'taps': 'taps',
             'base_frequency': 'base_frequency'
         }
 
         self._id = id
         self._phases = phases
         self._windings = windings
-        self._kvas = kvas
         self._buses = buses
+        self._kvas = kvas
         self._kvs = kvs
-        self._wdgs = wdgs
-        self._regcontrol = regcontrol
-        self._xhl = xhl
-        self._xlt = xlt
-        self._xht = xht
+        self._conns = conns
+        self._xsc_array = xsc_array
+        self._percent_rs = percent_rs
         self._percent_load_loss = percent_load_loss
         self._bank = bank
-        self._tap_level = tap_level
+        self._taps = taps
         self._base_frequency = base_frequency
 
     @classmethod
@@ -157,8 +145,6 @@ class Transformer(Model):
         :param phases: The phases of this Transformer.
         :type phases: int
         """
-        if phases is None:
-            raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501
 
         self._phases = phases
 
@@ -182,36 +168,14 @@ class Transformer(Model):
         :param windings: The windings of this Transformer.
         :type windings: int
         """
-        if windings is None:
-            raise ValueError("Invalid value for `windings`, must not be `None`")  # noqa: E501
 
         self._windings = windings
-
-    @property
-    def kvas(self) -> List[float]:
-        """Gets the kvas of this Transformer.
-
-
-        :return: The kvas of this Transformer.
-        :rtype: List[float]
-        """
-        return self._kvas
-
-    @kvas.setter
-    def kvas(self, kvas: List[float]):
-        """Sets the kvas of this Transformer.
-
-
-        :param kvas: The kvas of this Transformer.
-        :type kvas: List[float]
-        """
-
-        self._kvas = kvas
 
     @property
     def buses(self) -> List[str]:
         """Gets the buses of this Transformer.
 
+        Array of bus definitions for windings [1, 2. …].  # noqa: E501
 
         :return: The buses of this Transformer.
         :rtype: List[str]
@@ -222,6 +186,7 @@ class Transformer(Model):
     def buses(self, buses: List[str]):
         """Sets the buses of this Transformer.
 
+        Array of bus definitions for windings [1, 2. …].  # noqa: E501
 
         :param buses: The buses of this Transformer.
         :type buses: List[str]
@@ -230,9 +195,33 @@ class Transformer(Model):
         self._buses = buses
 
     @property
+    def kvas(self) -> List[float]:
+        """Gets the kvas of this Transformer.
+
+        Array of base kVA ratings for windings [1,2,…].  # noqa: E501
+
+        :return: The kvas of this Transformer.
+        :rtype: List[float]
+        """
+        return self._kvas
+
+    @kvas.setter
+    def kvas(self, kvas: List[float]):
+        """Sets the kvas of this Transformer.
+
+        Array of base kVA ratings for windings [1,2,…].  # noqa: E501
+
+        :param kvas: The kvas of this Transformer.
+        :type kvas: List[float]
+        """
+
+        self._kvas = kvas
+
+    @property
     def kvs(self) -> List[float]:
         """Gets the kvs of this Transformer.
 
+        Array of kV ratings for the kV field for windings [1,2,…].  # noqa: E501
 
         :return: The kvs of this Transformer.
         :rtype: List[float]
@@ -243,6 +232,7 @@ class Transformer(Model):
     def kvs(self, kvs: List[float]):
         """Sets the kvs of this Transformer.
 
+        Array of kV ratings for the kV field for windings [1,2,…].  # noqa: E501
 
         :param kvs: The kvs of this Transformer.
         :type kvs: List[float]
@@ -251,123 +241,79 @@ class Transformer(Model):
         self._kvs = kvs
 
     @property
-    def wdgs(self) -> TransformerWdgs:
-        """Gets the wdgs of this Transformer.
+    def conns(self) -> List[str]:
+        """Gets the conns of this Transformer.
 
+        Array of winding connections for windings [1, 2. …] <wye|delta>.  # noqa: E501
 
-        :return: The wdgs of this Transformer.
-        :rtype: TransformerWdgs
+        :return: The conns of this Transformer.
+        :rtype: List[str]
         """
-        return self._wdgs
+        return self._conns
 
-    @wdgs.setter
-    def wdgs(self, wdgs: TransformerWdgs):
-        """Sets the wdgs of this Transformer.
+    @conns.setter
+    def conns(self, conns: List[str]):
+        """Sets the conns of this Transformer.
 
+        Array of winding connections for windings [1, 2. …] <wye|delta>.  # noqa: E501
 
-        :param wdgs: The wdgs of this Transformer.
-        :type wdgs: TransformerWdgs
+        :param conns: The conns of this Transformer.
+        :type conns: List[str]
         """
 
-        self._wdgs = wdgs
+        self._conns = conns
 
     @property
-    def regcontrol(self) -> TransformerRegcontrol:
-        """Gets the regcontrol of this Transformer.
+    def xsc_array(self) -> List[float]:
+        """Gets the xsc_array of this Transformer.
 
+        Array of n*(n-1) /2 short circuit reactances in percent on the first winding’s kVA base. “n” is the number of windings. Order (12, 13, 14, …1n, 23, 24, … 34, …)  # noqa: E501
 
-        :return: The regcontrol of this Transformer.
-        :rtype: TransformerRegcontrol
+        :return: The xsc_array of this Transformer.
+        :rtype: List[float]
         """
-        return self._regcontrol
+        return self._xsc_array
 
-    @regcontrol.setter
-    def regcontrol(self, regcontrol: TransformerRegcontrol):
-        """Sets the regcontrol of this Transformer.
+    @xsc_array.setter
+    def xsc_array(self, xsc_array: List[float]):
+        """Sets the xsc_array of this Transformer.
 
+        Array of n*(n-1) /2 short circuit reactances in percent on the first winding’s kVA base. “n” is the number of windings. Order (12, 13, 14, …1n, 23, 24, … 34, …)  # noqa: E501
 
-        :param regcontrol: The regcontrol of this Transformer.
-        :type regcontrol: TransformerRegcontrol
+        :param xsc_array: The xsc_array of this Transformer.
+        :type xsc_array: List[float]
         """
 
-        self._regcontrol = regcontrol
+        self._xsc_array = xsc_array
 
     @property
-    def xhl(self) -> float:
-        """Gets the xhl of this Transformer.
+    def percent_rs(self) -> List[float]:
+        """Gets the percent_rs of this Transformer.
 
-        Percent reactance high-to-low (winding 1 to winding 2)  # noqa: E501
+        Array of percent resistances for windings [1, 2. …]  # noqa: E501
 
-        :return: The xhl of this Transformer.
-        :rtype: float
+        :return: The percent_rs of this Transformer.
+        :rtype: List[float]
         """
-        return self._xhl
+        return self._percent_rs
 
-    @xhl.setter
-    def xhl(self, xhl: float):
-        """Sets the xhl of this Transformer.
+    @percent_rs.setter
+    def percent_rs(self, percent_rs: List[float]):
+        """Sets the percent_rs of this Transformer.
 
-        Percent reactance high-to-low (winding 1 to winding 2)  # noqa: E501
+        Array of percent resistances for windings [1, 2. …]  # noqa: E501
 
-        :param xhl: The xhl of this Transformer.
-        :type xhl: float
-        """
-        if xhl is None:
-            raise ValueError("Invalid value for `xhl`, must not be `None`")  # noqa: E501
-
-        self._xhl = xhl
-
-    @property
-    def xlt(self) -> float:
-        """Gets the xlt of this Transformer.
-
-        Percent reactance high-to-low (winding 2 to winding 3)  # noqa: E501
-
-        :return: The xlt of this Transformer.
-        :rtype: float
-        """
-        return self._xlt
-
-    @xlt.setter
-    def xlt(self, xlt: float):
-        """Sets the xlt of this Transformer.
-
-        Percent reactance high-to-low (winding 2 to winding 3)  # noqa: E501
-
-        :param xlt: The xlt of this Transformer.
-        :type xlt: float
+        :param percent_rs: The percent_rs of this Transformer.
+        :type percent_rs: List[float]
         """
 
-        self._xlt = xlt
-
-    @property
-    def xht(self) -> float:
-        """Gets the xht of this Transformer.
-
-        Percent reactance high-to-low (winding 1 to winding 3)  # noqa: E501
-
-        :return: The xht of this Transformer.
-        :rtype: float
-        """
-        return self._xht
-
-    @xht.setter
-    def xht(self, xht: float):
-        """Sets the xht of this Transformer.
-
-        Percent reactance high-to-low (winding 1 to winding 3)  # noqa: E501
-
-        :param xht: The xht of this Transformer.
-        :type xht: float
-        """
-
-        self._xht = xht
+        self._percent_rs = percent_rs
 
     @property
     def percent_load_loss(self) -> float:
         """Gets the percent_load_loss of this Transformer.
 
-        Percent reactance high-to-low (winding 1 to winding 3)  # noqa: E501
+        Percent Losses at rated load.. Causes the %r values to be set for windings 1 and 2.  # noqa: E501
 
         :return: The percent_load_loss of this Transformer.
         :rtype: float
@@ -378,15 +324,11 @@ class Transformer(Model):
     def percent_load_loss(self, percent_load_loss: float):
         """Sets the percent_load_loss of this Transformer.
 
-        Percent reactance high-to-low (winding 1 to winding 3)  # noqa: E501
+        Percent Losses at rated load.. Causes the %r values to be set for windings 1 and 2.  # noqa: E501
 
         :param percent_load_loss: The percent_load_loss of this Transformer.
         :type percent_load_loss: float
         """
-        if percent_load_loss is not None and percent_load_loss > 1:  # noqa: E501
-            raise ValueError("Invalid value for `percent_load_loss`, must be a value less than or equal to `1`")  # noqa: E501
-        if percent_load_loss is not None and percent_load_loss < 0:  # noqa: E501
-            raise ValueError("Invalid value for `percent_load_loss`, must be a value greater than or equal to `0`")  # noqa: E501
 
         self._percent_load_loss = percent_load_loss
 
@@ -414,25 +356,27 @@ class Transformer(Model):
         self._bank = bank
 
     @property
-    def tap_level(self) -> float:
-        """Gets the tap_level of this Transformer.
+    def taps(self) -> List[float]:
+        """Gets the taps of this Transformer.
 
+        Array of per unit taps for windings [1,2,…].  # noqa: E501
 
-        :return: The tap_level of this Transformer.
-        :rtype: float
+        :return: The taps of this Transformer.
+        :rtype: List[float]
         """
-        return self._tap_level
+        return self._taps
 
-    @tap_level.setter
-    def tap_level(self, tap_level: float):
-        """Sets the tap_level of this Transformer.
+    @taps.setter
+    def taps(self, taps: List[float]):
+        """Sets the taps of this Transformer.
 
+        Array of per unit taps for windings [1,2,…].  # noqa: E501
 
-        :param tap_level: The tap_level of this Transformer.
-        :type tap_level: float
+        :param taps: The taps of this Transformer.
+        :type taps: List[float]
         """
 
-        self._tap_level = tap_level
+        self._taps = taps
 
     @property
     def base_frequency(self) -> float:

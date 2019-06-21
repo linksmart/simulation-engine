@@ -15,61 +15,61 @@ class RegControl(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, transformer_id: str=None, winding_id: str=None, voltage_setting: float=None, bandwidth_volt: float=None, pt_ratio: float=None, ct_primary_rating_amp: float=None, line_drop_compensator_r_volt: float=None, line_drop_compensator_x_volt: float=None):  # noqa: E501
+    def __init__(self, id: str=None, transformer: str=None, winding: int=None, vreg: float=None, band: float=None, ptration: float=None, ctprim: float=None, r: float=None, x: float=None):  # noqa: E501
         """RegControl - a model defined in Swagger
 
         :param id: The id of this RegControl.  # noqa: E501
         :type id: str
-        :param transformer_id: The transformer_id of this RegControl.  # noqa: E501
-        :type transformer_id: str
-        :param winding_id: The winding_id of this RegControl.  # noqa: E501
-        :type winding_id: str
-        :param voltage_setting: The voltage_setting of this RegControl.  # noqa: E501
-        :type voltage_setting: float
-        :param bandwidth_volt: The bandwidth_volt of this RegControl.  # noqa: E501
-        :type bandwidth_volt: float
-        :param pt_ratio: The pt_ratio of this RegControl.  # noqa: E501
-        :type pt_ratio: float
-        :param ct_primary_rating_amp: The ct_primary_rating_amp of this RegControl.  # noqa: E501
-        :type ct_primary_rating_amp: float
-        :param line_drop_compensator_r_volt: The line_drop_compensator_r_volt of this RegControl.  # noqa: E501
-        :type line_drop_compensator_r_volt: float
-        :param line_drop_compensator_x_volt: The line_drop_compensator_x_volt of this RegControl.  # noqa: E501
-        :type line_drop_compensator_x_volt: float
+        :param transformer: The transformer of this RegControl.  # noqa: E501
+        :type transformer: str
+        :param winding: The winding of this RegControl.  # noqa: E501
+        :type winding: int
+        :param vreg: The vreg of this RegControl.  # noqa: E501
+        :type vreg: float
+        :param band: The band of this RegControl.  # noqa: E501
+        :type band: float
+        :param ptration: The ptration of this RegControl.  # noqa: E501
+        :type ptration: float
+        :param ctprim: The ctprim of this RegControl.  # noqa: E501
+        :type ctprim: float
+        :param r: The r of this RegControl.  # noqa: E501
+        :type r: float
+        :param x: The x of this RegControl.  # noqa: E501
+        :type x: float
         """
         self.swagger_types = {
             'id': str,
-            'transformer_id': str,
-            'winding_id': str,
-            'voltage_setting': float,
-            'bandwidth_volt': float,
-            'pt_ratio': float,
-            'ct_primary_rating_amp': float,
-            'line_drop_compensator_r_volt': float,
-            'line_drop_compensator_x_volt': float
+            'transformer': str,
+            'winding': int,
+            'vreg': float,
+            'band': float,
+            'ptration': float,
+            'ctprim': float,
+            'r': float,
+            'x': float
         }
 
         self.attribute_map = {
             'id': 'id',
-            'transformer_id': 'transformer_id',
-            'winding_id': 'winding_id',
-            'voltage_setting': 'voltage_setting',
-            'bandwidth_volt': 'bandwidth_Volt',
-            'pt_ratio': 'PT_Ratio',
-            'ct_primary_rating_amp': 'CT_primary_rating_Amp',
-            'line_drop_compensator_r_volt': 'line_drop_compensator_R_Volt',
-            'line_drop_compensator_x_volt': 'line_drop_compensator_X_Volt'
+            'transformer': 'transformer',
+            'winding': 'winding',
+            'vreg': 'vreg',
+            'band': 'band',
+            'ptration': 'ptration',
+            'ctprim': 'ctprim',
+            'r': 'r',
+            'x': 'x'
         }
 
         self._id = id
-        self._transformer_id = transformer_id
-        self._winding_id = winding_id
-        self._voltage_setting = voltage_setting
-        self._bandwidth_volt = bandwidth_volt
-        self._pt_ratio = pt_ratio
-        self._ct_primary_rating_amp = ct_primary_rating_amp
-        self._line_drop_compensator_r_volt = line_drop_compensator_r_volt
-        self._line_drop_compensator_x_volt = line_drop_compensator_x_volt
+        self._transformer = transformer
+        self._winding = winding
+        self._vreg = vreg
+        self._band = band
+        self._ptration = ptration
+        self._ctprim = ctprim
+        self._r = r
+        self._x = x
 
     @classmethod
     def from_dict(cls, dikt) -> 'RegControl':
@@ -106,177 +106,171 @@ class RegControl(Model):
         self._id = id
 
     @property
-    def transformer_id(self) -> str:
-        """Gets the transformer_id of this RegControl.
+    def transformer(self) -> str:
+        """Gets the transformer of this RegControl.
 
         ID of the transformer to be connected to  # noqa: E501
 
-        :return: The transformer_id of this RegControl.
+        :return: The transformer of this RegControl.
         :rtype: str
         """
-        return self._transformer_id
+        return self._transformer
 
-    @transformer_id.setter
-    def transformer_id(self, transformer_id: str):
-        """Sets the transformer_id of this RegControl.
+    @transformer.setter
+    def transformer(self, transformer: str):
+        """Sets the transformer of this RegControl.
 
         ID of the transformer to be connected to  # noqa: E501
 
-        :param transformer_id: The transformer_id of this RegControl.
-        :type transformer_id: str
+        :param transformer: The transformer of this RegControl.
+        :type transformer: str
         """
-        if transformer_id is None:
-            raise ValueError("Invalid value for `transformer_id`, must not be `None`")  # noqa: E501
 
-        self._transformer_id = transformer_id
+        self._transformer = transformer
 
     @property
-    def winding_id(self) -> str:
-        """Gets the winding_id of this RegControl.
+    def winding(self) -> int:
+        """Gets the winding of this RegControl.
 
 
-        :return: The winding_id of this RegControl.
-        :rtype: str
+        :return: The winding of this RegControl.
+        :rtype: int
         """
-        return self._winding_id
+        return self._winding
 
-    @winding_id.setter
-    def winding_id(self, winding_id: str):
-        """Sets the winding_id of this RegControl.
+    @winding.setter
+    def winding(self, winding: int):
+        """Sets the winding of this RegControl.
 
 
-        :param winding_id: The winding_id of this RegControl.
-        :type winding_id: str
+        :param winding: The winding of this RegControl.
+        :type winding: int
         """
-        if winding_id is None:
-            raise ValueError("Invalid value for `winding_id`, must not be `None`")  # noqa: E501
 
-        self._winding_id = winding_id
+        self._winding = winding
 
     @property
-    def voltage_setting(self) -> float:
-        """Gets the voltage_setting of this RegControl.
+    def vreg(self) -> float:
+        """Gets the vreg of this RegControl.
 
 
-        :return: The voltage_setting of this RegControl.
+        :return: The vreg of this RegControl.
         :rtype: float
         """
-        return self._voltage_setting
+        return self._vreg
 
-    @voltage_setting.setter
-    def voltage_setting(self, voltage_setting: float):
-        """Sets the voltage_setting of this RegControl.
+    @vreg.setter
+    def vreg(self, vreg: float):
+        """Sets the vreg of this RegControl.
 
 
-        :param voltage_setting: The voltage_setting of this RegControl.
-        :type voltage_setting: float
+        :param vreg: The vreg of this RegControl.
+        :type vreg: float
         """
-        if voltage_setting is None:
-            raise ValueError("Invalid value for `voltage_setting`, must not be `None`")  # noqa: E501
 
-        self._voltage_setting = voltage_setting
+        self._vreg = vreg
 
     @property
-    def bandwidth_volt(self) -> float:
-        """Gets the bandwidth_volt of this RegControl.
+    def band(self) -> float:
+        """Gets the band of this RegControl.
 
 
-        :return: The bandwidth_volt of this RegControl.
+        :return: The band of this RegControl.
         :rtype: float
         """
-        return self._bandwidth_volt
+        return self._band
 
-    @bandwidth_volt.setter
-    def bandwidth_volt(self, bandwidth_volt: float):
-        """Sets the bandwidth_volt of this RegControl.
+    @band.setter
+    def band(self, band: float):
+        """Sets the band of this RegControl.
 
 
-        :param bandwidth_volt: The bandwidth_volt of this RegControl.
-        :type bandwidth_volt: float
+        :param band: The band of this RegControl.
+        :type band: float
         """
 
-        self._bandwidth_volt = bandwidth_volt
+        self._band = band
 
     @property
-    def pt_ratio(self) -> float:
-        """Gets the pt_ratio of this RegControl.
+    def ptration(self) -> float:
+        """Gets the ptration of this RegControl.
 
 
-        :return: The pt_ratio of this RegControl.
+        :return: The ptration of this RegControl.
         :rtype: float
         """
-        return self._pt_ratio
+        return self._ptration
 
-    @pt_ratio.setter
-    def pt_ratio(self, pt_ratio: float):
-        """Sets the pt_ratio of this RegControl.
+    @ptration.setter
+    def ptration(self, ptration: float):
+        """Sets the ptration of this RegControl.
 
 
-        :param pt_ratio: The pt_ratio of this RegControl.
-        :type pt_ratio: float
+        :param ptration: The ptration of this RegControl.
+        :type ptration: float
         """
 
-        self._pt_ratio = pt_ratio
+        self._ptration = ptration
 
     @property
-    def ct_primary_rating_amp(self) -> float:
-        """Gets the ct_primary_rating_amp of this RegControl.
+    def ctprim(self) -> float:
+        """Gets the ctprim of this RegControl.
 
 
-        :return: The ct_primary_rating_amp of this RegControl.
+        :return: The ctprim of this RegControl.
         :rtype: float
         """
-        return self._ct_primary_rating_amp
+        return self._ctprim
 
-    @ct_primary_rating_amp.setter
-    def ct_primary_rating_amp(self, ct_primary_rating_amp: float):
-        """Sets the ct_primary_rating_amp of this RegControl.
+    @ctprim.setter
+    def ctprim(self, ctprim: float):
+        """Sets the ctprim of this RegControl.
 
 
-        :param ct_primary_rating_amp: The ct_primary_rating_amp of this RegControl.
-        :type ct_primary_rating_amp: float
+        :param ctprim: The ctprim of this RegControl.
+        :type ctprim: float
         """
 
-        self._ct_primary_rating_amp = ct_primary_rating_amp
+        self._ctprim = ctprim
 
     @property
-    def line_drop_compensator_r_volt(self) -> float:
-        """Gets the line_drop_compensator_r_volt of this RegControl.
+    def r(self) -> float:
+        """Gets the r of this RegControl.
 
 
-        :return: The line_drop_compensator_r_volt of this RegControl.
+        :return: The r of this RegControl.
         :rtype: float
         """
-        return self._line_drop_compensator_r_volt
+        return self._r
 
-    @line_drop_compensator_r_volt.setter
-    def line_drop_compensator_r_volt(self, line_drop_compensator_r_volt: float):
-        """Sets the line_drop_compensator_r_volt of this RegControl.
+    @r.setter
+    def r(self, r: float):
+        """Sets the r of this RegControl.
 
 
-        :param line_drop_compensator_r_volt: The line_drop_compensator_r_volt of this RegControl.
-        :type line_drop_compensator_r_volt: float
+        :param r: The r of this RegControl.
+        :type r: float
         """
 
-        self._line_drop_compensator_r_volt = line_drop_compensator_r_volt
+        self._r = r
 
     @property
-    def line_drop_compensator_x_volt(self) -> float:
-        """Gets the line_drop_compensator_x_volt of this RegControl.
+    def x(self) -> float:
+        """Gets the x of this RegControl.
 
 
-        :return: The line_drop_compensator_x_volt of this RegControl.
+        :return: The x of this RegControl.
         :rtype: float
         """
-        return self._line_drop_compensator_x_volt
+        return self._x
 
-    @line_drop_compensator_x_volt.setter
-    def line_drop_compensator_x_volt(self, line_drop_compensator_x_volt: float):
-        """Sets the line_drop_compensator_x_volt of this RegControl.
+    @x.setter
+    def x(self, x: float):
+        """Sets the x of this RegControl.
 
 
-        :param line_drop_compensator_x_volt: The line_drop_compensator_x_volt of this RegControl.
-        :type line_drop_compensator_x_volt: float
+        :param x: The x of this RegControl.
+        :type x: float
         """
 
-        self._line_drop_compensator_x_volt = line_drop_compensator_x_volt
+        self._x = x

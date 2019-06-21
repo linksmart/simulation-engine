@@ -34,7 +34,7 @@ def create_simulation(body):  # noqa: E501
         #temp = json.loads(json.dumps(data))
         #logger.debug("Data: " + str(temp)) #shows the raw data sent from client
         grid = Grid.from_dict(data)  # noqa: E501. SOMETHING IS NOT GOOD HERE
-        logger.debug("Grid: " + str(grid)) #shows the raw data sent from client
+        #logger.debug("Grid: " + str(grid)) #shows the raw data sent from client
 
         ####generates an id an makes a directory with the id for the data and for the registry
         try:
@@ -75,28 +75,56 @@ def create_simulation(body):  # noqa: E501
             #logger.debug("values of the radial: "+str(values))
             values=values.to_dict()
             #logger.debug("Values: "+str(values))
+
+
             if "transformer" in values.keys() and values["transformer"] is not None:
-                logger.debug("---------------Setting Transformers------------------------")
+                #logger.debug("!---------------Setting Transformers------------------------")
+                print("!---------------Setting Transformers------------------------ \n")
                 transformer = values["transformer"]
-                logger.debug("Transformers" + str(transformer))
+#                logger.debug("Transformers" + str(transformer))
                 factory.gridController.setTransformers(id,transformer)
-                
+
+            if "regcontrol" in values.keys() and values["regcontrol"] is not None:
+#                logger.debug("---------------Setting RegControl------------------------")
+                print("!---------------Setting RegControl------------------------ \n")
+                regcontrol = values["regcontrol"]
+#                logger.debug("RegControl" + str(regcontrol))
+                factory.gridController.setRegControls(id, regcontrol)
+
+            if "linecode" in values.keys() and values["linecode"] is not None:
+                #logger.debug("---------------Setting LineCode-------------------------")
+                print("! ---------------Setting LineCode------------------------- \n")
+                linecode = values["linecode"]
+                # logger.debug("LineCode: " + str(linecode))
+                factory.gridController.setLineCodes(id, linecode)
+
             if "loads" in values.keys() and values["loads"] is not None:
-                logger.debug("---------------Setting Loads-------------------------")
+                #logger.debug("---------------Setting Loads-------------------------")
+                print("! ---------------Setting Loads------------------------- \n")
                 # radial=radial.to_dict()
                 load = values["loads"]
-                logger.debug("Loads" + str(transformer))
+                # logger.debug("Loads" + str(load))
                 factory.gridController.setLoads(id, load)
 
+            if "capacitor" in values.keys() and values["capacitor"] is not None:
+                #logger.debug("---------------Setting Capacitors-------------------------")
+                print("! ---------------Setting Capacitors------------------------- \p")
+                capacitor = values["capacitor"]
+                # logger.debug("Capacitors: " + str(capacitor))
+                factory.gridController.setCapacitors(id, capacitor)
+
             if "power_lines" in values.keys() and values["power_lines"] is not None:
-                logger.debug("---------------Setting Powerlines-------------------------")
+                #logger.debug("---------------Setting Powerlines-------------------------")
+                print("!---------------Setting Powerlines------------------------- \n")
                 powerLines = values["power_lines"]
                 #linecodes = values["linecode"]
                 #factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
-                logger.debug("Powerlines" + str(powerLines))
+                #logger.debug("Powerlines" + str(powerLines))
                 factory.gridController.setPowerLines(id, powerLines)
 
             if "powerProfile" in values.keys() and values["powerProfile"] is not None:
+#                logger.debug("---------------Setting powerProfile-------------------------")
+                print("!---------------Setting powerProfile------------------------- \n")
                 powerProfile = values["powerProfile"]
                 #logger.debug("Powerprofile" + str(powerProfile))
                 factory.gridController.setPowerProfile(id, powerProfile)
@@ -118,7 +146,8 @@ def create_simulation(body):  # noqa: E501
                             and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
             """
             if "storage_units" in values.keys() and values["storage_units"] is not None:
-                logger.debug("---------------Setting Storage-------------------------")
+                #logger.debug("---------------Setting Storage-------------------------")
+                print("! ---------------Setting Storage------------------------- \n")
                 # radial=radial.to_dict()
                 storage = values["storage_units"]
                 factory.gridController.setStorage(id, storage)
@@ -128,28 +157,23 @@ def create_simulation(body):  # noqa: E501
                 gridController.setChargingPoints(id, chargingPoints)
             """
             if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
+                #logger.debug("---------------Setting chargingPoints-------------------------")
                 chargingPoints = values["chargingPoints"]
                 factory.gridController.setChargingPoints(id, chargingPoints)               
-            if "linecode" in values.keys() and values["linecode"] is not None:
-                logger.debug("---------------Setting LineCode-------------------------")
-                linecode = values["linecode"]
-                logger.debug("LineCode: " + str(linecode))
-                factory.gridController.setLineCodes(id, linecode)   
-            if "capacitor" in values.keys() and values["capacitor"] is not None:
-                logger.debug("---------------Setting Capacitors-------------------------")
-                capacitor = values["capacitor"]
-                #logger.debug("Capacitors: " + str(capacitor))
-                factory.gridController.setCapacitors(id, capacitor) 
-                
-            if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:
+
+
+            """if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:
                 logger.debug("---------------Setting Voltage regulator-------------------------")
                 voltage_regulator = values["voltage_regulator"]
                 logger.debug("Voltage Regulator: " + str(voltage_regulator))
-                factory.gridController.setVoltageRegulator(id, voltage_regulator) 
+                factory.gridController.setVoltageRegulator(id, voltage_regulator)
+            """
+
             if "loadshapes" in values.keys() and values["loadshapes"] is not None:
-                logger.debug("---------------Setting loadshapes-------------------------")
+#                logger.debug("---------------Setting loadshapes-------------------------")
+                print("! ---------------Setting loadshapes------------------------- \n")
                 loadshapes = values["loadshapes"]
-                logger.debug("Load Shapes: " + str(loadshapes))
+#                logger.debug("Load Shapes: " + str(loadshapes))
                 factory.gridController.setLoadShape(id, loadshapes) 
             if "tshapes" in values.keys() and values["tshapes"] is not None:
                 logger.debug("---------------Setting tshapes-------------------------")
@@ -158,6 +182,7 @@ def create_simulation(body):  # noqa: E501
                 factory.gridController.setTShape(id, tshapes)                 
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)
+
         result = factory.gridController.run()
         #factory.gridController.run()
         #return str(result) 
