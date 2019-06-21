@@ -12,50 +12,8 @@
     "radials": [
         {
             "radialId": "string",
-            "transformer": [
-                {
-                    "id": "Sub",
-                    "phases": 3,
-                    "windings": 2,
-                    "xhl": 0.008,
-                    "wdgs": [
-                        {
-                            "wdg1": 1,
-                            "bus": "SourceBus",
-                            "connection_type": "delta",
-                            "kv": 115,
-                            "kva": 5000,
-                            "percent_r": 0.0005
-                        },
-                        {
-                            "wdg1": 2,
-                            "bus": 650,
-                            "connection_type": "wye",
-                            "kv": 4.16,
-                            "kva": 5000,
-                            "percent_r": 0.0005
-                        }
-                    ]
-                },
-                {
-                    "id": "Reg1",
-                    "phases": 1,
-                    "bank": "reg1",
-                    "xhl": 0.01,
-                    "kvas": [
-                        1666,
-                        1666
-                    ],
-                    "buses": [
-                        "650.1",
-                        "RG60.1"
-                    ],
-                    "KVs": [
-                        2.4,
-                        2.4
-                    ],
-                    "percent_load_loss": 0.01,
-                    "regcontrol": {
+			"regcontrol": [
+					{
                         "id": "Reg1",
                         "transformer": "Reg1",
                         "winding": 2,
@@ -65,27 +23,8 @@
                         "ctprim": 700,
                         "r": 3,
                         "x": 9
-                    }
-                },
-                {
-                    "id": "Reg2",
-                    "phases": 1,
-                    "bank": "reg1",
-                    "xhl": 0.01,
-                    "kvas": [
-                        1666,
-                        1666
-                    ],
-                    "buses": [
-                        "650.2",
-                        "RG60.2"
-                    ],
-                    "KVs": [
-                        2.4,
-                        2.4
-                    ],
-                    "percent_load_loss": 0.01,
-                    "regcontrol": {
+                    },
+					{
                         "id": "Reg2",
                         "transformer": "Reg2",
                         "winding": 2,
@@ -95,27 +34,8 @@
                         "ctprim": 700,
                         "r": 3,
                         "x": 9
-                    }
-                },
-                {
-                    "id": "Reg3",
-                    "phases": 1,
-                    "bank": "reg1",
-                    "xhl": 0.01,
-                    "kvas": [
-                        1666,
-                        1666
-                    ],
-                    "Buses": [
-                        "650.3",
-                        "RG60.3"
-                    ],
-                    "KVs": [
-                        2.4,
-                        2.4
-                    ],
-                    "percent_load_loss": 0.01,
-                    "regcontrol": {
+                    },
+					{
                         "id": "Reg3",
                         "transformer": "Reg3",
                         "winding": 2,
@@ -126,32 +46,182 @@
                         "r": 3,
                         "x": 9
                     }
-                },
+			],
+            "transformer": [
                 {
-                    "id": "XFMI",
+                    "id": "Sub",
                     "phases": 3,
                     "windings": 2,
-                    "xhl": 2,
-                    "wdgs": [
-                        {
-                            "wdg1": 1,
-                            "bus": 633,
-                            "connection_type": "Wye",
-                            "kv": 4.16,
-                            "kva": 500,
-                            "percent_r": 0.55,
-                            "xht": 1
-                        },
-                        {
-                            "wdg1": 2,
-                            "bus": 634,
-                            "connection_type": "Wye",
-                            "kv": 0.48,
-                            "kva": 500,
-                            "percent_r": 0.55,
-                            "xlt": 1
-                        }
-                    ]
+                    "buses": [
+                        "SourceBus",
+                        "650"
+                    ],
+                    "kvas": [
+                        5000,
+                        5000
+                    ],
+                    "kvs": [
+                        115,
+                        4.16
+                    ],
+                    "conns": [
+                        "delta",
+                        "wye"
+                    ],
+                    "xsc_array": [
+                        0.008
+                    ],
+                    "percent_rs": [
+                        0.0005,
+                        0.0005
+                    ],
+                    "percent_load_loss": 0.001,
+                    "taps": [
+                        1,
+                        1
+                    ],
+                    "base_frequency": 60
+                },
+                {
+                    "id": "Reg1",
+                    "phases": 1,
+                    "windings": 2,
+                    "buses": [
+                        "650.1",
+                        "RG60.1"
+                    ],
+                    "kvas": [
+                        1666,
+                        1666
+                    ],
+                    "kvs": [
+                        2.4,
+                        2.4
+                    ],
+                    "conns": [
+                        "wye",
+                        "wye"
+                    ],
+                    "xsc_array": [
+                        0.01
+                    ],
+                    "percent_rs": [
+                        0.005,
+                        0.005
+                    ],
+                    "percent_load_loss": 0.01,
+                    "bank": "reg1",
+                    "taps": [
+                        1,
+                        1
+                    ],
+                    "base_frequency": 60
+                },
+                {
+                    "id": "Reg2",
+                    "phases": 1,
+                    "windings": 2,
+                    "buses": [
+                        "650.2",
+                        "RG60.2"
+                    ],
+                    "kvas": [
+                        1666,
+                        1666
+                    ],
+                    "kvs": [
+                        2.4,
+                        2.4
+                    ],
+                    "conns": [
+                        "wye",
+                        "wye"
+                    ],
+                    "xsc_array": [
+                        0.01
+                    ],
+                    "percent_rs": [
+                        0.005,
+                        0.005
+                    ],
+                    "percent_load_loss": 0.01,
+					"bank": "reg1",
+                    "taps": [
+                        1,
+                        1
+                    ],
+                    "base_frequency": 60
+                },
+                {
+                    "id": "Reg3",
+                    "phases": 1,
+                    "windings": 2,
+                    "buses": [
+                        "650.3",
+                        "RG60.3"
+                    ],
+                    "kvas": [
+                        1666,
+                        1666
+                    ],
+                    "kvs": [
+                        2.4,
+                        2.4
+                    ],
+                    "conns": [
+                        "wye",
+                        "wye"
+                    ],
+                    "xsc_array": [
+                        0.01
+                    ],
+                    "percent_rs": [
+                        0.005,
+                        0.005
+                    ],
+                    "percent_load_loss": 0.01,
+					"bank": "reg1",
+                    "taps": [
+                        1,
+                        1
+                    ],
+                    "base_frequency": 60
+                },
+                {
+                    "id": "XFM1",
+                    "phases": 3,
+                    "windings": 2,
+                    "buses": [
+                        "633",
+                        "634"
+                    ],
+                    "kvas": [
+                        500,
+                        500
+                    ],
+                    "kvs": [
+                        4.16,
+                        0.48
+                    ],
+                    "conns": [
+                        "wye",
+                        "wye"
+                    ],
+                    "xsc_array": [
+                        2,
+						1,
+						1
+                    ],
+                    "percent_rs": [
+                        0.55,
+                        0.55
+                    ],
+                    "percent_load_loss": 1.1,
+                    "taps": [
+                        1,
+                        1
+                    ],
+                    "base_frequency": 60
                 }
             ],
             "linecode": [
@@ -251,7 +321,7 @@
                     "id": "mtx604",
                     "nphases": 2,
                     "base_frequency": 60,
-                    "rmatrix1": [
+                    "rmatrix": [
                         [
                             1.3238
                         ],
@@ -290,6 +360,7 @@
                 {
                     "id": "mtx606",
                     "nphases": 3,
+                    "base_frequency": 60,
                     "units": "mi",
                     "rmatrix": [
                         [
@@ -555,39 +626,7 @@
                 }
             ],
             "powerLines": [
-                {
-                    "id": "650632",
-                    "phases": 3,
-                    "bus1": "RG60.1.2.3",
-                    "bus2": "632.1.2.3",
-                    "linecode": "mtx601",
-                    "length": 2000,
-                    "unitlength": "ft",
-                    "r1": 0,
-                    "r0": 0,
-                    "x1": 0,
-                    "x0": 0,
-                    "c1": 0,
-                    "c0": 0,
-                    "switch": false
-                },
-                {
-                    "id": "632645",
-                    "phases": 2,
-                    "bus1": "632.3.2",
-                    "bus2": "645.3.2",
-                    "linecode": "mtx603",
-                    "length": 500,
-                    "unitlength": "ft",
-                    "r1": 0.0001,
-                    "r0": 0.0001,
-                    "x1": 0,
-                    "x0": 0,
-                    "c1": 0,
-                    "c0": 0,
-                    "switch": false
-                },
-                {
+              {
                     "id": "650632",
                     "phases": 3,
                     "bus1": "RG60.1.2.3",

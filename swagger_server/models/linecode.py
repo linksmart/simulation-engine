@@ -15,15 +15,19 @@ class Linecode(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, nphases: int=None, rmatrix: List[List[float]]=None, xmatrix: List[List[float]]=None, units: str=None, base_frequency: float=None):  # noqa: E501
+    def __init__(self, id: str=None, nphases: float=None, rmatrix: List[List[float]]=None, xmatrix: List[List[float]]=None, cmatrix: List[List[float]]=None, units: str=None, base_frequency: float=None):  # noqa: E501
         """Linecode - a model defined in Swagger
 
         :param id: The id of this Linecode.  # noqa: E501
         :type id: str
+        :param nphases: The nphases of this Linecode.  # noqa: E501
+        :type nphases: float
         :param rmatrix: The rmatrix of this Linecode.  # noqa: E501
         :type rmatrix: List[List[float]]
         :param xmatrix: The xmatrix of this Linecode.  # noqa: E501
         :type xmatrix: List[List[float]]
+        :param cmatrix: The cmatrix of this Linecode.  # noqa: E501
+        :type cmatrix: List[List[float]]
         :param units: The units of this Linecode.  # noqa: E501
         :type units: str
         :param base_frequency: The base_frequency of this Linecode.  # noqa: E501
@@ -31,18 +35,20 @@ class Linecode(Model):
         """
         self.swagger_types = {
             'id': str,
-            'nphases': int,
+            'nphases': float,
             'rmatrix': List[List[float]],
             'xmatrix': List[List[float]],
+            'cmatrix': List[List[float]],
             'units': str,
             'base_frequency': float
         }
 
         self.attribute_map = {
             'id': 'id',
-            'nphases':'nphases',
+            'nphases': 'nphases',
             'rmatrix': 'rmatrix',
             'xmatrix': 'xmatrix',
+            'cmatrix': 'cmatrix',
             'units': 'units',
             'base_frequency': 'base_frequency'
         }
@@ -51,6 +57,7 @@ class Linecode(Model):
         self._nphases = nphases
         self._rmatrix = rmatrix
         self._xmatrix = xmatrix
+        self._cmatrix = cmatrix
         self._units = units
         self._base_frequency = base_frequency
 
@@ -87,25 +94,26 @@ class Linecode(Model):
         self._id = id
 
     @property
-    def nphases(self) -> int:
-        """Gets the id of this Linecode.
+    def nphases(self) -> float:
+        """Gets the nphases of this Linecode.
 
 
-        :return: The id of this Linecode.
-        :rtype: str
+        :return: The nphases of this Linecode.
+        :rtype: float
         """
         return self._nphases
 
     @nphases.setter
-    def nphases(self, nphases: int):
-        """Sets the id of this Linecode.
+    def nphases(self, nphases: float):
+        """Sets the nphases of this Linecode.
 
 
-        :param id: The id of this Linecode.
-        :type id: str
+        :param nphases: The nphases of this Linecode.
+        :type nphases: float
         """
 
         self._nphases = nphases
+
     @property
     def rmatrix(self) -> List[List[float]]:
         """Gets the rmatrix of this Linecode.
@@ -147,6 +155,27 @@ class Linecode(Model):
         """
 
         self._xmatrix = xmatrix
+
+    @property
+    def cmatrix(self) -> List[List[float]]:
+        """Gets the cmatrix of this Linecode.
+
+
+        :return: The cmatrix of this Linecode.
+        :rtype: List[List[float]]
+        """
+        return self._cmatrix
+
+    @cmatrix.setter
+    def cmatrix(self, cmatrix: List[List[float]]):
+        """Sets the cmatrix of this Linecode.
+
+
+        :param cmatrix: The cmatrix of this Linecode.
+        :type cmatrix: List[List[float]]
+        """
+
+        self._cmatrix = cmatrix
 
     @property
     def units(self) -> str:

@@ -28,7 +28,7 @@ class Radial(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, radial_id: str=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_profiles: List[PowerProfile]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None, linecode: List[Linecode]=None, capacitor: List[Capacitor]=None, voltage_regulator: List[RegControl]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None):  # noqa: E501
+    def __init__(self, radial_id: str=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_profiles: List[PowerProfile]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None, linecode: List[Linecode]=None, capacitor: List[Capacitor]=None, regcontrol: List[RegControl]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None):  # noqa: E501
         """Radial - a model defined in Swagger
 
         :param radial_id: The radial_id of this Radial.  # noqa: E501
@@ -51,8 +51,8 @@ class Radial(Model):
         :type linecode: List[Linecode]
         :param capacitor: The capacitor of this Radial.  # noqa: E501
         :type capacitor: List[Capacitor]
-        :param voltage_regulator: The voltage_regulator of this Radial.  # noqa: E501
-        :type voltage_regulator: List[RegControl]
+        :param regcontrol: The regcontrol of this Radial.  # noqa: E501
+        :type regcontrol: List[RegControl]
         :param xycurves: The xycurves of this Radial.  # noqa: E501
         :type xycurves: List[XYCurve]
         :param loadshapes: The loadshapes of this Radial.  # noqa: E501
@@ -71,7 +71,7 @@ class Radial(Model):
             'charging_points': List[ChargingPoint],
             'linecode': List[Linecode],
             'capacitor': List[Capacitor],
-            'voltage_regulator': List[RegControl],
+            'regcontrol': List[RegControl],
             'xycurves': List[XYCurve],
             'loadshapes': List[Loadshape],
             'tshapes': List[Tshape]
@@ -88,7 +88,7 @@ class Radial(Model):
             'charging_points': 'chargingPoints',
             'linecode': 'linecode',
             'capacitor': 'capacitor',
-            'voltage_regulator': 'voltage_regulator',
+            'regcontrol': 'regcontrol',
             'xycurves': 'xycurves',
             'loadshapes': 'loadshapes',
             'tshapes': 'tshapes'
@@ -104,7 +104,7 @@ class Radial(Model):
         self._charging_points = charging_points
         self._linecode = linecode
         self._capacitor = capacitor
-        self._voltage_regulator = voltage_regulator
+        self._regcontrol = regcontrol
         self._xycurves = xycurves
         self._loadshapes = loadshapes
         self._tshapes = tshapes
@@ -331,25 +331,25 @@ class Radial(Model):
         self._capacitor = capacitor
 
     @property
-    def voltage_regulator(self) -> List[RegControl]:
-        """Gets the voltage_regulator of this Radial.
+    def regcontrol(self) -> List[RegControl]:
+        """Gets the regcontrol of this Radial.
 
 
-        :return: The voltage_regulator of this Radial.
+        :return: The regcontrol of this Radial.
         :rtype: List[RegControl]
         """
-        return self._voltage_regulator
+        return self._regcontrol
 
-    @voltage_regulator.setter
-    def voltage_regulator(self, voltage_regulator: List[RegControl]):
-        """Sets the voltage_regulator of this Radial.
+    @regcontrol.setter
+    def regcontrol(self, regcontrol: List[RegControl]):
+        """Sets the regcontrol of this Radial.
 
 
-        :param voltage_regulator: The voltage_regulator of this Radial.
-        :type voltage_regulator: List[RegControl]
+        :param regcontrol: The regcontrol of this Radial.
+        :type regcontrol: List[RegControl]
         """
 
-        self._voltage_regulator = voltage_regulator
+        self._regcontrol = regcontrol
 
     @property
     def xycurves(self) -> List[XYCurve]:

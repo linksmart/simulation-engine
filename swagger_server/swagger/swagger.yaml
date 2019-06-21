@@ -215,7 +215,7 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Capacitor"
-      voltage_regulator:
+      regcontrol:
         type: "array"
         items:
           $ref: "#/definitions/RegControl"
@@ -257,28 +257,25 @@ definitions:
     type: "object"
     required:
     - "id"
-    - "transformer_id"
-    - "voltage_setting"
-    - "winding_id"
     properties:
       id:
         type: "string"
-      transformer_id:
+      transformer:
         type: "string"
         description: "ID of the transformer to be connected to"
-      winding_id:
-        type: "string"
-      voltage_setting:
+      winding:
+        type: "integer"
+      vreg:
         type: "number"
-      bandwidth_Volt:
+      band:
         type: "number"
-      PT_Ratio:
+      ptration:
         type: "number"
-      CT_primary_rating_Amp:
+      ctprim:
         type: "number"
-      line_drop_compensator_R_Volt:
+      r:
         type: "number"
-      line_drop_compensator_X_Volt:
+      x:
         type: "number"
   Capacitor:
     type: "object"
@@ -328,11 +325,6 @@ definitions:
         type: "number"
       kVar:
         type: "number"
-      powerfactor:
-        type: "number"
-        maximum: 1
-      power_profile_id:
-        type: "string"
   PowerProfile:
     type: "object"
     properties:
@@ -382,7 +374,7 @@ definitions:
       id:
         type: "string"
       nphases:
-        type: number
+        type: "number"
       rmatrix:
         type: "array"
         items:
@@ -390,6 +382,12 @@ definitions:
           items:
             type: "number"
       xmatrix:
+        type: "array"
+        items:
+          type: "array"
+          items:
+            type: "number"
+      cmatrix:
         type: "array"
         items:
           type: "array"
@@ -606,41 +604,52 @@ definitions:
       windings:
         type: "integer"
         description: "number of windings"
-      kvas:
-        type: "array"
-        items:
-          type: "number"
       buses:
         type: "array"
+        description: "Array of bus definitions for windings [1, 2. …]."
         items:
           type: "string"
-      kvs:
+      kvas:
         type: "array"
+        description: "Array of base kVA ratings for windings [1,2,…]."
         items:
           type: "number"
-      wdgs:
-        $ref: "#/definitions/Transformer_wdgs"
-      regcontrol:
-        $ref: "#/definitions/Transformer_regcontrol"
-      xhl:
-        type: "number"
-        description: "Percent reactance high-to-low (winding 1 to winding 2)"
-      xlt:
-        type: "number"
-        description: "Percent reactance high-to-low (winding 2 to winding 3)"
-      xht:
-        type: "number"
-        description: "Percent reactance high-to-low (winding 1 to winding 3)"
+      kvs:
+        type: "array"
+        description: "Array of kV ratings for the kV field for windings [1,2,…]."
+        items:
+          type: "number"
+      conns:
+        type: "array"
+        description: "Array of winding connections for windings [1, 2. …] <wye|delta>."
+        items:
+          type: "string"
+      xsc_array:
+        type: "array"
+        description: "Array of n*(n-1) /2 short circuit reactances in percent on the\
+          \ first winding’s kVA base. “n” is the number of windings. Order (12, 13,\
+          \ 14, …1n, 23, 24, … 34, …)"
+        items:
+          type: "number"
+      percent_rs:
+        type: "array"
+        description: "Array of percent resistances for windings [1, 2. …]"
+        items:
+          type: "number"
       percent_load_loss:
         type: "number"
-        description: "Percent reactance high-to-low (winding 1 to winding 3)"
-        minimum: 0
-        maximum: 1
+        description: "Percent Losses at rated load.. Causes the %r values to be set\
+          \ for windings 1 and 2."
       bank:
         type: "string"
         description: "Name of the bank this transformer is part of"
-      tapLevel:
-        type: "number"
+      taps:
+        type: "array"
+        description: "Array of per unit taps for windings [1,2,…]."
+        items:
+          type: "number"
+          minimum: 0
+          maximum: 1
       base_frequency:
         type: "number"
   Duration:

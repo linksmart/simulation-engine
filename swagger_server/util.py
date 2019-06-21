@@ -107,8 +107,8 @@ def deserialize_model(data, klass):
 
     for attr, attr_type in six.iteritems(instance.swagger_types):
         #logger.debug(" Data: "+str(data)+"\n")
-        #logger.debug(" instance.attribute_map[attr]: "+str(instance.attribute_map[attr])+"\n")
-       # logger.debug("isinstance(data, (list, dict))"+str(isinstance(data, (list, dict)))+"\n")
+        #logger.debug(" instance.attribute_map[attr]: "+str(instance.attribute_map[attr])+" " +str(isinstance(data, (list, dict))))
+        #logger.debug("isinstance(data, (list, dict))"+str(isinstance(data, (list, dict)))+"\n")
         if data is not None \
                 and instance.attribute_map[attr] in data \
                 and isinstance(data, (list, dict)):

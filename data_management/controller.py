@@ -57,6 +57,12 @@ class gridController:
         self.sim.setTransformers(self.object)
         logger.debug("Transformers charged")
 
+    def setRegControls(self, id, object):
+        logger.debug("Charging RegControls into the simulator")
+        self.object = object
+        self.sim.setRegControls(self.object)
+        logger.debug("RegControls charged")
+
     def setPowerLines(self, id, powerlines): #(self, id, powerlines, linecodes):
         logger.debug("Charging power lines into the simulator")
         #self.sim.setLineCodes(linecodes)
@@ -132,6 +138,7 @@ class gridController:
         logger.debug("Active circuit: "+str(self.sim.getActiveCircuit()))
         #return "ok"
         ##################################################################################PROBLEM################################
+        self.sim.setVoltageBases(115, 4.16, 0.48)
         logger.info("Solution mode: "+str(self.sim.getMode()))
         logger.info("Solution step size: " + str(self.sim.getStepSize()))
         logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
@@ -142,14 +149,15 @@ class gridController:
         #logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         self.sim.setNumberSimulations(1)
         logger.info("Number simulations 2: " + str(self.sim.getNumberSimulations()))
-        self.sim.setVoltageBases(115,4.16,0.48)
+        #self.sim.setVoltageBases(115,4.16,0.48)
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
         #self.sim.setVoltageBases()
-        numSteps= 10
+        numSteps= 5
         #logger.info("Number of steps: "+str(numSteps))
         #nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         for i in range(numSteps):
+            logger.info("loop  numSteps, i= " + str(i) )
             nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         """df = self.sim.utils.lines_to_dataframe()
         data = df[['Bus1', 'Bus2']].to_dict(orient="index")
