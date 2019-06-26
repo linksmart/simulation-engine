@@ -179,13 +179,11 @@ class gridController:
         #return ("Nodes: " + str(nodeNames), "\nVoltages " + str(allBusMagPu))
         #return (nodeNames, allBusMagPu)
         #filename = str(id)+"_results.txt"
-        filename = '/usr/src/app/tests/results/results.txt'
-        f = open(filename, 'w')
-        #f.writelines("Nodes: " + str(nodeNames)+"\n")
-        f.writelines(str(allBusMagPu))
-        #f.writelines("VperPhase: " + str(vPerPhase))
-        f.close()
-        #return allBusMagPu
+        #!TODO: Create filename with id so serve multiple simultaneous simulations
+        json_data = json.dumps(allBusMagPu)
+        with open('/usr/src/app/tests/results/results.txt', 'w', encoding='utf-8') as outfile:
+            json.dump(json_data, outfile, ensure_ascii=False, indent=2)
+        #logger.info(json_data)
         return id
     
     #def results(self):   

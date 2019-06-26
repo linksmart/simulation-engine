@@ -206,8 +206,9 @@ def get_simulation_result(id):  # noqa: E501
     #result = factory.gridController.results()
     try:
         f = open('/usr/src/app/tests/results/results.txt') #open(str(id)+"_results.txt")
-        result = f.readlines()
-        logger.debug(result)
+        content = f.read()
+        #logger.info(content)
+        result = json.loads(content)
         f.close()
     except:
         result = "None"

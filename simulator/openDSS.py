@@ -85,11 +85,12 @@ class OpenDSS:
         #dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEE13Nodeckt.dss')
         #dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEELineCodes.dss')
         #logger.info(dss.utils.class_to_dataframe('Load'))
-        result = {}
+        result = []
         nodeList = dss.Circuit.AllNodeNames()
         puList = dss.Circuit.AllBusMagPu()
         for i in range(len(nodeList)):
             result[nodeList[i]] = puList[i]
+            result.append({Node": nodeList[i], "Pu": puList[i]})
             print(str(nodeList[i]) + ", " + str(puList[i]))
         return (dss.Circuit.AllNodeNames(), result, dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses())
         #return (dss.Circuit.AllNodeNames(), dss.Circuit.AllNodeVmagPUByPhase(1), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
