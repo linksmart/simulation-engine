@@ -182,7 +182,9 @@ class gridController:
         #!TODO: Create filename with id so serve multiple simultaneous simulations
         json_data = json.dumps(allBusMagPu)
         with open('/usr/src/app/tests/results/results.txt', 'w', encoding='utf-8') as outfile:
-            json.dump(json_data, outfile, ensure_ascii=False, indent=2)
+            #outfile.write(json_data) # working
+            json.dump(allBusMagPu, outfile, ensure_ascii=False, indent=2) # working
+            #json.dump(json_data, outfile, ensure_ascii=False, indent=2)  # not working !!!
         #logger.info(json_data)
         return id
     
