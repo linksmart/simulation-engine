@@ -69,12 +69,45 @@ class Profiles:
         return price_list
 
 
+    def pv(self, lat=50.7374, lon=7.0982, days = 365):
+        rad_data = []
+        logger.info("coord " + str(lat) + ", " + str(lon))
+        if lat is not None and lon is not None:
+            rad = requests.get("http://re.jrc.ec.europa.eu/pvgis5/seriescalc.php?lat=" +
+                               "{:.3f}".format(float(lat)) + "&lon=" + "{:.3f}".format(float(lon)) + "&raddatabase=" +
+                               "PVGIS-CMSAF&usehorizon=1&startyear=2016&endyear=2016&mountingplace=free&" +
+                               "optimalinclination=0&optimalangles=1&hourlyoptimalangles=1&PVcalculation=1&" +
+                               "pvtechchoice=crystSi&peakpower=" + str(1) + "&loss=14&components=1")
+            red_arr = str(rad.content).split("\\n")
+            for x in range(11):
+                del red_arr[0]
+            rad = []
+            for x in range(0, red_arr.__len__()):
+                w = red_arr[x][:-2].split(",")
+                if w.__len__() != 9:
+                    break
 
-if __name__ == "__main__":
+                rad.append(w)
+            rad = rad[0:days*24]
+            data = []
+            for i in range(0, len(rad)):
+                date = rad[i][0]
+                #timestamp = date.timestamp()
+                pv_output = float(rad[i][1])
+                data.append( pv_output)
+            print("***Data length****", len(data))
+            print(data)
+            return data
+
+
+"""if __name__ == "__main__":
     prof = Profiles()
     t_end = time.time() + 60 * 15
     day = 1
     while time.time() < t_end:
         prof.price_calculator("fur","denmark", day, "commercial")
         day = day + 1
-        time.sleep(5)
+        time.sleep(5)"""
+
+prof = Profiles()
+prof.pv(days=100)
