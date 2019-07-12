@@ -1134,6 +1134,8 @@ class OpenDSS:
     def setStorage(self, id, bus1, phases, connection, soc, dod, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor):
         #logger.info("starting setStorage for ID: " + str(id))
         # New Storage.AtPVNode phases=3 bus1=121117 kV=0.4  kva=5 kWhrated=9.6 kwrated=6.4
+
+
         dss_string = "New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} kWhstored={kwh_stored} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
             id=id,
             bus1=bus1,
@@ -1149,6 +1151,10 @@ class OpenDSS:
             discharge_efficiency=discharge_efficiency,
             powerfactor=powerfactor
         )
+
+        #testing storage charge/discharge
+        addition = " kW = 10 state = IDLING DischargeTrigger = 0.8 ChargeTrigger = 0.2 "
+        dss_string + addition
 
         #logger.info(dss_string)
         print(dss_string + "\n")
