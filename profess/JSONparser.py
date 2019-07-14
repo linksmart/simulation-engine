@@ -2,14 +2,14 @@ import json
 from collections.abc import Iterable
 
 IEEE13=open("IEEE13_changed.json").read()
-
-jsonIEEE=json.loads(IEEE13)
+topology ={}
 
 # @search returns a list with results
     # @searchIn is the dict/list we search in
     # @searchFor is the String we search for
     # @returnsAll if true, returns all where searchFor fits, even if searchID doesn't fit
 def search(searchIn, searchFor, searchID, returnsAll):
+
     searchResult = []
     dummyList = searchIn
     if type(searchIn) == list:
@@ -27,23 +27,43 @@ def search(searchIn, searchFor, searchID, returnsAll):
                     # print("matching id")
                     if returnsAll:
                         if type(searchIn[value]) == list:
+                            helpList={}
                             for element in searchIn[value]:
                                 searchResult.append(element)
                         else:
                             searchResult.append(searchIn[value])
                     else:
+                        #print(searchIn)
+                        #print(value)
                         searchResult.append(searchIn)
             if isinstance(searchIn[value], Iterable) and type(searchIn[value]) != str:
                 searchResult = searchResult + search(searchIn[value], searchFor, searchID, returnsAll)
 
     return searchResult
+def setTopology(jsonTopology):
+    global topology
+    topology=jsonTopology
+def getNodeElementList():
+    nodeElementList=[]
+    nodeList=search(topology["radials"][0]["storageUnits"], "bus1", "", True)
+    count=0
+    for element in nodeList:
+        nodeElementList.append([{"storageUnits":topology["radials"][0]["storageUnits"][count]}])
+        nodeElementList[count].append({"loads":(search(topology["radials"][0]["loads"], "bus", element, False))})
+        #TODO PV etc
+        count=count+1
+
+
+setTopology(json.loads(IEEE13))
+
 #print(search(jsonIEEE,"bus1",nodeID,False))
 helps=[]
-helps=search(jsonIEEE,"storageUnits","storageUnits",True)
+helps=search(topology, "storageUnits", "storageUnits", True)
 #print(helps)
-helper=search(helps,"bus1","bus1",True)
+helper=search(helps, "bus1", "bus1", True)
 #print(helper)
-#print(int(helper[0]))
-for element in range(len(helper)):
+#for element in helper:
+    #print(search(topology, "bus1", element, False)+search(topology, "bus", element, False))
 
-    print(search(jsonIEEE,"bus1",helper[element],False)+search(jsonIEEE,"bus",helper[element],False))
+getNodeElementList()
+#print(int(helper[0]))
