@@ -7,9 +7,7 @@ class Http_commands:
 
     def post(self,target, payLoad, type):
         request = requests.post(target, json=payLoad, headers={"Content-Type": "application/"+type})
-        print(request.headers)
 
-        print(request)
         return request
 
     def put(self,target,jsonLoad):

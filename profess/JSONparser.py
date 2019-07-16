@@ -1,8 +1,9 @@
 import json
 from collections.abc import Iterable
+import re
 
 IEEE13=open("IEEE13_changed.json").read()
-topology ={}
+topology =json.loads(IEEE13)
 
 # @search returns a list with results
     # @searchIn is the dict/list we search in
@@ -46,14 +47,26 @@ def setTopology(jsonTopology):
 def getNodeElementList():
     nodeElementList=[]
     nodeList=search(topology["radials"][0]["storageUnits"], "bus1", "", True)
+
+
+
     count=0
     for element in nodeList:
-        nodeElementList.append([{"storageUnits":topology["radials"][0]["storageUnits"][count]}])
-        nodeElementList[count].append({"loads":(search(topology["radials"][0]["loads"], "bus", element, False))})
+        pattern = re.compile("[^.]*")  #regex to find professID
+        m= pattern.findall(element)
+        element=m[0]
+        nodeElementList.append({element:[{"storageUnits":topology["radials"][0]["storageUnits"][count]}]})
+        nodeElementList[count][element].append({"loads":(search(topology["radials"][0]["loads"], "bus", element, False))})
         #TODO PV etc
         count=count+1
+    return nodeElementList
+def getNodeNameList():
+    nameList=[]
+    for element in getNodeElementList():
+        for value in element:
 
-
+            nameList.append(value)
+    return nameList
 setTopology(json.loads(IEEE13))
 
 #print(search(jsonIEEE,"bus1",nodeID,False))
