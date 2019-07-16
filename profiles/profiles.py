@@ -8,7 +8,10 @@ import requests
 import time
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
+
+
 class Profiles:
+
     def __init__(self):
         self.url = ""
 
@@ -70,7 +73,6 @@ class Profiles:
             logger.debug("Price data size: ", len(price_list))
             logger.debug("Price data: ", price_list)
         return price_list
-
 
     def pv_profile(self, city, country, days = 365):
         if (not (city) or not (country)):
@@ -147,7 +149,6 @@ class Profiles:
         load_list.extend(data_list[0:days * 24])
         logger.debug("Load data size: ",len(load_list))
         logger.debug("Load data: ", load_list)
-
 
 if __name__ == "__main__":
     prof = Profiles()
