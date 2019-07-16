@@ -133,33 +133,33 @@ def create_simulation(body):  # noqa: E501
                 xycurves = values["xycurves"]#TORemove
                 factory.gridController.setXYCurve(id, xycurves) 
 
-            if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
+            """if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
                 photovoltaics = values["photovoltaics"]
                 xycurves = radial["xycurves"]
                 loadshapes = radial["loadshapes"]
                 tshapes = radial["tshapes"]
-                factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)
+                factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)""" #TODO: fix and remove comment
 
             """
             and "xycurves" in radial.values.keys()s() and radial["xycurves"] is not None 
                             and "loadshapes" in radial.values.keys()s() and radial["loadshapes"] is not None 
                             and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
             """
-            if "storage_units" in values.keys() and values["storage_units"] is not None:
+            """if "storage_units" in values.keys() and values["storage_units"] is not None:
                 #logger.debug("---------------Setting Storage-------------------------")
                 print("! ---------------Setting Storage------------------------- \n")
                 # radial=radial.to_dict()
                 storage = values["storage_units"]
-                factory.gridController.setStorage(id, storage)
+                factory.gridController.setStorage(id, storage)""" #TODO: fix and remove comment
             """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
                 # radial=radial.to_dict()
                 chargingPoints = values["chargingPoints"]
                 gridController.setChargingPoints(id, chargingPoints)
             """
-            if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
+            """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
                 #logger.debug("---------------Setting chargingPoints-------------------------")
                 chargingPoints = values["chargingPoints"]
-                factory.gridController.setChargingPoints(id, chargingPoints)               
+                factory.gridController.setChargingPoints(id, chargingPoints)"""#TODO: fix and remove comment               
 
 
             """if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:
@@ -169,17 +169,17 @@ def create_simulation(body):  # noqa: E501
                 factory.gridController.setVoltageRegulator(id, voltage_regulator)
             """
 
-            if "loadshapes" in values.keys() and values["loadshapes"] is not None:
+            """if "loadshapes" in values.keys() and values["loadshapes"] is not None:
 #                logger.debug("---------------Setting loadshapes-------------------------")
                 print("! ---------------Setting loadshapes------------------------- \n")
                 loadshapes = values["loadshapes"]
 #                logger.debug("Load Shapes: " + str(loadshapes))
-                factory.gridController.setLoadShape(id, loadshapes) 
-            if "tshapes" in values.keys() and values["tshapes"] is not None:
+                factory.gridController.setLoadShape(id, loadshapes)""" #TODO: fix and remove comment
+            """if "tshapes" in values.keys() and values["tshapes"] is not None:
                 logger.debug("---------------Setting tshapes-------------------------")
                 tshapes = values["tshapes"]
                 logger.debug("Tshapes: " + str(tshapes))
-                factory.gridController.setTShape(id, tshapes)                 
+                factory.gridController.setTShape(id, tshapes)""" #TODO: fix and remove comment                 
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)
 
