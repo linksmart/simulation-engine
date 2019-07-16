@@ -4,6 +4,8 @@ FROM garagon/opendss:0.2_python3.6.5
 
 #RUN apt-get update -y && apt-get install -y \
 #    python3-yaml
+RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade OpenDSSDirect.py[extras]
 
 # Set the working directory to usr/src/app
 RUN mkdir -p /usr/src/app
