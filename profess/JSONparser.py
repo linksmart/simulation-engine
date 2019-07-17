@@ -2,81 +2,67 @@ import json
 from collections.abc import Iterable
 import re
 
-IEEE13=open("IEEE13_changed.json").read()
-topology =json.loads(IEEE13)
-
-# @search returns a list with results
+class JsonParser:
+    # @search returns a list with results
     # @searchIn is the dict/list we search in
     # @searchFor is the String we search for
     # @returnsAll if true, returns all where searchFor fits, even if searchID doesn't fit
-def search(searchIn, searchFor, searchID, returnsAll):
+    def __init__(self):
+        self.topology = ""
 
-    searchResult = []
-    dummyList = searchIn
-    if type(searchIn) == list:
-        dummyList = []
-        for element in range(len(searchIn)):
-            dummyList.append(element)
-    for value in dummyList:
-        if type(value) == dict or type(value) == list:
-            for element in value:
-               if isinstance(value[element], Iterable) and type(value[element]) != str:
-                   searchResult = searchResult + search(value[element], searchFor, searchID, returnsAll)
-        else:
-            if value == searchFor:
-               if searchIn[value] == searchID or returnsAll:
-                    # print("matching id")
-                    if returnsAll:
-                        if type(searchIn[value]) == list:
-                            helpList={}
-                            for element in searchIn[value]:
-                                searchResult.append(element)
+    def search(self, search_in, search_for, search_id, returns_all):
+
+        search_result = []
+        dummy_list = search_in
+        if type(search_in) == list:
+            dummy_list = []
+            for element in range(len(search_in)):
+                dummy_list.append(element)
+        for value in dummy_list:
+            if type(value) == dict or type(value) == list:
+                for element in value:
+                    if isinstance(value[element], Iterable) and type(value[element]) != str:
+                        search_result = search_result + self.search(value[element], search_for, search_id, returns_all)
+            else:
+                if str(value).startswith(search_for):
+                    if str(search_in[value]).startswith(search_id) or returns_all:
+                        if returns_all:
+                            if type(search_in[value]) == list:
+                                helpList = {}
+                                for element in search_in[value]:
+                                    search_result.append(element)
+                            else:
+                                search_result.append(search_in[value])
                         else:
-                            searchResult.append(searchIn[value])
-                    else:
-                        #print(searchIn)
-                        #print(value)
-                        searchResult.append(searchIn)
-            if isinstance(searchIn[value], Iterable) and type(searchIn[value]) != str:
-                searchResult = searchResult + search(searchIn[value], searchFor, searchID, returnsAll)
 
-    return searchResult
-def setTopology(jsonTopology):
-    global topology
-    topology=jsonTopology
-def getNodeElementList():
-    nodeElementList=[]
-    nodeList=search(topology["radials"][0]["storageUnits"], "bus1", "", True)
+                            search_result.append(search_in)
+                if isinstance(search_in[value], Iterable) and type(search_in[value]) != str:
+                    search_result = search_result + self.search(search_in[value], search_for, search_id, returns_all)
 
+        return search_result
 
+    def set_topology(self, json_topology):
+        global topology
+        self.topology = json_topology
 
-    count=0
-    for element in nodeList:
-        pattern = re.compile("[^.]*")  #regex to find professID
-        m= pattern.findall(element)
-        element=m[0]
-        nodeElementList.append({element:[{"storageUnits":topology["radials"][0]["storageUnits"][count]}]})
-        nodeElementList[count][element].append({"loads":(search(topology["radials"][0]["loads"], "bus", element, False))})
-        #TODO PV etc
-        count=count+1
-    return nodeElementList
-def getNodeNameList():
-    nameList=[]
-    for element in getNodeElementList():
-        for value in element:
+    def get_node_element_list(self):
+        node_element_list = []
+        node_list = self.search(self.topology["radials"][0]["storageUnits"], "bus1", "", True)
+        count = 0
+        for element in node_list:
+            pattern = re.compile("[^.]*")  # regex to find professID
+            m = pattern.findall(element)
+            element = m[0]
+            node_element_list.append({element: [{"storageUnits": self.topology["radials"][0]["storageUnits"][count]}]})
+            node_element_list[count][element].append(
+                {"loads": (self.search(self.topology["radials"][0]["loads"], "bus", element, False))})
+            # TODO PV etc
+            count = count + 1
+        return node_element_list
 
-            nameList.append(value)
-    return nameList
-setTopology(json.loads(IEEE13))
-
-#print(search(jsonIEEE,"bus1",nodeID,False))
-helps=[]
-helps=search(topology, "storageUnits", "storageUnits", True)
-#print(helps)
-helper=search(helps, "bus1", "bus1", True)
-#print(helper)
-#for element in helper:
-    #print(search(topology, "bus1", element, False)+search(topology, "bus", element, False))
-
-getNodeElementList()
-#print(int(helper[0]))
+    def get_node_name_list(self):
+        name_list = []
+        for element in self.get_node_element_list():
+            for value in element:
+                name_list.append(value)
+        return name_list
