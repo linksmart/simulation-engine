@@ -6,8 +6,8 @@ import simplejson as json
 
 
 class Profess:
-    def __init__(self, dummy_data):
-        self.domain = "http://localhost:8080/v1/" #domainName is different on operating systems
+    def __init__(self, domain, dummy_data):
+        self.domain = domain #domainName is different on operating systems
         self.dataList=[]
         self.httpClass = Http_commands()
         self.json_parser=JsonParser()
@@ -23,13 +23,13 @@ class Profess:
 
         response = self.httpClass.post(self.domain + "inputs/dataset", input_data, "json")
         json_response = response.json()
-        print("answer: "+json_response)
         pattern = re.compile("/inputs*[/]([^']*)")  #regex to find profess_id
         m= pattern.findall(str(response.headers))
         if m != "":
             profess_id = m[0]
         else:
-            print("an error happend with regex")
+            print("an error happened with regex")
+        print(json_response + ": " + profess_id)
         self.set_profess_id_for_node(node_name, profess_id)
         self.set_config_json(node_name, profess_id, input_data)
 
@@ -59,7 +59,7 @@ class Profess:
                                                                                              "solver": solver,
                                                                                              "optimization_type": optType})
             json_response = response.json()
-            print(json_response)
+            print(json_response +  ": " +profess_id)
         else:
             print("No Input to start declared")
 
@@ -105,16 +105,14 @@ class Profess:
         node_number = self.json_parser.get_node_name_list().index(node_name)
         dataList[node_number][node_name][profess_id]= {}
 
-    def set_profiles(self, profiles_list):
+    def set_profiles(self, load_profiles, pv_profiles, price_profiles):
         for nodeName in self.json_parser.get_node_name_list():
             node_number = self.json_parser.get_node_name_list().index(nodeName)
-            for element in profiles_list:
+            for element in load_profiles:
                 if nodeName in element:
                     profess_id=self.get_profess_id(nodeName)
                     json_data_of_node = dataList[node_number][nodeName][profess_id]
-                    json_data_of_node["photovoltaic"]["P_PV"] = element[nodeName][0]["PV"]
-                    json_data_of_node["generic"]["Price_Forecast"] = element[nodeName][2]["price"] #No reserved words for price
-                    for phase in element[nodeName][1]["load"]:
+                    for phase in element[nodeName]:
 
                         if nodeName+".1" in phase:
                             json_data_of_node["load"]["P_Load_R"] = phase[nodeName+".1"]
@@ -122,7 +120,15 @@ class Profess:
                             json_data_of_node["load"]["P_Load_S"] = phase[nodeName+".2"]
                         if nodeName+".3" in phase:
                             json_data_of_node["load"]["P_Load_T"] = phase[nodeName+".3"]
-        #TODO
+            for element in pv_profiles:
+                if nodeName in element:
+                    profess_id = self.get_profess_id(nodeName)
+                    json_data_of_node = dataList[node_number][nodeName][profess_id]
+                    json_data_of_node["photovoltaic"]["P_PV"] = element[nodeName]
+
+            profess_id = self.get_profess_id(nodeName)
+            json_data_of_node = dataList[node_number][nodeName][profess_id]
+            json_data_of_node["generic"]["Price_Forecast"] = price_profiles #No reserved words for price
 
     def get_profess_id(self, nodeName):
         node_number = self.json_parser.get_node_name_list().index(nodeName)
@@ -137,7 +143,6 @@ class Profess:
             for nodeKey in (node_list[element]):
                 node_list[element] = {nodeKey: {}}
 
-        # print(jsonInputDataFile)
         global dataList
         dataList = node_list
 
@@ -146,13 +151,12 @@ class Profess:
         self.set_data_list()
         self.post_all_dummy_data()
         #TODO
-        #self.set_profiles()
+        self.set_profiles(load_profiles, pv_profiles, price_profiles)
         for nodeName in self.json_parser.get_node_name_list():
             self.set_storage(nodeName)
             professID=self.get_profess_id(nodeName)
             nodeNumber = self.json_parser.get_node_name_list().index(nodeName)
             self.update_config_json(professID, dataList[nodeNumber][nodeName][professID])
-        print(dataList)
 
     def set_dummy_json(self, dummy):
         global dummyInputData

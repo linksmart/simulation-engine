@@ -10,24 +10,34 @@ jsonIEEE = json.loads(IEEE13)
 modelDataFile = open('model.json').read()
 
 
-p1 = Profess(dummyInputData)
-dummyLoad=[0]*24
-dummyList=[]
+p1 = Profess("http://localhost:8080/v1/",dummyInputData)
+dummyprofile= [0] * 24
+dummyLoads=[]
+dummyPrice=[]
+dummyPV=[]
 p1.json_parser.set_topology(jsonIEEE)
 for element in p1.json_parser.get_node_name_list():
-    dummyDict={element:[{"PV": copy.deepcopy(dummyLoad)},{"load":[{element+".1":copy.deepcopy(dummyLoad)},
-                                                                   {str(element)+".2":copy.deepcopy(dummyLoad)},
-                                                                   {str(element)+".3":copy.deepcopy(dummyLoad)}]},
-                        {"price":copy.deepcopy(dummyLoad)}]}
-    dummyList.append(dummyDict)
-print(dummyList)
+    dummyDict={element:[{element+".1":copy.deepcopy(dummyprofile)},
+                        {element+".2":copy.deepcopy(dummyprofile)},
+                        {element+".3":copy.deepcopy(dummyprofile)}]}
+    dummyLoads.append(dummyDict)
+for element in p1.json_parser.get_node_name_list():
+    dummyDict={element:copy.deepcopy(dummyprofile)}
+    dummyPV.append(dummyDict)
+dummyPrice=copy.deepcopy(dummyprofile)
+
+
+#print(dummyLoads)
+#print(dummyPV)
+#print(dummyPrice)
+
 
 
 print(p1.json_parser.get_node_element_list())
 
-p1.set_up_profess(jsonIEEE, dummyLoad, dummyLoad, dummyLoad)
+p1.set_up_profess(jsonIEEE, dummyLoads, dummyPV, dummyPrice)
 p1.start_all("MaximizePVNoLoad")
-print(p1.json_parser.get_node_element_list())
+#print(p1.json_parser.get_node_element_list())
 #p1.post_model("testmodel", modelDataFile)
 
 
