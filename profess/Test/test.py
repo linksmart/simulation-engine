@@ -10,24 +10,23 @@ jsonIEEE = json.loads(IEEE13)
 modelDataFile = open('model.json').read()
 
 
-p1 = Profess("http://localhost:8080/v1/",dummyInputData)
+p1 = Profess("http://localhost:8080/v1/", dummyInputData)
 dummyprofile= [0] * 24
 dummyLoads=[]
 dummyPrice=[]
 dummyPV=[]
 p1.json_parser.set_topology(jsonIEEE)
 for element in p1.json_parser.get_node_name_list():
-    dummyDict={element:[{element+".1":copy.deepcopy(dummyprofile)},
-                        {element+".2":copy.deepcopy(dummyprofile)},
-                        {element+".3":copy.deepcopy(dummyprofile)}]}
+    dummyDict={element:[{element+".1": copy.deepcopy(dummyprofile)},
+                        {element+".2": copy.deepcopy(dummyprofile)},
+                        {element+".3": copy.deepcopy(dummyprofile)}]}
     dummyLoads.append(dummyDict)
-for element in p1.json_parser.get_node_name_list():
-    dummyDict={element:copy.deepcopy(dummyprofile)}
-    dummyPV.append(dummyDict)
-dummyPrice=copy.deepcopy(dummyprofile)
-
-
-#print(dummyLoads)
+dummyPV = copy.deepcopy(dummyprofile)
+dummyPrice = copy.deepcopy(dummyprofile)
+element="671"
+dummyDict = {element: [{element + ".1.2.3": copy.deepcopy(dummyprofile)}]}
+dummyLoads[1]= dummyDict
+print(dummyLoads)
 #print(dummyPV)
 #print(dummyPrice)
 

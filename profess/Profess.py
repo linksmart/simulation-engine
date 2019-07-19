@@ -120,14 +120,12 @@ class Profess:
                             json_data_of_node["load"]["P_Load_S"] = phase[nodeName+".2"]
                         if nodeName+".3" in phase:
                             json_data_of_node["load"]["P_Load_T"] = phase[nodeName+".3"]
-            for element in pv_profiles:
-                if nodeName in element:
-                    profess_id = self.get_profess_id(nodeName)
-                    json_data_of_node = dataList[node_number][nodeName][profess_id]
-                    json_data_of_node["photovoltaic"]["P_PV"] = element[nodeName]
+                        if nodeName + ".1.2.3" in phase:
+                            json_data_of_node["load"]["P_Load"] = phase[nodeName + ".1.2.3"]
 
             profess_id = self.get_profess_id(nodeName)
             json_data_of_node = dataList[node_number][nodeName][profess_id]
+            json_data_of_node["photovoltaic"]["P_PV"] = pv_profiles
             json_data_of_node["generic"]["Price_Forecast"] = price_profiles #No reserved words for price
 
     def get_profess_id(self, nodeName):
@@ -146,6 +144,7 @@ class Profess:
         global dataList
         dataList = node_list
 
+
     def set_up_profess(self, topology, load_profiles, pv_profiles, price_profiles):
         self.json_parser.set_topology(topology)
         self.set_data_list()
@@ -157,7 +156,7 @@ class Profess:
             professID=self.get_profess_id(nodeName)
             nodeNumber = self.json_parser.get_node_name_list().index(nodeName)
             self.update_config_json(professID, dataList[nodeNumber][nodeName][professID])
-
+        print(dataList)
     def set_dummy_json(self, dummy):
         global dummyInputData
         dummyInputData=dummy
