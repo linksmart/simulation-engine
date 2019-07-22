@@ -120,8 +120,25 @@ class Profess:
                             json_data_of_node["load"]["P_Load_S"] = phase[nodeName+".2"]
                         if nodeName+".3" in phase:
                             json_data_of_node["load"]["P_Load_T"] = phase[nodeName+".3"]
+
+                        if "P_Load_R" in json_data_of_node["load"] and "P_Load_S" in json_data_of_node["load"] and \
+                                "P_Load_T" in json_data_of_node["load"]:
+                            three_phase = []
+                            for value in range(len(json_data_of_node["load"]["P_Load_T"])):
+                                three_phase_value = json_data_of_node["load"]["P_Load_R"][value]+\
+                                                    json_data_of_node["load"]["P_Load_S"][value]+\
+                                                    json_data_of_node["load"]["P_Load_T"][value]
+                                three_phase.append(three_phase_value)
+                            json_data_of_node["load"]["P_Load"] = three_phase
                         if nodeName + ".1.2.3" in phase:
                             json_data_of_node["load"]["P_Load"] = phase[nodeName + ".1.2.3"]
+                            single_phase=[]
+                            for value in phase[nodeName + ".1.2.3"]:
+                                value = value / 3
+                                single_phase.append(value)
+                            json_data_of_node["load"]["P_Load_R"]=copy.deepcopy(single_phase)
+                            json_data_of_node["load"]["P_Load_S"] = copy.deepcopy(single_phase)
+                            json_data_of_node["load"]["P_Load_T"] = copy.deepcopy(single_phase)
 
             profess_id = self.get_profess_id(nodeName)
             json_data_of_node = dataList[node_number][nodeName][profess_id]

@@ -11,7 +11,7 @@ modelDataFile = open('model.json').read()
 
 
 p1 = Profess("http://localhost:8080/v1/", dummyInputData)
-dummyprofile= [0] * 24
+dummyprofile= [3] * 24
 dummyLoads=[]
 dummyPrice=[]
 dummyPV=[]
@@ -27,20 +27,12 @@ element="671"
 dummyDict = {element: [{element + ".1.2.3": copy.deepcopy(dummyprofile)}]}
 dummyLoads[1]= dummyDict
 print(dummyLoads)
-#print(dummyPV)
-#print(dummyPrice)
-
-
+print(dummyPV)
+print(dummyPrice)
 
 print(p1.json_parser.get_node_element_list())
 
 p1.set_up_profess(jsonIEEE, dummyLoads, dummyPV, dummyPrice)
-p1.start_all("MaximizePVNoLoad")
-#print(p1.json_parser.get_node_element_list())
-#p1.post_model("testmodel", modelDataFile)
+#p1.start_all("MaximizePVNoLoad")
 
 
-
-#for element in p1.dataList[0]["633"]:
-    #print(element)
-    #print(p1.httpClass.get(domain+"inputs/dataset/"+element).json())
