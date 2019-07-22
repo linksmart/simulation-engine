@@ -63,11 +63,50 @@ class OpenDSS:
 
     def solveCircuitSolution(self):
         logger.info("Start solveCircuitSolution " + str(dss.Loads.AllNames()))
+        print("kWhstored vor Solution.Solve: " + str(dss.Properties.Value("kWhstored")))
+        print("kW vor Solution.Solve: " + str(dss.Properties.Value("kW")))
+        print("Storage.Akku1.State: " + str(dss.Properties.Value("State")))
+        print("Storage.Akku1.DispMode: " + str(dss.Properties.Value("DispMode")))
+
+        storageName = "Storage.Akku1"
+
         try:
             #dss. dss.run_command("calcv ")
+            #dss.Circuit.SetActiveElement(storageName)
+            #dss.Properties.Name("kW")
+            #dss.Properties.Value(15)
+
+            if self.getStartingHour() < 5:
+                #dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery
+                dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
+                dss.run_command('Storage.Akku1.State = Discharging')
+            else:
+                #dss.run_command('Storage.Akku1.kWrated = 30')
+                dss.run_command('Storage.Akku1.kW = -5')
+                dss.run_command('Storage.Akku1.State = charging')
+
+
             dss.Solution.Solve()
+
         except:
             logger.info("ERROR Running Solve!")
+
+
+        dss.Circuit.SetActiveElement(storageName)
+        print("Result2 %stored: " + str(dss.Properties.Value("%stored")))
+        print("Result1 %stored: " + str(dss.run_command('? Storage.Akku1.%stored')))
+        #print("Result1 kWhstored: " + str(dss.run_command('? Storage.Akku1.kWhstored')))
+        #print("Result2 kWhstored: " + str(dss.Properties.Value("kWhstored")))
+
+        #dss.Circuit.s setActiveElement(storageName)
+        # dss.ActiveCircuit.setActiveElement(storageName)
+        print(dss.CktElement.AllPropertyNames())
+        #energy_ESS=[]
+        #energyStored = dss.CktElement.Variable("%stored",energy_ESS)
+        #print("The result of ESS energy",str(energy_ESS))
+        #energyStored = dssElem.Properties(" % stored").Val
+        #print("==> energyStored: " + str(energyStored))
+
         logger.info("Loads names: "+str(dss.Loads.AllNames()))
         #logger.info("Bus names: " + str(dss.Circuit.AllBusNames()))
         #logger.info("All Node names: " + str(dss.Circuit.AllNodeNames()))
@@ -1136,8 +1175,9 @@ class OpenDSS:
         # New Storage.AtPVNode phases=3 bus1=121117 kV=0.4  kva=5 kWhrated=9.6 kwrated=6.4
 
 
-        dss_string = "New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} kWhstored={kwh_stored} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
-            id=id,
+        #dss_string = "New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} kWhstored={kwh_stored} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
+        dss_string="New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
+                id=id,
             bus1=bus1,
             phases=phases,
             connection=connection,
@@ -1153,8 +1193,10 @@ class OpenDSS:
         )
 
         #testing storage charge/discharge
-        addition = " kW = 10 state = IDLING DischargeTrigger = 0.8 ChargeTrigger = 0.2 "
-        dss_string + addition
+        #addition = " kW=15 state=discharging DischargeTrigger=0.8 ChargeTrigger=0.3 "
+        #addition = " kW=10 state=IDLING DischargeTrigger=0.8 ChargeTrigger=0.3 "
+        addition = " DispMode=FOLLOW "
+        dss_string = dss_string + addition
 
         #logger.info(dss_string)
         print(dss_string + "\n")
