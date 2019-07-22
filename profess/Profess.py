@@ -3,7 +3,7 @@ import re
 import copy
 from JSONparser import *
 import simplejson as json
-
+import time
 
 class Profess:
     def __init__(self, domain, dummy_data):
@@ -20,7 +20,6 @@ class Profess:
         print(json_response)
 
     def post_data(self, input_data, node_name):
-
         response = self.httpClass.post(self.domain + "inputs/dataset", input_data, "json")
         json_response = response.json()
         pattern = re.compile("/inputs*[/]([^']*)")  #regex to find profess_id
@@ -41,13 +40,36 @@ class Profess:
 
     def set_dummy_data(self,dummy_data):
         self.dummy_data=dummy_data
-
+    def get_optimization_status(self):
+        response = self.httpClass.get(self.domain + "optimization/status")
+        json_response = response.json()
+        return json_response
     def get_output(self, profess_id):
         if profess_id != "":
             response = self.httpClass.get(self.domain + "outputs/" + profess_id)
         else:
             print("No Input get output declared")
         return response.json()
+
+    def wait_and_get_output(self, data):
+        something_running = True
+        while something_running:
+            time.sleep(.3)
+            opt_status = self.get_optimization_status()
+            something_running = False
+            for element in data:
+                for value in element:
+                    for key in element[value]:
+                        if opt_status["status"][key]["status"] == "running":
+                            something_running = True
+        output_list=[]
+        for element in data:
+            for value in element:
+                for key in element[value]:
+                    output_list.append({key:self.get_output(key)})
+        return output_list
+
+
 
     def start(self, freq, horizon, dt, model, repition, solver, optType, profess_id):
         if profess_id != "":
@@ -66,7 +88,7 @@ class Profess:
     def start_all(self, model_name):
         for element in self.json_parser.get_node_name_list():
 
-            self.start(10, 24, 3600, model_name, 1, "ipopt", "discrete", self.get_profess_id(element))
+            self.start(1, 24, 3600, model_name, 1, "ipopt", "discrete", self.get_profess_id(element))
 
     def stop(self, profess_id):
         if profess_id != "":
@@ -81,11 +103,11 @@ class Profess:
 
     def set_storage(self, node_name):
         node_number = self.json_parser.get_node_name_list().index(node_name)
-        for element in dataList[node_number]:
+        for element in self.dataList[node_number]:
             node_name = element
-        for element in dataList[node_number][node_name]:
+        for element in self.dataList[node_number][node_name]:
             profess_id= element
-        json_data_of_node= dataList[node_number][node_name][profess_id]
+        json_data_of_node= self.dataList[node_number][node_name][profess_id]
         json_data_of_node["ESS"]["SoC_Value"] = self.json_parser.get_node_element_list()[node_number][node_name][0]["storageUnits"]["soc"] / 100
         json_data_of_node["ESS"]["meta"]["ESS_Charging_Eff"] = self.json_parser.get_node_element_list()[node_number][node_name][0]["storageUnits"][
             "charge_efficiency"] / 100
@@ -99,11 +121,11 @@ class Profess:
 
     def set_config_json(self, node_name, profess_id, config_json):
         node_number = self.json_parser.get_node_name_list().index(node_name)
-        dataList[node_number][node_name][profess_id] = copy.deepcopy(config_json)
+        self.dataList[node_number][node_name][profess_id] = copy.deepcopy(config_json)
 
     def set_profess_id_for_node(self, node_name, profess_id):
         node_number = self.json_parser.get_node_name_list().index(node_name)
-        dataList[node_number][node_name][profess_id]= {}
+        self.dataList[node_number][node_name][profess_id]= {}
 
     def set_profiles(self, load_profiles, pv_profiles, price_profiles):
         for nodeName in self.json_parser.get_node_name_list():
@@ -111,7 +133,7 @@ class Profess:
             for element in load_profiles:
                 if nodeName in element:
                     profess_id=self.get_profess_id(nodeName)
-                    json_data_of_node = dataList[node_number][nodeName][profess_id]
+                    json_data_of_node = self.dataList[node_number][nodeName][profess_id]
                     for phase in element[nodeName]:
 
                         if nodeName+".1" in phase:
@@ -141,14 +163,14 @@ class Profess:
                             json_data_of_node["load"]["P_Load_T"] = copy.deepcopy(single_phase)
 
             profess_id = self.get_profess_id(nodeName)
-            json_data_of_node = dataList[node_number][nodeName][profess_id]
+            json_data_of_node = self.dataList[node_number][nodeName][profess_id]
             json_data_of_node["photovoltaic"]["P_PV"] = pv_profiles
             json_data_of_node["generic"]["Price_Forecast"] = price_profiles #No reserved words for price
 
     def get_profess_id(self, nodeName):
         node_number = self.json_parser.get_node_name_list().index(nodeName)
 
-        for element in dataList[node_number][nodeName]:
+        for element in self.dataList[node_number][nodeName]:
             profess_id = element
         return profess_id
 
@@ -158,8 +180,8 @@ class Profess:
             for nodeKey in (node_list[element]):
                 node_list[element] = {nodeKey: {}}
 
-        global dataList
-        dataList = node_list
+        self.dataList = node_list
+
 
 
     def set_up_profess(self, topology, load_profiles, pv_profiles, price_profiles):
@@ -172,8 +194,7 @@ class Profess:
             self.set_storage(nodeName)
             professID=self.get_profess_id(nodeName)
             nodeNumber = self.json_parser.get_node_name_list().index(nodeName)
-            self.update_config_json(professID, dataList[nodeNumber][nodeName][professID])
-        print(dataList)
-    def set_dummy_json(self, dummy):
-        global dummyInputData
-        dummyInputData=dummy
+            self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
+
+
+

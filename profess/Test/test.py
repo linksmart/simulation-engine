@@ -26,13 +26,16 @@ dummyPrice = copy.deepcopy(dummyprofile)
 element="671"
 dummyDict = {element: [{element + ".1.2.3": copy.deepcopy(dummyprofile)}]}
 dummyLoads[1]= dummyDict
-print(dummyLoads)
-print(dummyPV)
-print(dummyPrice)
+#print(dummyLoads)
+#print(dummyPV)
+#print(dummyPrice)
 
-print(p1.json_parser.get_node_element_list())
+#print(p1.json_parser.get_node_element_list())
 
 p1.set_up_profess(jsonIEEE, dummyLoads, dummyPV, dummyPrice)
-#p1.start_all("MaximizePVNoLoad")
+p1.start_all("MaximizePVNoLoad")
+#print(p1.dataList)
+print(p1.wait_and_get_output(p1.dataList))
+
 
 
