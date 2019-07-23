@@ -783,7 +783,8 @@
                   "kwh_stored": 150,
                   "charge_efficiency": 95,
                   "discharge_efficiency": 95,
-                  "powerfactor": 1
+                  "powerfactor": 1,
+				  "optimization_model":"selfconsumption"
                 }
             ]
         }
