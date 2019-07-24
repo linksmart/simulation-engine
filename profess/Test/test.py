@@ -916,7 +916,7 @@ test= [
 }
 ]
 
-soc_list=[{"633":0.5},{"671":0.5},{"634":0.2}]
+soc_list=[{"633":0.5},{"671":0.4},{"634":0.2}]
 p1.update(dummyLoads, dummyPV, dummyPrice,soc_list)
 print(p1.dataList)
 

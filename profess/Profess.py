@@ -107,16 +107,18 @@ class Profess:
         elements = self.json_parser.get_node_element_list()
         for nodeKey in elements:
             for node_name in nodeKey:
-                self.update_config_json(node_name, json.loads(self.dummy_data))
                 index=elements.index(nodeKey)
                 profess_id=self.get_profess_id(node_name)
                 for value in soc_list:
                     if node_name in value:
                         soc_index=soc_list.index(value)
-                        self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"]=(soc_list[soc_index][node_name])
-    def update_config_json(self, profess_id, config_json):
-        self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
 
+                        self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"]=(soc_list[soc_index][node_name])
+                self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
+    def update_config_json(self, profess_id, config_json):
+        response = self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
+        json_response = response.json()
+        print(json_response+ ": "+profess_id)
     def set_storage(self, node_name):
         node_number = self.json_parser.get_node_name_list().index(node_name)
         for element in self.dataList[node_number]:
