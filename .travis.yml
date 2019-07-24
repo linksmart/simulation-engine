@@ -7,6 +7,7 @@ script:
     - docker-compose -f docker-compose.yml build
 
 before_deploy:
+    - docker tag simulation-engine linksmart/simulation-engine
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 deploy:
   - provider: script
