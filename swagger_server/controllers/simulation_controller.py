@@ -49,10 +49,19 @@ def create_simulation(body):  # noqa: E501
             #dir_data = os.path.join(os.getcwd(), "optimization", str(id), "mqtt")
             #if not os.path.exists(dir_data):
                 #os.makedirs(dir_data)
+            if not os.path.exists("data"):
+                os.makedirs("data")
+            os.chdir(r"./data")
+            fname = str(id)+"_input_grid"
+            f = open(fname,'w')
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.close()
+            os.chdir(r"../")
         except Exception as e:
             logger.error(e)
 
         #logger.info("This is the Grid: " + str(grid))#Only for debugging purpose
+
         radial = grid.radials
 
         #logger.info("These are the radials: "+ str(radial))
@@ -204,12 +213,16 @@ def get_simulation_result(id):  # noqa: E501
     #factory= ThreadFactory(id)
     #variable.set(id, factory)
     #result = factory.gridController.results()
+    logger.info("Get Error")
     try:
-        f = open('/usr/src/app/tests/results/results.txt') #open(str(id)+"_results.txt")
+        os.chdir(r"./data")
+        f = open(str(id)+"_result") #open(str(id)+"_results.txt")
+        logger.debug("GET file "+str(f))
         content = f.read()
         #logger.info(content)
         result = json.loads(content)
         f.close()
+        os.chdir(r"../")
     except:
         result = "None"
     return result
@@ -224,9 +237,16 @@ def delete_simulation(id):  # noqa: E501
 
     :rtype: None
     """
-    factory= ThreadFactory(id)
+    """factory= ThreadFactory(id)
     try:
         factory.gridController.disableCircuit(id)
+        status = 'Simulation ' + id + ' deleted!'
+    except:
+        status = "Could not delete Simulation " + id
+    return status"""
+    status = "None"
+    try:
+        util.rmfile(id, "data")
         status = 'Simulation ' + id + ' deleted!'
     except:
         status = "Could not delete Simulation " + id

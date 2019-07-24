@@ -1,0 +1,20 @@
+    
+language: minimal
+
+before_script:
+    - export VERSION=${TRAVIS_BRANCH}  BUILDNUM=${TRAVIS_BUILD_NUMBER}
+script:
+    - docker-compose -f docker-compose.yml build
+
+before_deploy:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+deploy:
+  - provider: script
+    script: docker push linksmart/simulation-engine:latest
+    on:
+      branch: master
+  - provider: script
+    script: docker tag linksmart/simulation-engine linksmart/simulation-engine:${TRAVIS_TAG} &&
+      docker push linksmart/simulation-engine:${TRAVIS_TAG}
+    on:
+      tags: true

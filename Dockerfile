@@ -31,5 +31,3 @@ COPY data_management /usr/src/app/data_management
 
 
 
-
-
