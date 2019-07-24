@@ -89,10 +89,11 @@ class Profess:
         else:
             print("No Input to start declared")
 
-    def start_all(self, model_name):
-        for element in self.json_parser.get_node_name_list():
-
-            self.start(1, 24, 3600, model_name, 1, "ipopt", "discrete", self.get_profess_id(element))
+    def start_all(self):
+        for node_name in self.json_parser.get_node_name_list():
+            element_node=(next(item for item in self.json_parser.get_node_element_list() if node_name in item))
+            storage=(next(item for item in element_node[node_name] if item["storageUnits"]))
+            self.start(1, 24, 3600, storage["storageUnits"]["optimization_model"], 1, "ipopt", "discrete", self.get_profess_id(node_name))
 
     def stop(self, profess_id):
         if profess_id != "":
@@ -101,7 +102,18 @@ class Profess:
             print(json_response)
         else:
             print("No Input to stop declared")
-
+    def update(self, load_profiles, pv_profiles, price_profiles, soc_list):
+        self.set_profiles(load_profiles,pv_profiles,price_profiles)
+        elements = self.json_parser.get_node_element_list()
+        for nodeKey in elements:
+            for node_name in nodeKey:
+                self.update_config_json(node_name, json.loads(self.dummy_data))
+                index=elements.index(nodeKey)
+                profess_id=self.get_profess_id(node_name)
+                for value in soc_list:
+                    if node_name in value:
+                        soc_index=soc_list.index(value)
+                        self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"]=(soc_list[soc_index][node_name])
     def update_config_json(self, profess_id, config_json):
         self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
 
@@ -208,6 +220,7 @@ class Profess:
             professID=self.get_profess_id(nodeName)
             nodeNumber = self.json_parser.get_node_name_list().index(nodeName)
             self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
+
     def translate_output(self, output_data):
         #print(self.get)
         output_list=copy.deepcopy(output_data)
