@@ -1,7 +1,8 @@
-from Profess import *
-from JSONparser import *
+from profess.Profess import *
+from profess.JSONparser import *
 
-domain = "http://localhost:8080/v1/"
+#domain = "http://localhost:8080/v1/"
+domain = "http://192.168.99.100:8080/v1/"
 dummyInputData = open('inputData.json').read()
 jsonInputDataFile=json.loads(dummyInputData)
 IEEE13=open("IEEE13_changed.json").read()
@@ -10,7 +11,8 @@ jsonIEEE = json.loads(IEEE13)
 modelDataFile = open('model.json').read()
 
 
-p1 = Profess("http://localhost:8080/v1/", dummyInputData)
+#p1 = Profess("http://localhost:8080/v1/", dummyInputData)
+p1 = Profess("http://192.168.99.100:8080/v1/", dummyInputData)
 dummyprofile= [3] * 24
 dummyLoads=[]
 dummyPrice=[]

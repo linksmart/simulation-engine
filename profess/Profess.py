@@ -1,7 +1,7 @@
-from Http_commands import Http_commands
+from profess.Http_commands import Http_commands
 import re
 import copy
-from JSONparser import *
+from profess.JSONparser import *
 import simplejson as json
 import time
 
