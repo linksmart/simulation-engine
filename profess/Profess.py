@@ -12,7 +12,7 @@ class Profess:
         self.httpClass = Http_commands()
         self.json_parser=JsonParser()
         self.dummy_data = dummy_data
-        self.list_with_desired_outoutw_words=["P_ESS_Output", "P_PV_Output", "P_PV_R_Output", "P_PV_S_Output"
+        self.list_with_desired_output_words=["P_ESS_Output", "P_PV_Output", "P_PV_R_Output", "P_PV_S_Output"
             , "P_PV_T_Output", "Q_PV_Output", "Q_PV_R_Output", "Q_PV_S_Output", "Q_PV_T_Output"]
         print("profess class created")
 
@@ -53,7 +53,8 @@ class Profess:
             print("No Input get output declared")
         return response.json()
 
-    def wait_and_get_output(self, data):
+    def wait_and_get_output(self):
+        data=self.dataList
         something_running = True
         while something_running:
             time.sleep(.3)
@@ -276,7 +277,7 @@ class Profess:
             for node_name in element:
                 for profess_id in element[node_name]:
                     for key in element[node_name][profess_id]:
-                        if not key in self.list_with_desired_outout_words:
+                        if not key in self.list_with_desired_output_words:
                             index=helper.index(element)
                             output_list[index][node_name][profess_id].pop(key, None)
         return output_list
