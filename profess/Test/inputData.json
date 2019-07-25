@@ -1,0 +1,61 @@
+{"load": {
+         "meta": {
+             "pf_Load": 1
+         }
+     },
+     "photovoltaic": {
+         "meta": {
+             "PV_Inv_Max_Power": 15.00
+         }
+     
+},
+"grid":{
+"meta":{
+"Q_Grid_Max_Export_Power":15,
+"P_Grid_Max_Export_Power":15
+}
+},
+"generic":{
+	"T_SoC":25,
+	"voltage": [
+             0.99,
+             0.98,
+             0.998,
+             1.01,
+             1,
+             1.02,
+             0.98,
+             0.97,
+             1.03,
+             1.05,
+             1.06,
+             1.07,
+             1.05,
+             1.09,
+             1.08,
+             1.07,
+             1.06,
+             1.04,
+             1.02,
+             1,
+             1.01,
+             0.99,
+             1.01,
+             1.02
+         ],
+    "mu_P": 1.2,
+    "mu_Q": -1.5
+},
+"ESS":{
+"SoC_Value":0.56,
+"meta":{
+"ESS_Max_SoC":1,
+"ESS_Max_Discharge_Power":0.250,
+"ESS_Charging_Eff":0.85,
+"ESS_Max_Charge_Power":0.050,
+"ESS_Min_SoC":0.2,
+"ESS_Discharging_Eff":0.85,
+"ESS_Capacity":67.2
+}
+}
+}

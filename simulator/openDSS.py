@@ -8,6 +8,7 @@ Created on Fri Mar 16 15:05:36 2018
 
 import logging
 import opendssdirect as dss
+from profess.Profess import *
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -22,23 +23,46 @@ class OpenDSS:
         #dss.Basic.NewCircuit("Test 1")
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
 
-    def setNewCircuit(self, name):
-        #dss.run_command("New circuit.{circuit_name}".format(circuit_name= name)) #To Remove
-        dss_string="New circuit.{circuit_name} basekv={base_k_v} pu={per_unit} phases={phases} bus1={bus1}  Angle={angle} MVAsc3={mv_asc3} MVASC1={mv_asc1}".format(
-                circuit_name = name,
-                phases = 3,
-                per_unit = 1.0001,
-                base_k_v = 115.0,
-                mv_asc1 = 21000.0,
-                mv_asc3 = 20000.0,
-                bus1 = 'SourceBus',
-                angle = 30
-                )
+    def setNewCircuit(self, name, common):
+        self.common = common
+        try:
+            for key, value in self.common.items():
+                if key == "id":
+                    common_id = value
+                elif key == "base_k_v":
+                    common_base_kV = value
+                elif key == "per_unit":
+                    common_per_unit = value
+                elif key == "phases":
+                    common_phases_input = value
+                elif key == "bus1":
+                    common_bus1 = value
+                elif key == "angle":
+                    common_angle = value
+                elif key == "mv_asc3":
+                    common_MVAsc3 = value
+                elif key == "mv_asc1":
+                    common_MVAsc1 = value
+                else:
+                    logger.debug("key not processed "+str(key))
+                    pass
 
-        print(dss_string + "\n")
-        dss.run_command(dss_string)
-        #dss.Basic.NewCircuit(name)
-        #logger.debug("Name of the active circuit: "+str(self.getActiveCircuit()))
+            dss_string = "New circuit.{circuit_name} basekv={base_k_v} pu={per_unit} phases={phases} bus1={bus1}  Angle={angle} MVAsc3={mv_asc3} MVASC1={mv_asc1}".format(
+                circuit_name=name,
+                phases=common_phases_input,
+                per_unit=common_per_unit,
+                base_k_v= common_base_kV,
+                mv_asc1= common_MVAsc1,
+                mv_asc3= common_MVAsc3,
+                bus1=common_bus1,
+                angle=common_angle
+            )
+
+            print(dss_string + "\n")
+            dss.run_command(dss_string)
+
+        except Exception as e:
+            logger.error(e)
 
     def getActiveCircuit(self):
         return dss.Circuit.Name()
@@ -63,11 +87,50 @@ class OpenDSS:
 
     def solveCircuitSolution(self):
         logger.info("Start solveCircuitSolution " + str(dss.Loads.AllNames()))
+        print("kWhstored vor Solution.Solve: " + str(dss.Properties.Value("kWhstored")))
+        print("kW vor Solution.Solve: " + str(dss.Properties.Value("kW")))
+        print("Storage.Akku1.State: " + str(dss.Properties.Value("State")))
+        print("Storage.Akku1.DispMode: " + str(dss.Properties.Value("DispMode")))
+
+        storageName = "Storage.Akku1"
+
         try:
             #dss. dss.run_command("calcv ")
+            #dss.Circuit.SetActiveElement(storageName)
+            #dss.Properties.Name("kW")
+            #dss.Properties.Value(15)
+
+            if self.getStartingHour() < 5:
+                #dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery
+                dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
+                dss.run_command('Storage.Akku1.State = Discharging')
+            else:
+                #dss.run_command('Storage.Akku1.kWrated = 30')
+                dss.run_command('Storage.Akku1.kW = -5')
+                dss.run_command('Storage.Akku1.State = charging')
+
+
             dss.Solution.Solve()
+
         except:
             logger.info("ERROR Running Solve!")
+
+
+        dss.Circuit.SetActiveElement(storageName)
+        print("Result2 %stored: " + str(dss.Properties.Value("%stored")))
+        print("Result1 %stored: " + str(dss.run_command('? Storage.Akku1.%stored')))
+        #print("Result1 kWhstored: " + str(dss.run_command('? Storage.Akku1.kWhstored')))
+        #print("Result2 kWhstored: " + str(dss.Properties.Value("kWhstored")))
+
+        #dss.Circuit.s setActiveElement(storageName)
+        # dss.ActiveCircuit.setActiveElement(storageName)
+        print(dss.CktElement.AllPropertyNames())
+        #energy_ESS=[]
+        #energyStored = dss.CktElement.Variable("%stored",energy_ESS)
+        #print("The result of ESS energy",str(energy_ESS))
+        #energyStored = dssElem.Properties(" % stored").Val
+        #print("==> energyStored: " + str(energyStored))
+
         logger.info("Loads names: "+str(dss.Loads.AllNames()))
         #logger.info("Bus names: " + str(dss.Circuit.AllBusNames()))
         #logger.info("All Node names: " + str(dss.Circuit.AllNodeNames()))
@@ -1135,8 +1198,11 @@ class OpenDSS:
     def setStorage(self, id, bus1, phases, connection, soc, dod, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor):
         #logger.info("starting setStorage for ID: " + str(id))
         # New Storage.AtPVNode phases=3 bus1=121117 kV=0.4  kva=5 kWhrated=9.6 kwrated=6.4
-        dss_string = "New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} kWhstored={kwh_stored} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
-            id=id,
+
+
+        #dss_string = "New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} kWhstored={kwh_stored} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
+        dss_string="New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
+                id=id,
             bus1=bus1,
             phases=phases,
             connection=connection,
@@ -1150,6 +1216,12 @@ class OpenDSS:
             discharge_efficiency=discharge_efficiency,
             powerfactor=powerfactor
         )
+
+        #testing storage charge/discharge
+        #addition = " kW=15 state=discharging DischargeTrigger=0.8 ChargeTrigger=0.3 "
+        #addition = " kW=10 state=IDLING DischargeTrigger=0.8 ChargeTrigger=0.3 "
+        addition = " DispMode=FOLLOW "
+        dss_string = dss_string + addition
 
         #logger.info(dss_string)
         print(dss_string + "\n")

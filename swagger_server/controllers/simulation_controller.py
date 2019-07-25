@@ -78,7 +78,9 @@ def create_simulation(body):  # noqa: E501
         #logger.debug("Factory stored in redisDB: "+str(object))
         #test= json.loads(object[id])
         #logger.debug("Factory stored in redisDB: " + str(test)+" type: "+str(type(test)))
-        factory.gridController.setNewCircuit(id)
+        common = grid.common.to_dict()
+        factory.gridController.setNewCircuit(id, common)
+        #factory.gridController.setNewCircuit(id)
 
         for values in radial:
             #logger.debug("values of the radial: "+str(values))

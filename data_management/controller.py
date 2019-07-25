@@ -20,9 +20,9 @@ class gridController:
         self.yCurrent = []
         self.losses = []
 
-    def setNewCircuit(self, name):
+    def setNewCircuit(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
-        self.sim.setNewCircuit(name)
+        self.sim.setNewCircuit(name, object)
         logger.debug("New circuit created")
 
     def enableCircuit(self, name):
@@ -143,21 +143,26 @@ class gridController:
         logger.info("Solution step size: " + str(self.sim.getStepSize()))
         logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
-        self.sim.setMode("snap")
-        logger.info("Solution mode 2: " + str(self.sim.getMode()))
+        #self.sim.setMode("snap")
+        self.sim.setMode("daily")
         self.sim.setStepSize("hours")
-        #logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         self.sim.setNumberSimulations(1)
+        logger.info("Solution mode 2: " + str(self.sim.getMode()))
         logger.info("Number simulations 2: " + str(self.sim.getNumberSimulations()))
+        logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
+
         #self.sim.setVoltageBases(115,4.16,0.48)
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
         #self.sim.setVoltageBases()
-        numSteps= 5
+        numSteps= 12
         #logger.info("Number of steps: "+str(numSteps))
         #nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         for i in range(numSteps):
+            logger.info("#####################################################################")
             logger.info("loop  numSteps, i= " + str(i) )
+            logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
+            logger.info("#####################################################################")
             nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         """df = self.sim.utils.lines_to_dataframe()
         data = df[['Bus1', 'Bus2']].to_dict(orient="index")
