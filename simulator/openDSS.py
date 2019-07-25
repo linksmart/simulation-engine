@@ -29,34 +29,37 @@ class OpenDSS:
             for key, value in self.common.items():
                 if key == "id":
                     common_id = value
-                elif key == "base_kV":
+                elif key == "base_k_v":
                     common_base_kV = value
                 elif key == "per_unit":
                     common_per_unit = value
                 elif key == "phases":
-                    common_phases = value
+                    common_phases_input = value
                 elif key == "bus1":
                     common_bus1 = value
                 elif key == "angle":
                     common_angle = value
-                elif key == "MVAsc3":
+                elif key == "mv_asc3":
                     common_MVAsc3 = value
-                elif key == "MVAsc1":
+                elif key == "mv_asc1":
                     common_MVAsc1 = value
+                else:
+                    logger.debug("key not processed "+str(key))
+                    pass
 
-                dss_string = "New circuit.{circuit_name} basekv={base_k_v} pu={per_unit} phases={phases} bus1={bus1}  Angle={angle} MVAsc3={mv_asc3} MVASC1={mv_asc1}".format(
-                    circuit_name=name,
-                    phases=common_phases,
-                    per_unit=common_per_unit,
-                    base_k_v= common_base_kV,
-                    mv_asc1= common_MVAsc1,
-                    mv_asc3= common_MVAsc3,
-                    bus1=common_bus1,
-                    angle=common_angle
-                )
+            dss_string = "New circuit.{circuit_name} basekv={base_k_v} pu={per_unit} phases={phases} bus1={bus1}  Angle={angle} MVAsc3={mv_asc3} MVASC1={mv_asc1}".format(
+                circuit_name=name,
+                phases=common_phases_input,
+                per_unit=common_per_unit,
+                base_k_v= common_base_kV,
+                mv_asc1= common_MVAsc1,
+                mv_asc3= common_MVAsc3,
+                bus1=common_bus1,
+                angle=common_angle
+            )
 
-                print(dss_string + "\n")
-                dss.run_command(dss_string)
+            print(dss_string + "\n")
+            dss.run_command(dss_string)
 
         except Exception as e:
             logger.error(e)
