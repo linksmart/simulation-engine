@@ -35,9 +35,18 @@ dummyLoads[1]= dummyDict
 #print(p1.json_parser.get_node_element_list())
 
 p1.set_up_profess(jsonIEEE, dummyLoads, dummyPV, dummyPrice)
-p1.start_all("MaximizePVNoLoad")
-#print(p1.dataList)
-print(p1.wait_and_get_output(p1.dataList))
+#print(p1.json_parser.get_node_element_list())
 
+p1.start_all()
+#print(p1.dataList)
+print(p1.wait_and_get_output())
+
+
+soc_list=[{"633":0.5},{"671":0.4},{"634":0.2}]
+p1.update(dummyLoads, dummyPV, dummyPrice,soc_list)
+print(p1.dataList)
+
+#print(sorted(test))
+#p1.translate_output(test)
 
 

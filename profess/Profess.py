@@ -12,6 +12,8 @@ class Profess:
         self.httpClass = Http_commands()
         self.json_parser=JsonParser()
         self.dummy_data = dummy_data
+        self.list_with_desired_output_words=["P_ESS_Output", "P_PV_Output", "P_PV_R_Output", "P_PV_S_Output"
+            , "P_PV_T_Output", "Q_PV_Output", "Q_PV_R_Output", "Q_PV_S_Output", "Q_PV_T_Output"]
         print("profess class created")
 
     def post_model(self, model_name, model_data):
@@ -51,7 +53,8 @@ class Profess:
             print("No Input get output declared")
         return response.json()
 
-    def wait_and_get_output(self, data):
+    def wait_and_get_output(self):
+        data=self.dataList
         something_running = True
         while something_running:
             time.sleep(.3)
@@ -67,7 +70,9 @@ class Profess:
             for value in element:
                 for key in element[value]:
                     output_list.append({key:self.get_output(key)})
-        return output_list
+
+
+        return self.translate_output(output_list)
 
 
 
@@ -85,10 +90,11 @@ class Profess:
         else:
             print("No Input to start declared")
 
-    def start_all(self, model_name):
-        for element in self.json_parser.get_node_name_list():
-
-            self.start(1, 24, 3600, model_name, 1, "ipopt", "discrete", self.get_profess_id(element))
+    def start_all(self):
+        for node_name in self.json_parser.get_node_name_list():
+            element_node=(next(item for item in self.json_parser.get_node_element_list() if node_name in item))
+            storage=(next(item for item in element_node[node_name] if item["storageUnits"]))
+            self.start(1, 24, 3600, storage["storageUnits"]["optimization_model"], 1, "ipopt", "discrete", self.get_profess_id(node_name))
 
     def stop(self, profess_id):
         if profess_id != "":
@@ -97,10 +103,23 @@ class Profess:
             print(json_response)
         else:
             print("No Input to stop declared")
+    def update(self, load_profiles, pv_profiles, price_profiles, soc_list):
+        self.set_profiles(load_profiles,pv_profiles,price_profiles)
+        elements = self.json_parser.get_node_element_list()
+        for nodeKey in elements:
+            for node_name in nodeKey:
+                index=elements.index(nodeKey)
+                profess_id=self.get_profess_id(node_name)
+                for value in soc_list:
+                    if node_name in value:
+                        soc_index=soc_list.index(value)
 
+                        self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"]=(soc_list[soc_index][node_name])
+                self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
     def update_config_json(self, profess_id, config_json):
-        self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
-
+        response = self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
+        json_response = response.json()
+        print(json_response+ ": "+profess_id)
     def set_storage(self, node_name):
         node_number = self.json_parser.get_node_name_list().index(node_name)
         for element in self.dataList[node_number]:
@@ -173,7 +192,16 @@ class Profess:
         for element in self.dataList[node_number][nodeName]:
             profess_id = element
         return profess_id
+    def get_node_name(self, profess_id):
+        nodeName=""
+        name_list = self.json_parser.get_node_name_list()
+        for name in name_list:
+            node_number = self.json_parser.get_node_name_list().index(name)
+            for element in self.dataList[node_number][name]:
+                if element==profess_id:
+                    nodeName= name
 
+        return nodeName
     def set_data_list(self):
         node_list = self.json_parser.get_node_element_list()
         for element in range(len(node_list)):
@@ -195,6 +223,64 @@ class Profess:
             professID=self.get_profess_id(nodeName)
             nodeNumber = self.json_parser.get_node_name_list().index(nodeName)
             self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
+
+    def translate_output(self, output_data):
+        #print(self.get)
+        output_list=copy.deepcopy(output_data)
+        #finding the lowest value of each variable
+        for element in output_data:
+            for node_name in element:
+                for profess_id in element[node_name]:
+                    helper = dict(sorted(element[node_name][profess_id].items()))
+                    index=output_data.index(element)
+                    output_list[index][node_name][profess_id] = element[node_name][profess_id][min(helper)]
+        #matching the right professid with nodename
+        for element in self.dataList:
+            for value in element:
+                for key in output_list:
+                    for profess_id in key:
+                        if profess_id in element[value]:
+                            index=output_list.index(key)
+                            output_list[index]={value:output_list[index]}
+        #TODO group phases together, i.e. translate phases into number
+        # for node in output_list:
+        #     for node_name in node:
+        #         print(node[node_name])
+        #         for profess_id in node[node_name]:
+        #             node[node_name][profess_id]["Grid"]=[]
+        #             for element in node[node_name][profess_id]:
+        #                 if str(element).startswith("P_Grid"):
+        #                     power_name="P"
+        #                 if str(element).startswith("Q_Grid"):
+        #                     power_name="Q"
+        #                 if str(element).endswith("Grid_R_Output"):
+        #                     print(node[node_name][profess_id]["Grid"])
+        #                     print((any(helper_dict["P"]) for helper_dict in node[node_name][profess_id]["Grid"]))
+        #                     if any(node[node_name][profess_id]["Grid"])==power_name:
+        #
+        #                         node[node_name][profess_id]["Grid"][power_name][node_name + ".1"]={node[node_name][profess_id][element]}
+        #                     else:
+        #                         node[node_name][profess_id]["Grid"].append({power_name:{node_name+".1":node[node_name][profess_id][element]}})
+        #                 if str(element).endswith("Grid_S_Output"):
+        #                     if any(node[node_name][profess_id]["Grid"])==power_name:
+        #                         node[node_name][profess_id]["Grid"][power_name][node_name + ".2"]={node[node_name][profess_id][element]}
+        #                     else:
+        #                         node[node_name][profess_id]["Grid"].append({power_name:{node_name+".2":node[node_name][profess_id][element]}})
+        #                 if str(element).endswith("Grid_T_Output"):
+        #                     if any(node[node_name][profess_id]["Grid"])==power_name:
+        #                         node[node_name][profess_id]["Grid"][power_name][node_name + ".3"]={node[node_name][profess_id][element]}
+        #                     else:
+        #                         node[node_name][profess_id]["Grid"].append({power_name:{node_name+".3":node[node_name][profess_id][element]}})
+        helper=copy.deepcopy(output_list)
+
+        for element in helper:
+            for node_name in element:
+                for profess_id in element[node_name]:
+                    for key in element[node_name][profess_id]:
+                        if not key in self.list_with_desired_output_words:
+                            index=helper.index(element)
+                            output_list[index][node_name][profess_id].pop(key, None)
+        return output_list
 
 
 
