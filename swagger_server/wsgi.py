@@ -19,7 +19,10 @@ def number_of_workers():
 class StandaloneApplication(gunicorn.app.base.BaseApplication):
 
     def __init__(self, app, options=None):
-        self.options = options or {}
+        self.options = options or {              
+                ('Access-Control-Allow-Origin', 'http://localhost:9090'),
+                ('Access-Control-Allow-Methods', 'POST'),
+                ('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Authorization')}
         self.application = app
         super(StandaloneApplication, self).__init__()
 

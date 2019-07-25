@@ -2,10 +2,21 @@ import datetime
 
 import six, logging
 import typing
+import os
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
+def rmfile(id, directory):
+    os.chdir(directory)
+    
+    curdir = os.getcwd()
+    files = os.listdir(curdir)
+    for file in files:
+        if file.startswith(str(id)):
+            os.remove(os.path.join(curdir,file))
+    os.chdir("..")
+    
 def _deserialize(data, klass):
     """Deserializes dict, list, str into an object.
 

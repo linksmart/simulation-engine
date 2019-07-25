@@ -4,3 +4,4 @@ psutil
 more_itertools
 jsonpickle
 simplejson
+flask-cors

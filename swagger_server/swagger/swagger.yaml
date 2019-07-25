@@ -698,9 +698,6 @@ definitions:
       thresholdLow: 5.96213399999999982270537657313980162143707275390625
   SimulationResult:
     type: "object"
-    required:
-    - "nodeId"
-    - "voltage"
     properties:
       nodeId:
         type: "string"

@@ -1,17 +1,17 @@
 version: '3'
 services:
-  #redis:
-  #  image: redis:latest
-  #  command: redis-server
-  #  ports:
-  #    - "6379:6379"
+  redis:
+    image: redis:latest
+    command: redis-server
+    ports:
+      - "6379:6379"
   se:
     build:
       context: ""
       dockerfile: Dockerfile
     image: "simulation-engine"
     volumes:
-       - .:/usr/src/app
+       - '${HOST_PATH}:${CONTAINER_PATH}'
         #- host_path:${CONTAINER_PATH}#this in combination with the code below does not work on windows
         #- 'tests: /usr/src/app/tests'
     #network_mode: "host"

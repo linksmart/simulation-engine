@@ -49,10 +49,19 @@ def create_simulation(body):  # noqa: E501
             #dir_data = os.path.join(os.getcwd(), "optimization", str(id), "mqtt")
             #if not os.path.exists(dir_data):
                 #os.makedirs(dir_data)
+            if not os.path.exists("data"):
+                os.makedirs("data")
+            os.chdir(r"./data")
+            fname = str(id)+"_input_grid"
+            f = open(fname,'w')
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.close()
+            os.chdir(r"../")
         except Exception as e:
             logger.error(e)
 
         #logger.info("This is the Grid: " + str(grid))#Only for debugging purpose
+
         radial = grid.radials
 
         #logger.info("These are the radials: "+ str(radial))
@@ -135,33 +144,33 @@ def create_simulation(body):  # noqa: E501
                 xycurves = values["xycurves"]#TORemove
                 factory.gridController.setXYCurve(id, xycurves) 
 
-            if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
+            """if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
                 photovoltaics = values["photovoltaics"]
                 xycurves = radial["xycurves"]
                 loadshapes = radial["loadshapes"]
                 tshapes = radial["tshapes"]
-                factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)
+                factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)""" #TODO: fix and remove comment
 
             """
             and "xycurves" in radial.values.keys()s() and radial["xycurves"] is not None 
                             and "loadshapes" in radial.values.keys()s() and radial["loadshapes"] is not None 
                             and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
             """
-            if "storage_units" in values.keys() and values["storage_units"] is not None:
+            """if "storage_units" in values.keys() and values["storage_units"] is not None:
                 #logger.debug("---------------Setting Storage-------------------------")
                 print("! ---------------Setting Storage------------------------- \n")
                 # radial=radial.to_dict()
                 storage = values["storage_units"]
-                factory.gridController.setStorage(id, storage)
+                factory.gridController.setStorage(id, storage)""" #TODO: fix and remove comment
             """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
                 # radial=radial.to_dict()
                 chargingPoints = values["chargingPoints"]
                 gridController.setChargingPoints(id, chargingPoints)
             """
-            if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
+            """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
                 #logger.debug("---------------Setting chargingPoints-------------------------")
                 chargingPoints = values["chargingPoints"]
-                factory.gridController.setChargingPoints(id, chargingPoints)               
+                factory.gridController.setChargingPoints(id, chargingPoints)"""#TODO: fix and remove comment               
 
 
             """if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:
@@ -171,17 +180,17 @@ def create_simulation(body):  # noqa: E501
                 factory.gridController.setVoltageRegulator(id, voltage_regulator)
             """
 
-            if "loadshapes" in values.keys() and values["loadshapes"] is not None:
+            """if "loadshapes" in values.keys() and values["loadshapes"] is not None:
 #                logger.debug("---------------Setting loadshapes-------------------------")
                 print("! ---------------Setting loadshapes------------------------- \n")
                 loadshapes = values["loadshapes"]
 #                logger.debug("Load Shapes: " + str(loadshapes))
-                factory.gridController.setLoadShape(id, loadshapes) 
-            if "tshapes" in values.keys() and values["tshapes"] is not None:
+                factory.gridController.setLoadShape(id, loadshapes)""" #TODO: fix and remove comment
+            """if "tshapes" in values.keys() and values["tshapes"] is not None:
                 logger.debug("---------------Setting tshapes-------------------------")
                 tshapes = values["tshapes"]
                 logger.debug("Tshapes: " + str(tshapes))
-                factory.gridController.setTShape(id, tshapes)                 
+                factory.gridController.setTShape(id, tshapes)""" #TODO: fix and remove comment                 
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)
 
@@ -206,12 +215,16 @@ def get_simulation_result(id):  # noqa: E501
     #factory= ThreadFactory(id)
     #variable.set(id, factory)
     #result = factory.gridController.results()
+    logger.info("Get Error")
     try:
-        f = open('/usr/src/app/tests/results/results.txt') #open(str(id)+"_results.txt")
+        os.chdir(r"./data")
+        f = open(str(id)+"_result") #open(str(id)+"_results.txt")
+        logger.debug("GET file "+str(f))
         content = f.read()
         #logger.info(content)
         result = json.loads(content)
         f.close()
+        os.chdir(r"../")
     except:
         result = "None"
     return result
@@ -226,9 +239,16 @@ def delete_simulation(id):  # noqa: E501
 
     :rtype: None
     """
-    factory= ThreadFactory(id)
+    """factory= ThreadFactory(id)
     try:
         factory.gridController.disableCircuit(id)
+        status = 'Simulation ' + id + ' deleted!'
+    except:
+        status = "Could not delete Simulation " + id
+    return status"""
+    status = "None"
+    try:
+        util.rmfile(id, "data")
         status = 'Simulation ' + id + ' deleted!'
     except:
         status = "Could not delete Simulation " + id

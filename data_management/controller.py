@@ -1,6 +1,6 @@
 import logging
 import json
-
+import os
 from simulator.openDSS import OpenDSS
 #from simulation_management import simulation_management as SM
 
@@ -186,11 +186,15 @@ class gridController:
         #filename = str(id)+"_results.txt"
         #!TODO: Create filename with id so serve multiple simultaneous simulations
         json_data = json.dumps(allBusMagPu)
-        with open('/usr/src/app/tests/results/results.txt', 'w', encoding='utf-8') as outfile:
+        fname = (self.id)+"_result"
+        os.chdir(r"./data")
+        with open(fname, 'w', encoding='utf-8') as outfile: 
+            #/usr/src/app/tests/results/
             #outfile.write(json_data) # working
             json.dump(allBusMagPu, outfile, ensure_ascii=False, indent=2) # working
             #json.dump(json_data, outfile, ensure_ascii=False, indent=2)  # not working !!!
         #logger.info(json_data)
+        os.chdir(r"../")
         return id
     
     #def results(self):   
