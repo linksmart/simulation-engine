@@ -12,7 +12,7 @@ modelDataFile = open('model.json').read()
 
 
 #p1 = Profess("http://localhost:8080/v1/", dummyInputData)
-p1 = Profess("http://192.168.99.100:8080/v1/", dummyInputData)
+p1 = Profess(domain, dummyInputData)
 dummyprofile= [3] * 24
 dummyLoads=[]
 dummyPrice=[]

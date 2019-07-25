@@ -8,6 +8,7 @@ Created on Fri Mar 16 15:05:36 2018
 
 import logging
 import opendssdirect as dss
+from profess.Profess import *
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
