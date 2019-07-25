@@ -483,13 +483,19 @@ definitions:
       kw_rated:
         type: "number"
         description: "kW rating of power output. Side effect: Set KVA property."
-      kwh_rated:
+      storage_capacity:
         type: "number"
         description: "Rated storage capacity in kWh. Default is 50."
       kwh_stored:
         type: "number"
         description: "Present amount of energy stored, kWh. Default is same as kWh\
           \ rated."
+      max_charging_power:
+        type: "number"
+        description: "Maximal power to charge the storage"
+      max_discharging_power:
+        type: "number"
+        description: "Maximal power to discharge the storage"
       charge_efficiency:
         type: "number"
         description: "Efficiency for CHARGING the storage element. Default=90%. (%EffCharge)"

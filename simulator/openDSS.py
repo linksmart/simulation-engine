@@ -1164,30 +1164,32 @@ class OpenDSS:
                     #logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
-                    if key == "bus1":
+                    elif key == "bus1":
                         bus1 = value
-                    if key == "phases":
+                    elif key == "phases":
                         phases = value
-                    if key == "connectio":
+                    elif key == "connectio":
                         connection = value
-                    if key == "soc":
+                    elif key == "soc":
                         soc = value
-                    if key == "dod":
+                    elif key == "dod":
                         dod = value
-                    if key == "kv":
+                    elif key == "kv":
                         kv = value
-                    if key == "kw_rated":
+                    elif key == "kw_rated":
                         kw_rated = value
-                    if key == "kwh_rated":
+                    elif key == "storage_capacity":
                         kwh_rated = value
-                    if key == "kwh_stored":
+                    elif key == "kwh_stored":
                         kwh_stored = value
-                    if key == "charge_efficiency":
+                    elif key == "charge_efficiency":
                         charge_efficiency = value
-                    if key == "discharge_efficiency":
+                    elif key == "discharge_efficiency":
                         discharge_efficiency = value
-                    if key == "powerfactor":
+                    elif key == "powerfactor":
                         powerfactor = value
+                    else:
+                        pass
                 self.setStorage(id, bus1, phases, connection, soc, dod, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor)
                 #!dss.run_command('Solve')
                 #!logger.info("Storage names: " + str(dss.Circuit.AllNodeNames()))
