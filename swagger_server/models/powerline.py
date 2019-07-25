@@ -82,12 +82,12 @@ class Powerline(Model):
         }
 
         self._id = id
-        self._phases = phases
         self._bus1 = bus1
+        self._phases = phases
         self._bus2 = bus2
-        self._linecode = linecode
         self._length = length
         self._unitlength = unitlength
+        self._linecode = linecode
         self._r1 = r1
         self._r0 = r0
         self._x1 = x1
@@ -215,8 +215,6 @@ class Powerline(Model):
         :param length: The length of this Powerline.
         :type length: float
         """
-        if length is None:
-            raise ValueError("Invalid value for `length`, must not be `None`")  # noqa: E501
 
         self._length = length
 
@@ -238,8 +236,6 @@ class Powerline(Model):
         :param unitlength: The unitlength of this Powerline.
         :type unitlength: str
         """
-        if unitlength is None:
-            raise ValueError("Invalid value for `unitlength`, must not be `None`")  # noqa: E501
 
         self._unitlength = unitlength
 

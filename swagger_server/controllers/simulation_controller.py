@@ -146,10 +146,10 @@ def create_simulation(body):  # noqa: E501
 
             """if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
                 photovoltaics = values["photovoltaics"]
-                xycurves = radial["xycurves"]
-                loadshapes = radial["loadshapes"]
-                tshapes = radial["tshapes"]
-                factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)""" #TODO: fix and remove comment
+                #xycurves = radial["xycurves"]
+                #loadshapes = radial["loadshapes"]
+                #tshapes = radial["tshapes"]
+                factory.gridController.setPhotovoltaic(id, photovoltaics)""" #TODO: fix and remove comment
 
             """
             and "xycurves" in radial.values.keys()s() and radial["xycurves"] is not None 

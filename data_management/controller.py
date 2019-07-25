@@ -88,12 +88,12 @@ class gridController:
         self.sim.setXYCurve(self.object)
         logger.debug("XYCurve set")
 
-    def setPhotovoltaic(self, id, photovoltaics, xycurves, loadshapes, tshapes):
+    def setPhotovoltaic(self, id, photovoltaics):
         logger.debug("Charging the photovoltaics into the simulator")
-        self.sim.setXYCurves(xycurves)
-        self.sim.setLoadshapes(loadshapes)
-        logger.debug("Tshape: "+str(tshapes))
-        self.sim.setTshapes(tshapes)
+        #self.sim.setXYCurves(xycurves)
+        #self.sim.setLoadshapes(loadshapes)
+        #logger.debug("Tshape: "+str(tshapes))
+        #self.sim.setTshapes(tshapes)
         self.sim.setPhotovoltaics(photovoltaics)
         logger.debug("Photovoltaics charged")
 

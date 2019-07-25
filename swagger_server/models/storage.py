@@ -295,8 +295,6 @@ class Storage(Model):
         :param kw_rated: The kw_rated of this Storage.
         :type kw_rated: float
         """
-        if kw_rated is None:
-            raise ValueError("Invalid value for `kw_rated`, must not be `None`")  # noqa: E501
 
         self._kw_rated = kw_rated
 
@@ -320,6 +318,8 @@ class Storage(Model):
         :param storage_capacity: The storage_capacity of this Storage.
         :type storage_capacity: float
         """
+        if storage_capacity is None:
+            raise ValueError("Invalid value for `storage_capacity`, must not be `None`")  # noqa: E501
 
         self._storage_capacity = storage_capacity
 

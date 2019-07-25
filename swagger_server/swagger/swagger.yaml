@@ -459,7 +459,7 @@ definitions:
     - "bus1"
     - "id"
     - "kv"
-    - "kw_rated"
+    - "storage_capacity"
     properties:
       id:
         type: "string"
@@ -510,26 +510,20 @@ definitions:
     type: "object"
     required:
     - "bus1"
-    - "daily"
-    - "effcurve"
     - "id"
-    - "node"
-    - "pf"
+    - "max_power"
     - "phases"
-    - "power"
-    - "ptcurve"
     - "voltage"
     properties:
       id:
         type: "string"
-      node:
-        type: "string"
-        description: "ID for the connected node"
       inverterEfficiency:
         type: "number"
       phases:
         type: "integer"
       power:
+        type: "number"
+      max_power:
         type: "number"
       powerunit:
         type: "string"
@@ -548,6 +542,10 @@ definitions:
       tdaily:
         type: "string"
       pf:
+        type: "number"
+      temperature:
+        type: "number"
+      irrad:
         type: "number"
       voltageunit:
         type: "string"

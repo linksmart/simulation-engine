@@ -1092,30 +1092,32 @@ class OpenDSS:
                 for key, value in element.items():
                     if key == "id":
                         id = value
-                    if key == "phases":
+                    elif key == "phases":
                         phases = value
-                    if key == "bus1":
+                    elif key == "bus1":
                         bus1 = value
-                    if key == "voltage":
+                    elif key == "voltage":
                         voltage = value
-                    if key == "power":
+                    elif key == "power":
                         power = value
-                    if key == "effcurve":
+                    elif key == "max_power":
+                        pmpp = value
+                    elif key == "effcurve":
                         effcurve = value
-                    if key == "ptcurve":
+                    elif key == "ptcurve":
                         ptcurve = value
-                    if key == "daily":
+                    elif key == "daily":
                         daily = value
-                    if key == "tdaily":
+                    elif key == "tdaily":
                         tdaily = value
-                    if key == "pf":
+                    elif key == "pf":
                         pf = value
-                    if key == "temperature":
+                    elif key == "temperature":
                         temperature = value
-                    if key == "irrad":
+                    elif key == "irrad":
                         irrad = value
-                    if key == "pmpp":
-                            pmpp = value
+                    else:
+                        pass
                 self.setPhotovoltaic(id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp)
                 #!dss.run_command('Solve')
                 #!logger.debug("Photovoltaics: " + str(dss.PVsystems.AllNames()))
