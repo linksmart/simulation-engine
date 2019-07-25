@@ -22,23 +22,43 @@ class OpenDSS:
         #dss.Basic.NewCircuit("Test 1")
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
 
-    def setNewCircuit(self, name):
-        #dss.run_command("New circuit.{circuit_name}".format(circuit_name= name)) #To Remove
-        dss_string="New circuit.{circuit_name} basekv={base_k_v} pu={per_unit} phases={phases} bus1={bus1}  Angle={angle} MVAsc3={mv_asc3} MVASC1={mv_asc1}".format(
-                circuit_name = name,
-                phases = 3,
-                per_unit = 1.0001,
-                base_k_v = 115.0,
-                mv_asc1 = 21000.0,
-                mv_asc3 = 20000.0,
-                bus1 = 'SourceBus',
-                angle = 30
+    def setNewCircuit(self, name, common):
+        self.common = common
+        try:
+            for key, value in self.common.items():
+                if key == "id":
+                    common_id = value
+                elif key == "base_kV":
+                    common_base_kV = value
+                elif key == "per_unit":
+                    common_per_unit = value
+                elif key == "phases":
+                    common_phases = value
+                elif key == "bus1":
+                    common_bus1 = value
+                elif key == "angle":
+                    common_angle = value
+                elif key == "MVAsc3":
+                    common_MVAsc3 = value
+                elif key == "MVAsc1":
+                    common_MVAsc1 = value
+
+                dss_string = "New circuit.{circuit_name} basekv={base_k_v} pu={per_unit} phases={phases} bus1={bus1}  Angle={angle} MVAsc3={mv_asc3} MVASC1={mv_asc1}".format(
+                    circuit_name=name,
+                    phases=common_phases,
+                    per_unit=common_per_unit,
+                    base_k_v= common_base_kV,
+                    mv_asc1= common_MVAsc1,
+                    mv_asc3= common_MVAsc3,
+                    bus1=common_bus1,
+                    angle=common_angle
                 )
 
-        print(dss_string + "\n")
-        dss.run_command(dss_string)
-        #dss.Basic.NewCircuit(name)
-        #logger.debug("Name of the active circuit: "+str(self.getActiveCircuit()))
+                print(dss_string + "\n")
+                dss.run_command(dss_string)
+
+        except Exception as e:
+            logger.error(e)
 
     def getActiveCircuit(self):
         return dss.Circuit.Name()

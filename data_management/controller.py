@@ -20,9 +20,9 @@ class gridController:
         self.yCurrent = []
         self.losses = []
 
-    def setNewCircuit(self, name):
+    def setNewCircuit(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
-        self.sim.setNewCircuit(name)
+        self.sim.setNewCircuit(name, object)
         logger.debug("New circuit created")
 
     def enableCircuit(self, name):
