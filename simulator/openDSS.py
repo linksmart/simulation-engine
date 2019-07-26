@@ -101,12 +101,12 @@ class OpenDSS:
             #dss.Properties.Value(15)
 
             if self.getStartingHour() < 5:
-                #dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery
-                dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
+                dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery (kWrated should be replaced with the value from PROFESS )
+                #dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
                 dss.run_command('Storage.Akku1.State = Discharging')
             else:
-                #dss.run_command('Storage.Akku1.kWrated = 30')
-                dss.run_command('Storage.Akku1.kW = -5')
+                dss.run_command('Storage.Akku1.kWrated = 30') # kWrated should be replaced with the value from PROFESS )
+                #dss.run_command('Storage.Akku1.kW = -5')
                 dss.run_command('Storage.Akku1.State = charging')
 
 
