@@ -6,12 +6,40 @@ import simplejson as json
 import time
 
 class Profess:
-    def __init__(self, domain, dummy_data):
+    def __init__(self, domain):
         self.domain = domain #domainName is different on operating systems
         self.dataList=[]
         self.httpClass = Http_commands()
         self.json_parser=JsonParser()
-        self.dummy_data = dummy_data
+        self.dummy_data = {"load": {
+         "meta": {
+             "pf_Load": 1
+         }
+     },
+     "photovoltaic": {
+         "meta": {
+             "PV_Inv_Max_Power": 15.00
+         }
+
+},
+"grid":{
+"meta":{
+"Q_Grid_Max_Export_Power":15,
+"P_Grid_Max_Export_Power":15
+}
+},
+"generic":{
+	"T_SoC":25,
+    "mu_P": 1.2,
+    "mu_Q": -1.5
+},
+"ESS":{
+"meta":{
+"ESS_Max_SoC":1,
+"ESS_Min_SoC":0.2
+}
+}
+}
         self.list_with_desired_output_words=["P_ESS_Output", "P_PV_Output", "P_PV_R_Output", "P_PV_S_Output"
             , "P_PV_T_Output", "Q_PV_Output", "Q_PV_R_Output", "Q_PV_S_Output", "Q_PV_T_Output"]
         print("profess class created")
@@ -38,7 +66,7 @@ class Profess:
         elements = self.json_parser.get_node_element_list()
         for nodeKey in elements:
             for value in nodeKey:
-                self.post_data(json.loads(self.dummy_data), value)
+                self.post_data((self.dummy_data), value)
 
     def set_dummy_data(self,dummy_data):
         self.dummy_data=dummy_data
@@ -103,8 +131,8 @@ class Profess:
             print(json_response)
         else:
             print("No Input to stop declared")
-    def update(self, load_profiles, pv_profiles, price_profiles, soc_list):
-        self.set_profiles(load_profiles,pv_profiles,price_profiles)
+    def update(self, load_profiles, pv_profiles, price_profiles, soc_list, ess_con):
+        self.set_profiles(load_profiles,pv_profiles,price_profiles,ess_con)
         elements = self.json_parser.get_node_element_list()
         for nodeKey in elements:
             for node_name in nodeKey:
@@ -146,44 +174,62 @@ class Profess:
         node_number = self.json_parser.get_node_name_list().index(node_name)
         self.dataList[node_number][node_name][profess_id]= {}
 
-    def set_profiles(self, load_profiles, pv_profiles, price_profiles):
+    def set_profiles(self, load_profiles, pv_profiles, price_profiles, ess_con):
         for nodeName in self.json_parser.get_node_name_list():
             node_number = self.json_parser.get_node_name_list().index(nodeName)
             for element in load_profiles:
                 if nodeName in element:
                     profess_id=self.get_profess_id(nodeName)
                     json_data_of_node = self.dataList[node_number][nodeName][profess_id]
-                    for phase in element[nodeName]:
+                    phase=element[nodeName]
+                    if nodeName + ".1" in phase:
+                        json_data_of_node["load"]["P_Load_R"] = phase[nodeName + ".1"]
+                    if nodeName + ".2" in phase:
+                        json_data_of_node["load"]["P_Load_S"] = phase[nodeName + ".2"]
+                    if nodeName + ".3" in phase:
+                        json_data_of_node["load"]["P_Load_T"] = phase[nodeName + ".3"]
 
-                        if nodeName+".1" in phase:
-                            json_data_of_node["load"]["P_Load_R"] = phase[nodeName+".1"]
-                        if nodeName+".2" in phase:
-                            json_data_of_node["load"]["P_Load_S"] = phase[nodeName+".2"]
-                        if nodeName+".3" in phase:
-                            json_data_of_node["load"]["P_Load_T"] = phase[nodeName+".3"]
-
-                        if "P_Load_R" in json_data_of_node["load"] and "P_Load_S" in json_data_of_node["load"] and \
-                                "P_Load_T" in json_data_of_node["load"]:
-                            three_phase = []
-                            for value in range(len(json_data_of_node["load"]["P_Load_T"])):
-                                three_phase_value = json_data_of_node["load"]["P_Load_R"][value]+\
-                                                    json_data_of_node["load"]["P_Load_S"][value]+\
-                                                    json_data_of_node["load"]["P_Load_T"][value]
-                                three_phase.append(three_phase_value)
-                            json_data_of_node["load"]["P_Load"] = three_phase
-                        if nodeName + ".1.2.3" in phase:
-                            json_data_of_node["load"]["P_Load"] = phase[nodeName + ".1.2.3"]
-                            single_phase=[]
-                            for value in phase[nodeName + ".1.2.3"]:
-                                value = value / 3
-                                single_phase.append(value)
-                            json_data_of_node["load"]["P_Load_R"]=copy.deepcopy(single_phase)
-                            json_data_of_node["load"]["P_Load_S"] = copy.deepcopy(single_phase)
-                            json_data_of_node["load"]["P_Load_T"] = copy.deepcopy(single_phase)
-
+                    if "P_Load_R" in json_data_of_node["load"] and "P_Load_S" in json_data_of_node["load"] and \
+                            "P_Load_T" in json_data_of_node["load"]:
+                        three_phase = []
+                        for value in range(len(json_data_of_node["load"]["P_Load_T"])):
+                            three_phase_value = json_data_of_node["load"]["P_Load_R"][value] + \
+                                                json_data_of_node["load"]["P_Load_S"][value] + \
+                                                json_data_of_node["load"]["P_Load_T"][value]
+                            three_phase.append(three_phase_value)
+                        json_data_of_node["load"]["P_Load"] = three_phase
+                    if nodeName + ".1.2.3" in phase:
+                        json_data_of_node["load"]["P_Load"] = phase[nodeName + ".1.2.3"]
+                        single_phase = []
+                        for value in phase[nodeName + ".1.2.3"]:
+                            value = value / 3
+                            single_phase.append(value)
+                        json_data_of_node["load"]["P_Load_R"] = copy.deepcopy(single_phase)
+                        json_data_of_node["load"]["P_Load_S"] = copy.deepcopy(single_phase)
+                        json_data_of_node["load"]["P_Load_T"] = copy.deepcopy(single_phase)
+            for element in pv_profiles:
+                profess_id = self.get_profess_id(nodeName)
+                json_data_of_node = self.dataList[node_number][nodeName][profess_id]
+                if nodeName in element:
+                    phase = element[nodeName]
+                    if nodeName + ".1.2.3" in phase:
+                        json_data_of_node["photovoltaic"]["P_PV"] = phase[nodeName + ".1.2.3"]
+                        single_phase = []
+                        for value in phase[nodeName + ".1.2.3"]:
+                            value = value / 3
+                            single_phase.append(value)
+                        json_data_of_node["photovoltaic"]["P_PV_R"] = copy.deepcopy(single_phase)
+                        json_data_of_node["photovoltaic"]["P_PV_S"] = copy.deepcopy(single_phase)
+                        json_data_of_node["photovoltaic"]["P_PV_T"] = copy.deepcopy(single_phase)
+            for element in ess_con:
+                profess_id = self.get_profess_id(nodeName)
+                json_data_of_node = self.dataList[node_number][nodeName][profess_id]
+                if nodeName in element:
+                    phase = element[nodeName]
+                    if nodeName + ".1.2.3" in phase:
+                        json_data_of_node["generic"]["ESS_Control"]=phase[nodeName + ".1.2.3"]
             profess_id = self.get_profess_id(nodeName)
             json_data_of_node = self.dataList[node_number][nodeName][profess_id]
-            json_data_of_node["photovoltaic"]["P_PV"] = pv_profiles
             json_data_of_node["generic"]["Price_Forecast"] = price_profiles #No reserved words for price
 
     def get_profess_id(self, nodeName):
@@ -210,19 +256,18 @@ class Profess:
 
         self.dataList = node_list
 
-
-
-    def set_up_profess(self, topology, load_profiles, pv_profiles, price_profiles):
+    def set_up_profess(self, topology, load_profiles, pv_profiles, price_profiles, ess_con):
         self.json_parser.set_topology(topology)
         self.set_data_list()
         self.post_all_dummy_data()
         #TODO
-        self.set_profiles(load_profiles, pv_profiles, price_profiles)
+        self.set_profiles(load_profiles, pv_profiles, price_profiles,ess_con)
         for nodeName in self.json_parser.get_node_name_list():
             self.set_storage(nodeName)
             professID=self.get_profess_id(nodeName)
             nodeNumber = self.json_parser.get_node_name_list().index(nodeName)
             self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
+
 
     def translate_output(self, output_data):
         #print(self.get)
