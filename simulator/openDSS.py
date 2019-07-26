@@ -151,14 +151,15 @@ class OpenDSS:
         result = []
         nodeList = dss.Circuit.AllNodeNames()
         puList = dss.Circuit.AllBusMagPu()
+        ycurrents = dss.Circuit.YCurrents()
+        elementLosses = dss.Circuit.AllElementLosses()
         for i in range(len(nodeList)):
             #result[nodeList[i]] = puList[i]
-            result.append({"Node": nodeList[i], "Pu": puList[i]})
-            print(str(nodeList[i]) + ", " + str(puList[i]))
+            result.append({"Node": nodeList[i], "Pu": puList[i], "YCurrent": ycurrents[i], "Loss": elementLosses[i]})
+            print(str(nodeList[i]) + ", " + str(puList[i])+ ", "+str(ycurrents[i])+", "+str(elementLosses[i]))
         return (dss.Circuit.AllNodeNames(), result, dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses())
         #return (dss.Circuit.AllNodeNames(), dss.Circuit.AllNodeVmagPUByPhase(1), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
-    #TODO: Return nodes, voltage and Current
-    #def getVoltages(self):
+        #def getVoltages(self):
 
 
     #def setSolveMode(self, mode):
@@ -1091,30 +1092,32 @@ class OpenDSS:
                 for key, value in element.items():
                     if key == "id":
                         id = value
-                    if key == "phases":
+                    elif key == "phases":
                         phases = value
-                    if key == "bus1":
+                    elif key == "bus1":
                         bus1 = value
-                    if key == "voltage":
+                    elif key == "voltage":
                         voltage = value
-                    if key == "power":
+                    elif key == "power":
                         power = value
-                    if key == "effcurve":
+                    elif key == "max_power":
+                        pmpp = value
+                    elif key == "effcurve":
                         effcurve = value
-                    if key == "ptcurve":
+                    elif key == "ptcurve":
                         ptcurve = value
-                    if key == "daily":
+                    elif key == "daily":
                         daily = value
-                    if key == "tdaily":
+                    elif key == "tdaily":
                         tdaily = value
-                    if key == "pf":
+                    elif key == "pf":
                         pf = value
-                    if key == "temperature":
+                    elif key == "temperature":
                         temperature = value
-                    if key == "irrad":
+                    elif key == "irrad":
                         irrad = value
-                    if key == "pmpp":
-                            pmpp = value
+                    else:
+                        pass
                 self.setPhotovoltaic(id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp)
                 #!dss.run_command('Solve')
                 #!logger.debug("Photovoltaics: " + str(dss.PVsystems.AllNames()))
@@ -1163,30 +1166,32 @@ class OpenDSS:
                     #logger.debug("Key: " + str(key) + " Value: " + str(value))
                     if key == "id":
                         id = value
-                    if key == "bus1":
+                    elif key == "bus1":
                         bus1 = value
-                    if key == "phases":
+                    elif key == "phases":
                         phases = value
-                    if key == "connectio":
+                    elif key == "connectio":
                         connection = value
-                    if key == "soc":
+                    elif key == "soc":
                         soc = value
-                    if key == "dod":
+                    elif key == "dod":
                         dod = value
-                    if key == "kv":
+                    elif key == "kv":
                         kv = value
-                    if key == "kw_rated":
+                    elif key == "kw_rated":
                         kw_rated = value
-                    if key == "kwh_rated":
+                    elif key == "storage_capacity":
                         kwh_rated = value
-                    if key == "kwh_stored":
+                    elif key == "kwh_stored":
                         kwh_stored = value
-                    if key == "charge_efficiency":
+                    elif key == "charge_efficiency":
                         charge_efficiency = value
-                    if key == "discharge_efficiency":
+                    elif key == "discharge_efficiency":
                         discharge_efficiency = value
-                    if key == "powerfactor":
+                    elif key == "powerfactor":
                         powerfactor = value
+                    else:
+                        pass
                 self.setStorage(id, bus1, phases, connection, soc, dod, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor)
                 #!dss.run_command('Solve')
                 #!logger.info("Storage names: " + str(dss.Circuit.AllNodeNames()))
