@@ -11,12 +11,8 @@ jsonIEEE = json.loads(IEEE13)
 modelDataFile = open('model.json').read()
 
 
-<<<<<<< HEAD
 #p1 = Profess("http://localhost:8080/v1/", dummyInputData)
 p1 = Profess(domain, dummyInputData)
-=======
-p1 = Profess("http://localhost:8080/v1/")
->>>>>>> dd1801c3858f3bcd7365f3675f94e232ce810274
 dummyprofile= [3] * 24
 dummyLoads=[]
 dummyPrice=[]
