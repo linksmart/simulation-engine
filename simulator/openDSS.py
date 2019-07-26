@@ -150,9 +150,13 @@ class OpenDSS:
         #logger.info(dss.utils.class_to_dataframe('Load'))
         result = []
         nodeList = dss.Circuit.AllNodeNames()
+        logger.info("Node List: " + str(nodeList))
         puList = dss.Circuit.AllBusMagPu()
+        logger.info("Pu List: " + str(puList))
         ycurrents = dss.Circuit.YCurrents()
+        logger.info("YCurrents List: " + str(ycurrnts))
         elementLosses = dss.Circuit.AllElementLosses()
+        logger.info("Losses List: " + str(elementLosses))
         for i in range(len(nodeList)):
             #result[nodeList[i]] = puList[i]
             result.append({"Node": nodeList[i], "Pu": puList[i], "YCurrent": ycurrents[i], "Loss": elementLosses[i]})
