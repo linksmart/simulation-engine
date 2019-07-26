@@ -141,8 +141,7 @@ class Profess:
                 for value in soc_list:
                     if node_name in value:
                         soc_index=soc_list.index(value)
-
-                        self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"]=(soc_list[soc_index][node_name]/100)
+                        self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"]=(soc_list[soc_index][node_name]["SoC"]/100)
                 self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
     def update_config_json(self, profess_id, config_json):
         response = self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)

@@ -48,8 +48,8 @@ p1.start_all()
 print(p1.wait_and_get_output())
 
 
-soc_list=[{"633":{"SoC":0.5}},{"671":{"SoC":0.4}},{"634":{"SoC":0.2}}]
-#p1.update(dummyLoads, dummyPV, dummyPrice,soc_list,dummyGESSCON)
+soc_list=[{"633":{"SoC":5}},{"671":{"SoC":4}},{"634":{"SoC":20}}]
+p1.update(dummyLoads, dummyPV, dummyPrice,soc_list,dummyGESSCON)
 #print(p1.dataList)
 
 #print(sorted(test))
