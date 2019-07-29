@@ -87,12 +87,12 @@ class OpenDSS:
 
     def solveCircuitSolution(self):
         logger.info("Start solveCircuitSolution " + str(dss.Loads.AllNames()))
-        print("kWhstored vor Solution.Solve: " + str(dss.Properties.Value("kWhstored")))
-        print("kW vor Solution.Solve: " + str(dss.Properties.Value("kW")))
-        print("Storage.Akku1.State: " + str(dss.Properties.Value("State")))
-        print("Storage.Akku1.DispMode: " + str(dss.Properties.Value("DispMode")))
+        #print("kWhstored vor Solution.Solve: " + str(dss.Properties.Value("kWhstored")))
+        #print("kW vor Solution.Solve: " + str(dss.Properties.Value("kW")))
+        #print("Storage.Akku1.State: " + str(dss.Properties.Value("State")))
+        #print("Storage.Akku1.DispMode: " + str(dss.Properties.Value("DispMode")))
 
-        storageName = "Storage.Akku1"
+        #storageName = "Storage.Akku1"
 
         try:
             #dss. dss.run_command("calcv ")
@@ -100,14 +100,14 @@ class OpenDSS:
             #dss.Properties.Name("kW")
             #dss.Properties.Value(15)
 
-            if self.getStartingHour() < 5:
+            """"if self.getStartingHour() < 5:
                 #dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery
                 dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
                 dss.run_command('Storage.Akku1.State = Discharging')
             else:
                 #dss.run_command('Storage.Akku1.kWrated = 30')
                 dss.run_command('Storage.Akku1.kW = -5')
-                dss.run_command('Storage.Akku1.State = charging')
+                dss.run_command('Storage.Akku1.State = charging')"""
 
 
             dss.Solution.Solve()
@@ -116,9 +116,9 @@ class OpenDSS:
             logger.info("ERROR Running Solve!")
 
 
-        dss.Circuit.SetActiveElement(storageName)
-        print("Result2 %stored: " + str(dss.Properties.Value("%stored")))
-        print("Result1 %stored: " + str(dss.run_command('? Storage.Akku1.%stored')))
+        #dss.Circuit.SetActiveElement(storageName)
+        #print("Result2 %stored: " + str(dss.Properties.Value("%stored")))
+        #print("Result1 %stored: " + str(dss.run_command('? Storage.Akku1.%stored')))
         #print("Result1 kWhstored: " + str(dss.run_command('? Storage.Akku1.kWhstored')))
         #print("Result2 kWhstored: " + str(dss.Properties.Value("kWhstored")))
 

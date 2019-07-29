@@ -40,6 +40,7 @@ def main():
         'bind': '%s:%s' % ('0.0.0.0', '9090'),
         'workers': 1,
         'timeout': 30,
+        'loglevel': 'debug',
     }
     StandaloneApplication(web(), options).run()
     logger.debug("Number of cores: "+str(number_of_workers()))
