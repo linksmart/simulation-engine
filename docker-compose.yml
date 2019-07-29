@@ -10,6 +10,7 @@ services:
       context: ""
       dockerfile: Dockerfile
     image: "simulation-engine"
+    container_name: "se"
     volumes:
        - .:/usr/src/app
         #- host_path:${CONTAINER_PATH}#this in combination with the code below does not work on windows
