@@ -15,7 +15,7 @@ class Winding(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, wdg: int=None, bus: str=None, connection_type: str=None, k_v: float=None, k_va: float=None, percent_resistance: float=None):  # noqa: E501
+    def __init__(self, wdg: int=None, bus: str=None, connection_type: str=None, k_v: float=None, k_va: float=None, percent_resistance: float=None, xlt: int=None, xht: int=None):  # noqa: E501
         """Winding - a model defined in Swagger
 
         :param wdg: The wdg of this Winding.  # noqa: E501
@@ -30,6 +30,10 @@ class Winding(Model):
         :type k_va: float
         :param percent_resistance: The percent_resistance of this Winding.  # noqa: E501
         :type percent_resistance: float
+        :param xlt: The xlt of this Winding.  # noqa: E501
+        :type xlt: int
+        :param xht: The xht of this Winding.  # noqa: E501
+        :type xht: int
         """
         self.swagger_types = {
             'wdg': int,
@@ -37,7 +41,9 @@ class Winding(Model):
             'connection_type': str,
             'k_v': float,
             'k_va': float,
-            'percent_resistance': float
+            'percent_resistance': float,
+            'xlt': int,
+            'xht': int
         }
 
         self.attribute_map = {
@@ -46,7 +52,9 @@ class Winding(Model):
             'connection_type': 'connection_type',
             'k_v': 'kV',
             'k_va': 'kVA',
-            'percent_resistance': 'percent_resistance'
+            'percent_resistance': 'percent_resistance',
+            'xlt': 'xlt',
+            'xht': 'xht'
         }
 
         self._wdg = wdg
@@ -55,6 +63,8 @@ class Winding(Model):
         self._k_v = k_v
         self._k_va = k_va
         self._percent_resistance = percent_resistance
+        self._xlt = xlt
+        self._xht = xht
 
     @classmethod
     def from_dict(cls, dikt) -> 'Winding':
@@ -200,3 +210,45 @@ class Winding(Model):
         """
 
         self._percent_resistance = percent_resistance
+
+    @property
+    def xlt(self) -> int:
+        """Gets the xlt of this Winding.
+
+
+        :return: The xlt of this Winding.
+        :rtype: int
+        """
+        return self._xlt
+
+    @xlt.setter
+    def xlt(self, xlt: int):
+        """Sets the xlt of this Winding.
+
+
+        :param xlt: The xlt of this Winding.
+        :type xlt: int
+        """
+
+        self._xlt = xlt
+
+    @property
+    def xht(self) -> int:
+        """Gets the xht of this Winding.
+
+
+        :return: The xht of this Winding.
+        :rtype: int
+        """
+        return self._xht
+
+    @xht.setter
+    def xht(self, xht: int):
+        """Sets the xht of this Winding.
+
+
+        :param xht: The xht of this Winding.
+        :type xht: int
+        """
+
+        self._xht = xht

@@ -61,6 +61,8 @@ class OpenDSS:
             print(dss_string + "\n")
             dss.run_command(dss_string)
 
+
+
         except Exception as e:
             logger.error(e)
 
@@ -176,16 +178,16 @@ class OpenDSS:
     def getVoltageBases(self):
         return dss.Settings.VoltageBases()
 
-    def setVoltageBases(self,V1=None,V2=None,V3=None,V4=None,V5=None):
-        self.V1=V1
-        self.V2=V2
-        self.V3=V3
-        self.V4=V4
-        self.V5=V5
-        #dss.Settings.VoltageBases(0.4,16)
+    def setVoltageBases(self, bases_list):
+        #values=[]
+
+
+        #for i in range(len(bases_list)):
+            #values.append(bases_list[i])
 
         #dss_string = "Set voltagebases = [{value1},{value2},{value3},{value4},{value5}]".format(value1=self.V1,value2=self.V2,value3=self.V3,value4=self.V4,value5=self.V5)
-        dss_string = "Set voltagebases = [{value1},{value2},{value3}]".format(value1=self.V1,value2=self.V2,value3=self.V3,value4=self.V4,value5=self.V5)
+        #dss_string = "Set voltagebases = [{value1},{value2},{value3},{value4},{value5}]".format(value1=values[0],value2=values[1],value3=values[2],value4=values[3],value5=values[4])
+        dss_string = "Set voltagebases = "+str(bases_list)
         print(dss_string + "\n")
 
         dss.run_command(dss_string)

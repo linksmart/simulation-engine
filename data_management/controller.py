@@ -19,11 +19,17 @@ class gridController:
         self.allBusMagPu=[]
         self.yCurrent = []
         self.losses = []
+        self.voltage_bases = []
 
     def setNewCircuit(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
         self.sim.setNewCircuit(name, object)
         logger.debug("New circuit created")
+        if object["voltage_bases"]:
+            self.voltage_bases = object["voltage_bases"]
+            logger.debug(" voltage bases " + str(self.voltage_bases))
+
+
 
     def enableCircuit(self, name):
         logger.debug("Enabling the circuit with the name: "+str(name))
@@ -138,7 +144,8 @@ class gridController:
         logger.debug("Active circuit: "+str(self.sim.getActiveCircuit()))
         #return "ok"
         ##################################################################################PROBLEM################################
-        self.sim.setVoltageBases(115, 4.16, 0.48)
+        #self.sim.setVoltageBases(115, 4.16, 0.48)
+        self.sim.setVoltageBases(self.voltage_bases)
         logger.info("Solution mode: "+str(self.sim.getMode()))
         logger.info("Solution step size: " + str(self.sim.getStepSize()))
         logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
@@ -155,7 +162,7 @@ class gridController:
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
         #self.sim.setVoltageBases()
-        numSteps= 12
+        numSteps= 1
         #logger.info("Number of steps: "+str(numSteps))
         #nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         for i in range(numSteps):

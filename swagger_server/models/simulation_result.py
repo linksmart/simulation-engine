@@ -72,8 +72,6 @@ class SimulationResult(Model):
         :param node_id: The node_id of this SimulationResult.
         :type node_id: str
         """
-        if node_id is None:
-            raise ValueError("Invalid value for `node_id`, must not be `None`")  # noqa: E501
 
         self._node_id = node_id
 
@@ -95,8 +93,6 @@ class SimulationResult(Model):
         :param voltage: The voltage of this SimulationResult.
         :type voltage: Voltage
         """
-        if voltage is None:
-            raise ValueError("Invalid value for `voltage`, must not be `None`")  # noqa: E501
 
         self._voltage = voltage
 
