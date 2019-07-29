@@ -23,4 +23,5 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
-   # restart: "always"
+    # restart: "always"
+    entrypoint: ["python3", "-u", "main.py"]
