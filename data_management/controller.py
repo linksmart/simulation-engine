@@ -72,8 +72,12 @@ class gridController:
     def setPowerLines(self, id, powerlines): #(self, id, powerlines, linecodes):
         logger.debug("Charging power lines into the simulator")
         #self.sim.setLineCodes(linecodes)
-        self.sim.setPowerLines(powerlines)
-        logger.debug("Power lines charged")
+        try:
+            self.sim.setPowerLines(powerlines)
+            logger.debug("Power lines charged")
+        except ValueError as e:
+            logger.error(e)
+
         
     def setCapacitors(self, id, capacitors):
         logger.debug("Charging capacitors into the simulator")

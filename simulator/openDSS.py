@@ -8,6 +8,7 @@ Created on Fri Mar 16 15:05:36 2018
 
 import logging
 import opendssdirect as dss
+import sys
 from profess.Profess import *
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
@@ -856,17 +857,59 @@ class OpenDSS:
                 self._bus1 = bus1
                 self._bus2 = bus2
                 self._linecode = linecode
-                self._length = length
-                self._unitlength = unitlength
-                self._r1 = r1
-                self._r0 = r0
-                self._x1 = x1
-                self._x0 = x0
-                self._c1 = c1
-                self._c0 = c0
-                self._switch = switch
+                #logger.debug("linecode :"+str(self._linecode))
 
-                portion_str = "r1={r1} r0={r0} x1={x1} x0={x0} c1={c1}  c0={c0} " if switch == True else " length={length} units={unitlength} linecode={linecode} "
+                self._length = length
+                #logger.debug("length :" + str(self._length))
+                self._unitlength = unitlength
+                #logger.debug("unit :" + str(self._unitlength))
+                self._r1 = r1
+                #logger.debug("r1 :" + str(self._r1))
+                self._r0 = r0
+                #logger.debug("r0 :" + str(self._r0))
+                self._x1 = x1
+                #logger.debug("x1 :" + str(self._x1))
+                self._x0 = x0
+                #logger.debug("x0 :" + str(self._x0))
+                self._c1 = c1
+                #logger.debug("c1 :" + str(self._c1))
+                self._c0 = c0
+                #logger.debug("c0 :" + str(self._c0))
+                self._switch = switch
+                #logger.debug("switch :" + str(self._switch))
+
+
+                my_str=[]
+                if not self._r1 == None and self._linecode == None:
+                    #portion_str = "r1={r1} r0={r0} x1={x1} x0={x0} c1={c1}  c0={c0} " if switch == True else " length={length} units={unitlength} linecode={linecode} "
+                    my_str.append("r1={r1} ")
+
+                    if not self._r0 == None:
+                        my_str.append("r0={r0} ")
+                    if not self._x1 == None:
+                        my_str.append("x1={x1} ")
+                    if not self._x0 == None:
+                        my_str.append("x0={x0} ")
+                    if not self._c1 == None:
+                        my_str.append("c1={c1} ")
+                    if not self._c0 == None:
+                        my_str.append("c0={c0} ")
+                else:
+                    if not self._linecode == None and self._r1 == None:
+                        my_str.append("linecode={linecode} ")
+                    else:
+                        logger.error("r1 and linecode cannot be entered at the same time")
+                        sys.exit(0)
+                        raise ValueError('r1 and linecode cannot be entered at the same time')
+
+
+                if not self._length == None:
+                    my_str.append("length={length} ")
+                if not self._unitlength == None:
+                    my_str.append("units={unitlength} ")
+
+                portion_str = ''.join(my_str)
+
                 dss_string = "New Line.{line_id} bus1={bus1} bus2={bus2} phases={phases} switch={switch} " + portion_str + " "
 
                 dss_string = dss_string.format(

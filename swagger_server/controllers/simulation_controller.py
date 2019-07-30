@@ -127,11 +127,14 @@ def create_simulation(body):  # noqa: E501
             if "power_lines" in values.keys() and values["power_lines"] is not None:
                 #logger.debug("---------------Setting Powerlines-------------------------")
                 print("!---------------Setting Powerlines------------------------- \n")
-                powerLines = values["power_lines"]
-                #linecodes = values["linecode"]
-                #factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
-                #logger.debug("Powerlines" + str(powerLines))
-                factory.gridController.setPowerLines(id, powerLines)
+                try:
+                    powerLines = values["power_lines"]
+                    #linecodes = values["linecode"]
+                    #factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
+                    #logger.debug("Powerlines" + str(powerLines))
+                    factory.gridController.setPowerLines(id, powerLines)
+                except ValueError as e:
+                    logger.error(e)
 
             if "powerProfile" in values.keys() and values["powerProfile"] is not None:
 #                logger.debug("---------------Setting powerProfile-------------------------")
