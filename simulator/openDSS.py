@@ -47,23 +47,18 @@ class OpenDSS:
                 else:
                     logger.debug("key not processed "+str(key))
                     pass
-
             dss_string = "New circuit.{circuit_name} basekv={base_k_v} pu={per_unit} phases={phases} bus1={bus1}  Angle={angle} MVAsc3={mv_asc3} MVASC1={mv_asc1}".format(
-                circuit_name=name,
+                circuit_name=common_id,
                 phases=common_phases_input,
                 per_unit=common_per_unit,
                 base_k_v= common_base_kV,
                 mv_asc1= common_MVAsc1,
                 mv_asc3= common_MVAsc3,
                 bus1=common_bus1,
-                angle=common_angle
+                angle=common_angle,
             )
-
             print(dss_string + "\n")
             dss.run_command(dss_string)
-
-
-
         except Exception as e:
             logger.error(e)
 

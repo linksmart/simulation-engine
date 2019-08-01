@@ -24,12 +24,10 @@ class gridController:
     def setNewCircuit(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
         self.sim.setNewCircuit(name, object)
-        logger.debug("New circuit created")
         if object["voltage_bases"]:
             self.voltage_bases = object["voltage_bases"]
             logger.debug(" voltage bases " + str(self.voltage_bases))
-
-
+        logger.debug("New circuit created")
 
     def enableCircuit(self, name):
         logger.debug("Enabling the circuit with the name: "+str(name))
@@ -77,7 +75,6 @@ class gridController:
             logger.debug("Power lines charged")
         except ValueError as e:
             logger.error(e)
-
         
     def setCapacitors(self, id, capacitors):
         logger.debug("Charging capacitors into the simulator")
@@ -85,6 +82,7 @@ class gridController:
         #self.sim.setCapacitors(self.object)
         self.sim.setCapacitors(capacitors)
         logger.debug("Capacitor charged")
+
     def setLineCodes(self, id, linecode):
         logger.debug("Charging LineCode into the simulator")
         #self.object = object
@@ -154,6 +152,7 @@ class gridController:
         logger.info("Solution step size: " + str(self.sim.getStepSize()))
         logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
+
         #self.sim.setMode("snap")
         self.sim.setMode("daily")
         self.sim.setStepSize("hours")
@@ -195,8 +194,8 @@ class gridController:
         #return ("Nodes: " + str(nodeNames), "\nVoltages " + str(allBusMagPu))
         #return (nodeNames, allBusMagPu)
         #filename = str(id)+"_results.txt"
-        #!TODO: Create filename with id so serve multiple simultaneous simulations
-        json_data = json.dumps(allBusMagPu)
+        #!TODO: Create filename with id so serve multiple simultaneous simulations#DONE
+        #json_data = json.dumps(allBusMagPu)
         fname = (self.id)+"_result"
         os.chdir(r"./data")
         with open(fname, 'w', encoding='utf-8') as outfile: 
