@@ -151,12 +151,12 @@ def create_simulation(body):  # noqa: E501
                             and "loadshapes" in radial.values.keys()s() and radial["loadshapes"] is not None 
                             and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
             """
-            """if "storage_units" in values.keys() and values["storage_units"] is not None:
+            if "storage_units" in values.keys() and values["storage_units"] is not None:
                 #logger.debug("---------------Setting Storage-------------------------")
                 print("! ---------------Setting Storage------------------------- \n")
                 # radial=radial.to_dict()
                 storage = values["storage_units"]
-                factory.gridController.setStorage(id, storage)"""#TODO: fixed to see if it is the couase of YCurrent 0
+                factory.gridController.setStorage(id, storage)
             """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
                 # radial=radial.to_dict()
                 chargingPoints = values["chargingPoints"]
