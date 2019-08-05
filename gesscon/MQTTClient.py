@@ -21,6 +21,7 @@ class MQTTClient:
         self.client_id = client_id
         self.id = id
         self.connected = False
+        self.messages = ""
         self.client = mqtt.Client(client_id, clean_session=False)
         if username is not None and password is not None:
             self.logger.debug("u "+username+" p "+password)
@@ -68,9 +69,12 @@ class MQTTClient:
     def on_disconnect(self, *args):
         self.logger.error("Disconnected to broker")
         self.logger.info(str(args))
-
+        
+    # def message_received(self):
+    #    return message_payload
+	    
     def on_message(self,client, userdata, message):
-        print("message received ", str(message.payload.decode()))
+        print("Message received ", str(message.payload.decode()))
         # self.callback_function(message.payload.decode())
 
 
