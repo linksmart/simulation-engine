@@ -181,15 +181,3 @@ class Profiles:
         load_list.extend(data_list[0:days * 24])
         logger.info("Load data = %s: ",load_list)
         return load_list
-
-if __name__ == "__main__":
-    prof = Profiles()
-    pv_profile_data = prof.pv_profile("bolzano", "italy", days=365)
-    load_profile_data = prof.load_profile(type="commercial", randint=0, days=365)
-    t_end = time.time() + 60
-    days = 1
-    while time.time() < t_end:
-        prof.price_profile("fur","denmark", days)
-        days = days + 1
-        time.sleep(5)
-
