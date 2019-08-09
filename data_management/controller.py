@@ -75,6 +75,7 @@ class gridController:
         #self.sim.setCapacitors(self.object)
         self.sim.setCapacitors(capacitors)
         logger.debug("Capacitor charged")
+
     def setLineCodes(self, id, linecode):
         logger.debug("Charging LineCode into the simulator")
         #self.object = object
@@ -96,6 +97,21 @@ class gridController:
         #self.sim.setTshapes(tshapes)
         self.sim.setPhotovoltaics(photovoltaics)
         logger.debug("Photovoltaics charged")
+
+    def setLoadshapes_Off(self, id, loadshapes):
+        logger.debug("Charging the loadshapes into the simulator")
+        self.sim.setLoadshapes(loadshapes)
+        logger.debug("loadshapes charged")
+
+    def setLoadshapes(self, id, loads, profiles, profess):
+        logger.debug("Charging the loadshapes into the simulator from profiles")
+        self.sim.setLoadshapes(loads, profiles, profess)
+        logger.debug("loadshapes from profiles charged")
+
+    def setLoadshape(self, id, npts, interval, mult):
+        logger.debug("Charging a loadshape into the simulator")
+        self.sim.setLoadshape(id, npts, interval, mult)
+        logger.debug("a loadshape charged")
 
     def setStorage(self, id, storage):
         logger.debug("Charging the ESS into the simulator")
@@ -155,7 +171,7 @@ class gridController:
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
         #self.sim.setVoltageBases()
-        numSteps= 12
+        numSteps= 3
         #logger.info("Number of steps: "+str(numSteps))
         #nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         for i in range(numSteps):

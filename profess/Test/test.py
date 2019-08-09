@@ -11,8 +11,7 @@ jsonIEEE = json.loads(IEEE13)
 modelDataFile = open('model.json').read()
 
 
-#p1 = Profess("http://localhost:8080/v1/", dummyInputData)
-p1 = Profess(domain, dummyInputData)
+p1 = Profess("http://localhost:8080/v1/")
 dummyprofile= [3] * 24
 dummyLoads=[]
 dummyPrice=[]
@@ -56,5 +55,3 @@ p1.update(dummyLoads, dummyPV, dummyPrice,soc_list,dummyGESSCON)
 
 #print(sorted(test))
 #p1.translate_output(test)
-
-

@@ -11,7 +11,8 @@ services:
       dockerfile: Dockerfile
     image: "simulation-engine"
     volumes:
-       - .:/usr/src/app
+       - .:/usr/src/app/data
+       #- .:/usr/src/app
         #- host_path:${CONTAINER_PATH}#this in combination with the code below does not work on windows
         #- 'tests: /usr/src/app/tests'
     #network_mode: "host"
@@ -24,3 +25,5 @@ services:
         max-size: "10m"
         max-file: "10"
    # restart: "always"
+#volumes:
+#  results:

@@ -459,7 +459,7 @@ definitions:
     - "bus1"
     - "id"
     - "kv"
-    - "storage_capacity"
+    - "kwh_rated"
     properties:
       id:
         type: "string"
@@ -483,7 +483,7 @@ definitions:
       kw_rated:
         type: "number"
         description: "kW rating of power output. Side effect: Set KVA property."
-      storage_capacity:
+      kwh_rated:
         type: "number"
         description: "Rated storage capacity in kWh. Default is 50."
       kwh_stored:
@@ -506,6 +506,9 @@ definitions:
       powerfactor:
         type: "number"
         description: "(openDSS Name: pf)"
+      optimization_model:
+        type: "string"
+        description: "(A value required by PROFFES)"
   Photovoltaic:
     type: "object"
     required:

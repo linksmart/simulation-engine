@@ -255,6 +255,17 @@ class Profess:
 
         self.dataList = node_list
 
+    def set_up_profess_for_existing_topology(self, load_profiles, pv_profiles, price_profiles, ess_con):
+        self.set_data_list()
+        self.post_all_dummy_data()
+        #TODO
+        self.set_profiles(load_profiles, pv_profiles, price_profiles,ess_con)
+        for nodeName in self.json_parser.get_node_name_list():
+            self.set_storage(nodeName)
+            professID=self.get_profess_id(nodeName)
+            nodeNumber = self.json_parser.get_node_name_list().index(nodeName)
+            self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
+
     def set_up_profess(self, topology, load_profiles, pv_profiles, price_profiles, ess_con):
         self.json_parser.set_topology(topology)
         self.set_data_list()

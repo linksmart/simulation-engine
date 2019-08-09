@@ -7,8 +7,9 @@ Created on Fri Mar 16 15:05:36 2018
 
 
 import logging
+import random
 import opendssdirect as dss
-from profess.Profess import *
+#from profess.Profess import *
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -22,6 +23,13 @@ class OpenDSS:
         dss.run_command("Set DefaultBaseFrequency=60")
         #dss.Basic.NewCircuit("Test 1")
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
+        self.loadshapes_for_loads={} #empty Dictionary for laod_id:load_profile pairs
+        self.profess=None
+        self.dummyGESSCON=[{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}, {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
+        self.dummyPrice=[3] * 24
+        self.dummyPV = [{'633': {'633.1.2.3': [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]}}, {
+            '671': {'671.1.2.3': [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]}}, {
+                    '634': {'634.1.2.3': [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]}}]
 
     def setNewCircuit(self, name, common):
         self.common = common
@@ -87,12 +95,15 @@ class OpenDSS:
 
     def solveCircuitSolution(self):
         logger.info("Start solveCircuitSolution " + str(dss.Loads.AllNames()))
+
+        storageName = "Storage.Akku1"
+        dss.Circuit.SetActiveElement(storageName)
+
         print("kWhstored vor Solution.Solve: " + str(dss.Properties.Value("kWhstored")))
         print("kW vor Solution.Solve: " + str(dss.Properties.Value("kW")))
         print("Storage.Akku1.State: " + str(dss.Properties.Value("State")))
         print("Storage.Akku1.DispMode: " + str(dss.Properties.Value("DispMode")))
 
-        storageName = "Storage.Akku1"
 
         try:
             #dss. dss.run_command("calcv ")
@@ -100,7 +111,21 @@ class OpenDSS:
             #dss.Properties.Name("kW")
             #dss.Properties.Value(15)
 
-            if self.getStartingHour() < 5:
+            hours = self.getStartingHour()
+            professLoads = self.getProfessLoadschapes(hours, 24)
+            #print("professLoads: " + str(professLoads))
+            self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
+            self.profess.start_all()
+            print("--------------------start profess results----------------------------")
+            print(self.profess.dataList)
+            print(self.profess.wait_and_get_output())
+            soc_list = [{"633": {"SoC": 5}}, {"671": {"SoC": 4}}, {"634": {"SoC": 20}}]
+            self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
+            print(self.profess.dataList)
+            print("--------------------end profess results----------------------------")
+
+
+            if hours < 5:
                 dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery (kWrated should be replaced with the value from PROFESS )
                 #dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
                 dss.run_command('Storage.Akku1.State = Discharging')
@@ -116,7 +141,7 @@ class OpenDSS:
             logger.info("ERROR Running Solve!")
 
 
-        dss.Circuit.SetActiveElement(storageName)
+
         print("Result2 %stored: " + str(dss.Properties.Value("%stored")))
         print("Result1 %stored: " + str(dss.run_command('? Storage.Akku1.%stored')))
         #print("Result1 kWhstored: " + str(dss.run_command('? Storage.Akku1.kWhstored')))
@@ -479,7 +504,37 @@ class OpenDSS:
             )
         logger.debug(dss_string)
         dss.run_command(dss_string)"""
-        
+
+    def getProfessLoadschapes(self, start: int, size=24):
+        # Preparing loadshape values in a format required by PROFESS
+        # All loads are includet, not only the one having storage attached
+        result = {}
+        print( "----------------- getProfessLoadschapes ----------------------")
+        try:
+            for key, value in self.loadshapes_for_loads.items():
+                load_id = key
+                bus_name = value["bus"]
+                main_bus_name = bus_name.split('.', 1)[0]
+                #print("bus_name: " + str(bus_name) + ", main_bus_name: " + str(main_bus_name))
+                loadshape = value["loadshape"]
+                #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
+                loadshape_portion=loadshape[int(start):int(start+size)]
+                #print("loadshape_portion: " + str(loadshape_portion))
+                bus_loadshape={bus_name:loadshape_portion}
+                #print("bus_loadshape: " + str(bus_loadshape))
+
+                if main_bus_name in result:
+                    # extend existing  element
+                    result[main_bus_name].update(bus_loadshape)
+                else:
+                    # add new element
+                    result[main_bus_name] = bus_loadshape
+        except Exception as e:
+            logger.error(e)
+        #print("resulting_loadshape_profess: " + str(result))
+        return [result]
+
+
     def setLoads(self, loads):
         #!logger.debug("Setting up the loads")
         self.loads=loads
@@ -543,6 +598,10 @@ class OpenDSS:
                 #power_factor=self.power_factor
                 #shape=self.power_profile_id
                 )
+
+                #---------- chek for available loadschape and attach it to the load
+                if self.load_name in self.loadshapes_for_loads:
+                    dss_string = dss_string + " Yearly=Loadshape" + load_name
 
                 #logger.info("dss_string: " + dss_string)
                 print(dss_string + "\n")
@@ -997,7 +1056,35 @@ class OpenDSS:
         print(dss_string + "\n")
         dss.run_command(dss_string)
 
-    def setLoadshapes(self, loadshapes):
+    def setLoadshapes(self, loads, profiles, profess):
+        self.profess=profess
+        #!logger.debug("Setting up the loads")
+        self.loads=loads
+        try:
+            for element in self.loads:
+                load_name = element["id"]
+                bus_name = element["bus"]
+
+                self.load_name=load_name
+                self.bus_name=bus_name
+
+                # ----------get_a_profile---------------#
+                randint_value=random.randrange(0, 50)
+                load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=365)
+                #print("load_profile_data: randint=" + str(randint_value))
+
+                #--------store_profile_for_line----------#
+                self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}
+                #loadshape_id=load_name + bus_name
+                loadshape_id=load_name
+
+                self.setLoadshape(loadshape_id, 8760, 1, load_profile_data)
+
+        except Exception as e:
+            logger.error(e)
+
+
+    def setLoadshapes_off(self, loadshapes):
         #!logger.debug("Setting up the Loadshapes")
         #!logger.debug("Loadshape in OpenDSS: " + str(loadshapes))
         try:
@@ -1023,16 +1110,30 @@ class OpenDSS:
             logger.error(e)
 
     def setLoadshape(self, id, npts, interval, mult):
-        # New Loadshape.assumed_irrad npts=24 interval=1 mult=[0 0 0 0 0 0 .1 .2 .3  .5  .8  .9  1.0  1.0  .99  .9  .7  .4  .1 0  0  0  0  0]
-        dss_string = "New Loadshape.{id} npts={npts} interval={interval} mult=[{mult}]".format(
-            id=id,
-            npts=npts,
-            interval=interval,
-            mult=','.join(['{:f}'.format(x) for x in mult])
-        )
-        #!logger.info(dss_string)
-        print(dss_string + "\n")
-        dss.run_command(dss_string)
+        try:
+            print("New Loadshape." + id)
+            # New Loadshape.assumed_irrad npts=24 interval=1 mult=[0 0 0 0 0 0 .1 .2 .3  .5  .8  .9  1.0  1.0  .99  .9  .7  .4  .1 0  0  0  0  0]
+            dss_string = "New Loadshape.{id} npts={npts} interval={interval} mult=({mult})".format(
+                id=id,
+                npts=npts,
+                interval=interval,
+                mult=' '.join(['{:f}'.format(x) for x in mult])
+                #mult = ','.join(['{:f}'.format(x) for x in mult])
+            )
+            #!logger.info(dss_string)
+            #print(dss_string + "\n")
+            #dss_string="New Loadshape1 npts=24 interval=1 mult=(0 0 0 0 0 0 .1 .2 .3 .5 .8 .9 1.0 1.0 .99 .9 .7 .4 .1 0 0 0 0 0)"
+            #print(dss_string + "\n")
+            dss.run_command(dss_string)
+
+            dss_string = "? Loadshape." + str(id) + ".mult"
+            #dss_string = "? Loadshape1.mult"
+            #print(dss_string + "\n")
+            result = dss.run_command(dss_string)
+            print("Loadshape." + str(id) + ".mult count:" +  str(len((str(result)).split(" "))) + "\n")
+            #print("Loadshape." + str(id) + ".mmult:" +  str(result) + "\n")
+        except Exception as e:
+            logger.error(e)
 
     def setTshapes(self, tshapes):
         #!logger.info("Setting up the TShapes")
@@ -1170,7 +1271,7 @@ class OpenDSS:
                         bus1 = value
                     elif key == "phases":
                         phases = value
-                    elif key == "connectio":
+                    elif key == "connection":
                         connection = value
                     elif key == "soc":
                         soc = value
@@ -1180,7 +1281,7 @@ class OpenDSS:
                         kv = value
                     elif key == "kw_rated":
                         kw_rated = value
-                    elif key == "storage_capacity":
+                    elif key == "kwh_rated":
                         kwh_rated = value
                     elif key == "kwh_stored":
                         kwh_stored = value

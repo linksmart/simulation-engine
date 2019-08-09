@@ -13,6 +13,10 @@ from data_management.redisDB import RedisDB
 from swagger_server.controllers.threadFactory import ThreadFactory
 from data_management.utils import Utils
 
+from profess.Profess import *
+from profess.JSONparser import *
+from profiles.profiles import *
+
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
@@ -35,6 +39,70 @@ def create_simulation(body):  # noqa: E501
         #logger.debug("Data: " + str(temp)) #shows the raw data sent from client
         grid = Grid.from_dict(data)  # noqa: E501. SOMETHING IS NOT GOOD HERE
         #logger.debug("Grid: " + str(grid)) #shows the raw data sent from client
+
+        #----------Profiles---------------#
+        prof = Profiles()
+        #pv_profile_data = prof.pv_profile("bolzano", "italy", days=365)
+        #print("pv_profile_data: " + str(pv_profile_data))
+        #load_profile_data = prof.load_profile(type="residential", randint=5, days=365)
+        #print("load_profile_data: " + str(load_profile_data))
+        #t_end = time.time() + 60
+        #days = 1
+        #while time.time() < t_end:
+        #    prof.price_profile("fur", "denmark", days)
+        #   days = days + 1
+        #   time.sleep(5)
+
+        #----------Profiles_end-----------#
+
+        #----------PROFESS----------------#
+        domain = "http://192.168.99.100:8080/v1/"
+        profss = Profess(domain)
+        #profss.json_parser.set_topology(data)
+
+        dummyprofile = [3] * 24
+        dummyLoads = []
+        dummyPrice = []
+        dummyPV = []
+
+        profss.json_parser.set_topology(data)
+        dummyPVdict = []
+        print("profss.json_parser.get_node_name_list(): " + str(profss.json_parser.get_node_name_list()))
+        for element in profss.json_parser.get_node_name_list():
+            print("element: " + str(element))
+            dummyDict = { element: {element + ".1": copy.deepcopy(dummyprofile), element + ".2": copy.deepcopy(dummyprofile), element + ".3": copy.deepcopy(dummyprofile)}}
+            print("dummyDict: " + str(dummyDict))
+            dummyLoads.append(dummyDict)
+            dummyPVdict = {element: {element + ".1.2.3": copy.deepcopy(dummyprofile)}}
+            dummyPV.append(dummyPVdict)
+
+
+        dummyPrice = copy.deepcopy(dummyprofile)
+        element = "671"
+        dummyDict = {element: [{element + ".1.2.3": copy.deepcopy(dummyprofile)}]}
+
+        print("dummyDict: " + str(dummyDict))
+        print("dummyLoads: " + str(dummyLoads))
+        print("dummyPV: " +  str(dummyPV))
+        print("dummyPrice: " + str(dummyPrice))
+
+        print("dummyLoads len: " + str(len(dummyLoads)))
+
+        dummyLoads[0] = dummyDict
+        dummyGESSCON = [{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                        {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
+
+        #profss.set_up_profess_for_existing_topology( dummyLoads, dummyPV, dummyPrice, dummyGESSCON)
+        #profss.start_all()
+        print(profss.dataList)
+        print(profss.wait_and_get_output())
+
+        soc_list = [{"633": {"SoC": 0.5}}, {"671": {"SoC": 0.4}}, {"634": {"SoC": 0.2}}]
+        #profss.update(dummyLoads, dummyPV, dummyPrice, soc_list, dummyGESSCON)
+        #print(profss.dataList)
+        #---------------PROFESS_END--------------------#
+
+
 
         ####generates an id an makes a directory with the id for the data and for the registry
         try:
@@ -80,6 +148,10 @@ def create_simulation(body):  # noqa: E501
         #logger.debug("Factory stored in redisDB: " + str(test)+" type: "+str(type(test)))
         common = grid.common.to_dict()
         factory.gridController.setNewCircuit(id, common)
+
+        #factory.gridController.setLoadshape(id, npts, interval, mult)
+        #factory.gridController.setLoadshape("test_loadschape", 8760, 1, load_profile_data)
+
         #factory.gridController.setNewCircuit(id)
 
         for values in radial:
@@ -115,6 +187,9 @@ def create_simulation(body):  # noqa: E501
                 # radial=radial.to_dict()
                 load = values["loads"]
                 # logger.debug("Loads" + str(load))
+                print("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
+                factory.gridController.setLoadshapes(id, load, prof, profss)
+                print("! >>>  ---------------and the Loads afterwards ------------------------- \n")
                 factory.gridController.setLoads(id, load)
 
             if "capacitor" in values.keys() and values["capacitor"] is not None:
@@ -156,12 +231,13 @@ def create_simulation(body):  # noqa: E501
                             and "loadshapes" in radial.values.keys()s() and radial["loadshapes"] is not None 
                             and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
             """
-            """if "storage_units" in values.keys() and values["storage_units"] is not None:
+            if "storage_units" in values.keys() and values["storage_units"] is not None:
                 #logger.debug("---------------Setting Storage-------------------------")
                 print("! ---------------Setting Storage------------------------- \n")
                 # radial=radial.to_dict()
                 storage = values["storage_units"]
-                factory.gridController.setStorage(id, storage)""" #TODO: fix and remove comment
+                factory.gridController.setStorage(id, storage) #TODO: fix and remove comment
+
             """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
                 # radial=radial.to_dict()
                 chargingPoints = values["chargingPoints"]

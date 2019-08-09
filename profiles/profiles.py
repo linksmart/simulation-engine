@@ -161,12 +161,12 @@ class Profiles:
             return
 
         if(type == "residential"):
-            file_path = "load_profiles/residential/profiles_" + str(randint) + ".txt"
+            file_path = "profiles/load_profiles/residential/profiles_" + str(randint) + ".txt"
             with open(file_path, "r") as file:
                 data = file.readlines()
                 data_list = [float(i)for i in data]
         else:
-            with open("load_profiles/commercial/commercial_general.txt", "r") as file:
+            with open("profiles/load_profiles/commercial/commercial_general.txt", "r") as file:
                 data = file.readlines()
                 data_list = [float(i) for i in data]
                 data_list.extend(data_list[-24:])
@@ -179,7 +179,7 @@ class Profiles:
         for i in range(no_of_years):
             load_list.extend(data_list)
         load_list.extend(data_list[0:days * 24])
-        logger.info("Load data = %s: ",load_list)
+        #logger.info("Load data = %s: ",load_list)
         return load_list
 
 if __name__ == "__main__":

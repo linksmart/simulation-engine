@@ -15,7 +15,7 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, dod: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None):  # noqa: E501
+    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, dod: float=None, kv: float=None, kw_rated: float=None, kwh_rated: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501
@@ -34,8 +34,8 @@ class Storage(Model):
         :type kv: float
         :param kw_rated: The kw_rated of this Storage.  # noqa: E501
         :type kw_rated: float
-        :param storage_capacity: The storage_capacity of this Storage.  # noqa: E501
-        :type storage_capacity: float
+        :param kwh_rated: The kwh_rated of this Storage.  # noqa: E501
+        :type kwh_rated: float
         :param kwh_stored: The kwh_stored of this Storage.  # noqa: E501
         :type kwh_stored: float
         :param max_charging_power: The max_charging_power of this Storage.  # noqa: E501
@@ -48,6 +48,8 @@ class Storage(Model):
         :type discharge_efficiency: float
         :param powerfactor: The powerfactor of this Storage.  # noqa: E501
         :type powerfactor: float
+        :param optimization_model: The optimization_model of this Storage.  # noqa: E501
+        :type optimization_model: str
         """
         self.swagger_types = {
             'id': str,
@@ -58,13 +60,14 @@ class Storage(Model):
             'dod': float,
             'kv': float,
             'kw_rated': float,
-            'storage_capacity': float,
+            'kwh_rated': float,
             'kwh_stored': float,
             'max_charging_power': float,
             'max_discharging_power': float,
             'charge_efficiency': float,
             'discharge_efficiency': float,
-            'powerfactor': float
+            'powerfactor': float,
+            'optimization_model': str
         }
 
         self.attribute_map = {
@@ -76,13 +79,14 @@ class Storage(Model):
             'dod': 'dod',
             'kv': 'kv',
             'kw_rated': 'kw_rated',
-            'storage_capacity': 'storage_capacity',
+            'kwh_rated': 'kwh_rated',
             'kwh_stored': 'kwh_stored',
             'max_charging_power': 'max_charging_power',
             'max_discharging_power': 'max_discharging_power',
             'charge_efficiency': 'charge_efficiency',
             'discharge_efficiency': 'discharge_efficiency',
-            'powerfactor': 'powerfactor'
+            'powerfactor': 'powerfactor',
+            'optimization_model': 'optimization_model'
         }
 
         self._id = id
@@ -93,13 +97,14 @@ class Storage(Model):
         self._dod = dod
         self._kv = kv
         self._kw_rated = kw_rated
-        self._storage_capacity = storage_capacity
+        self._kwh_rated = kwh_rated
         self._kwh_stored = kwh_stored
         self._max_charging_power = max_charging_power
         self._max_discharging_power = max_discharging_power
         self._charge_efficiency = charge_efficiency
         self._discharge_efficiency = discharge_efficiency
         self._powerfactor = powerfactor
+        self._optimization_model = optimization_model
 
     @classmethod
     def from_dict(cls, dikt) -> 'Storage':
@@ -299,29 +304,29 @@ class Storage(Model):
         self._kw_rated = kw_rated
 
     @property
-    def storage_capacity(self) -> float:
-        """Gets the storage_capacity of this Storage.
+    def kwh_rated(self) -> float:
+        """Gets the kwh_rated of this Storage.
 
         Rated storage capacity in kWh. Default is 50.  # noqa: E501
 
-        :return: The storage_capacity of this Storage.
+        :return: The kwh_rated of this Storage.
         :rtype: float
         """
-        return self._storage_capacity
+        return self._kwh_rated
 
-    @storage_capacity.setter
-    def storage_capacity(self, storage_capacity: float):
-        """Sets the storage_capacity of this Storage.
+    @kwh_rated.setter
+    def kwh_rated(self, kwh_rated: float):
+        """Sets the kwh_rated of this Storage.
 
         Rated storage capacity in kWh. Default is 50.  # noqa: E501
 
-        :param storage_capacity: The storage_capacity of this Storage.
-        :type storage_capacity: float
+        :param kwh_rated: The kwh_rated of this Storage.
+        :type kwh_rated: float
         """
-        if storage_capacity is None:
-            raise ValueError("Invalid value for `storage_capacity`, must not be `None`")  # noqa: E501
+        if kwh_rated is None:
+            raise ValueError("Invalid value for `kwh_rated`, must not be `None`")  # noqa: E501
 
-        self._storage_capacity = storage_capacity
+        self._kwh_rated = kwh_rated
 
     @property
     def kwh_stored(self) -> float:
@@ -460,3 +465,26 @@ class Storage(Model):
         """
 
         self._powerfactor = powerfactor
+
+    @property
+    def optimization_model(self) -> str:
+        """Gets the optimization_model of this Storage.
+
+        (A value required by PROFFES)  # noqa: E501
+
+        :return: The optimization_model of this Storage.
+        :rtype: str
+        """
+        return self._optimization_model
+
+    @optimization_model.setter
+    def optimization_model(self, optimization_model: str):
+        """Sets the optimization_model of this Storage.
+
+        (A value required by PROFFES)  # noqa: E501
+
+        :param optimization_model: The optimization_model of this Storage.
+        :type optimization_model: str
+        """
+
+        self._optimization_model = optimization_model
