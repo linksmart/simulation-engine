@@ -2,7 +2,6 @@ from Http_commands import Http_commands
 import re
 import copy
 from JSONparser import *
-import simplejson as json
 import time
 
 class Profess:
@@ -13,7 +12,6 @@ class Profess:
         self.json_parser=JsonParser()
         self.dummy_data = {"load": {
          "meta": {
-             "pf_Load": 1
          }
      },
      "photovoltaic": {
@@ -85,7 +83,7 @@ class Profess:
         data=self.dataList
         something_running = True
         while something_running:
-            time.sleep(.3)
+            time.sleep(5)
             opt_status = self.get_optimization_status()
             something_running = False
             for element in data:

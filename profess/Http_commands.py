@@ -1,5 +1,4 @@
 import requests
-import json
 
 class Http_commands:
     def __init__(self):

@@ -1,6 +1,9 @@
 from Profess import *
+import json
 from JSONparser import *
-
+import datetime
+t1 = datetime.datetime.now()
+print(t1)
 domain = "http://localhost:8080/v1/"
 dummyInputData = open('inputData.json').read()
 jsonInputDataFile=json.loads(dummyInputData)
@@ -49,10 +52,14 @@ print(p1.wait_and_get_output())
 
 
 soc_list=[{"633":{"SoC":5}},{"671":{"SoC":4}},{"634":{"SoC":20}}]
-p1.update(dummyLoads, dummyPV, dummyPrice,soc_list,dummyGESSCON)
+#p1.update(dummyLoads, dummyPV, dummyPrice,soc_list,dummyGESSCON)
 #print(p1.dataList)
 
 #print(sorted(test))
 #p1.translate_output(test)
 
 
+t2 = datetime.datetime.now()
+print(t1)
+print(t2)
+print(t2-t1)

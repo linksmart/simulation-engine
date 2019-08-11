@@ -1,10 +1,10 @@
 version: '3'
 services:
-  redis:
-    image: redis:latest
-    command: redis-server
-    ports:
-      - "6379:6379"
+  #redis:
+   # image: redis:latest
+   # command: redis-server
+   # ports:
+   #   - "6379:6379"
   se:
     build:
       context: ""

@@ -108,9 +108,9 @@ class gridController:
         self.sim.setChargingPoints(self.object)
         logger.debug("Charging points charged")
 
-    def run(self):#self, id, duration):
-        #self.id = id
-        #self.duration = duration
+    def run(self, id, duration):
+        self.id = id
+        self.duration = duration
 
         logger.debug("Simulation of grid " + self.id + " started")
         logger.debug("These are the parameters")
