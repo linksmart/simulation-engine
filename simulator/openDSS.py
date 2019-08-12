@@ -23,6 +23,7 @@ class OpenDSS:
         dss.run_command("Set DefaultBaseFrequency=60")
         #dss.Basic.NewCircuit("Test 1")
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
+        #dat to erase 
         self.loadshapes_for_loads={} #empty Dictionary for laod_id:load_profile pairs
         self.profess=None
         self.dummyGESSCON=[{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}, {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
@@ -54,21 +55,18 @@ class OpenDSS:
                 else:
                     logger.debug("key not processed "+str(key))
                     pass
-
             dss_string = "New circuit.{circuit_name} basekv={base_k_v} pu={per_unit} phases={phases} bus1={bus1}  Angle={angle} MVAsc3={mv_asc3} MVASC1={mv_asc1}".format(
-                circuit_name=name,
+                circuit_name=common_id,
                 phases=common_phases_input,
                 per_unit=common_per_unit,
                 base_k_v= common_base_kV,
                 mv_asc1= common_MVAsc1,
                 mv_asc3= common_MVAsc3,
                 bus1=common_bus1,
-                angle=common_angle
+                angle=common_angle,
             )
-
             print(dss_string + "\n")
             dss.run_command(dss_string)
-
         except Exception as e:
             logger.error(e)
 
@@ -132,7 +130,7 @@ class OpenDSS:
             else:
                 dss.run_command('Storage.Akku1.kWrated = 30') # kWrated should be replaced with the value from PROFESS )
                 #dss.run_command('Storage.Akku1.kW = -5')
-                dss.run_command('Storage.Akku1.State = charging')
+                dss.run_command('Storage.Akku1.State = charging')"""
 
 
             dss.Solution.Solve()
@@ -201,16 +199,16 @@ class OpenDSS:
     def getVoltageBases(self):
         return dss.Settings.VoltageBases()
 
-    def setVoltageBases(self,V1=None,V2=None,V3=None,V4=None,V5=None):
-        self.V1=V1
-        self.V2=V2
-        self.V3=V3
-        self.V4=V4
-        self.V5=V5
-        #dss.Settings.VoltageBases(0.4,16)
+    def setVoltageBases(self, bases_list):
+        #values=[]
+
+
+        #for i in range(len(bases_list)):
+            #values.append(bases_list[i])
 
         #dss_string = "Set voltagebases = [{value1},{value2},{value3},{value4},{value5}]".format(value1=self.V1,value2=self.V2,value3=self.V3,value4=self.V4,value5=self.V5)
-        dss_string = "Set voltagebases = [{value1},{value2},{value3}]".format(value1=self.V1,value2=self.V2,value3=self.V3,value4=self.V4,value5=self.V5)
+        #dss_string = "Set voltagebases = [{value1},{value2},{value3},{value4},{value5}]".format(value1=values[0],value2=values[1],value3=values[2],value4=values[3],value5=values[4])
+        dss_string = "Set voltagebases = "+str(bases_list)
         print(dss_string + "\n")
 
         dss.run_command(dss_string)
@@ -913,17 +911,59 @@ class OpenDSS:
                 self._bus1 = bus1
                 self._bus2 = bus2
                 self._linecode = linecode
-                self._length = length
-                self._unitlength = unitlength
-                self._r1 = r1
-                self._r0 = r0
-                self._x1 = x1
-                self._x0 = x0
-                self._c1 = c1
-                self._c0 = c0
-                self._switch = switch
+                #logger.debug("linecode :"+str(self._linecode))
 
-                portion_str = "r1={r1} r0={r0} x1={x1} x0={x0} c1={c1}  c0={c0} " if switch == True else " length={length} units={unitlength} linecode={linecode} "
+                self._length = length
+                #logger.debug("length :" + str(self._length))
+                self._unitlength = unitlength
+                #logger.debug("unit :" + str(self._unitlength))
+                self._r1 = r1
+                #logger.debug("r1 :" + str(self._r1))
+                self._r0 = r0
+                #logger.debug("r0 :" + str(self._r0))
+                self._x1 = x1
+                #logger.debug("x1 :" + str(self._x1))
+                self._x0 = x0
+                #logger.debug("x0 :" + str(self._x0))
+                self._c1 = c1
+                #logger.debug("c1 :" + str(self._c1))
+                self._c0 = c0
+                #logger.debug("c0 :" + str(self._c0))
+                self._switch = switch
+                #logger.debug("switch :" + str(self._switch))
+
+
+                my_str=[]
+                if not self._r1 == None and self._linecode == None:
+                    #portion_str = "r1={r1} r0={r0} x1={x1} x0={x0} c1={c1}  c0={c0} " if switch == True else " length={length} units={unitlength} linecode={linecode} "
+                    my_str.append("r1={r1} ")
+
+                    if not self._r0 == None:
+                        my_str.append("r0={r0} ")
+                    if not self._x1 == None:
+                        my_str.append("x1={x1} ")
+                    if not self._x0 == None:
+                        my_str.append("x0={x0} ")
+                    if not self._c1 == None:
+                        my_str.append("c1={c1} ")
+                    if not self._c0 == None:
+                        my_str.append("c0={c0} ")
+                else:
+                    if not self._linecode == None and self._r1 == None:
+                        my_str.append("linecode={linecode} ")
+                    else:
+                        logger.error("r1 and linecode cannot be entered at the same time")
+                        sys.exit(0)
+                        raise ValueError('r1 and linecode cannot be entered at the same time')
+
+
+                if not self._length == None:
+                    my_str.append("length={length} ")
+                if not self._unitlength == None:
+                    my_str.append("units={unitlength} ")
+
+                portion_str = ''.join(my_str)
+
                 dss_string = "New Line.{line_id} bus1={bus1} bus2={bus2} phases={phases} switch={switch} " + portion_str + " "
 
                 dss_string = dss_string.format(

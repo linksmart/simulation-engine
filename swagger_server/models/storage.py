@@ -15,7 +15,7 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, dod: float=None, kv: float=None, kw_rated: float=None, kwh_rated: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None):  # noqa: E501
+    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, dod: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501
@@ -34,8 +34,8 @@ class Storage(Model):
         :type kv: float
         :param kw_rated: The kw_rated of this Storage.  # noqa: E501
         :type kw_rated: float
-        :param kwh_rated: The kwh_rated of this Storage.  # noqa: E501
-        :type kwh_rated: float
+        :param storage_capacity: The storage_capacity of this Storage.  # noqa: E501
+        :type storage_capacity: float
         :param kwh_stored: The kwh_stored of this Storage.  # noqa: E501
         :type kwh_stored: float
         :param max_charging_power: The max_charging_power of this Storage.  # noqa: E501
@@ -60,7 +60,7 @@ class Storage(Model):
             'dod': float,
             'kv': float,
             'kw_rated': float,
-            'kwh_rated': float,
+            'storage_capacity': float,
             'kwh_stored': float,
             'max_charging_power': float,
             'max_discharging_power': float,
@@ -79,7 +79,7 @@ class Storage(Model):
             'dod': 'dod',
             'kv': 'kv',
             'kw_rated': 'kw_rated',
-            'kwh_rated': 'kwh_rated',
+            'storage_capacity': 'storage_capacity',
             'kwh_stored': 'kwh_stored',
             'max_charging_power': 'max_charging_power',
             'max_discharging_power': 'max_discharging_power',
@@ -97,7 +97,7 @@ class Storage(Model):
         self._dod = dod
         self._kv = kv
         self._kw_rated = kw_rated
-        self._kwh_rated = kwh_rated
+        self._storage_capacity = storage_capacity
         self._kwh_stored = kwh_stored
         self._max_charging_power = max_charging_power
         self._max_discharging_power = max_discharging_power
@@ -304,29 +304,29 @@ class Storage(Model):
         self._kw_rated = kw_rated
 
     @property
-    def kwh_rated(self) -> float:
-        """Gets the kwh_rated of this Storage.
+    def storage_capacity(self) -> float:
+        """Gets the storage_capacity of this Storage.
 
         Rated storage capacity in kWh. Default is 50.  # noqa: E501
 
-        :return: The kwh_rated of this Storage.
+        :return: The storage_capacity of this Storage.
         :rtype: float
         """
-        return self._kwh_rated
+        return self._storage_capacity
 
-    @kwh_rated.setter
-    def kwh_rated(self, kwh_rated: float):
-        """Sets the kwh_rated of this Storage.
+    @storage_capacity.setter
+    def storage_capacity(self, storage_capacity: float):
+        """Sets the storage_capacity of this Storage.
 
         Rated storage capacity in kWh. Default is 50.  # noqa: E501
 
-        :param kwh_rated: The kwh_rated of this Storage.
-        :type kwh_rated: float
+        :param storage_capacity: The storage_capacity of this Storage.
+        :type storage_capacity: float
         """
-        if kwh_rated is None:
-            raise ValueError("Invalid value for `kwh_rated`, must not be `None`")  # noqa: E501
+        if storage_capacity is None:
+            raise ValueError("Invalid value for `storage_capacity`, must not be `None`")  # noqa: E501
 
-        self._kwh_rated = kwh_rated
+        self._storage_capacity = storage_capacity
 
     @property
     def kwh_stored(self) -> float:

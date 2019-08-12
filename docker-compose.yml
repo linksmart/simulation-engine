@@ -37,8 +37,6 @@ services:
       dockerfile: Dockerfile
     image: "simulation-engine"
     container_name: "se"
-    depends_on:
-      - ofw
     volumes:
        - .:/usr/src/app/data
        #- .:/usr/src/app
@@ -53,6 +51,5 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
-   # restart: "always"
-#volumes:
-#  results:
+    # restart: "always"
+    entrypoint: ["python3", "-u", "main.py"]

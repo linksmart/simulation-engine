@@ -39,7 +39,11 @@ def create_simulation(body):  # noqa: E501
         #logger.debug("Data: " + str(temp)) #shows the raw data sent from client
         grid = Grid.from_dict(data)  # noqa: E501. SOMETHING IS NOT GOOD HERE
         #logger.debug("Grid: " + str(grid)) #shows the raw data sent from client
-
+        id = utils.create_and_get_ID()
+        """redis_db = RedisDB()
+        redis_db.set(id, "created")
+        flag = redis_db.get(id)
+        logger.debug("id stored in RedisDB: "+str(flag))"""
         #----------Profiles---------------#
         prof = Profiles()
         #pv_profile_data = prof.pv_profile("bolzano", "italy", days=365)
@@ -106,11 +110,6 @@ def create_simulation(body):  # noqa: E501
 
         ####generates an id an makes a directory with the id for the data and for the registry
         try:
-            id = utils.create_and_get_ID()
-            redis_db = RedisDB()
-            redis_db.set(id, "created")
-            flag = redis_db.get(id)
-            logger.debug("id stored in RedisDB: "+str(flag))
             #dir = os.path.join(os.getcwd(), "utils", str(id))
             #if not os.path.exists(dir):
                 #os.makedirs(dir)
@@ -121,6 +120,7 @@ def create_simulation(body):  # noqa: E501
                 os.makedirs("data")
             os.chdir(r"./data")
             fname = str(id)+"_input_grid"
+            logger.debug("File name = " + str(fname))
             f = open(fname,'w')
             json.dump(data, f, ensure_ascii=False, indent=2)
             f.close()
@@ -153,7 +153,7 @@ def create_simulation(body):  # noqa: E501
         #factory.gridController.setLoadshape("test_loadschape", 8760, 1, load_profile_data)
 
         #factory.gridController.setNewCircuit(id)
-
+            
         for values in radial:
             #logger.debug("values of the radial: "+str(values))
             values=values.to_dict()
@@ -202,11 +202,14 @@ def create_simulation(body):  # noqa: E501
             if "power_lines" in values.keys() and values["power_lines"] is not None:
                 #logger.debug("---------------Setting Powerlines-------------------------")
                 print("!---------------Setting Powerlines------------------------- \n")
-                powerLines = values["power_lines"]
-                #linecodes = values["linecode"]
-                #factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
-                #logger.debug("Powerlines" + str(powerLines))
-                factory.gridController.setPowerLines(id, powerLines)
+                try:
+                    powerLines = values["power_lines"]
+                    #linecodes = values["linecode"]
+                    #factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
+                    #logger.debug("Powerlines" + str(powerLines))
+                    factory.gridController.setPowerLines(id, powerLines)
+                except ValueError as e:
+                    logger.error(e)
 
             if "powerProfile" in values.keys() and values["powerProfile"] is not None:
 #                logger.debug("---------------Setting powerProfile-------------------------")
@@ -243,10 +246,10 @@ def create_simulation(body):  # noqa: E501
                 chargingPoints = values["chargingPoints"]
                 gridController.setChargingPoints(id, chargingPoints)
             """
-            """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
+            if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
                 #logger.debug("---------------Setting chargingPoints-------------------------")
                 chargingPoints = values["chargingPoints"]
-                factory.gridController.setChargingPoints(id, chargingPoints)"""#TODO: fix and remove comment               
+                factory.gridController.setChargingPoints(id, chargingPoints)               
 
 
             """if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:
@@ -256,17 +259,25 @@ def create_simulation(body):  # noqa: E501
                 factory.gridController.setVoltageRegulator(id, voltage_regulator)
             """
 
-            """if "loadshapes" in values.keys() and values["loadshapes"] is not None:
+            if "loadshapes" in values.keys() and values["loadshapes"] is not None:
 #                logger.debug("---------------Setting loadshapes-------------------------")
                 print("! ---------------Setting loadshapes------------------------- \n")
                 loadshapes = values["loadshapes"]
 #                logger.debug("Load Shapes: " + str(loadshapes))
-                factory.gridController.setLoadShape(id, loadshapes)""" #TODO: fix and remove comment
-            """if "tshapes" in values.keys() and values["tshapes"] is not None:
+                factory.gridController.setLoadShape(id, loadshapes)
+            if "tshapes" in values.keys() and values["tshapes"] is not None:
                 logger.debug("---------------Setting tshapes-------------------------")
                 tshapes = values["tshapes"]
                 logger.debug("Tshapes: " + str(tshapes))
-                factory.gridController.setTShape(id, tshapes)""" #TODO: fix and remove comment                 
+                factory.gridController.setTShape(id, tshapes)      
+            if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
+                print("! ---------------Setting Photovoltaic------------------------- \n")
+                photovoltaics = values["photovoltaics"]
+                xycurves = radial["xycurves"]
+                loadshapes = radial["loadshapes"]
+                tshapes = radial["tshapes"]
+                factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)
+
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)
 
@@ -291,11 +302,11 @@ def get_simulation_result(id):  # noqa: E501
     #factory= ThreadFactory(id)
     #variable.set(id, factory)
     #result = factory.gridController.results()
-    logger.info("Get Error")
+    #logger.info("Get Error")
     try:
         os.chdir(r"./data")
         f = open(str(id)+"_result") #open(str(id)+"_results.txt")
-        logger.debug("GET file "+str(f))
+        #logger.debug("GET file "+str(f))
         content = f.read()
         #logger.info(content)
         result = json.loads(content)
@@ -330,7 +341,14 @@ def delete_simulation(id):  # noqa: E501
         status = "Could not delete Simulation " + id
     return status
 
-def update_simulation(id, body):  # noqa: E501
+def mod_dict(data, k, v):
+    for key in data.keys():
+        if key == k:
+            data[key] = v
+        elif type(data[key]) is dict:
+            mod_dict(data[key], k, v)
+            
+def update_simulation():  # noqa: E501 ##TODO: work in progress
     """Send new data to an existing simulation
 
      # noqa: E501
@@ -342,6 +360,24 @@ def update_simulation(id, body):  # noqa: E501
 
     :rtype: None
     """
-    if connexion.request.is_json:
+    """if connexion.request.is_json:
         body = Grid.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'Simulation ' + id + ' updated!'
+        logger.debug(body)"""
+    fileid = connexion.request.args.get('id')
+    key = connexion.request.args.get('key')
+    value = connexion.request.args.get('value')
+    try:
+        os.chdir(r"./data")
+        f = open(fileid+"_input_grid", 'a') #open(str(id)+"_results.txt")
+        #logger.debug("GET file "+str(f))
+        content = f.read()
+        #logger.info(content)
+        data = json.loads(content)
+        f.close()
+        os.chdir(r"../")
+        #key = body[0]
+        #value = 
+        mod_dict(data, key, value)
+    except:
+        logger.debug("Error updating")
+    return 'Simulation ' + fileid + ' updated!'

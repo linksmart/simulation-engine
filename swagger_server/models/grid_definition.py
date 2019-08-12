@@ -15,7 +15,7 @@ class GridDefinition(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None):  # noqa: E501
+    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, voltage_bases: List[float]=None):  # noqa: E501
         """GridDefinition - a model defined in Swagger
 
         :param id: The id of this GridDefinition.  # noqa: E501
@@ -34,6 +34,8 @@ class GridDefinition(Model):
         :type mv_asc3: float
         :param mv_asc1: The mv_asc1 of this GridDefinition.  # noqa: E501
         :type mv_asc1: float
+        :param voltage_bases: The voltage_bases of this GridDefinition.  # noqa: E501
+        :type voltage_bases: List[float]
         """
         self.swagger_types = {
             'id': str,
@@ -43,7 +45,8 @@ class GridDefinition(Model):
             'bus1': str,
             'angle': int,
             'mv_asc3': float,
-            'mv_asc1': float
+            'mv_asc1': float,
+            'voltage_bases': List[float]
         }
 
         self.attribute_map = {
@@ -54,7 +57,8 @@ class GridDefinition(Model):
             'bus1': 'bus1',
             'angle': 'angle',
             'mv_asc3': 'MVAsc3',
-            'mv_asc1': 'MVAsc1'
+            'mv_asc1': 'MVAsc1',
+            'voltage_bases': 'VoltageBases'
         }
 
         self._id = id
@@ -65,6 +69,7 @@ class GridDefinition(Model):
         self._angle = angle
         self._mv_asc3 = mv_asc3
         self._mv_asc1 = mv_asc1
+        self._voltage_bases = voltage_bases
 
     @classmethod
     def from_dict(cls, dikt) -> 'GridDefinition':
@@ -95,6 +100,8 @@ class GridDefinition(Model):
         :param id: The id of this GridDefinition.
         :type id: str
         """
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
 
@@ -116,6 +123,8 @@ class GridDefinition(Model):
         :param base_k_v: The base_k_v of this GridDefinition.
         :type base_k_v: float
         """
+        if base_k_v is None:
+            raise ValueError("Invalid value for `base_k_v`, must not be `None`")  # noqa: E501
 
         self._base_k_v = base_k_v
 
@@ -158,6 +167,8 @@ class GridDefinition(Model):
         :param phases: The phases of this GridDefinition.
         :type phases: int
         """
+        if phases is None:
+            raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501
 
         self._phases = phases
 
@@ -179,6 +190,8 @@ class GridDefinition(Model):
         :param bus1: The bus1 of this GridDefinition.
         :type bus1: str
         """
+        if bus1 is None:
+            raise ValueError("Invalid value for `bus1`, must not be `None`")  # noqa: E501
 
         self._bus1 = bus1
 
@@ -200,6 +213,8 @@ class GridDefinition(Model):
         :param angle: The angle of this GridDefinition.
         :type angle: int
         """
+        if angle is None:
+            raise ValueError("Invalid value for `angle`, must not be `None`")  # noqa: E501
 
         self._angle = angle
 
@@ -221,6 +236,8 @@ class GridDefinition(Model):
         :param mv_asc3: The mv_asc3 of this GridDefinition.
         :type mv_asc3: float
         """
+        if mv_asc3 is None:
+            raise ValueError("Invalid value for `mv_asc3`, must not be `None`")  # noqa: E501
 
         self._mv_asc3 = mv_asc3
 
@@ -244,3 +261,26 @@ class GridDefinition(Model):
         """
 
         self._mv_asc1 = mv_asc1
+
+    @property
+    def voltage_bases(self) -> List[float]:
+        """Gets the voltage_bases of this GridDefinition.
+
+
+        :return: The voltage_bases of this GridDefinition.
+        :rtype: List[float]
+        """
+        return self._voltage_bases
+
+    @voltage_bases.setter
+    def voltage_bases(self, voltage_bases: List[float]):
+        """Sets the voltage_bases of this GridDefinition.
+
+
+        :param voltage_bases: The voltage_bases of this GridDefinition.
+        :type voltage_bases: List[float]
+        """
+        if voltage_bases is None:
+            raise ValueError("Invalid value for `voltage_bases`, must not be `None`")  # noqa: E501
+
+        self._voltage_bases = voltage_bases

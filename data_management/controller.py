@@ -19,10 +19,14 @@ class gridController:
         self.allBusMagPu=[]
         self.yCurrent = []
         self.losses = []
+        self.voltage_bases = []
 
     def setNewCircuit(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
         self.sim.setNewCircuit(name, object)
+        if object["voltage_bases"]:
+            self.voltage_bases = object["voltage_bases"]
+            logger.debug(" voltage bases " + str(self.voltage_bases))
         logger.debug("New circuit created")
 
     def enableCircuit(self, name):
@@ -66,8 +70,11 @@ class gridController:
     def setPowerLines(self, id, powerlines): #(self, id, powerlines, linecodes):
         logger.debug("Charging power lines into the simulator")
         #self.sim.setLineCodes(linecodes)
-        self.sim.setPowerLines(powerlines)
-        logger.debug("Power lines charged")
+        try:
+            self.sim.setPowerLines(powerlines)
+            logger.debug("Power lines charged")
+        except ValueError as e:
+            logger.error(e)
         
     def setCapacitors(self, id, capacitors):
         logger.debug("Charging capacitors into the simulator")
@@ -154,11 +161,14 @@ class gridController:
         logger.debug("Active circuit: "+str(self.sim.getActiveCircuit()))
         #return "ok"
         ##################################################################################PROBLEM################################
-        self.sim.setVoltageBases(115, 4.16, 0.48)
+      
+        #self.sim.setVoltageBases(115, 4.16, 0.48)
+        self.sim.setVoltageBases(self.voltage_bases)
         logger.info("Solution mode: "+str(self.sim.getMode()))
         logger.info("Solution step size: " + str(self.sim.getStepSize()))
         logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
+
         #self.sim.setMode("snap")
         self.sim.setMode("daily")
         self.sim.setStepSize("hours")
@@ -171,7 +181,7 @@ class gridController:
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
         #self.sim.setVoltageBases()
-        numSteps= 3
+        numSteps=3
         #logger.info("Number of steps: "+str(numSteps))
         #nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         for i in range(numSteps):
@@ -200,8 +210,8 @@ class gridController:
         #return ("Nodes: " + str(nodeNames), "\nVoltages " + str(allBusMagPu))
         #return (nodeNames, allBusMagPu)
         #filename = str(id)+"_results.txt"
-        #!TODO: Create filename with id so serve multiple simultaneous simulations
-        json_data = json.dumps(allBusMagPu)
+        #!TODO: Create filename with id so serve multiple simultaneous simulations#DONE
+        #json_data = json.dumps(allBusMagPu)
         fname = (self.id)+"_result"
         os.chdir(r"./data")
         with open(fname, 'w', encoding='utf-8') as outfile: 

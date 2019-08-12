@@ -1,4 +1,4 @@
-# DSF Simulation Engine API
+﻿# DSF Simulation Engine API
 DSF Simulation Engine (DSF-SE) API is a web-based API to that enables online interaction with power simulator, i.e., OpenDSS. These instructions will get you a copy of the project up and running for development and testing purposes.
 
 ### Getting the Source from the Repository
@@ -63,3 +63,6 @@ Parameters of simulation can be updated using simulation id that is returned by 
 Instance of a simulation can be deleted using simulation id that is returned by the successfull creation of simulation in the above step.
 - Method: delete
 - End Point: /simulation/simulation_id 
+
+### CI
+https://travis-ci.com/linksmart/simulation-engine
