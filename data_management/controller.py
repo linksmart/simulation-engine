@@ -23,6 +23,7 @@ class gridController:
         self.city = None
         self.country = None
         self.profess_url = "http://localhost:8080"
+        self.sim_days = 0
 
     def get_profess_url(self):
         return self.profess_url
@@ -32,6 +33,9 @@ class gridController:
 
     def get_country(self):
         return self.country
+
+    def get_sim_days(self):
+        return self.sim_days
 
     def setNewCircuit(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
@@ -48,6 +52,9 @@ class gridController:
         if object["country"]:
             self.country = object["country"]
             logger.debug("country: "+str(self.country))
+        if object["simulation_days"]:
+            self.sim_days = object["simulation_days"]
+            logger.debug("sim_days: "+str(self.sim_days))
         logger.debug("New circuit created")
 
     def enableCircuit(self, name):
@@ -157,7 +164,7 @@ class gridController:
         self.sim.setChargingPoints(self.object)
         logger.debug("Charging points charged")
 
-    def run(self):#self, id, duration):
+    def run(self, topology):#self, id, duration):
         #self.id = id
         #self.duration = duration
 
@@ -207,14 +214,44 @@ class gridController:
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
         #self.sim.setVoltageBases()
-        numSteps=3
-        #logger.info("Number of steps: "+str(numSteps))
+        #numSteps=self.get_sim_days()
+        numSteps=1
+        logger.debug("Number of steps: "+str(numSteps))
         #nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         for i in range(numSteps):
             logger.info("#####################################################################")
             logger.info("loop  numSteps, i= " + str(i) )
             logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
             logger.info("#####################################################################")
+
+            logger.debug("---------storage control in the loop--------------------------------")
+            hours = self.sim.getStartingHour()
+            logger.debug("timestep "+str(hours))
+            professLoads = self.sim.getProfessLoadschapes(hours, 24)
+            print("professLoads: " + str(professLoads))
+            professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
+            print("professPVs: " + str(professPVs))
+
+            if "storageUnits" in topology["radials"][0].keys():
+                logger.debug("---------storage control in the loop--------------------------------")
+                hours = self.sim.getStartingHour()
+                professLoads = self.sim.getProfessLoadschapes(hours, 24)
+                print("professLoads: " + str(professLoads))
+                professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
+                print("professPVs: " + str(professPVs))
+                """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
+                self.profess.start_all()
+                print("--------------------start profess results----------------------------")
+                print(self.profess.dataList)
+                print(self.profess.wait_and_get_output())
+                soc_list = [{"633": {"SoC": 5}}, {"671": {"SoC": 4}}, {"634": {"SoC": 20}}]
+                self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
+                print(self.profess.dataList)
+                print("--------------------end profess results----------------------------")"""
+            else:
+                logger.debug("No Storage Units present")
+
+
             nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
         """df = self.sim.utils.lines_to_dataframe()
         data = df[['Bus1', 'Bus2']].to_dict(orient="index")
@@ -226,27 +263,30 @@ class gridController:
                 V = abs(complex(re,im))
         logger.info("Voltage: " + str(V))"""
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
-        logger.info("Node Names: "+ str(nodeNames))
-        logger.info("All Bus MagPus: " + str(allBusMagPu))
+        """logger.info("Node Names: "+ str(nodeNames))
+        logger.info("All Bus MagPus: " + str(allBusMagPu))"""
         #!TODO: return node names, voltage and current in json
         #data = {"NodeNames": nodeNames, "Voltage": allBusMagPu}
         #return json.dumps(data)
-        logger.info("YCurrent: " + str(yCurrent))
-        logger.info("losses: " + str(losses))
+        """logger.info("YCurrent: " + str(yCurrent))
+        logger.info("losses: " + str(losses))"""
         #return ("Nodes: " + str(nodeNames), "\nVoltages " + str(allBusMagPu))
         #return (nodeNames, allBusMagPu)
         #filename = str(id)+"_results.txt"
         #!TODO: Create filename with id so serve multiple simultaneous simulations#DONE
         #json_data = json.dumps(allBusMagPu)
-        fname = (self.id)+"_result"
+        fname = (str(self.id))+"_result.txt"
+        logger.debug("storing results in results folder")
         os.chdir(r"./data")
         with open(fname, 'w', encoding='utf-8') as outfile: 
             #/usr/src/app/tests/results/
             #outfile.write(json_data) # working
+            #logger.debug("data "+str(allBusMagPu))
             json.dump(allBusMagPu, outfile, ensure_ascii=False, indent=2) # working
             #json.dump(json_data, outfile, ensure_ascii=False, indent=2)  # not working !!!
         #logger.info(json_data)
         os.chdir(r"../")
+
         return id
     
     #def results(self):   

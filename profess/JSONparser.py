@@ -45,6 +45,9 @@ class JsonParser:
         global topology
         self.topology = json_topology
 
+    def get_topology(self):
+        return self.topology
+
     def get_node_element_list(self):
         node_element_list = []
         if "storageUnits" in self.topology["radials"][0].keys():

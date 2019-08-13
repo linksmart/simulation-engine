@@ -93,15 +93,17 @@ class OpenDSS:
         dss.run_command('Redirect /usr/src/app/tests/data/13Bus/IEEE13Nodeckt.dss')
 
     def solveCircuitSolution(self):
-        logger.info("Start solveCircuitSolution " + str(dss.Loads.AllNames()))
+        logger.info("Start solveCircuitSolution")
+        #logger.info("Start solveCircuitSolution " + str(dss.Loads.AllNames()))
 
-        storageName = "Storage.Akku1"
+        """storageName = "Storage.Akku1"
         dss.Circuit.SetActiveElement(storageName)
 
         print("kWhstored vor Solution.Solve: " + str(dss.Properties.Value("kWhstored")))
         print("kW vor Solution.Solve: " + str(dss.Properties.Value("kW")))
         print("Storage.Akku1.State: " + str(dss.Properties.Value("State")))
         print("Storage.Akku1.DispMode: " + str(dss.Properties.Value("DispMode")))
+        """
 
 
         try:
@@ -110,18 +112,7 @@ class OpenDSS:
             #dss.Properties.Name("kW")
             #dss.Properties.Value(15)
 
-            hours = self.getStartingHour()
-            professLoads = self.getProfessLoadschapes(hours, 24)
-            #print("professLoads: " + str(professLoads))
-            self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
-            self.profess.start_all()
-            print("--------------------start profess results----------------------------")
-            print(self.profess.dataList)
-            print(self.profess.wait_and_get_output())
-            soc_list = [{"633": {"SoC": 5}}, {"671": {"SoC": 4}}, {"634": {"SoC": 20}}]
-            self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
-            print(self.profess.dataList)
-            print("--------------------end profess results----------------------------")
+
 
 
             """if hours < 5:
@@ -141,30 +132,31 @@ class OpenDSS:
 
 
 
-        print("Result2 %stored: " + str(dss.Properties.Value("%stored")))
+        """print("Result2 %stored: " + str(dss.Properties.Value("%stored")))
         print("Result1 %stored: " + str(dss.run_command('? Storage.Akku1.%stored')))
+        """
         #print("Result1 kWhstored: " + str(dss.run_command('? Storage.Akku1.kWhstored')))
         #print("Result2 kWhstored: " + str(dss.Properties.Value("kWhstored")))
 
         #dss.Circuit.s setActiveElement(storageName)
         # dss.ActiveCircuit.setActiveElement(storageName)
-        print(dss.CktElement.AllPropertyNames())
+        #print(dss.CktElement.AllPropertyNames())
         #energy_ESS=[]
         #energyStored = dss.CktElement.Variable("%stored",energy_ESS)
         #print("The result of ESS energy",str(energy_ESS))
         #energyStored = dssElem.Properties(" % stored").Val
         #print("==> energyStored: " + str(energyStored))
 
-        logger.info("Loads names: "+str(dss.Loads.AllNames()))
+        #logger.info("Loads names: "+str(dss.Loads.AllNames()))
         #logger.info("Bus names: " + str(dss.Circuit.AllBusNames()))
         #logger.info("All Node names: " + str(dss.Circuit.AllNodeNames()))
         #logger.info("Length of Node Names: " + str(len(dss.Circuit.AllNodeNames())))
         #logger.info("Voltages: "+str(dss.Circuit.AllBusVolts()))
         #logger.info("Length of Bus Voltages: "+str(len(dss.Circuit.AllBusVolts())))
-        print("Bus PuVoltages: "+ str(dss.Bus.PuVoltage()))
+        """print("Bus PuVoltages: "+ str(dss.Bus.PuVoltage()))
         print("Bus Voltages: " + str(dss.Circuit.AllBusVolts()))
         print("AllBusVMag: "+str(dss.Circuit.AllBusVMag()))
-        print("AllBusMagPu: "+str(dss.Circuit.AllBusMagPu()))
+        print("AllBusMagPu: "+str(dss.Circuit.AllBusMagPu()))"""
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusVMag())))
         #logger.info("Just pu of Voltages: " + str(dss.Circuit.AllBusMagPu()))
         #logger.info("Length of Bus Voltages: " + str(len(dss.Circuit.AllBusMagPu())))
@@ -180,7 +172,7 @@ class OpenDSS:
         for i in range(len(nodeList)):
             #result[nodeList[i]] = puList[i]
             result.append({"Node": nodeList[i], "Pu": puList[i], "YCurrent": ycurrents[i], "Loss": elementLosses[i]})
-            print(str(nodeList[i]) + ", " + str(puList[i])+ ", "+str(ycurrents[i])+", "+str(elementLosses[i]))
+            #print(str(nodeList[i]) + ", " + str(puList[i])+ ", "+str(ycurrents[i])+", "+str(elementLosses[i]))
         return (dss.Circuit.AllNodeNames(), result, dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses())
         #return (dss.Circuit.AllNodeNames(), dss.Circuit.AllNodeVmagPUByPhase(1), dss.Circuit.YCurrents(), dss.Circuit.AllElementLosses()) 
         #def getVoltages(self):
@@ -533,6 +525,35 @@ class OpenDSS:
         #print("resulting_loadshape_profess: " + str(result))
         return [result]
 
+
+    def getProfessLoadschapesPV(self, start: int, size=24):
+        # Preparing loadshape values in a format required by PROFESS
+        # All loads are includet, not only the one having storage attached
+        result = {}
+        print( "----------------- getProfessLoadschapes ----------------------")
+        try:
+            for key, value in self.loadshapes_for_pv.items():
+                pv_id = key
+                bus_name = value["bus"]
+                main_bus_name = bus_name.split('.', 1)[0]
+                #print("bus_name: " + str(bus_name) + ", main_bus_name: " + str(main_bus_name))
+                loadshape = value["loadshape"]
+                #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
+                loadshape_portion=loadshape[int(start):int(start+size)]
+                #print("loadshape_portion: " + str(loadshape_portion))
+                bus_loadshape={bus_name:loadshape_portion}
+                #print("bus_loadshape: " + str(bus_loadshape))
+
+                if main_bus_name in result:
+                    # extend existing  element
+                    result[main_bus_name].update(bus_loadshape)
+                else:
+                    # add new element
+                    result[main_bus_name] = bus_loadshape
+        except Exception as e:
+            logger.error(e)
+        #print("resulting_loadshape_profess: " + str(result))
+        return [result]
 
     def setLoads(self, loads):
         #!logger.debug("Setting up the loads")
@@ -1105,14 +1126,18 @@ class OpenDSS:
         self.pvs=pvs
         try:
             for element in self.pvs:
+                #for kskd in element.keys():
+                    #logger.debug("key "+str(kskd))
                 pv_name = element["id"]
                 bus_name = element["bus1"]
-
+                max_power= element["max_power_k_w"]
+                logger.debug("max power "+str(max_power))
                 #self.pv_name=pv_name
                 #self.bus_name=bus_name
 
                 # ----------get_a_profile---------------#
-                pv_profile_data = profiles.pv_profile(city, country, sim_days)
+                pv_profile_data = profiles.pv_profile(city, country, sim_days, max_power)
+                #logger.debug("pv profile: "+str(pv_profile_data))
                 #print("load_profile_data: randint=" + str(randint_value))
 
                 #--------store_profile_for_line----------#
