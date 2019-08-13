@@ -21,12 +21,18 @@ class gridController:
         self.losses = []
         self.voltage_bases = []
 
+    def get_profess_url(self):
+        return self.profess_url
+
     def setNewCircuit(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
         self.sim.setNewCircuit(name, object)
         if object["voltage_bases"]:
             self.voltage_bases = object["voltage_bases"]
             logger.debug(" voltage bases " + str(self.voltage_bases))
+        if object["url_storage_controller"]:
+            self.profess_url = object["url_storage_controller"]
+            logger.debug("profess url: "+str(self.profess_url))
         logger.debug("New circuit created")
 
     def enableCircuit(self, name):

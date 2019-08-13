@@ -186,6 +186,9 @@ definitions:
         type: "array"
         items:
           type: "number"
+      url_storage_controller:
+        type: "string"
+        default: "http://localhost:8080"
   Radial:
     type: "object"
     properties:
@@ -471,6 +474,7 @@ definitions:
     - "bus1"
     - "id"
     - "kv"
+    - "optimization_model"
     - "storage_capacity"
     properties:
       id:

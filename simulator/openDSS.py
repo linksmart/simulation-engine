@@ -123,7 +123,7 @@ class OpenDSS:
             print("--------------------end profess results----------------------------")
 
 
-            if hours < 5:
+            """if hours < 5:
                 dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery (kWrated should be replaced with the value from PROFESS )
                 #dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
                 dss.run_command('Storage.Akku1.State = Discharging')
@@ -397,8 +397,8 @@ class OpenDSS:
                         taps=self._taps,
                         base_frequency=self._base_frequency
 
-                    ))"""
-
+                    ))
+                """
             # !logger.debug("Transformer_names: " + str(dss.Transformers.AllNames()))
             # dss.run_command('Solve')
             # !logger.debug("Load SOLVED") #It does not get here. This is now good

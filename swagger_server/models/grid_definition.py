@@ -15,7 +15,7 @@ class GridDefinition(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, voltage_bases: List[float]=None):  # noqa: E501
+    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, voltage_bases: List[float]=None, url_storage_controller: str='http://localhost:8080'):  # noqa: E501
         """GridDefinition - a model defined in Swagger
 
         :param id: The id of this GridDefinition.  # noqa: E501
@@ -36,6 +36,8 @@ class GridDefinition(Model):
         :type mv_asc1: float
         :param voltage_bases: The voltage_bases of this GridDefinition.  # noqa: E501
         :type voltage_bases: List[float]
+        :param url_storage_controller: The url_storage_controller of this GridDefinition.  # noqa: E501
+        :type url_storage_controller: str
         """
         self.swagger_types = {
             'id': str,
@@ -46,7 +48,8 @@ class GridDefinition(Model):
             'angle': int,
             'mv_asc3': float,
             'mv_asc1': float,
-            'voltage_bases': List[float]
+            'voltage_bases': List[float],
+            'url_storage_controller': str
         }
 
         self.attribute_map = {
@@ -58,7 +61,8 @@ class GridDefinition(Model):
             'angle': 'angle',
             'mv_asc3': 'MVAsc3',
             'mv_asc1': 'MVAsc1',
-            'voltage_bases': 'VoltageBases'
+            'voltage_bases': 'VoltageBases',
+            'url_storage_controller': 'url_storage_controller'
         }
 
         self._id = id
@@ -70,6 +74,7 @@ class GridDefinition(Model):
         self._mv_asc3 = mv_asc3
         self._mv_asc1 = mv_asc1
         self._voltage_bases = voltage_bases
+        self._url_storage_controller = url_storage_controller
 
     @classmethod
     def from_dict(cls, dikt) -> 'GridDefinition':
@@ -284,3 +289,24 @@ class GridDefinition(Model):
             raise ValueError("Invalid value for `voltage_bases`, must not be `None`")  # noqa: E501
 
         self._voltage_bases = voltage_bases
+
+    @property
+    def url_storage_controller(self) -> str:
+        """Gets the url_storage_controller of this GridDefinition.
+
+
+        :return: The url_storage_controller of this GridDefinition.
+        :rtype: str
+        """
+        return self._url_storage_controller
+
+    @url_storage_controller.setter
+    def url_storage_controller(self, url_storage_controller: str):
+        """Sets the url_storage_controller of this GridDefinition.
+
+
+        :param url_storage_controller: The url_storage_controller of this GridDefinition.
+        :type url_storage_controller: str
+        """
+
+        self._url_storage_controller = url_storage_controller

@@ -59,53 +59,6 @@ def create_simulation(body):  # noqa: E501
 
         #----------Profiles_end-----------#
 
-        #----------PROFESS----------------#
-        domain = "http://192.168.99.100:8080/v1/"
-        profss = Profess(domain)
-        #profss.json_parser.set_topology(data)
-
-        dummyprofile = [3] * 24
-        dummyLoads = []
-        dummyPrice = []
-        dummyPV = []
-
-        profss.json_parser.set_topology(data)
-        dummyPVdict = []
-        print("profss.json_parser.get_node_name_list(): " + str(profss.json_parser.get_node_name_list()))
-        for element in profss.json_parser.get_node_name_list():
-            print("element: " + str(element))
-            dummyDict = { element: {element + ".1": copy.deepcopy(dummyprofile), element + ".2": copy.deepcopy(dummyprofile), element + ".3": copy.deepcopy(dummyprofile)}}
-            print("dummyDict: " + str(dummyDict))
-            dummyLoads.append(dummyDict)
-            dummyPVdict = {element: {element + ".1.2.3": copy.deepcopy(dummyprofile)}}
-            dummyPV.append(dummyPVdict)
-
-
-        dummyPrice = copy.deepcopy(dummyprofile)
-        element = "671"
-        dummyDict = {element: [{element + ".1.2.3": copy.deepcopy(dummyprofile)}]}
-
-        print("dummyDict: " + str(dummyDict))
-        print("dummyLoads: " + str(dummyLoads))
-        print("dummyPV: " +  str(dummyPV))
-        print("dummyPrice: " + str(dummyPrice))
-
-        print("dummyLoads len: " + str(len(dummyLoads)))
-
-        dummyLoads[0] = dummyDict
-        dummyGESSCON = [{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
-                        {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
-
-        #profss.set_up_profess_for_existing_topology( dummyLoads, dummyPV, dummyPrice, dummyGESSCON)
-        #profss.start_all()
-        print(profss.dataList)
-        print(profss.wait_and_get_output())
-
-        soc_list = [{"633": {"SoC": 0.5}}, {"671": {"SoC": 0.4}}, {"634": {"SoC": 0.2}}]
-        #profss.update(dummyLoads, dummyPV, dummyPrice, soc_list, dummyGESSCON)
-        #print(profss.dataList)
-        #---------------PROFESS_END--------------------#
-
 
 
         ####generates an id an makes a directory with the id for the data and for the registry
@@ -153,6 +106,65 @@ def create_simulation(body):  # noqa: E501
         #factory.gridController.setLoadshape("test_loadschape", 8760, 1, load_profile_data)
 
         #factory.gridController.setNewCircuit(id)
+
+
+        #----------PROFESS----------------#
+        domain = factory.gridController.get_profess_url()+"/v1/"
+        logger.debug("profess url: "+str(domain))
+        profess = Profess(domain)
+        #profess.json_parser.set_topology(data)
+
+
+
+
+        profess.json_parser.set_topology(data)
+
+        """
+        dummyprofile = [3] * 24
+        dummyLoads = []
+        dummyPrice = []
+        dummyPV = []
+        
+        
+        dummyPVdict = []
+        print("profess.json_parser.get_node_name_list(): " + str(profess.json_parser.get_node_name_list()))
+        
+        for element in profess.json_parser.get_node_name_list():
+            print("element: " + str(element))
+            dummyDict = { element: {element + ".1": copy.deepcopy(dummyprofile), element + ".2": copy.deepcopy(dummyprofile), element + ".3": copy.deepcopy(dummyprofile)}}
+            print("dummyDict: " + str(dummyDict))
+            dummyLoads.append(dummyDict)
+            dummyPVdict = {element: {element + ".1.2.3": copy.deepcopy(dummyprofile)}}
+            dummyPV.append(dummyPVdict)
+
+
+        dummyPrice = copy.deepcopy(dummyprofile)
+        
+        element = "671"
+        dummyDict = {element: [{element + ".1.2.3": copy.deepcopy(dummyprofile)}]}
+
+        print("dummyDict: " + str(dummyDict))
+        print("dummyLoads: " + str(dummyLoads))
+        print("dummyPV: " +  str(dummyPV))
+        print("dummyPrice: " + str(dummyPrice))
+
+        print("dummyLoads len: " + str(len(dummyLoads)))
+
+        dummyLoads[0] = dummyDict
+        dummyGESSCON = [{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                        {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
+
+        #profess.set_up_profess_for_existing_topology( dummyLoads, dummyPV, dummyPrice, dummyGESSCON)
+        #profess.start_all()
+        print(profess.dataList)
+        print(profess.wait_and_get_output())
+
+        soc_list = [{"633": {"SoC": 0.5}}, {"671": {"SoC": 0.4}}, {"634": {"SoC": 0.2}}]
+        #profess.update(dummyLoads, dummyPV, dummyPrice, soc_list, dummyGESSCON)
+        #print(profess.dataList)
+        #---------------PROFESS_END--------------------#
+
+        """
             
         for values in radial:
             #logger.debug("values of the radial: "+str(values))
@@ -188,7 +200,7 @@ def create_simulation(body):  # noqa: E501
                 load = values["loads"]
                 # logger.debug("Loads" + str(load))
                 print("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                factory.gridController.setLoadshapes(id, load, prof, profss)
+                factory.gridController.setLoadshapes(id, load, prof, profess)
                 print("! >>>  ---------------and the Loads afterwards ------------------------- \n")
                 factory.gridController.setLoads(id, load)
 
@@ -273,10 +285,10 @@ def create_simulation(body):  # noqa: E501
             if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
                 print("! ---------------Setting Photovoltaic------------------------- \n")
                 photovoltaics = values["photovoltaics"]
-                xycurves = radial["xycurves"]
-                loadshapes = radial["loadshapes"]
-                tshapes = radial["tshapes"]
-                factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)
+                #xycurves = radial["xycurves"]
+                #loadshapes = radial["loadshapes"]
+                #tshapes = radial["tshapes"]
+                factory.gridController.setPhotovoltaic(id, photovoltaics)
 
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)
