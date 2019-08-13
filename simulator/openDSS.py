@@ -25,6 +25,7 @@ class OpenDSS:
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
         #dat to erase 
         self.loadshapes_for_loads={} #empty Dictionary for laod_id:load_profile pairs
+        self.loadshapes_for_pv = {}
         self.profess=None
         self.dummyGESSCON=[{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}, {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
         self.dummyPrice=[3] * 24
@@ -599,7 +600,7 @@ class OpenDSS:
 
                 #---------- chek for available loadschape and attach it to the load
                 if self.load_name in self.loadshapes_for_loads:
-                    dss_string = dss_string + " Yearly=Loadshape" + load_name
+                    dss_string = dss_string + " Yearly=" + load_name
 
                 #logger.info("dss_string: " + dss_string)
                 print(dss_string + "\n")
@@ -1096,7 +1097,35 @@ class OpenDSS:
         print(dss_string + "\n")
         dss.run_command(dss_string)
 
-    def setLoadshapes(self, loads, profiles, profess):
+
+
+    def setPVshapes(self, pvs, city, country, sim_days, profiles, profess):
+        self.profess=profess
+        #!logger.debug("Setting up the loads")
+        self.pvs=pvs
+        try:
+            for element in self.pvs:
+                pv_name = element["id"]
+                bus_name = element["bus1"]
+
+                #self.pv_name=pv_name
+                #self.bus_name=bus_name
+
+                # ----------get_a_profile---------------#
+                pv_profile_data = profiles.pv_profile(city, country, sim_days)
+                #print("load_profile_data: randint=" + str(randint_value))
+
+                #--------store_profile_for_line----------#
+                self.loadshapes_for_pv[pv_name] = {"bus":bus_name, "loadshape":pv_profile_data}
+                #loadshape_id=load_name + bus_name
+                loadshape_id=pv_name
+
+                self.setLoadshapePV(loadshape_id, sim_days * 24, 1, pv_profile_data)
+
+        except Exception as e:
+            logger.error(e)
+
+    def setLoadshapes(self, loads, sim_days, profiles, profess):
         self.profess=profess
         #!logger.debug("Setting up the loads")
         self.loads=loads
@@ -1110,7 +1139,7 @@ class OpenDSS:
 
                 # ----------get_a_profile---------------#
                 randint_value=random.randrange(0, 50)
-                load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=365)
+                load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
                 #print("load_profile_data: randint=" + str(randint_value))
 
                 #--------store_profile_for_line----------#
@@ -1118,7 +1147,7 @@ class OpenDSS:
                 #loadshape_id=load_name + bus_name
                 loadshape_id=load_name
 
-                self.setLoadshape(loadshape_id, 8760, 1, load_profile_data)
+                self.setLoadshape(loadshape_id, sim_days*24, 1, load_profile_data)
 
         except Exception as e:
             logger.error(e)
@@ -1175,6 +1204,32 @@ class OpenDSS:
         except Exception as e:
             logger.error(e)
 
+    def setLoadshapePV(self, id, npts, interval, mult):
+        try:
+            print("New Loadshape.Shape_" + id)
+            # New Loadshape.assumed_irrad npts=24 interval=1 mult=[0 0 0 0 0 0 .1 .2 .3  .5  .8  .9  1.0  1.0  .99  .9  .7  .4  .1 0  0  0  0  0]
+            dss_string = "New Loadshape.Shape_{id} npts={npts} interval={interval} mult=({mult})".format(
+                id=id,
+                npts=npts,
+                interval=interval,
+                mult=' '.join(['{:f}'.format(x) for x in mult])
+                #mult = ','.join(['{:f}'.format(x) for x in mult])
+            )
+            #!logger.info(dss_string)
+            #print(dss_string + "\n")
+            #dss_string="New Loadshape1 npts=24 interval=1 mult=(0 0 0 0 0 0 .1 .2 .3 .5 .8 .9 1.0 1.0 .99 .9 .7 .4 .1 0 0 0 0 0)"
+            #print(dss_string + "\n")
+            dss.run_command(dss_string)
+
+            dss_string = "? Loadshape.Shape_" + str(id) + ".mult"
+            #dss_string = "? Loadshape1.mult"
+            #print(dss_string + "\n")
+            result = dss.run_command(dss_string)
+            print("Loadshape.Shape_" + str(id) + ".mult count:" +  str(len((str(result)).split(" "))) + "\n")
+            #print("Loadshape." + str(id) + ".mmult:" +  str(result) + "\n")
+        except Exception as e:
+            logger.error(e)
+
     def setTshapes(self, tshapes):
         #!logger.info("Setting up the TShapes")
         #!logger.debug("Tshape in OpenDSS: "+str(tshapes))
@@ -1222,6 +1277,7 @@ class OpenDSS:
                 bus1 = None
                 voltage = None
                 power = None
+                powerunit= None
                 effcurve = None
                 ptcurve = None
                 daily = None
@@ -1237,11 +1293,11 @@ class OpenDSS:
                         phases = value
                     elif key == "bus1":
                         bus1 = value
-                    elif key == "voltage":
+                    elif key == "kV":
                         voltage = value
                     elif key == "power":
                         power = value
-                    elif key == "max_power":
+                    elif key == "max_power_kw":
                         pmpp = value
                     elif key == "effcurve":
                         effcurve = value
@@ -1251,7 +1307,7 @@ class OpenDSS:
                         daily = value
                     elif key == "tdaily":
                         tdaily = value
-                    elif key == "pf":
+                    elif key == "powerfactor":
                         pf = value
                     elif key == "temperature":
                         temperature = value
@@ -1259,6 +1315,7 @@ class OpenDSS:
                         irrad = value
                     else:
                         pass
+
                 self.setPhotovoltaic(id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp)
                 #!dss.run_command('Solve')
                 #!logger.debug("Photovoltaics: " + str(dss.PVsystems.AllNames()))
@@ -1266,7 +1323,23 @@ class OpenDSS:
             logger.error(e)
 
     def setPhotovoltaic(self, id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp):
-        dss_string = "New PVSystem.{id} phases={phases} bus1={bus1} kV={voltage} kVA={power} effcurve={effcurve} P-TCurve={ptcurve} Daily={daily} TDaily={tdaily} PF={pf} temperature={temperature} irrad={irrad} Pmpp={pmpp}".format(
+        dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} PF={pf} model=1".format(
+            id=id,
+            phases=phases,
+            bus1=bus1,
+            voltage=voltage,
+            pmpp=pmpp,
+            pf=pf,
+            ptcurve=ptcurve,
+        )
+        # !logger.info(dss_string)
+        # ---------- chek for available loadschape and attach it to the load
+        if id in self.loadshapes_for_pv:
+            dss_string = dss_string + " Yearly=Shape_" + id
+
+        print(dss_string + "\n")
+        dss.run_command(dss_string)
+        """dss_string = "New PVSystem.{id} phases={phases} bus1={bus1} kV={voltage} kVA={power} effcurve={effcurve} P-TCurve={ptcurve} Daily={daily} TDaily={tdaily} PF={pf} temperature={temperature} irrad={irrad} Pmpp={pmpp}".format(
             id=id,
             phases=phases,
             bus1=bus1,
@@ -1283,7 +1356,7 @@ class OpenDSS:
         )
         #!logger.info(dss_string)
         print(dss_string + "\n")
-        dss.run_command(dss_string)
+        dss.run_command(dss_string)"""
 
     def setStorages(self, storage):
         #logger.info("Setting up the Storages")

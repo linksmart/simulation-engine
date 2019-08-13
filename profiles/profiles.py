@@ -138,7 +138,7 @@ class Profiles:
                 for i in range(no_of_years):
                     pv_list.extend(data)
                 pv_list.extend(data[0:days * 24])
-                logger.info("PV data = %s: ", pv_list)
+                #logger.info("PV data = %s: ", pv_list)
                 return pv_list
         except Exception as e:
             logger.error(str(e))
