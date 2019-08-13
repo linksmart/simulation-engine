@@ -108,6 +108,7 @@ def create_simulation(body):  # noqa: E501
         #factory.gridController.setNewCircuit(id)
 
 
+
         #----------PROFESS----------------#
         domain = factory.gridController.get_profess_url()+"/v1/"
         logger.debug("profess url: "+str(domain))
@@ -118,6 +119,9 @@ def create_simulation(body):  # noqa: E501
 
 
         profess.json_parser.set_topology(data)
+
+        # ToDo  change sim_days
+        sim_days = 365
 
         """
         dummyprofile = [3] * 24
@@ -200,7 +204,7 @@ def create_simulation(body):  # noqa: E501
                 load = values["loads"]
                 # logger.debug("Loads" + str(load))
                 print("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                factory.gridController.setLoadshapes(id, load, prof, profess)
+                factory.gridController.setLoadshapes(id, load, sim_days, prof, profess)
                 print("! >>>  ---------------and the Loads afterwards ------------------------- \n")
                 factory.gridController.setLoads(id, load)
 
@@ -288,7 +292,19 @@ def create_simulation(body):  # noqa: E501
                 #xycurves = radial["xycurves"]
                 #loadshapes = radial["loadshapes"]
                 #tshapes = radial["tshapes"]
-                factory.gridController.setPhotovoltaic(id, photovoltaics)
+
+                city= factory.gridController.get_city()
+                logger.debug("city "+str(city))
+                country = factory.gridController.get_country()
+                logger.debug("country "+str(country))
+                if not city == None and not country == None:
+                    print("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
+                    factory.gridController.setPVshapes(id, photovoltaics, city, country, sim_days, prof, profess)
+                    print("! >>>  ---------------and the PVs afterwards ------------------------- \n")
+                    factory.gridController.setPhotovoltaic(id, photovoltaics)
+                else:
+                    logger.error("Fatal error: city and country are missing")
+                print("! >>>  ---------------PVs finished ------------------------- \n")
 
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)

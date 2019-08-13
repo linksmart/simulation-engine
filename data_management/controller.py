@@ -20,9 +20,18 @@ class gridController:
         self.yCurrent = []
         self.losses = []
         self.voltage_bases = []
+        self.city = None
+        self.country = None
+        self.profess_url = "http://localhost:8080"
 
     def get_profess_url(self):
         return self.profess_url
+
+    def get_city(self):
+        return self.city
+
+    def get_country(self):
+        return self.country
 
     def setNewCircuit(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
@@ -33,6 +42,12 @@ class gridController:
         if object["url_storage_controller"]:
             self.profess_url = object["url_storage_controller"]
             logger.debug("profess url: "+str(self.profess_url))
+        if object["city"]:
+            self.city = object["city"]
+            logger.debug("city: "+str(self.city))
+        if object["country"]:
+            self.country = object["country"]
+            logger.debug("country: "+str(self.country))
         logger.debug("New circuit created")
 
     def enableCircuit(self, name):
@@ -104,21 +119,26 @@ class gridController:
 
     def setPhotovoltaic(self, id, photovoltaics):
         logger.debug("Charging the photovoltaics into the simulator")
-        #self.sim.setXYCurves(xycurves)
-        #self.sim.setLoadshapes(loadshapes)
-        #logger.debug("Tshape: "+str(tshapes))
-        #self.sim.setTshapes(tshapes)
+
         self.sim.setPhotovoltaics(photovoltaics)
         logger.debug("Photovoltaics charged")
+
+    def setPVshapes(self, id, pvs, city, country, sim_days, profiles, profess):
+        if not city == None and not country == None:
+            logger.debug("Charging the pvshapes into the simulator from profiles")
+            self.sim.setPVshapes(pvs, city, country, sim_days, profiles, profess)
+            logger.debug("loadshapes from profiles charged")
+        else:
+            logger.error("City and country are not present")
 
     def setLoadshapes_Off(self, id, loadshapes):
         logger.debug("Charging the loadshapes into the simulator")
         self.sim.setLoadshapes(loadshapes)
         logger.debug("loadshapes charged")
 
-    def setLoadshapes(self, id, loads, profiles, profess):
+    def setLoadshapes(self, id, loads, sim_days, profiles, profess):
         logger.debug("Charging the loadshapes into the simulator from profiles")
-        self.sim.setLoadshapes(loads, profiles, profess)
+        self.sim.setLoadshapes(loads, sim_days, profiles, profess)
         logger.debug("loadshapes from profiles charged")
 
     def setLoadshape(self, id, npts, interval, mult):

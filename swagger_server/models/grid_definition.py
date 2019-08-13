@@ -15,7 +15,7 @@ class GridDefinition(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, voltage_bases: List[float]=None, url_storage_controller: str='http://localhost:8080'):  # noqa: E501
+    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, voltage_bases: List[float]=None, url_storage_controller: str='http://localhost:8080', city: str=None, country: str=None):  # noqa: E501
         """GridDefinition - a model defined in Swagger
 
         :param id: The id of this GridDefinition.  # noqa: E501
@@ -38,6 +38,10 @@ class GridDefinition(Model):
         :type voltage_bases: List[float]
         :param url_storage_controller: The url_storage_controller of this GridDefinition.  # noqa: E501
         :type url_storage_controller: str
+        :param city: The city of this GridDefinition.  # noqa: E501
+        :type city: str
+        :param country: The country of this GridDefinition.  # noqa: E501
+        :type country: str
         """
         self.swagger_types = {
             'id': str,
@@ -49,7 +53,9 @@ class GridDefinition(Model):
             'mv_asc3': float,
             'mv_asc1': float,
             'voltage_bases': List[float],
-            'url_storage_controller': str
+            'url_storage_controller': str,
+            'city': str,
+            'country': str
         }
 
         self.attribute_map = {
@@ -62,7 +68,9 @@ class GridDefinition(Model):
             'mv_asc3': 'MVAsc3',
             'mv_asc1': 'MVAsc1',
             'voltage_bases': 'VoltageBases',
-            'url_storage_controller': 'url_storage_controller'
+            'url_storage_controller': 'url_storage_controller',
+            'city': 'city',
+            'country': 'country'
         }
 
         self._id = id
@@ -75,6 +83,8 @@ class GridDefinition(Model):
         self._mv_asc1 = mv_asc1
         self._voltage_bases = voltage_bases
         self._url_storage_controller = url_storage_controller
+        self._city = city
+        self._country = country
 
     @classmethod
     def from_dict(cls, dikt) -> 'GridDefinition':
@@ -310,3 +320,45 @@ class GridDefinition(Model):
         """
 
         self._url_storage_controller = url_storage_controller
+
+    @property
+    def city(self) -> str:
+        """Gets the city of this GridDefinition.
+
+
+        :return: The city of this GridDefinition.
+        :rtype: str
+        """
+        return self._city
+
+    @city.setter
+    def city(self, city: str):
+        """Sets the city of this GridDefinition.
+
+
+        :param city: The city of this GridDefinition.
+        :type city: str
+        """
+
+        self._city = city
+
+    @property
+    def country(self) -> str:
+        """Gets the country of this GridDefinition.
+
+
+        :return: The country of this GridDefinition.
+        :rtype: str
+        """
+        return self._country
+
+    @country.setter
+    def country(self, country: str):
+        """Sets the country of this GridDefinition.
+
+
+        :param country: The country of this GridDefinition.
+        :type country: str
+        """
+
+        self._country = country

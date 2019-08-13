@@ -189,6 +189,10 @@ definitions:
       url_storage_controller:
         type: "string"
         default: "http://localhost:8080"
+      city:
+        type: "string"
+      country:
+        type: "string"
   Radial:
     type: "object"
     properties:
@@ -530,9 +534,7 @@ definitions:
     required:
     - "bus1"
     - "id"
-    - "max_power"
     - "phases"
-    - "voltage"
     properties:
       id:
         type: "string"
@@ -542,7 +544,7 @@ definitions:
         type: "integer"
       power:
         type: "number"
-      max_power:
+      max_power_kW:
         type: "number"
       powerunit:
         type: "string"
@@ -550,7 +552,7 @@ definitions:
         type: "number"
       bus1:
         type: "string"
-      voltage:
+      kV:
         type: "number"
       effcurve:
         type: "string"
@@ -560,8 +562,6 @@ definitions:
         type: "string"
       tdaily:
         type: "string"
-      pf:
-        type: "number"
       temperature:
         type: "number"
       irrad:
