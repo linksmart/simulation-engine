@@ -113,13 +113,14 @@ class OpenDSS:
                        dss.run_command('Storage.Akku1.kWrated = 30') # kWrated should be replaced with the value from PROFESS )
                        #dss.run_command('Storage.Akku1.kW = -5')
                        dss.run_command('Storage.Akku1.State = charging')"""
-
+        logger.debug("power " + str(power))
         if power < 0:
             route_name = "Storage." + str(battery_name)
             dss_string = route_name + ".kWrated = " + str(abs(power))
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
             dss_string = route_name + ".State = Charging"
+            logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
         else:
             route_name="Storage."+str(battery_name)
@@ -133,7 +134,9 @@ class OpenDSS:
         self.set_active_element(battery_name)
         dss_string="? Storage."+str(battery_name)+".%stored"
         #dss.run_command('? Storage.Akku1.%stored')
-        dss.run_command(dss_string)
+        return dss.run_command(dss_string)
+
+
 
     def solveCircuitSolution(self):
         logger.info("Start solveCircuitSolution")

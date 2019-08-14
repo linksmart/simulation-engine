@@ -220,6 +220,7 @@ class gridController:
         currents = [[] for i in range(len(nodeNames))]
         losses = [[] for i in range(len(nodeNames))]
 
+        charging = True
 
         for i in range(numSteps):
             logger.info("#####################################################################")
@@ -239,6 +240,24 @@ class gridController:
                 #logger.debug("professPVs: " + str(professPVs))
                 dummyPrice = [3] * 24
                 dummyGESSCON = [3] * 24
+
+
+                SoC = float(self.sim.getSoCfromBattery("Akku1"))
+                logger.debug("SoC_value: " + str(SoC))
+                logger.debug("charging " + str(charging))
+                if charging is True:
+                    logger.debug("Entered to charging")
+                    if SoC >= 100:
+                        logger.debug("Setting charging to false")
+                        charging = False
+                    self.sim.setActivePowertoBatery("Akku1", -0.5)
+                else:
+                    logger.debug("Entered to discharging")
+                    if SoC <= 0:
+                        charging = True
+                    self.sim.setActivePowertoBatery("Akku1",0.5)
+
+
 
                 #profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
                 """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
