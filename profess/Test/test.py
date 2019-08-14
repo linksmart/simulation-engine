@@ -1,5 +1,5 @@
-from Profess import *
-from JSONparser import *
+from profess.Profess import *
+from profess.JSONparser import *
 import json
 
 #domain = "http://localhost:8080/v1/"
