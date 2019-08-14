@@ -497,9 +497,6 @@ definitions:
       soc:
         type: "number"
         description: "State of Charge in % of rated kWh (openDSS Name: %stored)"
-      dod:
-        type: "number"
-        description: "Minimum Depth of Discharge recommended in % of rated kWh (%reserve)"
       kv:
         type: "number"
         description: "Nominal rated (1.0 per unit) voltage, kV, for Storage element."
@@ -532,6 +529,8 @@ definitions:
       optimization_model:
         type: "string"
         description: "(A value required by PROFFES)"
+      global_control:
+        type: "boolean"
   Photovoltaic:
     type: "object"
     required:
