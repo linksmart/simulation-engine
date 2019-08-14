@@ -1,4 +1,4 @@
-from Http_commands import Http_commands
+from profess.Http_commands import Http_commands
 import re
 import copy
 from profess.JSONparser import *

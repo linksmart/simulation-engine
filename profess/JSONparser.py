@@ -47,7 +47,7 @@ class JsonParser:
 
     def get_node_element_list(self):
         node_element_list = []
-        for radial_number in ran(len(self.topology["radials"])):
+        for radial_number in range(len(self.topology["radials"])):
             if "storageUnits" in self.topology["radials"][radial_number].keys():
                 node_list = self.search(self.topology["radials"][radial_number]["storageUnits"], "bus1", "", True)
                 count = 0
