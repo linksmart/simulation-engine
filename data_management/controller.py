@@ -208,8 +208,8 @@ class gridController:
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        #numSteps=self.get_sim_days()
-        numSteps=3
+        numSteps=self.get_sim_days()
+        #numSteps=3
         logger.debug("Number of steps: "+str(numSteps))
         result=[]
 

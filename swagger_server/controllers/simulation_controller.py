@@ -122,7 +122,8 @@ def create_simulation(body):  # noqa: E501
 
 
         # ToDo  change sim_days
-        sim_days = 365
+        sim_days = factory.gridController.get_sim_days() #365
+        logger.debug("sim_days "+str(sim_days))
 
         """
         dummyprofile = [3] * 24
