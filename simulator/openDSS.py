@@ -28,9 +28,7 @@ class OpenDSS:
         self.loadshapes_for_pv = {}
         self.dummyGESSCON=[{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}, {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
         self.dummyPrice=[3] * 24
-        self.dummyPV = [{'633': {'633.1.2.3': [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]}}, {
-            '671': {'671.1.2.3': [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]}}, {
-                    '634': {'634.1.2.3': [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]}}]
+
 
     def setNewCircuit(self, name, common):
         self.common = common
@@ -94,39 +92,54 @@ class OpenDSS:
     def get_node_list(self):
         return dss.Circuit.AllNodeNames()
 
+    def set_active_element(self, element_name):
+        dss.Circuit.SetActiveElement(element_name)
+
+    def setActivePowertoBatery(self,battery_name, power):
+        self.set_active_element(battery_name)
+        """storageName = "Storage.Akku1"
+                dss.Circuit.SetActiveElement(storageName)
+
+                print("kWhstored vor Solution.Solve: " + str(dss.Properties.Value("kWhstored")))
+                print("kW vor Solution.Solve: " + str(dss.Properties.Value("kW")))
+                print("Storage.Akku1.State: " + str(dss.Properties.Value("State")))
+                print("Storage.Akku1.DispMode: " + str(dss.Properties.Value("DispMode")))
+                
+        if hours < 5:
+                       dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery (kWrated should be replaced with the value from PROFESS )
+                       #dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
+                       dss.run_command('Storage.Akku1.State = Discharging')
+                   else:
+                       dss.run_command('Storage.Akku1.kWrated = 30') # kWrated should be replaced with the value from PROFESS )
+                       #dss.run_command('Storage.Akku1.kW = -5')
+                       dss.run_command('Storage.Akku1.State = charging')"""
+
+        if power < 0:
+            route_name = "Storage." + str(battery_name)
+            dss_string = route_name + ".kWrated = " + str(abs(power))
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            dss_string = route_name + ".State = Charging"
+            dss.run_command(dss_string)
+        else:
+            route_name="Storage."+str(battery_name)
+            dss_string=route_name+".kWrated = "+str(power)
+            logger.debug("dss_string "+str(dss_string))
+            dss.run_command(dss_string)
+            dss_string = route_name+".State = Discharging"
+            dss.run_command(dss_string)
+
+    def getSoCfromBattery(self, battery_name):
+        self.set_active_element(battery_name)
+        dss_string="? Storage."+str(battery_name)+".%stored"
+        #dss.run_command('? Storage.Akku1.%stored')
+        dss.run_command(dss_string)
+
     def solveCircuitSolution(self):
         logger.info("Start solveCircuitSolution")
         #logger.info("Start solveCircuitSolution " + str(dss.Loads.AllNames()))
 
-        """storageName = "Storage.Akku1"
-        dss.Circuit.SetActiveElement(storageName)
-
-        print("kWhstored vor Solution.Solve: " + str(dss.Properties.Value("kWhstored")))
-        print("kW vor Solution.Solve: " + str(dss.Properties.Value("kW")))
-        print("Storage.Akku1.State: " + str(dss.Properties.Value("State")))
-        print("Storage.Akku1.DispMode: " + str(dss.Properties.Value("DispMode")))
-        """
-
-
         try:
-            #dss. dss.run_command("calcv ")
-            #dss.Circuit.SetActiveElement(storageName)
-            #dss.Properties.Name("kW")
-            #dss.Properties.Value(15)
-
-
-
-
-            """if hours < 5:
-                dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery (kWrated should be replaced with the value from PROFESS )
-                #dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
-                dss.run_command('Storage.Akku1.State = Discharging')
-            else:
-                dss.run_command('Storage.Akku1.kWrated = 30') # kWrated should be replaced with the value from PROFESS )
-                #dss.run_command('Storage.Akku1.kW = -5')
-                dss.run_command('Storage.Akku1.State = charging')"""
-
-
             dss.Solution.Solve()
 
         except:

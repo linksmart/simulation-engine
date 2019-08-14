@@ -240,7 +240,7 @@ class gridController:
                 dummyPrice = [3] * 24
                 dummyGESSCON = [3] * 24
 
-                profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
+                #profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
                 """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
                 self.profess.start_all()
                 print("--------------------start profess results----------------------------")
@@ -266,10 +266,10 @@ class gridController:
         #logger.debug("volt finish "+str(voltages))
 
         data ={}
-        row_data={}
+        raw_data={}
 
         for i in range(len(nodeNames)):
-            row_data[nodeNames[i]] = {"Voltage": voltages[i], "Current": currents[i], "Loss": losses[i]}
+            raw_data[nodeNames[i]] = {"Voltage": voltages[i], "Current": currents[i], "Loss": losses[i]}
             data[nodeNames[i]]={"Voltage": {"max":max(voltages[i]), "min":min(voltages[i])}, "Current":max(currents[i]), "Loss":max(losses[i])}
 
         data2={}
@@ -280,7 +280,7 @@ class gridController:
 
             data2[node]["Phase_" + phase] = value
 
-            logger.debug("data 2 "+str(data2))
+
         result=data2
         #logger.debug("result: "+str(result))
 
@@ -307,7 +307,8 @@ class gridController:
         #!TODO: Create filename with id so serve multiple simultaneous simulations#DONE
         #json_data = json.dumps(allBusMagPu)
         fname = (str(self.id))+"_result"
-        logger.debug("storing results in results folder")
+        fname_row = (str(self.id)) + "_result_row.json"
+        logger.debug("Storing results in data folder")
         os.chdir(r"./data")
         with open(fname, 'w', encoding='utf-8') as outfile: 
             #/usr/src/app/tests/results/
@@ -315,7 +316,12 @@ class gridController:
             #logger.debug("data "+str(allBusMagPu))
             json.dump(result, outfile, ensure_ascii=False, indent=2) # working
             #json.dump(json_data, outfile, ensure_ascii=False, indent=2)  # not working !!!
-        #logger.info(json_data)
+        logger.debug("Results succesfully stored")
+        logger.debug("Stroring raw data in data folder")
+        with open(fname_row, 'w', encoding='utf-8') as outfile:
+            json.dump(raw_data, outfile, ensure_ascii=False, indent=2) # working
+        logger.debug("Raw data successfully stored")
+
         os.chdir(r"../")
 
         return id
