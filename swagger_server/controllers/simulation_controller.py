@@ -120,8 +120,10 @@ def create_simulation(body):  # noqa: E501
 
         profess.json_parser.set_topology(data)
 
+
         # ToDo  change sim_days
-        sim_days = 365
+        sim_days = factory.gridController.get_sim_days() #365
+        logger.debug("sim_days "+str(sim_days))
 
         """
         dummyprofile = [3] * 24
@@ -309,7 +311,7 @@ def create_simulation(body):  # noqa: E501
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)
 
-        result = factory.gridController.run()
+        result = factory.gridController.run(profess)
         #factory.gridController.run()
         #return str(result) 
         return id 

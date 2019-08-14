@@ -80,7 +80,7 @@ class Profiles:
             logger.info("Price data = %s: ", price_list)
         return price_list
 
-    def pv_profile(self, city, country, days = 365):
+    def pv_profile(self, city, country, days = 365, max_power_kw=1):
         """
         Returns the pv profile for the given number of days
         Args:
@@ -139,7 +139,10 @@ class Profiles:
                     pv_list.extend(data)
                 pv_list.extend(data[0:days * 24])
                 #logger.info("PV data = %s: ", pv_list)
-                return pv_list
+                pv_list_2=[]
+                for element in pv_list:
+                    pv_list_2.append((element / 1000)*max_power_kw)
+                return pv_list_2
         except Exception as e:
             logger.error(str(e))
 
