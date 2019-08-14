@@ -1,6 +1,8 @@
 import logging
 import json
 import os
+import sys
+
 from simulator.openDSS import OpenDSS
 #from simulation_management import simulation_management as SM
 
@@ -164,7 +166,7 @@ class gridController:
         self.sim.setChargingPoints(self.object)
         logger.debug("Charging points charged")
 
-    def run(self, topology):#self, id, duration):
+    def run(self, profess):#self, id, duration):
         #self.id = id
         #self.duration = duration
 
@@ -197,11 +199,6 @@ class gridController:
       
         #self.sim.setVoltageBases(115, 4.16, 0.48)
         self.sim.setVoltageBases(self.voltage_bases)
-        logger.info("Solution mode: "+str(self.sim.getMode()))
-        logger.info("Solution step size: " + str(self.sim.getStepSize()))
-        logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
-        logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
-
         #self.sim.setMode("snap")
         self.sim.setMode("daily")
         self.sim.setStepSize("hours")
@@ -209,36 +206,41 @@ class gridController:
         logger.info("Solution mode 2: " + str(self.sim.getMode()))
         logger.info("Number simulations 2: " + str(self.sim.getNumberSimulations()))
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
-
-        #self.sim.setVoltageBases(115,4.16,0.48)
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        #self.sim.setVoltageBases()
         #numSteps=self.get_sim_days()
-        numSteps=1
+        numSteps=3
         logger.debug("Number of steps: "+str(numSteps))
-        #nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
+        result=[]
+
+        nodeNames = self.sim.get_node_list()
+
+        logger.debug("node_ names "+str(nodeNames))
+        voltages = [[] for i in range(len(nodeNames))]
+        currents = [[] for i in range(len(nodeNames))]
+        losses = [[] for i in range(len(nodeNames))]
+
+
         for i in range(numSteps):
             logger.info("#####################################################################")
             logger.info("loop  numSteps, i= " + str(i) )
             logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
             logger.info("#####################################################################")
 
-            logger.debug("---------storage control in the loop--------------------------------")
-            hours = self.sim.getStartingHour()
-            logger.debug("timestep "+str(hours))
-            professLoads = self.sim.getProfessLoadschapes(hours, 24)
-            print("professLoads: " + str(professLoads))
-            professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
-            print("professPVs: " + str(professPVs))
+            topology = profess.json_parser.get_topology()
 
             if "storageUnits" in topology["radials"][0].keys():
                 logger.debug("---------storage control in the loop--------------------------------")
                 hours = self.sim.getStartingHour()
+                logger.debug("timestep " + str(hours))
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
-                print("professLoads: " + str(professLoads))
+                #logger.debug("professLoads: " + str(professLoads))
                 professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
-                print("professPVs: " + str(professPVs))
+                #logger.debug("professPVs: " + str(professPVs))
+                dummyPrice = [3] * 24
+                dummyGESSCON = [3] * 24
+
+                profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
                 """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
                 self.profess.start_all()
                 print("--------------------start profess results----------------------------")
@@ -252,7 +254,36 @@ class gridController:
                 logger.debug("No Storage Units present")
 
 
-            nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
+            puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
+            logger.debug("Voltage "+str(puVoltages[0]))
+            for i in range(len(nodeNames)):
+                voltages[i].append(puVoltages[i])
+                currents[i].append(Currents[i])
+                losses[i].append(Losses[i])
+
+
+
+        #logger.debug("volt finish "+str(voltages))
+
+        data ={}
+        row_data={}
+
+        for i in range(len(nodeNames)):
+            row_data[nodeNames[i]] = {"Voltage": voltages[i], "Current": currents[i], "Loss": losses[i]}
+            data[nodeNames[i]]={"Voltage": {"max":max(voltages[i]), "min":min(voltages[i])}, "Current":max(currents[i]), "Loss":max(losses[i])}
+
+        data2={}
+        for key, value in data.items():
+            node, phase = key.split(".", 1)
+            if node not in data2.keys():
+                data2[node] = {}
+
+            data2[node]["Phase_" + phase] = value
+
+            logger.debug("data 2 "+str(data2))
+        result=data2
+        #logger.debug("result: "+str(result))
+
         """df = self.sim.utils.lines_to_dataframe()
         data = df[['Bus1', 'Bus2']].to_dict(orient="index")
         for name in data:
@@ -275,14 +306,14 @@ class gridController:
         #filename = str(id)+"_results.txt"
         #!TODO: Create filename with id so serve multiple simultaneous simulations#DONE
         #json_data = json.dumps(allBusMagPu)
-        fname = (str(self.id))+"_result.txt"
+        fname = (str(self.id))+"_result"
         logger.debug("storing results in results folder")
         os.chdir(r"./data")
         with open(fname, 'w', encoding='utf-8') as outfile: 
             #/usr/src/app/tests/results/
             #outfile.write(json_data) # working
             #logger.debug("data "+str(allBusMagPu))
-            json.dump(allBusMagPu, outfile, ensure_ascii=False, indent=2) # working
+            json.dump(result, outfile, ensure_ascii=False, indent=2) # working
             #json.dump(json_data, outfile, ensure_ascii=False, indent=2)  # not working !!!
         #logger.info(json_data)
         os.chdir(r"../")

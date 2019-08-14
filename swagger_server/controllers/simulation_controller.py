@@ -309,8 +309,8 @@ def create_simulation(body):  # noqa: E501
 
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)
-        topology=profess.json_parser.get_topology()
-        result = factory.gridController.run(topology)
+
+        result = factory.gridController.run(profess)
         #factory.gridController.run()
         #return str(result) 
         return id 
