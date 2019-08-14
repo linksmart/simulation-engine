@@ -158,7 +158,7 @@ def create_simulation(body):  # noqa: E501
         dummyGESSCON = [{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
                         {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
 
-        #profess.set_up_profess_for_existing_topology( dummyLoads, dummyPV, dummyPrice, dummyGESSCON)
+        #profess.set_up_profess( dummyLoads, dummyPV, dummyPrice, dummyGESSCON)
         #profess.start_all()
         print(profess.dataList)
         print(profess.wait_and_get_output())

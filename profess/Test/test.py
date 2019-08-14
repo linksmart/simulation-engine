@@ -29,7 +29,7 @@ for element in p1.json_parser.get_node_name_list():
 dummyPrice = copy.deepcopy(dummyprofile)
 element="671"
 dummyDict = {element: [{element + ".1.2.3": copy.deepcopy(dummyprofile)}]}
-dummyLoads[1]= dummyDict
+#dummyLoads[1]= dummyDict
 dummyGESSCON=[{'633':
 {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0]}},
@@ -42,10 +42,10 @@ dummyGESSCON=[{'633':
 
 #print(p1.json_parser.get_node_element_list())
 
-p1.set_up_profess(jsonIEEE, dummyLoads, dummyPV, dummyPrice, dummyGESSCON)
+p1.set_up_profess(jsonIEEE, pv_profiles=dummyPV)
 #print(p1.json_parser.get_node_element_list())
 
-p1.start_all()
+p1.start_all(optimization_model="MaximizePVNoLoad")
 #print(p1.dataList)
 print(p1.wait_and_get_output())
 

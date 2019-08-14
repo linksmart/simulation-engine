@@ -739,56 +739,13 @@
                     "c0": 0
                 }
             ],
-                        "storageUnits": [
-                {
-                  "id": "Akku1",
-                  "bus1": "633",
-                  "phases": 3,
-                  "connection": "wye",
-                  "soc": 100,
-                  "dod": 30,
-                  "kv": 4.16,
-                  "kw_rated": 75,
-                  "kwh_rated": 150,
-                  "kwh_stored": 150,
-                  "charge_efficiency": 95,
-                  "discharge_efficiency": 95,
-                  "powerfactor": 1,
-				  "optimization_model":"MaximizePVNoLoad"
-                },
-				{
-                  "id": "Akku2",
-                  "bus1": "671.1.2.3",
-                  "phases": 3,
-                  "connection": "wye",
-                  "soc": 100,
-                  "dod": 30,
-                  "kv": 4.16,
-                  "kw_rated": 75,
-                  "kwh_rated": 150,
-                  "kwh_stored": 150,
-                  "charge_efficiency": 95,
-                  "discharge_efficiency": 95,
-                  "powerfactor": 1,
-				  "optimization_model":"MaximizePVNoLoad"
-                },
-				{
-                  "id": "Akku3",
-                  "bus1": "634.1",
-                  "phases": 3,
-                  "connection": "wye",
-                  "soc": 100,
-                  "dod": 30,
-                  "kv": 4.16,
-                  "kw_rated": 75,
-                  "kwh_rated": 150,
-                  "kwh_stored": 150,
-                  "charge_efficiency": 95,
-                  "discharge_efficiency": 95,
-                  "powerfactor": 1,
-				  "optimization_model":"MaximizePVNoLoad"
-                }
-            ]
+					"photovoltaics":[{
+				"bus1": "671",
+				"id": "PV_1",
+				"max_power_kW":4,
+				"phases":3,
+				"kV":0.23
+			}]
         }
     ]
 }
