@@ -5,6 +5,7 @@ import logging, time
 import pickle
 import json
 import jsonpickle
+import data_management.redisDB
 
 
 from swagger_server.models.simulation import Simulation  # noqa: E501
@@ -158,6 +159,28 @@ def abort_simulation(id):  # noqa: E501
         message = "Error stoping the system"
     return message
 
+def get_simulation_status(id):  # noqa: E501
+    """Get the status of the simulation
+
+     # noqa: E501
+
+    :param id: ID of the simulation
+    :type id: str
+
+    :rtype: float
+    """
+    try:
+        logger.debug("#############Getting status#####################")
+        redis=RedisDB()
+        timestep=int(redis.get("timestep_"+str(id)))
+        logger.debug("timestep "+str(timestep))
+        sim_days=int(redis.get("sim_days_"+str(id)))
+        logger.debug("sim_days "+str(sim_days))
+        status = (timestep / (sim_days-1)) * 100.0
+    except Exception as e:
+        logger.error(e)
+        status="id not present"
+    return status
 
 def run_simulation(id, body):  # noqa: E501
     """Runs a simulation

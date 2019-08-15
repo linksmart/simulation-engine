@@ -4,6 +4,7 @@ import os
 import sys
 
 from simulator.openDSS import OpenDSS
+from data_management.redisDB import RedisDB
 #from simulation_management import simulation_management as SM
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
@@ -26,6 +27,7 @@ class gridController:
         self.country = None
         self.profess_url = "http://localhost:8080"
         self.sim_days = 0
+        self.redis = RedisDB()
 
     def get_profess_url(self):
         return self.profess_url
@@ -209,6 +211,7 @@ class gridController:
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
         numSteps=self.get_sim_days()
+        self.redis.set("sim_days_"+str(self.id),numSteps)
         #numSteps=3
         logger.debug("Number of steps: "+str(numSteps))
         result=[]
@@ -228,7 +231,9 @@ class gridController:
             logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
             logger.info("#####################################################################")
 
+            self.redis.set("timestep_"+str(self.id), i)
             topology = profess.json_parser.get_topology()
+
 
             if "storageUnits" in topology["radials"][0].keys():
                 logger.debug("---------storage control in the loop--------------------------------")
@@ -240,7 +245,10 @@ class gridController:
                 #logger.debug("professPVs: " + str(professPVs))
                 dummyPrice = [3] * 24
                 dummyGESSCON = [3] * 24
-
+                logger.debug("######################Setting profess##################################")
+                #profess.set_up_profess(topology, professLoads, professPVs)
+                #profess.start_all()
+                logger.debug("######################Ending profess##################################")
 
                 SoC = float(self.sim.getSoCfromBattery("Akku1"))
                 logger.debug("SoC_value: " + str(SoC))
