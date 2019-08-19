@@ -11,8 +11,9 @@ logger = logging.getLogger(__file__)
 
 class ThreadFactory:
 
-    def __init__(self, id):
-        self.gridController=gridController(id)
+    def __init__(self, id, grid):
+        self.gridController=gridController(id, grid)
+
 
     def setParameters(self, id, duration):
         self.id = id
@@ -35,8 +36,8 @@ class ThreadFactory:
         logger.debug("This is the gridController in Threadfactory: "+str(self.gridController))
         try:
             self.gridController.duration=self.duration
-            listNames, listValues = self.gridController.run()
-            return (listNames,listValues)
+            result = self.gridController.run()
+            return "Simulation started succesfully "
 
         except Exception as e:
             logger.error(e)

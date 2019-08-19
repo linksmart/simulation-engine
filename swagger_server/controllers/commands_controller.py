@@ -68,7 +68,7 @@ class CommandController:
     def run(self, id, json_object):
         logger.debug("Run in command controller started")
         self.id = id
-        self.duration = json_object.duration
+        self.duration = json_object["duration"]
         logger.debug("Duration: "+str(self.duration))
         #gridController = gControl()
         #self.factory= jsonpickle.decode(self.redisDB.get("factory: "+id))
@@ -82,10 +82,11 @@ class CommandController:
             self.redisDB.set("run:" + self.id, "running")
             logger.debug("Status: "+str(self.redisDB.get("run:" + self.id)))
             logger.debug("Thread: " + str(self.get(self.id)))
-            listNames, listValues = self.get(self.id).startController(self.duration)
-            self.redisDB.set("run:" + self.id, "stop")
-            return buildAnswer(listNames, listValues, json_object.threshold_high, json_object.threshold_medium,
-                               json_object.threshold_low)
+            message = self.get(self.id).startController(self.duration)
+            return message
+            #self.redisDB.set("run:" + self.id, "stop")
+            #return buildAnswer(listNames, listValues, json_object.threshold_high, json_object.threshold_medium,
+            #                  json_object.threshold_low)
 
         except Exception as e:
             logger.error(e)
@@ -194,8 +195,11 @@ def run_simulation(id, body):  # noqa: E501
     """
     logger.info("Running Simulation ...")
     if connexion.request.is_json:
-        logger.info("Start command for simulation ID:" + id)
-        body = Simulation.from_dict(connexion.request.get_json())  # noqa: E501
+        logger.info("Start command for simulation ID: " + id)
+        data = connexion.request.get_json()
+        logger.debug("data "+str(data)+" type "+str(type(data)) )
+
+        #body = Simulation.from_dict(connexion.request.get_json())  # noqa: E501
         #gjglkjkzzz123
         try:
             redis_db = RedisDB()
@@ -205,20 +209,20 @@ def run_simulation(id, body):  # noqa: E501
                 if variable.isRunningExists():
                     logger.debug("isRunning exists")
                     if not variable.get_isRunning(id):
-                        response = variable.run(id, body)
+                        response = variable.run(id, data)
                         return response
                     else:
                         logger.debug("System already running")
                         return "System already running"
                 else:
                     logger.debug("isRunning not created yet")
-                    response = variable.run(id, body)
+                    response = variable.run(id, data)
                     return response
             else:
                 response = "Id not existing"
 
         except Exception as e:
-            logger.debug("e")
+            logger.error(e)
             response = e
 
     return response

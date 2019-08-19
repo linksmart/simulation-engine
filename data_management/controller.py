@@ -3,8 +3,11 @@ import json
 import os
 import sys
 
+from profess.JSONparser import *
+from profess.Profess import *
 from simulator.openDSS import OpenDSS
 from data_management.redisDB import RedisDB
+from profiles.profiles import *
 #from simulation_management import simulation_management as SM
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
@@ -13,7 +16,7 @@ logger = logging.getLogger(__file__)
 
 class gridController:
 
-    def __init__(self, id):
+    def __init__(self, id, grid):
         super(gridController, self).__init__()
         logger.info("Initializing simulation controller")
         self.sim = OpenDSS("S4G Simulation")
@@ -25,9 +28,27 @@ class gridController:
         self.voltage_bases = []
         self.city = None
         self.country = None
-        self.profess_url = "http://localhost:8080"
+
         self.sim_days = 0
         self.redis = RedisDB()
+        self.topology = grid
+
+        # ----------PROFESS----------------#
+        common = grid.common.to_dict()
+        if common["url_storage_controller"]:
+            self.profess_url = common["url_storage_controller"]
+        else:
+            self.profess_url = "http://localhost:8080"
+
+        self.domain = self.get_profess_url() + "/v1/"
+        logger.debug("profess url: " + str(self.domain))
+        self.profess = Profess(self.domain)
+        self.profiles = Profiles()
+        # profess.json_parser.set_topology(data)
+
+        self.profess.json_parser.set_topology(common)
+        logger.debug("Simulation controller initiated")
+
 
     def get_profess_url(self):
         return self.profess_url
@@ -43,6 +64,7 @@ class gridController:
 
     def setNewCircuit(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
+
         self.sim.setNewCircuit(name, object)
         if object["voltage_bases"]:
             self.voltage_bases = object["voltage_bases"]
@@ -134,10 +156,10 @@ class gridController:
         self.sim.setPhotovoltaics(photovoltaics)
         logger.debug("Photovoltaics charged")
 
-    def setPVshapes(self, id, pvs, city, country, sim_days, profiles, profess):
+    def setPVshapes(self, id, pvs, city, country, sim_days):
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
-            self.sim.setPVshapes(pvs, city, country, sim_days, profiles, profess)
+            self.sim.setPVshapes(pvs, city, country, sim_days, self.profiles, self.profess)
             logger.debug("loadshapes from profiles charged")
         else:
             logger.error("City and country are not present")
@@ -147,9 +169,9 @@ class gridController:
         self.sim.setLoadshapes(loadshapes)
         logger.debug("loadshapes charged")
 
-    def setLoadshapes(self, id, loads, sim_days, profiles, profess):
+    def setLoadshapes(self, id, loads, sim_days):
         logger.debug("Charging the loadshapes into the simulator from profiles")
-        self.sim.setLoadshapes(loads, sim_days, profiles, profess)
+        self.sim.setLoadshapes(loads, sim_days, self.profiles, self.profess)
         logger.debug("loadshapes from profiles charged")
 
     def setLoadshape(self, id, npts, interval, mult):
@@ -168,7 +190,18 @@ class gridController:
         self.sim.setChargingPoints(self.object)
         logger.debug("Charging points charged")
 
-    def run(self, profess):#self, id, duration):
+    def is_Storage_in_Topology(self):
+        # topology = profess.json_parser.get_topology()
+        #logger.debug("type topology " + str(type(self.topology)))
+        radial = self.topology.radials
+        flag_to_return = False
+        for values in radial:
+            values = values.to_dict()
+            if "storageUnits" in values.keys():
+                flag_to_return = True
+        return flag_to_return
+
+    def run(self):#self, id, duration):
         #self.id = id
         #self.duration = duration
 
@@ -232,10 +265,10 @@ class gridController:
             logger.info("#####################################################################")
 
             self.redis.set("timestep_"+str(self.id), i)
-            topology = profess.json_parser.get_topology()
 
 
-            if "storageUnits" in topology["radials"][0].keys():
+            if self.is_Storage_in_Topology():
+            #if "storageUnits" in self.topology["radials"][0].keys():
                 logger.debug("---------storage control in the loop--------------------------------")
                 hours = self.sim.getStartingHour()
                 logger.debug("timestep " + str(hours))

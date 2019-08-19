@@ -40,12 +40,12 @@ def create_simulation(body):  # noqa: E501
         grid = Grid.from_dict(data)  # noqa: E501. SOMETHING IS NOT GOOD HERE
         #logger.debug("Grid: " + str(grid)) #shows the raw data sent from client
         id = utils.create_and_get_ID()
-        """redis_db = RedisDB()
+        redis_db = RedisDB()
         redis_db.set(id, "created")
         flag = redis_db.get(id)
-        logger.debug("id stored in RedisDB: "+str(flag))"""
+        logger.debug("id stored in RedisDB: "+str(flag))
         #----------Profiles---------------#
-        prof = Profiles()
+
         #pv_profile_data = prof.pv_profile("bolzano", "italy", days=365)
         #print("pv_profile_data: " + str(pv_profile_data))
         #load_profile_data = prof.load_profile(type="residential", randint=5, days=365)
@@ -84,13 +84,8 @@ def create_simulation(body):  # noqa: E501
         #logger.info("This is the Grid: " + str(grid))#Only for debugging purpose
 
         radial = grid.radials
-
-        #logger.info("These are the radials: "+ str(radial))
-
-        #linecodes = [c().linecodes[0]]
-        #logger.debug("Linecode: "+str(linecodes))
-        #gridController= gControl()
-        factory= ThreadFactory(id)
+        common = grid.common.to_dict()
+        factory= ThreadFactory(id, grid)
         variable.set(id, factory)
         logger.debug("Factory instance stored")
         #redis_db.set("factory: "+id, json.dumps(factory))
@@ -99,26 +94,10 @@ def create_simulation(body):  # noqa: E501
         #logger.debug("Factory stored in redisDB: "+str(object))
         #test= json.loads(object[id])
         #logger.debug("Factory stored in redisDB: " + str(test)+" type: "+str(type(test)))
-        common = grid.common.to_dict()
+
         factory.gridController.setNewCircuit(id, common)
 
-        #factory.gridController.setLoadshape(id, npts, interval, mult)
-        #factory.gridController.setLoadshape("test_loadschape", 8760, 1, load_profile_data)
 
-        #factory.gridController.setNewCircuit(id)
-
-
-
-        #----------PROFESS----------------#
-        domain = factory.gridController.get_profess_url()+"/v1/"
-        logger.debug("profess url: "+str(domain))
-        profess = Profess(domain)
-        #profess.json_parser.set_topology(data)
-
-
-
-
-        profess.json_parser.set_topology(data)
 
 
         # ToDo  change sim_days
@@ -206,7 +185,7 @@ def create_simulation(body):  # noqa: E501
                 load = values["loads"]
                 # logger.debug("Loads" + str(load))
                 print("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                factory.gridController.setLoadshapes(id, load, sim_days, prof, profess)
+                factory.gridController.setLoadshapes(id, load, sim_days)
                 print("! >>>  ---------------and the Loads afterwards ------------------------- \n")
                 factory.gridController.setLoads(id, load)
 
@@ -301,7 +280,7 @@ def create_simulation(body):  # noqa: E501
                 logger.debug("country "+str(country))
                 if not city == None and not country == None:
                     print("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    factory.gridController.setPVshapes(id, photovoltaics, city, country, sim_days, prof, profess)
+                    factory.gridController.setPVshapes(id, photovoltaics, city, country, sim_days)
                     print("! >>>  ---------------and the PVs afterwards ------------------------- \n")
                     factory.gridController.setPhotovoltaic(id, photovoltaics)
                 else:
@@ -311,9 +290,9 @@ def create_simulation(body):  # noqa: E501
         ######Disables circuits untilo the run simulation is started
         #factory.gridController.disableCircuit(id)
 
-        result = factory.gridController.run(profess)
-        #factory.gridController.run()
-        #return str(result) 
+
+        #result = factory.gridController.run(profess)
+
         return id 
         #return " Result: " + str(result)
     else:
