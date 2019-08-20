@@ -15,7 +15,7 @@ class Linecode(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, nphases: float=None, rmatrix: List[List[float]]=None, xmatrix: List[List[float]]=None, cmatrix: List[List[float]]=None, units: str=None, base_frequency: float=None):  # noqa: E501
+    def __init__(self, id: str=None, nphases: float=None, rmatrix: List[List[float]]=None, xmatrix: List[List[float]]=None, cmatrix: List[List[float]]=None, units: str=None):  # noqa: E501
         """Linecode - a model defined in Swagger
 
         :param id: The id of this Linecode.  # noqa: E501
@@ -30,8 +30,6 @@ class Linecode(Model):
         :type cmatrix: List[List[float]]
         :param units: The units of this Linecode.  # noqa: E501
         :type units: str
-        :param base_frequency: The base_frequency of this Linecode.  # noqa: E501
-        :type base_frequency: float
         """
         self.swagger_types = {
             'id': str,
@@ -39,8 +37,7 @@ class Linecode(Model):
             'rmatrix': List[List[float]],
             'xmatrix': List[List[float]],
             'cmatrix': List[List[float]],
-            'units': str,
-            'base_frequency': float
+            'units': str
         }
 
         self.attribute_map = {
@@ -49,8 +46,7 @@ class Linecode(Model):
             'rmatrix': 'rmatrix',
             'xmatrix': 'xmatrix',
             'cmatrix': 'cmatrix',
-            'units': 'units',
-            'base_frequency': 'base_frequency'
+            'units': 'units'
         }
 
         self._id = id
@@ -59,7 +55,6 @@ class Linecode(Model):
         self._xmatrix = xmatrix
         self._cmatrix = cmatrix
         self._units = units
-        self._base_frequency = base_frequency
 
     @classmethod
     def from_dict(cls, dikt) -> 'Linecode':
@@ -90,6 +85,8 @@ class Linecode(Model):
         :param id: The id of this Linecode.
         :type id: str
         """
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
 
@@ -111,6 +108,8 @@ class Linecode(Model):
         :param nphases: The nphases of this Linecode.
         :type nphases: float
         """
+        if nphases is None:
+            raise ValueError("Invalid value for `nphases`, must not be `None`")  # noqa: E501
 
         self._nphases = nphases
 
@@ -132,6 +131,8 @@ class Linecode(Model):
         :param rmatrix: The rmatrix of this Linecode.
         :type rmatrix: List[List[float]]
         """
+        if rmatrix is None:
+            raise ValueError("Invalid value for `rmatrix`, must not be `None`")  # noqa: E501
 
         self._rmatrix = rmatrix
 
@@ -153,6 +154,8 @@ class Linecode(Model):
         :param xmatrix: The xmatrix of this Linecode.
         :type xmatrix: List[List[float]]
         """
+        if xmatrix is None:
+            raise ValueError("Invalid value for `xmatrix`, must not be `None`")  # noqa: E501
 
         self._xmatrix = xmatrix
 
@@ -195,26 +198,7 @@ class Linecode(Model):
         :param units: The units of this Linecode.
         :type units: str
         """
+        if units is None:
+            raise ValueError("Invalid value for `units`, must not be `None`")  # noqa: E501
 
         self._units = units
-
-    @property
-    def base_frequency(self) -> float:
-        """Gets the base_frequency of this Linecode.
-
-
-        :return: The base_frequency of this Linecode.
-        :rtype: float
-        """
-        return self._base_frequency
-
-    @base_frequency.setter
-    def base_frequency(self, base_frequency: float):
-        """Sets the base_frequency of this Linecode.
-
-
-        :param base_frequency: The base_frequency of this Linecode.
-        :type base_frequency: float
-        """
-
-        self._base_frequency = base_frequency

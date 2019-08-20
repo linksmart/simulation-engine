@@ -15,7 +15,7 @@ class Transformer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, phases: int=None, windings: int=None, buses: List[str]=None, kvas: List[float]=None, kvs: List[float]=None, conns: List[str]=None, xsc_array: List[float]=None, percent_rs: List[float]=None, percent_load_loss: float=None, bank: str=None, taps: List[float]=None, base_frequency: float=None):  # noqa: E501
+    def __init__(self, id: str=None, phases: int=None, windings: int=None, buses: List[str]=None, kvas: List[float]=None, kvs: List[float]=None, conns: List[str]=None, xsc_array: List[float]=None, percent_rs: List[float]=None, percent_load_loss: float=None, bank: str=None, taps: List[float]=None):  # noqa: E501
         """Transformer - a model defined in Swagger
 
         :param id: The id of this Transformer.  # noqa: E501
@@ -42,8 +42,6 @@ class Transformer(Model):
         :type bank: str
         :param taps: The taps of this Transformer.  # noqa: E501
         :type taps: List[float]
-        :param base_frequency: The base_frequency of this Transformer.  # noqa: E501
-        :type base_frequency: float
         """
         self.swagger_types = {
             'id': str,
@@ -57,8 +55,7 @@ class Transformer(Model):
             'percent_rs': List[float],
             'percent_load_loss': float,
             'bank': str,
-            'taps': List[float],
-            'base_frequency': float
+            'taps': List[float]
         }
 
         self.attribute_map = {
@@ -73,8 +70,7 @@ class Transformer(Model):
             'percent_rs': 'percent_rs',
             'percent_load_loss': 'percent_load_loss',
             'bank': 'bank',
-            'taps': 'taps',
-            'base_frequency': 'base_frequency'
+            'taps': 'taps'
         }
 
         self._id = id
@@ -89,7 +85,6 @@ class Transformer(Model):
         self._percent_load_loss = percent_load_loss
         self._bank = bank
         self._taps = taps
-        self._base_frequency = base_frequency
 
     @classmethod
     def from_dict(cls, dikt) -> 'Transformer':
@@ -145,6 +140,8 @@ class Transformer(Model):
         :param phases: The phases of this Transformer.
         :type phases: int
         """
+        if phases is None:
+            raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501
 
         self._phases = phases
 
@@ -168,6 +165,8 @@ class Transformer(Model):
         :param windings: The windings of this Transformer.
         :type windings: int
         """
+        if windings is None:
+            raise ValueError("Invalid value for `windings`, must not be `None`")  # noqa: E501
 
         self._windings = windings
 
@@ -191,6 +190,8 @@ class Transformer(Model):
         :param buses: The buses of this Transformer.
         :type buses: List[str]
         """
+        if buses is None:
+            raise ValueError("Invalid value for `buses`, must not be `None`")  # noqa: E501
 
         self._buses = buses
 
@@ -214,6 +215,8 @@ class Transformer(Model):
         :param kvas: The kvas of this Transformer.
         :type kvas: List[float]
         """
+        if kvas is None:
+            raise ValueError("Invalid value for `kvas`, must not be `None`")  # noqa: E501
 
         self._kvas = kvas
 
@@ -237,6 +240,8 @@ class Transformer(Model):
         :param kvs: The kvs of this Transformer.
         :type kvs: List[float]
         """
+        if kvs is None:
+            raise ValueError("Invalid value for `kvs`, must not be `None`")  # noqa: E501
 
         self._kvs = kvs
 
@@ -377,24 +382,3 @@ class Transformer(Model):
         """
 
         self._taps = taps
-
-    @property
-    def base_frequency(self) -> float:
-        """Gets the base_frequency of this Transformer.
-
-
-        :return: The base_frequency of this Transformer.
-        :rtype: float
-        """
-        return self._base_frequency
-
-    @base_frequency.setter
-    def base_frequency(self, base_frequency: float):
-        """Sets the base_frequency of this Transformer.
-
-
-        :param base_frequency: The base_frequency of this Transformer.
-        :type base_frequency: float
-        """
-
-        self._base_frequency = base_frequency

@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
-from swagger_server.models.duration import Duration  # noqa: F401,E501
 from swagger_server import util
 
 
@@ -16,13 +15,11 @@ class Simulation(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, grid_id: str=None, duration: Duration=None, threshold_low: float=None, threshold_medium: float=None, threshold_high: float=None):  # noqa: E501
+    def __init__(self, sim_duration_in_days: int=None, threshold_low: float=None, threshold_medium: float=None, threshold_high: float=None):  # noqa: E501
         """Simulation - a model defined in Swagger
 
-        :param grid_id: The grid_id of this Simulation.  # noqa: E501
-        :type grid_id: str
-        :param duration: The duration of this Simulation.  # noqa: E501
-        :type duration: Duration
+        :param sim_duration_in_days: The sim_duration_in_days of this Simulation.  # noqa: E501
+        :type sim_duration_in_days: int
         :param threshold_low: The threshold_low of this Simulation.  # noqa: E501
         :type threshold_low: float
         :param threshold_medium: The threshold_medium of this Simulation.  # noqa: E501
@@ -31,23 +28,20 @@ class Simulation(Model):
         :type threshold_high: float
         """
         self.swagger_types = {
-            'grid_id': str,
-            'duration': Duration,
+            'sim_duration_in_days': int,
             'threshold_low': float,
             'threshold_medium': float,
             'threshold_high': float
         }
 
         self.attribute_map = {
-            'grid_id': 'gridId',
-            'duration': 'duration',
+            'sim_duration_in_days': 'sim_duration_in_days',
             'threshold_low': 'thresholdLow',
             'threshold_medium': 'thresholdMedium',
             'threshold_high': 'thresholdHigh'
         }
 
-        self._grid_id = grid_id
-        self._duration = duration
+        self._sim_duration_in_days = sim_duration_in_days
         self._threshold_low = threshold_low
         self._threshold_medium = threshold_medium
         self._threshold_high = threshold_high
@@ -64,46 +58,27 @@ class Simulation(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def grid_id(self) -> str:
-        """Gets the grid_id of this Simulation.
+    def sim_duration_in_days(self) -> int:
+        """Gets the sim_duration_in_days of this Simulation.
 
 
-        :return: The grid_id of this Simulation.
-        :rtype: str
+        :return: The sim_duration_in_days of this Simulation.
+        :rtype: int
         """
-        return self._grid_id
+        return self._sim_duration_in_days
 
-    @grid_id.setter
-    def grid_id(self, grid_id: str):
-        """Sets the grid_id of this Simulation.
+    @sim_duration_in_days.setter
+    def sim_duration_in_days(self, sim_duration_in_days: int):
+        """Sets the sim_duration_in_days of this Simulation.
 
 
-        :param grid_id: The grid_id of this Simulation.
-        :type grid_id: str
+        :param sim_duration_in_days: The sim_duration_in_days of this Simulation.
+        :type sim_duration_in_days: int
         """
+        if sim_duration_in_days is None:
+            raise ValueError("Invalid value for `sim_duration_in_days`, must not be `None`")  # noqa: E501
 
-        self._grid_id = grid_id
-
-    @property
-    def duration(self) -> Duration:
-        """Gets the duration of this Simulation.
-
-
-        :return: The duration of this Simulation.
-        :rtype: Duration
-        """
-        return self._duration
-
-    @duration.setter
-    def duration(self, duration: Duration):
-        """Sets the duration of this Simulation.
-
-
-        :param duration: The duration of this Simulation.
-        :type duration: Duration
-        """
-
-        self._duration = duration
+        self._sim_duration_in_days = sim_duration_in_days
 
     @property
     def threshold_low(self) -> float:
@@ -125,6 +100,10 @@ class Simulation(Model):
         :param threshold_low: The threshold_low of this Simulation.
         :type threshold_low: float
         """
+        if threshold_low is not None and threshold_low > 100:  # noqa: E501
+            raise ValueError("Invalid value for `threshold_low`, must be a value less than or equal to `100`")  # noqa: E501
+        if threshold_low is not None and threshold_low < 0:  # noqa: E501
+            raise ValueError("Invalid value for `threshold_low`, must be a value greater than or equal to `0`")  # noqa: E501
 
         self._threshold_low = threshold_low
 
@@ -148,6 +127,10 @@ class Simulation(Model):
         :param threshold_medium: The threshold_medium of this Simulation.
         :type threshold_medium: float
         """
+        if threshold_medium is not None and threshold_medium > 100:  # noqa: E501
+            raise ValueError("Invalid value for `threshold_medium`, must be a value less than or equal to `100`")  # noqa: E501
+        if threshold_medium is not None and threshold_medium < 0:  # noqa: E501
+            raise ValueError("Invalid value for `threshold_medium`, must be a value greater than or equal to `0`")  # noqa: E501
 
         self._threshold_medium = threshold_medium
 
@@ -171,5 +154,9 @@ class Simulation(Model):
         :param threshold_high: The threshold_high of this Simulation.
         :type threshold_high: float
         """
+        if threshold_high is not None and threshold_high > 100:  # noqa: E501
+            raise ValueError("Invalid value for `threshold_high`, must be a value less than or equal to `100`")  # noqa: E501
+        if threshold_high is not None and threshold_high < 0:  # noqa: E501
+            raise ValueError("Invalid value for `threshold_high`, must be a value greater than or equal to `0`")  # noqa: E501
 
         self._threshold_high = threshold_high

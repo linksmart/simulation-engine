@@ -11,48 +11,50 @@ logger = logging.getLogger(__file__)
 
 class ThreadFactory:
 
-    def __init__(self, id, grid):
-        self.gridController=gridController(id, grid)
+    def __init__(self, id, duration):
+        self.id = id
+        self.duration = duration
+
+        #self.initializeGridController()
+
 
 
     def setParameters(self, id, duration):
         self.id = id
-        self.duration = duration
+
 
     def getId(self):
         return self.id
 
-    def getDuration(self):
-        return self.duration
 
-    def startController(self, duration):
-        self.duration=duration
+
+    def startController(self):
+
         logger.info("Creating se controller thread")
-        logger.info("Duration: " + str(self.duration))
 
-
+        self.gridController = gridController(self.id, self.duration)
         # Initializing constructor of the optimization controller thread
         #self.gridController=self.redisDB.get("controller: " + id)
-        logger.debug("This is the gridController in Threadfactory: "+str(self.gridController))
+        #logger.debug("This is the gridController in Threadfactory: "+str(self.gridController))
         try:
-            self.gridController.duration=self.duration
-            result = self.gridController.run()
-            return "Simulation started succesfully "
+
+            logger.debug("Starting thread")
+            self.gridController.start()
+
+            return 0
 
         except Exception as e:
             logger.error(e)
-            return e
+            return 1
         #logger.debug("Simulation Engine object started")
 
-    def stopController(self):
+    def stopControllerThread(self):
         try:
             # stop as per ID
-            for name, obj in self.prediction_threads.items():
-                obj.Stop()
-            for name, obj in self.non_prediction_threads.items():
-                obj.Stop()
             logger.info("Stopping controller thread")
-            self.gridController.Stop(self.id)
+            self.gridController.Stop()
+
+            #self.gridController.Stop(self.id)
             logger.info("controller thread stopped")
             return " controller thread stopped"
         except Exception as e:
@@ -60,4 +62,4 @@ class ThreadFactory:
             return e
 
     def is_running(self):
-        return not self.gridController.finish_status
+        return not self.gridController.get_finish_status()

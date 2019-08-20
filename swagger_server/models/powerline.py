@@ -150,6 +150,8 @@ class Powerline(Model):
         :param bus1: The bus1 of this Powerline.
         :type bus1: str
         """
+        if bus1 is None:
+            raise ValueError("Invalid value for `bus1`, must not be `None`")  # noqa: E501
 
         self._bus1 = bus1
 
@@ -171,6 +173,8 @@ class Powerline(Model):
         :param phases: The phases of this Powerline.
         :type phases: int
         """
+        if phases is None:
+            raise ValueError("Invalid value for `phases`, must not be `None`")  # noqa: E501
 
         self._phases = phases
 
@@ -194,6 +198,8 @@ class Powerline(Model):
         :param bus2: The bus2 of this Powerline.
         :type bus2: str
         """
+        if bus2 is None:
+            raise ValueError("Invalid value for `bus2`, must not be `None`")  # noqa: E501
 
         self._bus2 = bus2
 
@@ -215,6 +221,8 @@ class Powerline(Model):
         :param length: The length of this Powerline.
         :type length: float
         """
+        if length is None:
+            raise ValueError("Invalid value for `length`, must not be `None`")  # noqa: E501
 
         self._length = length
 

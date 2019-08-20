@@ -237,6 +237,8 @@ class Load(Model):
         :param k_w: The k_w of this Load.
         :type k_w: float
         """
+        if k_w is None:
+            raise ValueError("Invalid value for `k_w`, must not be `None`")  # noqa: E501
 
         self._k_w = k_w
 

@@ -97,7 +97,7 @@ paths:
           description: "successful operation"
       x-swagger-router-controller: "swagger_server.controllers.simulation_controller"
   /commands/run/{id}:
-    post:
+    put:
       tags:
       - "commands"
       summary: "Runs a simulation"
@@ -112,7 +112,7 @@ paths:
       - in: "body"
         name: "body"
         description: "Configuration data for the simulation e.g. duration"
-        required: true
+        required: false
         schema:
           $ref: "#/definitions/Simulation"
       responses:
@@ -128,7 +128,7 @@ paths:
           description: "Simulation ID not found"
       x-swagger-router-controller: "swagger_server.controllers.commands_controller"
   /commands/abort/{id}:
-    post:
+    put:
       tags:
       - "commands"
       summary: "Aborts a running simulation"
@@ -183,11 +183,11 @@ definitions:
     - "MVAsc3"
     - "VoltageBases"
     - "angle"
+    - "base_frequency"
     - "base_kV"
     - "bus1"
     - "id"
     - "phases"
-    - "simulation_days"
     properties:
       id:
         type: "string"
@@ -205,6 +205,9 @@ definitions:
         type: "number"
       MVAsc1:
         type: "number"
+      base_frequency:
+        type: "integer"
+        format: "int32"
       VoltageBases:
         type: "array"
         items:
@@ -216,8 +219,6 @@ definitions:
         type: "string"
       country:
         type: "string"
-      simulation_days:
-        type: "integer"
   Radial:
     type: "object"
     properties:
@@ -347,6 +348,7 @@ definitions:
     - "bus"
     - "id"
     - "kV"
+    - "kW"
     - "phases"
     properties:
       id:
@@ -379,7 +381,11 @@ definitions:
   Powerline:
     type: "object"
     required:
+    - "bus1"
+    - "bus2"
     - "id"
+    - "length"
+    - "phases"
     properties:
       id:
         type: "string"
@@ -414,6 +420,12 @@ definitions:
         default: false
   Linecode:
     type: "object"
+    required:
+    - "id"
+    - "nphases"
+    - "rmatrix"
+    - "units"
+    - "xmatrix"
     properties:
       id:
         type: "string"
@@ -439,8 +451,6 @@ definitions:
             type: "number"
       units:
         type: "string"
-      base_frequency:
-        type: "number"
   XYCurve:
     type: "object"
     required:
@@ -558,6 +568,8 @@ definitions:
     required:
     - "bus1"
     - "id"
+    - "kV"
+    - "max_power_kW"
     - "phases"
     properties:
       id:
@@ -641,7 +653,12 @@ definitions:
   Transformer:
     type: "object"
     required:
+    - "buses"
     - "id"
+    - "kvas"
+    - "kvs"
+    - "phases"
+    - "windings"
     properties:
       id:
         type: "string"
@@ -697,8 +714,6 @@ definitions:
           type: "number"
           minimum: 0
           maximum: 1
-      base_frequency:
-        type: "number"
   Duration:
     type: "object"
     properties:
@@ -717,32 +732,35 @@ definitions:
       day: 0
   Simulation:
     type: "object"
+    required:
+    - "sim_duration_in_days"
     properties:
-      gridId:
-        type: "string"
-      duration:
-        $ref: "#/definitions/Duration"
+      sim_duration_in_days:
+        type: "integer"
+        format: "int32"
       thresholdLow:
         type: "number"
         format: "float"
         description: "Lower threshold in % for voltage error"
+        minimum: 0
+        maximum: 100
       thresholdMedium:
         type: "number"
         format: "float"
         description: "Medium threshold in % for voltage error"
+        minimum: 0
+        maximum: 100
       thresholdHigh:
         type: "number"
         format: "float"
         description: "Maximum threshold in % for voltage error"
+        minimum: 0
+        maximum: 100
     example:
-      duration:
-        month: 6
-        year: 1
-        day: 0
-      thresholdMedium: 5.63737699999999986033571985899470746517181396484375
-      gridId: "gridId"
-      thresholdHigh: 2.30213599999999996015276337857358157634735107421875
-      thresholdLow: 5.96213399999999982270537657313980162143707275390625
+      sim_duration_in_days: 365
+      thresholdMedium: 5
+      thresholdHigh: 10
+      thresholdLow: 2.5
   SimulationResult:
     type: "object"
     properties:

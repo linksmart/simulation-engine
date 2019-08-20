@@ -15,7 +15,7 @@ class GridDefinition(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, voltage_bases: List[float]=None, url_storage_controller: str='http://localhost:8080', city: str=None, country: str=None, simulation_days: int=None):  # noqa: E501
+    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, base_frequency: int=None, voltage_bases: List[float]=None, url_storage_controller: str='http://localhost:8080', city: str=None, country: str=None):  # noqa: E501
         """GridDefinition - a model defined in Swagger
 
         :param id: The id of this GridDefinition.  # noqa: E501
@@ -34,6 +34,8 @@ class GridDefinition(Model):
         :type mv_asc3: float
         :param mv_asc1: The mv_asc1 of this GridDefinition.  # noqa: E501
         :type mv_asc1: float
+        :param base_frequency: The base_frequency of this GridDefinition.  # noqa: E501
+        :type base_frequency: int
         :param voltage_bases: The voltage_bases of this GridDefinition.  # noqa: E501
         :type voltage_bases: List[float]
         :param url_storage_controller: The url_storage_controller of this GridDefinition.  # noqa: E501
@@ -42,8 +44,6 @@ class GridDefinition(Model):
         :type city: str
         :param country: The country of this GridDefinition.  # noqa: E501
         :type country: str
-        :param simulation_days: The simulation_days of this GridDefinition.  # noqa: E501
-        :type simulation_days: int
         """
         self.swagger_types = {
             'id': str,
@@ -54,11 +54,11 @@ class GridDefinition(Model):
             'angle': int,
             'mv_asc3': float,
             'mv_asc1': float,
+            'base_frequency': int,
             'voltage_bases': List[float],
             'url_storage_controller': str,
             'city': str,
-            'country': str,
-            'simulation_days': int
+            'country': str
         }
 
         self.attribute_map = {
@@ -70,11 +70,11 @@ class GridDefinition(Model):
             'angle': 'angle',
             'mv_asc3': 'MVAsc3',
             'mv_asc1': 'MVAsc1',
+            'base_frequency': 'base_frequency',
             'voltage_bases': 'VoltageBases',
             'url_storage_controller': 'url_storage_controller',
             'city': 'city',
-            'country': 'country',
-            'simulation_days': 'simulation_days'
+            'country': 'country'
         }
 
         self._id = id
@@ -85,11 +85,11 @@ class GridDefinition(Model):
         self._angle = angle
         self._mv_asc3 = mv_asc3
         self._mv_asc1 = mv_asc1
+        self._base_frequency = base_frequency
         self._voltage_bases = voltage_bases
         self._url_storage_controller = url_storage_controller
         self._city = city
         self._country = country
-        self._simulation_days = simulation_days
 
     @classmethod
     def from_dict(cls, dikt) -> 'GridDefinition':
@@ -283,6 +283,29 @@ class GridDefinition(Model):
         self._mv_asc1 = mv_asc1
 
     @property
+    def base_frequency(self) -> int:
+        """Gets the base_frequency of this GridDefinition.
+
+
+        :return: The base_frequency of this GridDefinition.
+        :rtype: int
+        """
+        return self._base_frequency
+
+    @base_frequency.setter
+    def base_frequency(self, base_frequency: int):
+        """Sets the base_frequency of this GridDefinition.
+
+
+        :param base_frequency: The base_frequency of this GridDefinition.
+        :type base_frequency: int
+        """
+        if base_frequency is None:
+            raise ValueError("Invalid value for `base_frequency`, must not be `None`")  # noqa: E501
+
+        self._base_frequency = base_frequency
+
+    @property
     def voltage_bases(self) -> List[float]:
         """Gets the voltage_bases of this GridDefinition.
 
@@ -367,26 +390,3 @@ class GridDefinition(Model):
         """
 
         self._country = country
-
-    @property
-    def simulation_days(self) -> int:
-        """Gets the simulation_days of this GridDefinition.
-
-
-        :return: The simulation_days of this GridDefinition.
-        :rtype: int
-        """
-        return self._simulation_days
-
-    @simulation_days.setter
-    def simulation_days(self, simulation_days: int):
-        """Sets the simulation_days of this GridDefinition.
-
-
-        :param simulation_days: The simulation_days of this GridDefinition.
-        :type simulation_days: int
-        """
-        if simulation_days is None:
-            raise ValueError("Invalid value for `simulation_days`, must not be `None`")  # noqa: E501
-
-        self._simulation_days = simulation_days

@@ -223,6 +223,8 @@ class Photovoltaic(Model):
         :param max_power_k_w: The max_power_k_w of this Photovoltaic.
         :type max_power_k_w: float
         """
+        if max_power_k_w is None:
+            raise ValueError("Invalid value for `max_power_k_w`, must not be `None`")  # noqa: E501
 
         self._max_power_k_w = max_power_k_w
 
@@ -309,6 +311,8 @@ class Photovoltaic(Model):
         :param k_v: The k_v of this Photovoltaic.
         :type k_v: float
         """
+        if k_v is None:
+            raise ValueError("Invalid value for `k_v`, must not be `None`")  # noqa: E501
 
         self._k_v = k_v
 
