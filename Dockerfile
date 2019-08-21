@@ -24,7 +24,7 @@ COPY data_management /usr/src/app/data_management
 COPY profess /usr/src/app/profess
 COPY profiles /usr/src/app/profiles
 
-
+CMD ["python3", "-u", "main.py"]
 
 
 
