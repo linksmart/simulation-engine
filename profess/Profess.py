@@ -139,6 +139,7 @@ class Profess:
             print(json_response)
         else:
             print("No Input to stop declared")
+
     def update_config_json(self, profess_id, config_json):
         response = self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
         json_response = response.json()

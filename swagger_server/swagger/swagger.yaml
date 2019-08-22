@@ -529,6 +529,10 @@ definitions:
       soc:
         type: "number"
         description: "State of Charge in % of rated kWh (openDSS Name: %stored)"
+      min_soc:
+        type: "number"
+      max_soc:
+        type: "number"
       kv:
         type: "number"
         description: "Nominal rated (1.0 per unit) voltage, kV, for Storage element."

@@ -26,6 +26,7 @@ services:
       - ./optimization-framework/utils/gurobi/license:/usr/src/app/share/gurobi811/license/gurobi.lic
     command: ["python3", "-u", "ofw.py"]
     #restart: "always"
+
   se:
     build:
       context: ""
