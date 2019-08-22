@@ -251,7 +251,7 @@ class gridController(threading.Thread):
 
         for i in range(len(nodeNames)):
             raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
-            data_voltages[nodeNames[i]]={"Voltage": {"max":max(voltages[i]), "min":min(voltages[i])}}
+            data_voltages[nodeNames[i]]={"max":max(voltages[i]), "min":min(voltages[i])}
 
 
         #logger.debug("len element names "+str(len(elementNames)))
@@ -279,19 +279,28 @@ class gridController(threading.Thread):
             data_currents[nodeNamesCurrents[i]]=max(element)
 
         raw_data={"Voltages":raw_data_voltages, "Currents":raw_data_currents,"Losses":raw_data_losses}
-        data={"Voltages":data_voltages, "Currents":data_currents,"Losses":data_losses}
-        #logger.debug("data "+str(data))
 
-        data2={}
-        for key, value in data.items():
-            for key2, value2 in value.items():
-                node, phase = key2.split(".", 1)
-                if node not in data2.keys():
-                    data2[node] = {}
-                data2[node]["Phase_" + phase] = value2
+        data2 = {}
+        for key, value in data_voltages.items():
+            node, phase = key.split(".", 1)
+            if node not in data2.keys():
+                data2[node] = {}
+            data2[node]["Phase_" + phase] = value
+
+        data3 = {}
+        for key, value in data_currents.items():
+            node, phase = key.split(".", 1)
+            if node not in data3.keys():
+                data3[node] = {}
+            data3[node]["Phase_" + phase] = value
+
+        data={"Voltages":data2, "Currents":data3,"Losses":data_losses}
+        logger.debug("data "+str(data))
 
 
-        result=data2
+
+
+        result=data
         """logger.debug("result YNodeOrder: "+str(self.sim.get_YNodeOrder()))
         logger.debug("Length YNodeOrder: " + str(len(self.sim.get_YNodeOrder())))
         logger.debug("#####################################################################")
