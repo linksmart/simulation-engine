@@ -77,7 +77,13 @@ class gridController(threading.Thread):
         for element in soc_list:
             for key, value in element.items():
                 element_id=value["id"]
+                logger.debug("ESS_id "+str(element_id))
+                logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
                 SoC = float(self.sim.getSoCfromBattery(element_id))
+                logger.debug("SoC "+str(SoC))
+                logger.debug("Capacity "+str(self.sim.getCapacityfromBattery(element_id)))
+                logger.debug("Min_SoC " + str(self.sim.getMinSoCfromBattery(element_id)))
+                logger.debug("bus " + str(self.sim.getBusfromBattery(element_id)))
                 value["SoC"]=SoC
                 new_soc_list.append(element)
         logger.debug("new soc list: " + str(new_soc_list))
@@ -115,7 +121,10 @@ class gridController(threading.Thread):
         common = self.topology["common"]
         radial = self.topology["radials"]
 
-        self.input.setNewCircuit(self.id, common)
+        self.input.setParameters(self.id, common)
+        self.sim.set_base_frequency(self.input.get_base_frequency())
+        self.sim.setNewCircuit(self.id, common)
+
 
 
 
@@ -128,7 +137,7 @@ class gridController(threading.Thread):
             self.profess_url = "http://localhost:8080"
         self.domain = self.get_profess_url() + "/v1/"
         logger.debug("profess url: " + str(self.domain))
-        self.profess = Profess(self.domain)#, self.topology)
+        self.profess = Profess(self.domain, self.topology)
         self.profess.json_parser.set_topology(common)
 
         # ----------PROFILES----------------#
@@ -142,7 +151,6 @@ class gridController(threading.Thread):
 
 
         logger.debug("Simulation of grid " + self.id + " started")
-        logger.debug("These are the parameters")
         logger.debug("GridID: "+str(self.id))
 
         #self.sim.runNode13()
@@ -153,7 +161,7 @@ class gridController(threading.Thread):
         ##################################################################################PROBLEM################################
       
         #self.sim.setVoltageBases(115, 4.16, 0.48)
-        self.sim.setVoltageBases(self.voltage_bases)
+        self.sim.setVoltageBases(self.input.get_voltage_bases())
         #self.sim.setMode("snap")
         self.sim.setMode("daily")
         self.sim.setStepSize("hours")
@@ -163,7 +171,7 @@ class gridController(threading.Thread):
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        numSteps=self.sim_days
+        numSteps=2#self.sim_days
         self.redisDB.set("sim_days_"+str(self.id),numSteps)
         #numSteps=3
         logger.debug("Number of steps: "+str(numSteps))
@@ -216,12 +224,14 @@ class gridController(threading.Thread):
                 #soc_list=self.get_soc_list(self.topology)
                 soc_list_new = self.set_new_soc(soc_list)
                 logger.debug("######################Ending profess##################################")
-                sys.exit(0)
+
                 self.profess.update(soc_list_new, professLoads, professPVs)
                 self.profess.start_all()
+                profess_output=self.profess.wait_and_get_output()
+                logger.debug("output profess "+str(profess_output))
                 logger.debug("######################Ending profess##################################")
 
-                SoC = float(self.sim.getSoCfromBattery("Akku1"))
+                """SoC = float(self.sim.getSoCfromBattery("Akku1"))
                 logger.debug("SoC_value: " + str(SoC))
                 logger.debug("charging " + str(charging))
                 if charging is True:
@@ -234,7 +244,7 @@ class gridController(threading.Thread):
                     logger.debug("Entered to discharging")
                     if SoC <= 20:
                         charging = True
-                    self.sim.setActivePowertoBatery("Akku1",0.5)
+                    self.sim.setActivePowertoBatery("Akku1",0.5)"""
 
 
 

@@ -26,6 +26,8 @@ class InputController:
         self.profiles = None
         self.profess = None
         self.sim_days = sim_days
+        self.voltage_bases = None
+        self.base_frequency = 60
         logger.debug("id " + str(id))
         self.utils = Utils()
 
@@ -40,13 +42,14 @@ class InputController:
         else:
             return data
 
-    def setNewCircuit(self, name, object):
+    def setParameters(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
-
-        self.sim.setNewCircuit(name, object)
         if object["VoltageBases"]:
             self.voltage_bases = object["VoltageBases"]
             logger.debug(" voltage bases " + str(self.voltage_bases))
+        if object["base_frequency"]:
+            self.base_frequency = object["base_frequency"]
+            logger.debug("base_frequency " + str(self.base_frequency))
         if object["url_storage_controller"]:
             self.profess_url = object["url_storage_controller"]
             logger.debug("profess url: "+str(self.profess_url))
@@ -56,8 +59,13 @@ class InputController:
         if object["country"]:
             self.country = object["country"]
             logger.debug("country: "+str(self.country))
-
         logger.debug("New circuit created")
+
+    def get_voltage_bases(self):
+        return self.voltage_bases
+
+    def get_base_frequency(self):
+        return self.base_frequency
 
     def enableCircuit(self, name):
         logger.debug("Enabling the circuit with the name: "+str(name))

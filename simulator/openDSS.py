@@ -21,7 +21,7 @@ class OpenDSS:
         logger.debug("grid_name in opendss "+str(grid_name))
         self.grid_name= str(grid_name)
         dss.run_command("Clear")
-        dss.run_command("Set DefaultBaseFrequency=60")
+
         #dss.Basic.NewCircuit("Test 1")
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
         #dat to erase 
@@ -31,6 +31,10 @@ class OpenDSS:
         self.dummyPrice=[3] * 24
         logger.debug("Initialization of Opendss finished")
 
+    def set_base_frequency(self, frequency):
+        dss_string="Set DefaultBaseFrequency="+str(frequency)
+        logger.debug(dss_string)
+        dss.run_command(dss_string)
 
     def setNewCircuit(self, name, common):
         self.common = common
@@ -132,9 +136,33 @@ class OpenDSS:
             dss_string = route_name+".State = Discharging"
             dss.run_command(dss_string)
 
+    def setSoCofBattery(self, battery_name, value):
+        self.set_active_element(battery_name)
+        dss_string="Storage."+str(battery_name)+".%stored="+str(value)
+        #dss.run_command('? Storage.Akku1.%stored')
+        return dss.run_command(dss_string)
+
     def getSoCfromBattery(self, battery_name):
         self.set_active_element(battery_name)
         dss_string="? Storage."+str(battery_name)+".%stored"
+        #dss.run_command('? Storage.Akku1.%stored')
+        return dss.run_command(dss_string)
+
+    def getCapacityfromBattery(self, battery_name):
+        self.set_active_element(battery_name)
+        dss_string="? Storage."+str(battery_name)+".kWhrated"
+        #dss.run_command('? Storage.Akku1.%stored')
+        return dss.run_command(dss_string)
+
+    def getMinSoCfromBattery(self, battery_name):
+        self.set_active_element(battery_name)
+        dss_string="? Storage."+str(battery_name)+".%reserve"
+        #dss.run_command('? Storage.Akku1.%stored')
+        return dss.run_command(dss_string)
+
+    def getBusfromBattery(self, battery_name):
+        self.set_active_element(battery_name)
+        dss_string="? Storage."+str(battery_name)+".bus1"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
@@ -1147,7 +1175,7 @@ class OpenDSS:
                 soc = 100 #! defalt value
                 dod = 20 #! defalt value
                 kv = None
-                kw_rated = 0
+                kw_rated = None
                 kwh_rated = 50 #! defalt value
                 kwh_stored = 50 #! defalt value
                 charge_efficiency = 90 #! defalt value
@@ -1219,7 +1247,8 @@ class OpenDSS:
         #addition = " kW=10 state=IDLING DischargeTrigger=0.8 ChargeTrigger=0.3 "
         addition = " DispMode=FOLLOW "
         dss_string = dss_string + addition
-        dss_string = dss_string + "kWrated="+str(kw_rated)
+        if not kw_rated == None:
+            dss_string = dss_string + "kWrated="+str(kw_rated)
         #logger.info(dss_string)
         logger.debug(dss_string + "\n")
         dss.run_command(dss_string)
