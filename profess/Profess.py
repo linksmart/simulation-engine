@@ -6,11 +6,12 @@ import simplejson as json
 import time
 
 class Profess:
-    def __init__(self, domain):
+    def __init__(self, domain,topology):
         self.domain = domain #domainName is different on operating systems
         self.dataList=[]
         self.httpClass = Http_commands()
         self.json_parser=JsonParser()
+        self.json_parser.set_topology(topology)
         self.dummy_data = {"load": {
          "meta": {
              "pf_Load": 1
@@ -119,6 +120,7 @@ class Profess:
             print("No Input to start declared")
 
     def start_all(self, optimization_model=None):
+
         for node_name in self.json_parser.get_node_name_list():
             element_node=(next(item for item in self.json_parser.get_node_element_list() if node_name in item))
             if "storageUnits" in element_node[node_name]:
@@ -272,8 +274,7 @@ class Profess:
         self.dataList = node_list
 
 
-    def set_up_profess(self, topology=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
-        self.json_parser.set_topology(topology)
+    def set_up_profess(self, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
         self.set_data_list()
         self.post_all_dummy_data()
         #TODO
