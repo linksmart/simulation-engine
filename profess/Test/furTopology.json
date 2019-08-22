@@ -47,10 +47,6 @@
                   "max_charging_power": 1.5,
                   "max_discharging_power":1.5,
                   "storage_capacity": 3,
-				  "charge_efficiency": 95,
-				  "kw_rated": 75,
-				  "kwh_rated": 150,
-                  "discharge_efficiency": 95,
                   "optimization_model": "Maximize Self-Consumption",
                   "powerfactor":1
                   

@@ -1,6 +1,10 @@
 import json
 from collections.abc import Iterable
 import re
+import logging
+
+logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__file__)
 
 class JsonParser:
     # @search returns a list with results
@@ -52,65 +56,66 @@ class JsonParser:
         node_element_list = []
         storage_node_list = []
         pv_node_list = []
-        for radial_number in range(len(self.topology["radials"])):
-            if "storageUnits" in self.topology["radials"][radial_number].keys():
-                storage_node_list = self.search(self.topology["radials"][radial_number]["storageUnits"], "bus1", "", True)
-                node_list=storage_node_list
+        if "radials" in self.topology:
+            for radial_number in range(len(self.topology["radials"])):
+                if "storageUnits" in self.topology["radials"][radial_number].keys():
+                    storage_node_list = self.search(self.topology["radials"][radial_number]["storageUnits"], "bus1", "", True)
+                    node_list=storage_node_list
 
-            if "photovoltaics" in self.topology["radials"][radial_number].keys():
-                pv_node_list = self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True)
-                node_list=pv_node_list
-            if storage_node_list is not None and pv_node_list is not None:
-                node_list= storage_node_list + list(set(pv_node_list) - set(storage_node_list))
-                #print(storage_node_list)
-            count = 0
-            for element in node_list:
+                if "photovoltaics" in self.topology["radials"][radial_number].keys():
+                    pv_node_list = self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True)
+                    node_list=pv_node_list
+                if storage_node_list is not None and pv_node_list is not None:
+                    node_list= storage_node_list + list(set(pv_node_list) - set(storage_node_list))
+                    #print(storage_node_list)
+                count = 0
+                for element in node_list:
 
-                pattern = re.compile("[^.]*")  # regex to find professID
-                m = pattern.findall(element)
-                element = m[0]
-                if "storageUnits" in self.topology["radials"][radial_number]:
-                    for essunits in self.topology["radials"][radial_number]["storageUnits"]:
-                        m = pattern.findall(essunits["bus1"])
-                        essunitsBus= m[0]
-                        if essunitsBus == element:
-                            ess_index = self.topology["radials"][radial_number]["storageUnits"].index(essunits)
-                            node_element_list.append(
-                                {element: [
-                                    {"storageUnits": self.topology["radials"][radial_number]["storageUnits"][
-                                        ess_index]}]})
-                if "photovoltaics" in self.topology["radials"][radial_number]:
-                    for pvunits in self.topology["radials"][radial_number]["photovoltaics"]:
-                        #print(pvunits)
-                        #print(element)
-                        m = pattern.findall(pvunits["bus1"])
-                        pvunitsBus= m[0]
-                        if pvunitsBus == element:
-                            alreadyInList=False
-                            for item in node_element_list:
-                                if element in item.keys():
-                                    alreadyInList = True
-                                    listIndex= node_element_list.index(item)
-                            pv_index = self.topology["radials"][radial_number]["photovoltaics"].index(pvunits)
-                            if alreadyInList:
-                                node_element_list[listIndex][element].append({"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
-                                            pv_index]})
-                            else:
+                    pattern = re.compile("[^.]*")  # regex to find professID
+                    m = pattern.findall(element)
+                    element = m[0]
+                    if "storageUnits" in self.topology["radials"][radial_number]:
+                        for essunits in self.topology["radials"][radial_number]["storageUnits"]:
+                            m = pattern.findall(essunits["bus1"])
+                            essunitsBus= m[0]
+                            if essunitsBus == element:
+                                ess_index = self.topology["radials"][radial_number]["storageUnits"].index(essunits)
                                 node_element_list.append(
                                     {element: [
-                                        {"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
-                                            pv_index]}]})
+                                        {"storageUnits": self.topology["radials"][radial_number]["storageUnits"][
+                                            ess_index]}]})
+                    if "photovoltaics" in self.topology["radials"][radial_number]:
+                        for pvunits in self.topology["radials"][radial_number]["photovoltaics"]:
+                            #print(pvunits)
+                            #print(element)
+                            m = pattern.findall(pvunits["bus1"])
+                            pvunitsBus= m[0]
+                            if pvunitsBus == element:
+                                alreadyInList=False
+                                for item in node_element_list:
+                                    if element in item.keys():
+                                        alreadyInList = True
+                                        listIndex= node_element_list.index(item)
+                                pv_index = self.topology["radials"][radial_number]["photovoltaics"].index(pvunits)
+                                if alreadyInList:
+                                    node_element_list[listIndex][element].append({"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
+                                                pv_index]})
+                                else:
+                                    node_element_list.append(
+                                        {element: [
+                                            {"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
+                                                pv_index]}]})
 
-                #print(element)
-                #print(count)
-                #print(node_element_list)
-                if node_element_list[count][element] is not None:
-                    node_element_list[count][element].append(
-                        {"loads": (
-                            self.search(self.topology["radials"][radial_number]["loads"], "bus", element, False))})
+                    #print(element)
+                    #print(count)
+                    #print(node_element_list)
+                    if node_element_list[count][element] is not None:
+                        node_element_list[count][element].append(
+                            {"loads": (
+                                self.search(self.topology["radials"][radial_number]["loads"], "bus", element, False))})
 
-                    # TODO PV etc
-                count = count + 1
+                        # TODO PV etc
+                    count = count + 1
 
         return node_element_list
 

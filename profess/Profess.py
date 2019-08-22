@@ -4,7 +4,10 @@ import copy
 from profess.JSONparser import *
 import simplejson as json
 import time
+import logging
 
+logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__file__)
 class Profess:
     def __init__(self, domain,topology):
         self.domain = domain #domainName is different on operating systems
@@ -44,6 +47,9 @@ class Profess:
         self.list_with_desired_output_words=["P_ESS_Output", "P_PV_Output", "P_PV_R_Output", "P_PV_S_Output"
             , "P_PV_T_Output", "Q_PV_Output", "Q_PV_R_Output", "Q_PV_S_Output", "Q_PV_T_Output"]
         print("profess class created")
+        logger.debug("Profess instance created")
+        logger.debug("Profess was started with "+ domain)
+        logger.debug(topology)
 
     def post_model(self, model_name, model_data):
         response=self.httpClass.put(self.domain + "models/" + model_name, model_data)
@@ -83,17 +89,21 @@ class Profess:
         return response.json()
 
     def wait_and_get_output(self):
+
         data=self.dataList
         something_running = True
         while something_running:
             time.sleep(.3)
             opt_status = self.get_optimization_status()
+            logging.debug("optimization status: ")
+            logging.debug(opt_status)
             something_running = False
             for element in data:
                 for value in element:
                     for key in element[value]:
                         if opt_status["status"][key]["status"] == "running":
                             something_running = True
+                            logging.debug("An optimization is still running "+key)
         output_list=[]
         for element in data:
             for value in element:
@@ -116,6 +126,7 @@ class Profess:
                                                                                              "optimization_type": optType})
             json_response = response.json()
             print(json_response +  ": " +profess_id)
+            logging.debug(json_response +  ": " +profess_id)
         else:
             print("No Input to start declared")
 
@@ -127,7 +138,6 @@ class Profess:
                 if "storageUnits" in item:
                     storage = next(item for item in element_node[node_name] if item["storageUnits"])
                     model = storage["storageUnits"]["optimization_model"]
-                    print(model)
             if optimization_model is None:
                 optimization_model=model
             self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name))
@@ -137,6 +147,7 @@ class Profess:
             response = self.httpClass.put(self.domain + "optimization/stop/" + profess_id)
             json_response = response.json()
             print(json_response)
+            logging.debug(json_response+" :"+profess_id)
         else:
             print("No Input to stop declared")
 
@@ -153,22 +164,32 @@ class Profess:
         json_data_of_node= self.dataList[node_number][node_name][profess_id]
         for radial_number in range(len(self.json_parser.topology["radials"])):
             if "storageUnits" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number].keys():
-                json_data_of_node["ESS"]["SoC_Value"] = \
-                    self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]["soc"] / 100
-                json_data_of_node["ESS"]["meta"]["ESS_Charging_Eff"] = \
-                    self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                        "charge_efficiency"] / 100
-                json_data_of_node["ESS"]["meta"]["ESS_Discharging_Eff"] = \
-                    self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                        "discharge_efficiency"] / 100
-                json_data_of_node["ESS"]["meta"]["ESS_Max_Charge_Power"] = \
-                    self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                        "kw_rated"]
-                json_data_of_node["ESS"]["meta"]["ESS_Max_Discharge_Power"] = \
-                    self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                        "kw_rated"]
-                json_data_of_node["ESS"]["meta"]["ESS_Capacity"] = \
-                    self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]["kwh_rated"]
+                if "soc" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number][
+                    "storageUnits"]:
+                    json_data_of_node["ESS"]["SoC_Value"] = \
+                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]["soc"] / 100
+                if "charge_efficiency" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number][
+                    "storageUnits"]:
+                    json_data_of_node["ESS"]["meta"]["ESS_Charging_Eff"] = \
+                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
+                            "charge_efficiency"] / 100
+                if "discharge_efficiency" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number][
+                    "storageUnits"]:
+                    json_data_of_node["ESS"]["meta"]["ESS_Discharging_Eff"] = \
+                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
+                            "discharge_efficiency"] / 100
+                if "kw_rated" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number][
+                    "storageUnits"]:
+                    json_data_of_node["ESS"]["meta"]["ESS_Max_Charge_Power"] = \
+                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
+                            "kw_rated"]
+                if "kw_rated" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]:
+                    json_data_of_node["ESS"]["meta"]["ESS_Max_Discharge_Power"] = \
+                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
+                            "kw_rated"]
+                if "kwh_rated" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]:
+                    json_data_of_node["ESS"]["meta"]["ESS_Capacity"] = \
+                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]["kwh_rated"]
 
     def set_config_json(self, node_name, profess_id, config_json):
         node_number = self.json_parser.get_node_name_list().index(node_name)
@@ -256,6 +277,7 @@ class Profess:
 
         return nodeName
     def set_data_list(self):
+        logger.debug("data for nodes is set")
         node_list = self.json_parser.get_node_element_list()
         for element in range(len(node_list)):
             for nodeKey in (node_list[element]):
@@ -263,27 +285,14 @@ class Profess:
 
         self.dataList = node_list
 
-    def update(self, load_profiles=None, pv_profiles=None, price_profiles=None, soc_list=None, ess_con=None):
-        self.set_profiles(load_profiles=load_profiles,pv_profiles=pv_profiles,price_profiles=price_profiles,ess_con=ess_con)
-        elements = self.json_parser.get_node_element_list()
-        for nodeKey in elements:
-            for node_name in nodeKey:
-                index=elements.index(nodeKey)
-                profess_id=self.get_profess_id(node_name)
-                if soc_list is not None:
-                    for value in soc_list:
-                        if node_name in value:
-                            soc_index = soc_list.index(value)
-                            self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"] = (
-                                        soc_list[soc_index][node_name]["SoC"] / 100)
-                self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
 
     def set_up_profess(self,soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
+        logging.debug("set_up_profess started")
         self.set_data_list()
         self.post_all_dummy_data()
         #TODO
         if soc_list is not None:
-            if soc_list.type() is dict:
+            if type(soc_list) is dict:
                 self.json_parser.set_topology(soc_list)
         self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                           ,ess_con=ess_con)
@@ -294,7 +303,7 @@ class Profess:
             self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
         elements = self.json_parser.get_node_element_list()
         if soc_list is not None:
-            if soc_list.type() is list:
+            if type(soc_list) is list:
                 for nodeKey in elements:
                     for node_name in nodeKey:
                         index = elements.index(nodeKey)
