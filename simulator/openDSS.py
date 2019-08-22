@@ -138,6 +138,12 @@ class OpenDSS:
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
+    def get_YCurrents(self):
+        return dss.Circuit.YCurrents()
+
+    def get_all_element_losses(self):
+        return dss.Circuit.AllElementLosses()
+
 
     def Stop(self):
         logger.debug("Stopping the simulator")
@@ -201,7 +207,20 @@ class OpenDSS:
     def get_power_elements(self):
         dss.Circuit.A
 
+    def get_YNodeOrder(self):
+        return dss.Circuit.YNodeOrder()
 
+    def get_line_losses(self):
+        return dss.Circuit.LineLosses()
+
+    def get_element_names(self):
+        return dss.Circuit.AllElementNames()
+
+    def get_node_names(self):
+        return dss.Circuit.AllNodeNames()
+
+    def get_number_of_elements(self):
+        dss.Circuit.NumCktElements()
     #def setSolveMode(self, mode):
      #   self.mode=mode
       #  dss.run_command("Solve mode=" + self.mode)

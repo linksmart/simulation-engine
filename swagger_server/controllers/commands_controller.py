@@ -274,8 +274,10 @@ def run_simulation(id, body=None):  # noqa: E501
         data = connexion.request.get_json()
         logger.debug("data "+str(data)+" type "+str(type(data)) )
 
-        #body = Simulation.from_dict(connexion.request.get_json())  # noqa: E501
-        #gjglkjkzzz123
+        dir = os.path.join("data", str(id))
+        if not os.path.exists(dir):
+            return "Id not existing"
+
         redis_db = RedisDB()
         # flag = redis_db.get(id)
         flag = redis_db.get("run:" + id)

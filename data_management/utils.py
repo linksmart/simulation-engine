@@ -41,6 +41,23 @@ class Utils(metaclass=Singleton):
             logger.error(e)
 
 
+    def store_data_raw(self, fname, data):
+        import pickle
+        path = self.get_path(fname)
+        #folder_path = self.getFolderPath(path)
+        logger.debug("path " + str(path))
+        #path=self.get_path(fname)
+        #logger.debug("folderpath "+str(folder_path))
+        try:
+
+            with open(path, 'w', encoding='utf-8') as outfile:
+                pickle.dumps(data, outfile) # working
+
+            logger.debug("input data saved in " + str(path))
+        except Exception as e:
+            logger.error("Error while storing file ", path)
+            logger.error(e)
+
     def get_path(self, relative_path):
         path_to_send = os.path.abspath(relative_path)
         logger.debug("abs path " + str(path_to_send))

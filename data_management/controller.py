@@ -140,11 +140,16 @@ class gridController(threading.Thread):
         result=[]
 
         nodeNames = self.sim.get_node_list()
+        len_nodeNames = len(nodeNames)
+        elementNames = self.sim.get_element_names()
+        len_elementNames= len(elementNames)
+        nodeNamesCurrents = self.sim.get_YNodeOrder()
+        len_nodeNamesCurrents = len(nodeNamesCurrents)
 
         #logger.debug("node_ names "+str(nodeNames))
         voltages = [[] for i in range(len(nodeNames))]
-        currents = [[] for i in range(len(nodeNames))]
-        losses = [[] for i in range(len(nodeNames))]
+        currents = [[] for i in range(len_nodeNamesCurrents)]
+        losses = [[] for i in range(len_elementNames)]
         powers = [[] for i in range(len(nodeNames))]
 
         charging = True
@@ -155,7 +160,7 @@ class gridController(threading.Thread):
 
 
         for i in range(numSteps):
-            #time.sleep(0.5)
+            #time.sleep(0.1)
             logger.info("#####################################################################")
             logger.info("loop  numSteps, i= " + str(i) )
             hours = self.sim.getStartingHour()
@@ -214,33 +219,97 @@ class gridController(threading.Thread):
 
             puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
             #logger.debug("Voltage "+str(puVoltages[0]))
-            for i in range(len(nodeNames)):
+            for i in range(len_nodeNames):
                 voltages[i].append(puVoltages[i])
-                currents[i].append(Currents[i])
-                losses[i].append(Losses[i])
 
+            for i in range(len_elementNames):
+                #logger.debug("Step "+str(i))
+                #logger.debug("len Losses " + str(len(Losses)))
+                number = int(i+(len_elementNames))
+                #logger.debug("Number "+str(number))
+                #logger.debug("complex number "+str(complex(Losses[i], Losses[number])))
+                losses[i].append(complex(Losses[i], Losses[number]))
+                #logger.debug("len losses intern " + str(len(losses)))
+                #logger.debug("len losses intern[i] " + str(len(losses[i])))
+
+            for i in range(len_nodeNamesCurrents):
+                currents[i].append(complex(Currents[i], Currents[int(i+(len_nodeNamesCurrents))]))
 
 
         #logger.debug("volt finish "+str(voltages))
-
+        logger.debug("#####################################################################################")
         data ={}
+        data_voltages={}
+        data_currents={}
+        data_losses={}
         raw_data={}
+        raw_data_voltages={}
+        raw_data_currents={}
+        raw_data_losses={}
+
+        #import numpy as np
 
         for i in range(len(nodeNames)):
-            raw_data[nodeNames[i]] = {"Voltage": voltages[i], "Current": currents[i], "Loss": losses[i]}
-            data[nodeNames[i]]={"Voltage": {"max":max(voltages[i]), "min":min(voltages[i])}, "Current":max(currents[i]), "Loss":max(losses[i])}
+            raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
+            data_voltages[nodeNames[i]]={"Voltage": {"max":max(voltages[i]), "min":min(voltages[i])}}
+
+
+        #logger.debug("len element names "+str(len(elementNames)))
+        #logger.debug("len losses "+str(len(losses)))
+        #logger.debug("len losses[0] " + str(len(losses[0])))
+        #logger.debug("losses[0] " + str(losses[0]))
+        #logger.debug("len losses[0][0] " + str(len(losses[0][0])))
+
+        for i in range(len_elementNames):
+            raw_data_losses[elementNames[i]]=losses[i]
+
+        for i in range(len_elementNames):
+            #losses[i] = [max(abs(x)) for x in losses[i]]
+            element= [abs(x) for x in losses[i]]
+            #logger.debug("element "+str(element)+" type "+str(type(element)))
+            #logger.debug("max element "+str(max(element)))
+            data_losses[elementNames[i]]= max(element)
+
+        #logger.debug("#####################################################################################")
+        for i in range(len_nodeNamesCurrents):
+            raw_data_currents[nodeNamesCurrents[i]]=currents[i]
+
+        for i in range(len_nodeNamesCurrents):
+            element= [abs(x) for x in currents[i]]
+            data_currents[nodeNamesCurrents[i]]=max(element)
+
+        raw_data={"Voltages":raw_data_voltages, "Currents":raw_data_currents,"Losses":raw_data_losses}
+        data={"Voltages":data_voltages, "Currents":data_currents,"Losses":data_losses}
+        #logger.debug("data "+str(data))
 
         data2={}
         for key, value in data.items():
-            node, phase = key.split(".", 1)
-            if node not in data2.keys():
-                data2[node] = {}
-
-            data2[node]["Phase_" + phase] = value
+            for key2, value2 in value.items():
+                node, phase = key2.split(".", 1)
+                if node not in data2.keys():
+                    data2[node] = {}
+                data2[node]["Phase_" + phase] = value2
 
 
         result=data2
-        #logger.debug("result: "+str(result))
+        """logger.debug("result YNodeOrder: "+str(self.sim.get_YNodeOrder()))
+        logger.debug("Length YNodeOrder: " + str(len(self.sim.get_YNodeOrder())))
+        logger.debug("#####################################################################")
+        logger.debug("Y current" + str(self.sim.get_YCurrents()))
+        logger.debug("Length Y current"+str(len(self.sim.get_YCurrents())))
+        logger.debug("#####################################################################")
+        logger.debug("All node names "+str(self.sim.get_node_names()))
+        logger.debug("Length All node names " + str(len(self.sim.get_node_names())))
+        logger.debug("#####################################################################")
+        logger.debug("All Element names "+str(self.sim.get_element_names()))
+        logger.debug("Length All Element names " + str(len(self.sim.get_element_names())))
+        logger.debug("Number of elements "+str(self.sim.get_number_of_elements()))
+        logger.debug("#####################################################################")
+        logger.debug("All losses " + str(self.sim.get_all_element_losses()))
+        logger.debug("Length All losses " + str(len(self.sim.get_all_element_losses())))
+
+        logger.debug("#####################################################################")
+        logger.debug("result "+str(result))"""
 
 
         fname = (str(self.id))+"_result"
@@ -251,8 +320,8 @@ class gridController(threading.Thread):
         logger.debug("Stroring raw data in data folder")
         fname_row = (str(self.id)) + "_result_row.json"
         path = os.path.join("data", str(self.id), fname_row)
-        self.utils.store_data(path, raw_data)
-        logger.debug("Raw data successfully stored")
+        #self.utils.store_data_raw(path, raw_data)
+        #logger.debug("Raw data successfully stored")
         self.redisDB.set(self.finish_status_key, "True")
 
 
