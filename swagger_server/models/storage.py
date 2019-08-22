@@ -15,7 +15,7 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None, global_control: bool=None):  # noqa: E501
+    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, min_soc: float=None, max_soc: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None, global_control: bool=None):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501
@@ -28,6 +28,10 @@ class Storage(Model):
         :type connection: str
         :param soc: The soc of this Storage.  # noqa: E501
         :type soc: float
+        :param min_soc: The min_soc of this Storage.  # noqa: E501
+        :type min_soc: float
+        :param max_soc: The max_soc of this Storage.  # noqa: E501
+        :type max_soc: float
         :param kv: The kv of this Storage.  # noqa: E501
         :type kv: float
         :param kw_rated: The kw_rated of this Storage.  # noqa: E501
@@ -57,6 +61,8 @@ class Storage(Model):
             'phases': int,
             'connection': str,
             'soc': float,
+            'min_soc': float,
+            'max_soc': float,
             'kv': float,
             'kw_rated': float,
             'storage_capacity': float,
@@ -76,6 +82,8 @@ class Storage(Model):
             'phases': 'phases',
             'connection': 'connection',
             'soc': 'soc',
+            'min_soc': 'min_soc',
+            'max_soc': 'max_soc',
             'kv': 'kv',
             'kw_rated': 'kw_rated',
             'storage_capacity': 'storage_capacity',
@@ -94,6 +102,8 @@ class Storage(Model):
         self._phases = phases
         self._connection = connection
         self._soc = soc
+        self._min_soc = min_soc
+        self._max_soc = max_soc
         self._kv = kv
         self._kw_rated = kw_rated
         self._storage_capacity = storage_capacity
@@ -231,6 +241,48 @@ class Storage(Model):
         """
 
         self._soc = soc
+
+    @property
+    def min_soc(self) -> float:
+        """Gets the min_soc of this Storage.
+
+
+        :return: The min_soc of this Storage.
+        :rtype: float
+        """
+        return self._min_soc
+
+    @min_soc.setter
+    def min_soc(self, min_soc: float):
+        """Sets the min_soc of this Storage.
+
+
+        :param min_soc: The min_soc of this Storage.
+        :type min_soc: float
+        """
+
+        self._min_soc = min_soc
+
+    @property
+    def max_soc(self) -> float:
+        """Gets the max_soc of this Storage.
+
+
+        :return: The max_soc of this Storage.
+        :rtype: float
+        """
+        return self._max_soc
+
+    @max_soc.setter
+    def max_soc(self, max_soc: float):
+        """Sets the max_soc of this Storage.
+
+
+        :param max_soc: The max_soc of this Storage.
+        :type max_soc: float
+        """
+
+        self._max_soc = max_soc
 
     @property
     def kv(self) -> float:
