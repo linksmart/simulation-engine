@@ -278,10 +278,13 @@ class Profess:
                                         soc_list[soc_index][node_name]["SoC"] / 100)
                 self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
 
-    def set_up_profess(self, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None, soc_list=None):
+    def set_up_profess(self,soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
         self.set_data_list()
         self.post_all_dummy_data()
         #TODO
+        if soc_list is not None:
+            if soc_list.type() is dict:
+                self.json_parser.set_topology(soc_list)
         self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                           ,ess_con=ess_con)
         for nodeName in self.json_parser.get_node_name_list():
@@ -291,17 +294,18 @@ class Profess:
             self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
         elements = self.json_parser.get_node_element_list()
         if soc_list is not None:
-            for nodeKey in elements:
-                for node_name in nodeKey:
-                    index = elements.index(nodeKey)
-                    profess_id = self.get_profess_id(node_name)
-                    if soc_list is not None:
-                        for value in soc_list:
-                            if node_name in value:
-                                soc_index = soc_list.index(value)
-                                self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"] = (
-                                        soc_list[soc_index][node_name]["SoC"] / 100)
-                    self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
+            if soc_list.type() is list:
+                for nodeKey in elements:
+                    for node_name in nodeKey:
+                        index = elements.index(nodeKey)
+                        profess_id = self.get_profess_id(node_name)
+                        if soc_list is not None:
+                            for value in soc_list:
+                                if node_name in value:
+                                    soc_index = soc_list.index(value)
+                                    self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"] = (
+                                            soc_list[soc_index][node_name]["SoC"] / 100)
+                        self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
 
     def translate_output(self, output_data):
         #print(self.get)
