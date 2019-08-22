@@ -72,18 +72,15 @@ class gridController(threading.Thread):
         return soc_list
 
     def set_new_soc(self, soc_list):
+        #self.sim.getSoCfromBattery("Akku1")
 
         new_soc_list=[]
         for element in soc_list:
             for key, value in element.items():
                 element_id=value["id"]
                 logger.debug("ESS_id "+str(element_id))
-                logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
+                #logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
                 SoC = float(self.sim.getSoCfromBattery(element_id))
-                logger.debug("SoC "+str(SoC))
-                logger.debug("Capacity "+str(self.sim.getCapacityfromBattery(element_id)))
-                logger.debug("Min_SoC " + str(self.sim.getMinSoCfromBattery(element_id)))
-                logger.debug("bus " + str(self.sim.getBusfromBattery(element_id)))
                 value["SoC"]=SoC
                 new_soc_list.append(element)
         logger.debug("new soc list: " + str(new_soc_list))
@@ -172,7 +169,7 @@ class gridController(threading.Thread):
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        numSteps=2#self.sim_days
+        numSteps=self.sim_days
         self.redisDB.set("sim_days_"+str(self.id),numSteps)
         #numSteps=3
         logger.debug("Number of steps: "+str(numSteps))
@@ -198,6 +195,8 @@ class gridController(threading.Thread):
 
         logger.debug("flag is storage "+str(flag_is_storage))
 
+        self.sim.update_storage()
+
 
         for i in range(numSteps):
             #time.sleep(0.1)
@@ -210,9 +209,10 @@ class gridController(threading.Thread):
             self.redisDB.set("timestep_"+str(self.id), i)
 
 
+            #self.sim.get_power_Transformer("transformer_20082")
             if flag_is_storage:
             #if "storageUnits" in self.topology["radials"][0].keys():
-                logger.debug("---------storage control in the loop--------------------------------")
+                #logger.debug("######################Setting profess##################################")
                 #
                 #logger.debug("timestep " + str(hours))
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
@@ -221,32 +221,51 @@ class gridController(threading.Thread):
                 #logger.debug("professPVs: " + str(professPVs))
                 dummyPrice = [3] * 24
                 dummyGESSCON = [3] * 24
-                logger.debug("######################Setting profess##################################")
+
                 #soc_list=self.get_soc_list(self.topology)
                 soc_list_new = self.set_new_soc(soc_list)
-                logger.debug("######################Ending profess##################################")
 
-                self.profess.update(soc_list_new, professLoads, professPVs)
+                """self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
                 self.profess.start_all()
                 profess_output=self.profess.wait_and_get_output()
-                logger.debug("output profess "+str(profess_output))
-                logger.debug("######################Ending profess##################################")
+                logger.debug("output profess "+str(profess_output))"""
+                #logger.debug("######################Ending profess##################################")
 
-                """SoC = float(self.sim.getSoCfromBattery("Akku1"))
-                logger.debug("SoC_value: " + str(SoC))
-                logger.debug("charging " + str(charging))
-                if charging is True:
-                    logger.debug("Entered to charging")
-                    if SoC >= 100:
-                        logger.debug("Setting charging to false")
-                        charging = False
-                    self.sim.setActivePowertoBatery("Akku1", -0.5)
-                else:
-                    logger.debug("Entered to discharging")
-                    if SoC <= 20:
-                        charging = True
-                    self.sim.setActivePowertoBatery("Akku1",0.5)"""
 
+                logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
+                logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
+                logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
+                logger.debug("kW " + str(self.sim.getkWfromBattery("Akku1")))
+                logger.debug("Min_SoC " + str(self.sim.getMinSoCfromBattery("Akku1")))
+                logger.debug("bus " + str(self.sim.getBusfromBattery("Akku1")))
+                logger.debug("ESS state "+str(self.sim.getStatefromBattery("Akku1")))
+                max_charging_power_value=float(self.sim.getkWratedfromBattery("Akku1"))
+
+                SoC = float(self.sim.getSoCfromBattery("Akku1"))
+                logger.debug("SoC_value Akku1: " + str(SoC))
+                if i>0:
+
+                    if charging is True:
+
+                        if SoC >= 100:
+                            charging = False
+                            logger.debug("Entered to discharging")
+                            self.sim.setActivePowertoBatery("Akku1",0.5,max_charging_power_value)
+                        else:
+                            logger.debug("Entered to charging")
+                            self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
+                    else:
+
+                        if SoC <= 20:
+                            charging = True
+                            logger.debug("Entered to charging")
+                            self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
+                        else:
+                            logger.debug("Entered to discharging")
+                            self.sim.setActivePowertoBatery("Akku1",0.5, max_charging_power_value)
+                logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))
+
+                #logger.debug("######################Ending profess##################################")
 
 
                 #profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)

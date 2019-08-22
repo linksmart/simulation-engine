@@ -101,7 +101,7 @@ class OpenDSS:
     def set_active_element(self, element_name):
         dss.Circuit.SetActiveElement(element_name)
 
-    def setActivePowertoBatery(self,battery_name, power):
+    def setActivePowertoBatery(self,battery_name, power, max_power):
         self.set_active_element(battery_name)
         """storageName = "Storage.Akku1"
                 dss.Circuit.SetActiveElement(storageName)
@@ -121,28 +121,58 @@ class OpenDSS:
                        dss.run_command('Storage.Akku1.State = charging')"""
         logger.debug("power " + str(power))
         if power < 0:
-            route_name = "Storage." + str(battery_name)
+            """route_name = "Storage." + str(battery_name)
             dss_string = route_name + ".kWrated = " + str(abs(power))
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
             dss_string = route_name + ".State = Charging"
             logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)"""
+            percentage_charge=(abs(power)/max_power)*100
+            dss_string = "Storage."+str(battery_name)+".%Charge="+str(int(percentage_charge))
+            #dss_string = "Storage." + str(battery_name) + ".kW=" + str(power)
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            dss_string="Storage."+str(battery_name)+".State = Charging"
+            logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
         else:
-            route_name="Storage."+str(battery_name)
+            """route_name="Storage."+str(battery_name)
             dss_string=route_name+".kWrated = "+str(power)
             logger.debug("dss_string "+str(dss_string))
             dss.run_command(dss_string)
             dss_string = route_name+".State = Discharging"
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)"""
+            percentage_charge = (power / max_power) * 100
+            dss_string = "Storage." + str(battery_name) + ".kW=" + str(power)
+            dss_string = "Storage." + str(battery_name) + ".%Discharge=" + str(int(percentage_charge))
+            #logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            dss_string = "Storage." + str(battery_name) + ".State = Discharging"
+            logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
 
-    def setSoCofBattery(self, battery_name, value):
+    def update_storage(self):
+        dss.Circuit.UpdateStorage()
+
+    def get_power_Transformer(self, name):
+        self.set_active_element(name)
+        logger.debug("Transformer name "+str(dss.Transformers.Name()))
+        dss.Transformers.Wdg(1)
+        logger.debug("Tranformer KVA "+str(dss.Transformers.kVA()))
+
+        #dss_string = "? Transformer." + str(battery_name) + ".%stored"
+
+    def setSoCBattery(self, battery_name, value):
         self.set_active_element(battery_name)
         dss_string="Storage."+str(battery_name)+".%stored="+str(value)
+        logger.debug("dss_string "+str(dss_string))
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
     def getSoCfromBattery(self, battery_name):
+        logger.debug("Battery name "+str(battery_name))
         self.set_active_element(battery_name)
         dss_string="? Storage."+str(battery_name)+".%stored"
         #dss.run_command('? Storage.Akku1.%stored')
@@ -157,6 +187,30 @@ class OpenDSS:
     def getMinSoCfromBattery(self, battery_name):
         self.set_active_element(battery_name)
         dss_string="? Storage."+str(battery_name)+".%reserve"
+        #dss.run_command('? Storage.Akku1.%stored')
+        return dss.run_command(dss_string)
+
+    def getkWfromBattery(self, battery_name):
+        self.set_active_element(battery_name)
+        dss_string="? Storage."+str(battery_name)+".kW"
+        #dss.run_command('? Storage.Akku1.%stored')
+        return dss.run_command(dss_string)
+
+    def getkWhStoredfromBattery(self, battery_name):
+        self.set_active_element(battery_name)
+        dss_string="? Storage."+str(battery_name)+".kWhstored"
+        #dss.run_command('? Storage.Akku1.%stored')
+        return dss.run_command(dss_string)
+
+    def getkWratedfromBattery(self, battery_name):
+        self.set_active_element(battery_name)
+        dss_string="? Storage."+str(battery_name)+".kWRated"
+        #dss.run_command('? Storage.Akku1.%stored')
+        return dss.run_command(dss_string)
+
+    def getStatefromBattery(self, battery_name):
+        self.set_active_element(battery_name)
+        dss_string="? Storage."+str(battery_name)+".State"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
@@ -451,7 +505,7 @@ class OpenDSS:
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
-        logger.debug( "----------------- getProfessLoadschapes ----------------------")
+        logger.debug( "getProfessLoadschapes")
         try:
             for key, value in self.loadshapes_for_loads.items():
                 load_id = key
@@ -481,7 +535,7 @@ class OpenDSS:
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
-        logger.debug( "----------------- getProfessPVLoadschapes ----------------------")
+        logger.debug( "getProfessPVLoadschapes")
         try:
             for key, value in self.loadshapes_for_pv.items():
                 pv_id = key
@@ -1175,7 +1229,7 @@ class OpenDSS:
                 soc = 100 #! defalt value
                 dod = 20 #! defalt value
                 kv = None
-                kw_rated = None
+                kw_rated = 0
                 kwh_rated = 50 #! defalt value
                 kwh_stored = 50 #! defalt value
                 charge_efficiency = 90 #! defalt value
@@ -1196,6 +1250,8 @@ class OpenDSS:
                         soc = value
                     elif key == "min_soc":
                         dod = value
+                    elif key == "max_charging_power":
+                        kw_rated = value
                     elif key == "kv":
                         kv = value
                     elif key == "kw_rated":
@@ -1245,13 +1301,15 @@ class OpenDSS:
         #testing storage charge/discharge
         #addition = " kW=15 state=discharging DischargeTrigger=0.8 ChargeTrigger=0.3 "
         #addition = " kW=10 state=IDLING DischargeTrigger=0.8 ChargeTrigger=0.3 "
-        addition = " DispMode=FOLLOW "
-        dss_string = dss_string + addition
+        #addition = " DispMode=FOLLOW "
+        #dss_string = dss_string + addition
+        dss_string = dss_string + " TimeChargeTrigger=-1 "
         if not kw_rated == None:
-            dss_string = dss_string + "kWrated="+str(kw_rated)
+            dss_string = dss_string + " kWrated="+str(kw_rated)
         #logger.info(dss_string)
         logger.debug(dss_string + "\n")
         dss.run_command(dss_string)
+        self.setSoCBattery(id, soc)
 
     def setCapacitors(self, capacitors):
         #!logger.info("Setting up the capacitors")
