@@ -5,6 +5,11 @@ services:
     command: redis-server
     ports:
       - "6379:6379"
+  ofw:
+    image: garagon/optimization:amddocker
+    command: ["python3", "-u", "ofw.py"]
+    ports:
+      - "8080:8080"
   se:
     build:
       context: ""

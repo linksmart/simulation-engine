@@ -12,6 +12,20 @@ services:
         max-size: "10m"
         max-file: "10"
     restart: "always"
+  ofw:
+    image: garagon/optimization:amd
+    container_name: "ofw"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    volumes:
+      - ./optimization-framework/prediction/resources:/usr/src/app/prediction/resources
+      - ./optimization-framework/optimization/resources:/usr/src/app/optimization/resources
+      - ./optimization-framework/utils/resources:/usr/src/app/utils/resources
+      - ./optimization-framework/utils/gurobi/license:/usr/src/app/share/gurobi811/license/gurobi.lic
+    command: ["python3", "-u", "ofw.py"]
+    #restart: "always"
 
   se:
     build:

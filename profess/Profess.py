@@ -6,11 +6,12 @@ import simplejson as json
 import time
 
 class Profess:
-    def __init__(self, domain):
+    def __init__(self, domain,topology):
         self.domain = domain #domainName is different on operating systems
         self.dataList=[]
         self.httpClass = Http_commands()
         self.json_parser=JsonParser()
+        self.json_parser.set_topology(topology)
         self.dummy_data = {"load": {
          "meta": {
              "pf_Load": 1
@@ -119,12 +120,16 @@ class Profess:
             print("No Input to start declared")
 
     def start_all(self, optimization_model=None):
+
         for node_name in self.json_parser.get_node_name_list():
             element_node=(next(item for item in self.json_parser.get_node_element_list() if node_name in item))
-            if "storageUnits" in element_node[node_name]:
-                storage = next(item for item in element_node[node_name] if item["storageUnits"])
-                model=storage["storageUnits"]["optimization_model"]
-
+            for item in element_node[node_name]:
+                if "storageUnits" in item:
+                    storage = next(item for item in element_node[node_name] if item["storageUnits"])
+                    model = storage["storageUnits"]["optimization_model"]
+                    print(model)
+            if optimization_model is None:
+                optimization_model=model
             self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name))
 
     def stop(self, profess_id):
@@ -134,29 +139,7 @@ class Profess:
             print(json_response)
         else:
             print("No Input to stop declared")
-    def update(self, load_profiles=None, pv_profiles=None, price_profiles=None, soc_list=None, ess_con=None):
-        """
 
-        :param load_profiles:
-        :param pv_profiles:
-        :param price_profiles:
-        :param soc_list:
-        :param ess_con:
-        :return:
-        """
-        self.set_profiles(load_profiles=load_profiles,pv_profiles=pv_profiles,price_profiles=price_profiles,ess_con=ess_con)
-        elements = self.json_parser.get_node_element_list()
-        for nodeKey in elements:
-            for node_name in nodeKey:
-                index=elements.index(nodeKey)
-                profess_id=self.get_profess_id(node_name)
-                if soc_list is not None:
-                    for value in soc_list:
-                        if node_name in value:
-                            soc_index = soc_list.index(value)
-                            self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"] = (
-                                        soc_list[soc_index][node_name]["SoC"] / 100)
-                self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
     def update_config_json(self, profess_id, config_json):
         response = self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
         json_response = response.json()
@@ -280,9 +263,22 @@ class Profess:
 
         self.dataList = node_list
 
+    def update(self, load_profiles=None, pv_profiles=None, price_profiles=None, soc_list=None, ess_con=None):
+        self.set_profiles(load_profiles=load_profiles,pv_profiles=pv_profiles,price_profiles=price_profiles,ess_con=ess_con)
+        elements = self.json_parser.get_node_element_list()
+        for nodeKey in elements:
+            for node_name in nodeKey:
+                index=elements.index(nodeKey)
+                profess_id=self.get_profess_id(node_name)
+                if soc_list is not None:
+                    for value in soc_list:
+                        if node_name in value:
+                            soc_index = soc_list.index(value)
+                            self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"] = (
+                                        soc_list[soc_index][node_name]["SoC"] / 100)
+                self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
 
-    def set_up_profess(self, topology=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
-        self.json_parser.set_topology(topology)
+    def set_up_profess(self, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None, soc_list=None):
         self.set_data_list()
         self.post_all_dummy_data()
         #TODO
@@ -293,7 +289,19 @@ class Profess:
             professID=self.get_profess_id(nodeName)
             nodeNumber = self.json_parser.get_node_name_list().index(nodeName)
             self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
-
+        elements = self.json_parser.get_node_element_list()
+        if soc_list is not None:
+            for nodeKey in elements:
+                for node_name in nodeKey:
+                    index = elements.index(nodeKey)
+                    profess_id = self.get_profess_id(node_name)
+                    if soc_list is not None:
+                        for value in soc_list:
+                            if node_name in value:
+                                soc_index = soc_list.index(value)
+                                self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"] = (
+                                        soc_list[soc_index][node_name]["SoC"] / 100)
+                    self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
 
     def translate_output(self, output_data):
         #print(self.get)
