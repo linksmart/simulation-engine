@@ -278,6 +278,7 @@ class gridController(threading.Thread):
             element= [abs(x) for x in currents[i]]
             data_currents[nodeNamesCurrents[i]]=max(element)
 
+        dummy_power= {"Transformer.transformer_20082":70}
         raw_data={"Voltages":raw_data_voltages, "Currents":raw_data_currents,"Losses":raw_data_losses}
 
         data2 = {}
@@ -294,7 +295,7 @@ class gridController(threading.Thread):
                 data3[node] = {}
             data3[node]["Phase_" + phase] = value
 
-        data={"Voltages":data2, "Currents":data3,"Losses":data_losses}
+        data={"Voltages":data2, "Currents":data3,"Losses":data_losses, "Powers":dummy_power}
         logger.debug("data "+str(data))
 
 
