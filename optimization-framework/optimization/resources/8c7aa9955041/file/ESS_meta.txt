@@ -1,0 +1,1 @@
+ESS_Max_SoCESS_Min_SoCESS_Charging_EffESS_Discharging_EffESS_Max_Charge_PowerESS_Max_Discharge_PowerESS_Capacity

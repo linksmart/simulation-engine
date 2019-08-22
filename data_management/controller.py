@@ -98,7 +98,7 @@ class gridController(threading.Thread):
             self.profess_url = "http://localhost:8080"
         self.domain = self.get_profess_url() + "/v1/"
         logger.debug("profess url: " + str(self.domain))
-        self.profess = Profess(self.domain)
+        self.profess = Profess(self.domain, self.topology)
         self.profess.json_parser.set_topology(common)
 
         # ----------PROFILES----------------#

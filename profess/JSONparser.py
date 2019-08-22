@@ -56,6 +56,7 @@ class JsonParser:
             if "storageUnits" in self.topology["radials"][radial_number].keys():
                 storage_node_list = self.search(self.topology["radials"][radial_number]["storageUnits"], "bus1", "", True)
                 node_list=storage_node_list
+
             if "photovoltaics" in self.topology["radials"][radial_number].keys():
                 pv_node_list = self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True)
                 node_list=pv_node_list
@@ -78,18 +79,27 @@ class JsonParser:
                                 {element: [
                                     {"storageUnits": self.topology["radials"][radial_number]["storageUnits"][
                                         ess_index]}]})
-                #print("here is for")
-                #print(node_element_list)
                 if "photovoltaics" in self.topology["radials"][radial_number]:
                     for pvunits in self.topology["radials"][radial_number]["photovoltaics"]:
+                        #print(pvunits)
+                        #print(element)
                         m = pattern.findall(pvunits["bus1"])
                         pvunitsBus= m[0]
-                        if pvunitsBus is element:
+                        if pvunitsBus == element:
+                            alreadyInList=False
+                            for item in node_element_list:
+                                if element in item.keys():
+                                    alreadyInList = True
+                                    listIndex= node_element_list.index(item)
                             pv_index = self.topology["radials"][radial_number]["photovoltaics"].index(pvunits)
-                            node_element_list.append(
-                                {element: [
-                                    {"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
-                                        pv_index]}]})
+                            if alreadyInList:
+                                node_element_list[listIndex][element].append({"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
+                                            pv_index]})
+                            else:
+                                node_element_list.append(
+                                    {element: [
+                                        {"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
+                                            pv_index]}]})
 
                 #print(element)
                 #print(count)
