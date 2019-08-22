@@ -52,6 +52,36 @@ class gridController(threading.Thread):
     def get_profess_url(self):
         return self.profess_url
 
+    def get_soc_list(self,topology):
+        radial=topology["radials"]#["storageUnits"]
+        list_storages=[]
+        soc_list = []
+        soc_dict_intern = {"SoC":None}
+        for element in radial:
+
+            for key, value in element.items():
+                if key == "storageUnits":
+                    for element_intern in value:
+                        soc_dict = {}
+                        logger.debug("element intern "+str(element_intern))
+                        soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"], "id":element_intern["id"]}
+                        soc_list.append(soc_dict)
+                        list_storages.append(element_intern)
+        #logger.debug("list_storages "+str(list_storages))
+        logger.debug("soc_list " + str(soc_list))
+        return soc_list
+
+    def set_new_soc(self, soc_list):
+
+        new_soc_list=[]
+        for element in soc_list:
+            for key, value in element.items():
+                element_id=value["id"]
+                SoC = float(self.sim.getSoCfromBattery(element_id))
+                value["SoC"]=SoC
+                new_soc_list.append(element)
+        logger.debug("new soc list: " + str(new_soc_list))
+        return new_soc_list
 
 
     def getId(self):
@@ -98,7 +128,7 @@ class gridController(threading.Thread):
             self.profess_url = "http://localhost:8080"
         self.domain = self.get_profess_url() + "/v1/"
         logger.debug("profess url: " + str(self.domain))
-        self.profess = Profess(self.domain)
+        self.profess = Profess(self.domain)#, self.topology)
         self.profess.json_parser.set_topology(common)
 
         # ----------PROFILES----------------#
@@ -152,6 +182,7 @@ class gridController(threading.Thread):
         losses = [[] for i in range(len_elementNames)]
         powers = [[] for i in range(len(nodeNames))]
 
+        soc_list = self.get_soc_list(self.topology)
         charging = True
         logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
         flag_is_storage = self.input.is_Storage_in_Topology(self.topology)
@@ -182,8 +213,12 @@ class gridController(threading.Thread):
                 dummyPrice = [3] * 24
                 dummyGESSCON = [3] * 24
                 logger.debug("######################Setting profess##################################")
-                #profess.set_up_profess(topology, professLoads, professPVs)
-                #profess.start_all()
+                #soc_list=self.get_soc_list(self.topology)
+                soc_list_new = self.set_new_soc(soc_list)
+                logger.debug("######################Ending profess##################################")
+                sys.exit(0)
+                self.profess.update(soc_list_new, professLoads, professPVs)
+                self.profess.start_all()
                 logger.debug("######################Ending profess##################################")
 
                 SoC = float(self.sim.getSoCfromBattery("Akku1"))
@@ -278,7 +313,7 @@ class gridController(threading.Thread):
             element= [abs(x) for x in currents[i]]
             data_currents[nodeNamesCurrents[i]]=max(element)
 
-        dummy_power= {"Transformer.transformer_20082":70}
+
         raw_data={"Voltages":raw_data_voltages, "Currents":raw_data_currents,"Losses":raw_data_losses}
 
         data2 = {}
@@ -295,6 +330,7 @@ class gridController(threading.Thread):
                 data3[node] = {}
             data3[node]["Phase_" + phase] = value
 
+        dummy_power = {"Transformer.transformer_20082": 70}
         data={"Voltages":data2, "Currents":data3,"Losses":data_losses, "Powers":dummy_power}
         logger.debug("data "+str(data))
 

@@ -1166,13 +1166,13 @@ class OpenDSS:
                         connection = value
                     elif key == "soc":
                         soc = value
-                    elif key == "dod":
+                    elif key == "min_soc":
                         dod = value
                     elif key == "kv":
                         kv = value
                     elif key == "kw_rated":
                         kw_rated = value
-                    elif key == "kwh_rated":
+                    elif key == "storage_capacity":
                         kwh_rated = value
                     elif key == "kwh_stored":
                         kwh_stored = value
@@ -1183,7 +1183,7 @@ class OpenDSS:
                     elif key == "powerfactor":
                         powerfactor = value
                     else:
-                        pass
+                        logger.debug("key not registered: "+str(key))
                 self.setStorage(id, bus1, phases, connection, soc, dod, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor)
                 #!dss.run_command('Solve')
                 #!logger.info("Storage names: " + str(dss.Circuit.AllNodeNames()))
@@ -1199,7 +1199,7 @@ class OpenDSS:
 
 
         #dss_string = "New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} kWhstored={kwh_stored} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
-        dss_string="New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv} kWrated={kw_rated} kWhrated={kwh_rated} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
+        dss_string="New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={dod} kV={kv}  kWhrated={kwh_rated} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
                 id=id,
             bus1=bus1,
             phases=phases,
@@ -1207,7 +1207,6 @@ class OpenDSS:
             soc=soc,
             dod=dod,
             kv=kv,
-            kw_rated=kw_rated,
             kwh_rated=kwh_rated,
             kwh_stored=kwh_stored,
             charge_efficiency=charge_efficiency,
@@ -1220,7 +1219,7 @@ class OpenDSS:
         #addition = " kW=10 state=IDLING DischargeTrigger=0.8 ChargeTrigger=0.3 "
         addition = " DispMode=FOLLOW "
         dss_string = dss_string + addition
-
+        dss_string = dss_string + "kWrated="+str(kw_rated)
         #logger.info(dss_string)
         logger.debug(dss_string + "\n")
         dss.run_command(dss_string)

@@ -135,6 +135,15 @@ class Profess:
         else:
             print("No Input to stop declared")
     def update(self, load_profiles=None, pv_profiles=None, price_profiles=None, soc_list=None, ess_con=None):
+        """
+
+        :param load_profiles:
+        :param pv_profiles:
+        :param price_profiles:
+        :param soc_list:
+        :param ess_con:
+        :return:
+        """
         self.set_profiles(load_profiles=load_profiles,pv_profiles=pv_profiles,price_profiles=price_profiles,ess_con=ess_con)
         elements = self.json_parser.get_node_element_list()
         for nodeKey in elements:
