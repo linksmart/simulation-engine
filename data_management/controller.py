@@ -63,7 +63,7 @@ class gridController(threading.Thread):
                 if key == "storageUnits":
                     for element_intern in value:
                         soc_dict = {}
-                        logger.debug("element intern "+str(element_intern))
+                        #logger.debug("element intern "+str(element_intern))
                         soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"], "id":element_intern["id"]}
                         soc_list.append(soc_dict)
                         list_storages.append(element_intern)
@@ -143,6 +143,10 @@ class gridController(threading.Thread):
         # profess.json_parser.set_topology(data)
 
         self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
+        transformer_names=self.sim.get_transformer_names()
+        logger.debug("Transformers in the circuit")
+        for i in range(len(transformer_names)):
+            self.sim.create_monitor("monitor_transformer_"+str(i), "Transformer."+str(transformer_names[i]),1,1)
 
         logger.debug("#####################################################################")
         logger.debug("Simulation of grid " + self.id + " started")
@@ -159,7 +163,8 @@ class gridController(threading.Thread):
         #self.sim.setVoltageBases(115, 4.16, 0.48)
         self.sim.setVoltageBases(self.input.get_voltage_bases())
         #self.sim.setMode("snap")
-        self.sim.setMode("daily")
+        #self.sim.setMode("daily")
+        self.sim.setMode("yearly")
         self.sim.setStepSize("hours")
         self.sim.setNumberSimulations(1)
         logger.info("Solution mode 2: " + str(self.sim.getMode()))
@@ -206,6 +211,11 @@ class gridController(threading.Thread):
             self.redisDB.set("timestep_"+str(self.id), i)
 
 
+            terminal=self.sim.get_monitor_terminals("mon_transformer")
+            logger.debug("Number of terminals in monitor "+str(terminal))
+
+
+
             #self.sim.get_power_Transformer("transformer_20082")
             if flag_is_storage:
             #if "storageUnits" in self.topology["radials"][0].keys():
@@ -222,14 +232,14 @@ class gridController(threading.Thread):
                 #soc_list=self.get_soc_list(self.topology)
                 soc_list_new = self.set_new_soc(soc_list)
 
-                """self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
-                self.profess.start_all()
-                profess_output=self.profess.wait_and_get_output()
-                logger.debug("output profess "+str(profess_output))"""
+                #self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+                #self.profess.start_all()
+                #profess_output=self.profess.wait_and_get_output()
+                #logger.debug("output profess "+str(profess_output))
                 #logger.debug("######################Ending profess##################################")
 
 
-                logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
+                """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
                 logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
                 logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
                 logger.debug("kW " + str(self.sim.getkWfromBattery("Akku1")))
@@ -260,7 +270,7 @@ class gridController(threading.Thread):
                         else:
                             logger.debug("Entered to discharging")
                             self.sim.setActivePowertoBatery("Akku1",0.5, max_charging_power_value)
-                logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))
+                logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))"""
 
                 #logger.debug("######################Ending profess##################################")
 
@@ -300,6 +310,19 @@ class gridController(threading.Thread):
 
         #logger.debug("volt finish "+str(voltages))
         logger.debug("#####################################################################################")
+        S_total=[]
+        mon_sample=[]
+        for i in range(len(transformer_names)):
+            S_total.append(self.sim.get_monitor_sample("monitor_transformer_"+str(i)))
+        logger.debug("S_total "+str(S_total))
+        """P1 = mon_sample[0]
+        A1 = mon_sample[1]
+        P2 = mon_sample[2]
+        A2 = mon_sample[3]
+        P3 = mon_sample[4]
+        A3 = mon_sample[5]
+        #logger.debug("S_total" +str(S_total)+" P1 = " + str(P1) + " A1 = " + str(A1)+ " P2 = " + str(P2) + " A2 = " + str(A2) + " P3 = " + str(P3)+" A3 = " + str(A3))
+        """
         data ={}
         data_voltages={}
         data_currents={}
@@ -348,17 +371,20 @@ class gridController(threading.Thread):
             node, phase = key.split(".", 1)
             if node not in data2.keys():
                 data2[node] = {}
-            data2[node]["Phase_" + phase] = value
+            data2[node]["Phase " + phase] = value
 
         data3 = {}
         for key, value in data_currents.items():
             node, phase = key.split(".", 1)
             if node not in data3.keys():
                 data3[node] = {}
-            data3[node]["Phase_" + phase] = value
+            data3[node]["Phase " + phase] = value
 
-        dummy_power = {"Transformer.transformer_20082": 70}
-        data={"Voltages":data2, "Currents":data3,"Losses":data_losses, "Powers":dummy_power}
+        #power = {"Transformer.transformer_20082": max(S_total)}
+        power={}
+        for i in range(len(transformer_names)):
+            power["Transformer."+str(transformer_names[i])]=max(S_total[i][0])
+        data={"Voltages":data2, "Currents":data3,"Losses":data_losses, "Powers":power}
         logger.debug("data "+str(data))
 
 

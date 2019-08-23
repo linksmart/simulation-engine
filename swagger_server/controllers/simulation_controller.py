@@ -48,6 +48,7 @@ def create_simulation(body):  # noqa: E501
         redis_db.set(id, "created")
         flag = redis_db.get(id)
         logger.debug("id stored in RedisDB: "+str(flag))
+        redis_db.set("run:" + id, "created")
         #----------Profiles---------------#
 
         #pv_profile_data = prof.pv_profile("bolzano", "italy", days=365)
