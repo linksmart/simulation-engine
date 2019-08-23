@@ -144,12 +144,10 @@ class gridController(threading.Thread):
 
         self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
 
-
-
-
-
+        logger.debug("#####################################################################")
         logger.debug("Simulation of grid " + self.id + " started")
         logger.debug("GridID: "+str(self.id))
+        logger.debug("#####################################################################")
 
         #self.sim.runNode13()
         self.sim.enableCircuit(self.id)
@@ -195,7 +193,6 @@ class gridController(threading.Thread):
 
         logger.debug("flag is storage "+str(flag_is_storage))
 
-        self.sim.update_storage()
 
 
         for i in range(numSteps):

@@ -384,7 +384,6 @@ definitions:
     - "bus1"
     - "bus2"
     - "id"
-    - "length"
     - "phases"
     properties:
       id:

@@ -221,8 +221,6 @@ class Powerline(Model):
         :param length: The length of this Powerline.
         :type length: float
         """
-        if length is None:
-            raise ValueError("Invalid value for `length`, must not be `None`")  # noqa: E501
 
         self._length = length
 

@@ -1325,12 +1325,12 @@ class OpenDSS:
                         bus=value
                     elif key=="phases":
                         phases=value 
-                    elif key == "k_var":
+                    elif key == "kVAR":
                         voltage_kVar = value
-                    elif key == "k_v":  
+                    elif key == "kV":
                         voltage_kV = value
                     else:
-                        break
+                        logger.debug("key nor registered "+str(key))
                 self.capacitor_name=id
                 self.bus_name=bus
                 self.num_phases=phases

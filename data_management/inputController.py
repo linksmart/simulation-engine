@@ -287,7 +287,7 @@ class InputController:
             if "linecode" in values.keys() and values["linecode"] is not None:
                 logger.debug("! ---------------Setting LineCode------------------------- \n")
                 linecode = values["linecode"]
-                logger.debug("LineCode: " + str(linecode))
+                #logger.debug("LineCode: " + str(linecode))
                 message = self.setLineCodes(id, linecode)
                 if not message == 0:
                     return message
