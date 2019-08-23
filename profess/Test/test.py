@@ -6,7 +6,7 @@ import json
 domain = "http://192.168.99.100:8080/v1/"
 #dummyInputData = open('inputData.json').read()
 #jsonInputDataFile=json.loads(dummyInputData)
-IEEE13=open("furTopology.json").read()
+IEEE13=open("IEEE13_changed.json").read()
 jsonIEEE = json.loads(IEEE13)
 
 modelDataFile = open('model.json').read()
@@ -43,7 +43,7 @@ dummyGESSCON=[{'633':
 print(p1.json_parser.get_node_element_list())
 
 p1.set_up_profess(pv_profiles=dummyPV)
-print(p1.json_parser.get_node_element_list())
+#print(p1.json_parser.get_node_element_list())
 
 p1.start_all(optimization_model="MaximizePVNoLoad")
 #print(p1.dataList)
