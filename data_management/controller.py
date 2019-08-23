@@ -312,14 +312,6 @@ class gridController(threading.Thread):
         #logger.debug("volt finish "+str(voltages))
         logger.debug("#####################################################################################")
 
-        """P1 = mon_sample[0]
-        A1 = mon_sample[1]
-        P2 = mon_sample[2]
-        A2 = mon_sample[3]
-        P3 = mon_sample[4]
-        A3 = mon_sample[5]
-        #logger.debug("S_total" +str(S_total)+" P1 = " + str(P1) + " A1 = " + str(A1)+ " P2 = " + str(P2) + " A2 = " + str(A2) + " P3 = " + str(P3)+" A3 = " + str(A3))
-        """
         data ={}
         data_voltages={}
         data_currents={}
@@ -329,16 +321,7 @@ class gridController(threading.Thread):
         raw_data_currents={}
         raw_data_losses={}
 
-        #import numpy as np
-
-
-
-
-        #logger.debug("len element names "+str(len(elementNames)))
-        #logger.debug("len losses "+str(len(losses)))
-        #logger.debug("len losses[0] " + str(len(losses[0])))
-        #logger.debug("losses[0] " + str(losses[0]))
-        #logger.debug("len losses[0][0] " + str(len(losses[0][0])))
+        ############################### Losses ###################################
 
         for i in range(len_elementNames):
             raw_data_losses[elementNames[i]]=losses[i]
@@ -357,7 +340,6 @@ class gridController(threading.Thread):
         for i in range(len_nodeNamesCurrents):
             element= [abs(x) for x in currents[i]]
             key=nodeNamesCurrents[i]
-            #logger.debug("key "+str(key)+" type "+str(type(key)))
             data_currents[key]=max(element)
 
         data3 = {}
@@ -382,9 +364,6 @@ class gridController(threading.Thread):
                 data2[node] = {}
             data2[node]["Phase " + phase] = value
 
-
-
-
         ###############################Max power in transformers###################################
         S_total = []
         mon_sample = []
@@ -406,24 +385,7 @@ class gridController(threading.Thread):
 
 
         result=data
-        """logger.debug("result YNodeOrder: "+str(self.sim.get_YNodeOrder()))
-        logger.debug("Length YNodeOrder: " + str(len(self.sim.get_YNodeOrder())))
-        logger.debug("#####################################################################")
-        logger.debug("Y current" + str(self.sim.get_YCurrents()))
-        logger.debug("Length Y current"+str(len(self.sim.get_YCurrents())))
-        logger.debug("#####################################################################")
-        logger.debug("All node names "+str(self.sim.get_node_names()))
-        logger.debug("Length All node names " + str(len(self.sim.get_node_names())))
-        logger.debug("#####################################################################")
-        logger.debug("All Element names "+str(self.sim.get_element_names()))
-        logger.debug("Length All Element names " + str(len(self.sim.get_element_names())))
-        logger.debug("Number of elements "+str(self.sim.get_number_of_elements()))
-        logger.debug("#####################################################################")
-        logger.debug("All losses " + str(self.sim.get_all_element_losses()))
-        logger.debug("Length All losses " + str(len(self.sim.get_all_element_losses())))
 
-        logger.debug("#####################################################################")
-        logger.debug("result "+str(result))"""
 
 
         fname = (str(self.id))+"_result"
@@ -436,6 +398,9 @@ class gridController(threading.Thread):
         path = os.path.join("data", str(self.id), fname_row)
         #self.utils.store_data_raw(path, raw_data)
         #logger.debug("Raw data successfully stored")
+        logger.debug("#####################################################################################")
+        logger.debug("##########################   Simulation End   #######################################")
+        logger.debug("#####################################################################################")
         self.redisDB.set(self.finish_status_key, "True")
 
 
