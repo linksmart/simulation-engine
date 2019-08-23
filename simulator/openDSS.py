@@ -112,14 +112,11 @@ class OpenDSS:
         logger.debug(dss_string)
         dss.run_command(dss_string)
         #dss.Monitors.Name(name)
-        logger.debug("Name " + str(dss.Monitors.Name()))
+        #logger.debug("Name " + str(dss.Monitors.Name()))
         #dss.Monitors.Element(element_name)
-        logger.debug("Element " + str(dss.Monitors.Element()))
+        #logger.debug("Element " + str(dss.Monitors.Element()))
         #dss.Monitors.Mode(mode)
-        logger.debug("Mode " + str(dss.Monitors.Mode()))
-        if not terminal == None:
-            #dss.Monitors.Terminal(terminal)
-            logger.debug("terminal " + str(dss.Monitors.Terminal()))
+        #logger.debug("Mode " + str(dss.Monitors.Mode()))
         logger.debug("Monitor "+str(name)+" for element "+str(element_name)+" in terminals "+str(terminal)+ " created")
 
     def get_monitor_terminals(self, name):
@@ -130,32 +127,28 @@ class OpenDSS:
         return terminal
 
     def get_monitor_sample(self, name):
-        dss.Monitors.First()
+        dss.Monitors.Name(name)
         logger.debug("Name "+str(dss.Monitors.Name()))
 
         number_samples=dss.Monitors.SampleCount()
-        logger.debug("Number samples "+str(number_samples))
+        #logger.debug("Number samples "+str(number_samples))
         dss.Monitors.Save()
 
-        numChannels = dss.Monitors.NumChannels()
-        logger.debug("Number channels " + str(numChannels))
+        numChannels = 6#dss.Monitors.NumChannels()
+        #logger.debug("Number channels " + str(numChannels))
         channel=[]
         for i in range(numChannels):
-            logger.debug("i "+str(i))
+            #logger.debug("i "+str(i))
             channel.append(dss.Monitors.Channel(i+1))
-            logger.debug("Channel "+str(i) +str(channel[i]))
+            #logger.debug("Channel "+str(i) +str(channel[i]))
 
         S_total=[]
         for i in range(len(channel[0])):
-            logger.debug("i "+str(i))
-            logger.debug("channel[0]["+str(i)+"] = " + str(channel[0][i]))
-            logger.debug("channel[2][" + str(i) + "] = " + str(channel[2][i]))
-            logger.debug("channel[4][" + str(i) + "] = " + str(channel[4][i]))
             S_total.append(math.sqrt(math.pow(channel[0][i],2)+math.pow(channel[2][i],2)+math.pow(channel[4][i],2)))
-        logger.debug("S total "+str(S_total))
-        logger.debug("Number samples " + str(dss.Monitors.SampleCount()))
+        #logger.debug("S total "+str(S_total))
+        #logger.debug("Number samples " + str(dss.Monitors.SampleCount()))
 
-        return (S_total , channel)
+        return S_total
 
     def setActivePowertoBatery(self,battery_name, power, max_power):
         self.set_active_element(battery_name)

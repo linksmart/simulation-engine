@@ -144,6 +144,7 @@ class gridController(threading.Thread):
 
         self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
         transformer_names=self.sim.get_transformer_names()
+        logger.debug("Transformer names: "+str(transformer_names))
         logger.debug("Transformers in the circuit")
         for i in range(len(transformer_names)):
             self.sim.create_monitor("monitor_transformer_"+str(i), "Transformer."+str(transformer_names[i]),1,1)
@@ -310,11 +311,7 @@ class gridController(threading.Thread):
 
         #logger.debug("volt finish "+str(voltages))
         logger.debug("#####################################################################################")
-        S_total=[]
-        mon_sample=[]
-        for i in range(len(transformer_names)):
-            S_total.append(self.sim.get_monitor_sample("monitor_transformer_"+str(i)))
-        logger.debug("S_total "+str(S_total))
+
         """P1 = mon_sample[0]
         A1 = mon_sample[1]
         P2 = mon_sample[2]
@@ -334,9 +331,7 @@ class gridController(threading.Thread):
 
         #import numpy as np
 
-        for i in range(len(nodeNames)):
-            raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
-            data_voltages[nodeNames[i]]={"max":max(voltages[i]), "min":min(voltages[i])}
+
 
 
         #logger.debug("len element names "+str(len(elementNames)))
@@ -355,14 +350,28 @@ class gridController(threading.Thread):
             #logger.debug("max element "+str(max(element)))
             data_losses[elementNames[i]]= max(element)
 
-        #logger.debug("#####################################################################################")
+        ############################### Currents ###################################
         for i in range(len_nodeNamesCurrents):
-            raw_data_currents[nodeNamesCurrents[i]]=currents[i]
+            raw_data_currents[str(nodeNamesCurrents[i]).lower()]=currents[i]
 
         for i in range(len_nodeNamesCurrents):
             element= [abs(x) for x in currents[i]]
-            data_currents[nodeNamesCurrents[i]]=max(element)
+            key=nodeNamesCurrents[i]
+            #logger.debug("key "+str(key)+" type "+str(type(key)))
+            data_currents[key]=max(element)
 
+        data3 = {}
+        for key, value in data_currents.items():
+            node, phase = key.split(".", 1)
+            key_to_give = str(node).lower()
+            if node not in data3.keys():
+                data3[key_to_give] = {}
+            data3[key_to_give]["Phase " + phase] = value
+
+        ############################### Voltages ###################################
+        for i in range(len(nodeNames)):
+            raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
+            data_voltages[nodeNames[i]]={"max":max(voltages[i]), "min":min(voltages[i])}
 
         raw_data={"Voltages":raw_data_voltages, "Currents":raw_data_currents,"Losses":raw_data_losses}
 
@@ -373,19 +382,25 @@ class gridController(threading.Thread):
                 data2[node] = {}
             data2[node]["Phase " + phase] = value
 
-        data3 = {}
-        for key, value in data_currents.items():
-            node, phase = key.split(".", 1)
-            if node not in data3.keys():
-                data3[node] = {}
-            data3[node]["Phase " + phase] = value
 
-        #power = {"Transformer.transformer_20082": max(S_total)}
+
+
+        ###############################Max power in transformers###################################
+        S_total = []
+        mon_sample = []
+        for i in range(len(transformer_names)):
+            name_monitor="monitor_transformer_" + str(i)
+            logger.debug("i in sample monitor "+str(i)+" "+str(name_monitor))
+            S_total.append(self.sim.get_monitor_sample(name_monitor))
+        #logger.debug("S_total " + str(S_total))
+        #logger.debug("S_total[0] " + str(S_total[0]))
+        #logger.debug("S_total[0][0] " + str(S_total[0][0]))
         power={}
         for i in range(len(transformer_names)):
-            power["Transformer."+str(transformer_names[i])]=max(S_total[i][0])
-        data={"Voltages":data2, "Currents":data3,"Losses":data_losses, "Powers":power}
-        logger.debug("data "+str(data))
+            power["Transformer."+str(transformer_names[i])]=max(S_total[i])
+        logger.debug("power "+str(power))
+        data={"voltages":data2, "currents":data3,"losses":data_losses, "powers":power}
+        #logger.debug("data "+str(data))
 
 
 
