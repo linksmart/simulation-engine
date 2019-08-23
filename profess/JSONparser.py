@@ -53,27 +53,32 @@ class JsonParser:
         return self.topology
 
     def get_node_element_list(self):
+        logger.debug("get_node_element_list started")
         node_element_list = []
         storage_node_list = []
         pv_node_list = []
         if "radials" in self.topology:
             for radial_number in range(len(self.topology["radials"])):
                 if "storageUnits" in self.topology["radials"][radial_number].keys():
-                    storage_node_list = self.search(self.topology["radials"][radial_number]["storageUnits"], "bus1", "", True)
+                    for element in self.search(self.topology["radials"][radial_number]["storageUnits"], "bus1", "", True):
+                        pattern = re.compile("[^.]*")  # regex to find professID
+                        m = pattern.findall(element)
+                        element = m[0]
+                        storage_node_list.append(element)
                     node_list=storage_node_list
 
+
                 if "photovoltaics" in self.topology["radials"][radial_number].keys():
-                    pv_node_list = self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True)
+                    for element in self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True):
+                        pattern = re.compile("[^.]*")  # regex to find professID
+                        m = pattern.findall(element)
+                        element = m[0]
+                        pv_node_list.append(element)
                     node_list=pv_node_list
                 if storage_node_list is not None and pv_node_list is not None:
                     node_list= storage_node_list + list(set(pv_node_list) - set(storage_node_list))
-                    #print(storage_node_list)
                 count = 0
                 for element in node_list:
-
-                    pattern = re.compile("[^.]*")  # regex to find professID
-                    m = pattern.findall(element)
-                    element = m[0]
                     if "storageUnits" in self.topology["radials"][radial_number]:
                         for essunits in self.topology["radials"][radial_number]["storageUnits"]:
                             m = pattern.findall(essunits["bus1"])
@@ -116,7 +121,7 @@ class JsonParser:
 
                         # TODO PV etc
                     count = count + 1
-
+        logger.debug(node_element_list)
         return node_element_list
 
     def get_node_name_list(self):
