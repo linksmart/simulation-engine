@@ -244,11 +244,19 @@ def get_simulation_status(id):  # noqa: E501
     :rtype: float
     """
     try:
+        dir = os.path.join("data", str(id))
+        if not os.path.exists(dir):
+            return "Id not existing"
+        redis_db = RedisDB()
+        flag = redis_db.get("run:" + id)
+        logger.info("flag: " + str(flag))
+        if flag == None or flag == "created":
+            return "Simulation has not been started"
         logger.debug("#############Getting status#####################")
-        redis=RedisDB()
-        timestep=int(redis.get("timestep_"+str(id)))
+
+        timestep=int(redis_db.get("timestep_"+str(id)))
         logger.debug("timestep "+str(timestep))
-        sim_days=int(redis.get("sim_days_"+str(id)))
+        sim_days=int(redis_db.get("sim_days_"+str(id)))
         logger.debug("sim_days "+str(sim_days))
         status = (timestep / (sim_days-1)) * 100.0
     except Exception as e:

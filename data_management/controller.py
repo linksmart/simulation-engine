@@ -63,7 +63,7 @@ class gridController(threading.Thread):
                 if key == "storageUnits":
                     for element_intern in value:
                         soc_dict = {}
-                        logger.debug("element intern "+str(element_intern))
+                        #logger.debug("element intern "+str(element_intern))
                         soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"], "id":element_intern["id"]}
                         soc_list.append(soc_dict)
                         list_storages.append(element_intern)
@@ -143,6 +143,11 @@ class gridController(threading.Thread):
         # profess.json_parser.set_topology(data)
 
         self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
+        transformer_names=self.sim.get_transformer_names()
+        logger.debug("Transformer names: "+str(transformer_names))
+        logger.debug("Transformers in the circuit")
+        for i in range(len(transformer_names)):
+            self.sim.create_monitor("monitor_transformer_"+str(i), "Transformer."+str(transformer_names[i]),1,1)
 
         logger.debug("#####################################################################")
         logger.debug("Simulation of grid " + self.id + " started")
@@ -159,7 +164,8 @@ class gridController(threading.Thread):
         #self.sim.setVoltageBases(115, 4.16, 0.48)
         self.sim.setVoltageBases(self.input.get_voltage_bases())
         #self.sim.setMode("snap")
-        self.sim.setMode("daily")
+        #self.sim.setMode("daily")
+        self.sim.setMode("yearly")
         self.sim.setStepSize("hours")
         self.sim.setNumberSimulations(1)
         logger.info("Solution mode 2: " + str(self.sim.getMode()))
@@ -206,6 +212,11 @@ class gridController(threading.Thread):
             self.redisDB.set("timestep_"+str(self.id), i)
 
 
+            terminal=self.sim.get_monitor_terminals("mon_transformer")
+            logger.debug("Number of terminals in monitor "+str(terminal))
+
+
+
             #self.sim.get_power_Transformer("transformer_20082")
             if flag_is_storage:
             #if "storageUnits" in self.topology["radials"][0].keys():
@@ -222,14 +233,14 @@ class gridController(threading.Thread):
                 #soc_list=self.get_soc_list(self.topology)
                 soc_list_new = self.set_new_soc(soc_list)
 
-                """self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
-                self.profess.start_all()
-                profess_output=self.profess.wait_and_get_output()
-                logger.debug("output profess "+str(profess_output))"""
+                #self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+                #self.profess.start_all()
+                #profess_output=self.profess.wait_and_get_output()
+                #logger.debug("output profess "+str(profess_output))
                 #logger.debug("######################Ending profess##################################")
 
 
-                logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
+                """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
                 logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
                 logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
                 logger.debug("kW " + str(self.sim.getkWfromBattery("Akku1")))
@@ -260,7 +271,7 @@ class gridController(threading.Thread):
                         else:
                             logger.debug("Entered to discharging")
                             self.sim.setActivePowertoBatery("Akku1",0.5, max_charging_power_value)
-                logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))
+                logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))"""
 
                 #logger.debug("######################Ending profess##################################")
 
@@ -300,6 +311,7 @@ class gridController(threading.Thread):
 
         #logger.debug("volt finish "+str(voltages))
         logger.debug("#####################################################################################")
+
         data ={}
         data_voltages={}
         data_currents={}
@@ -309,18 +321,7 @@ class gridController(threading.Thread):
         raw_data_currents={}
         raw_data_losses={}
 
-        #import numpy as np
-
-        for i in range(len(nodeNames)):
-            raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
-            data_voltages[nodeNames[i]]={"max":max(voltages[i]), "min":min(voltages[i])}
-
-
-        #logger.debug("len element names "+str(len(elementNames)))
-        #logger.debug("len losses "+str(len(losses)))
-        #logger.debug("len losses[0] " + str(len(losses[0])))
-        #logger.debug("losses[0] " + str(losses[0]))
-        #logger.debug("len losses[0][0] " + str(len(losses[0][0])))
+        ############################### Losses ###################################
 
         for i in range(len_elementNames):
             raw_data_losses[elementNames[i]]=losses[i]
@@ -332,14 +333,27 @@ class gridController(threading.Thread):
             #logger.debug("max element "+str(max(element)))
             data_losses[elementNames[i]]= max(element)
 
-        #logger.debug("#####################################################################################")
+        ############################### Currents ###################################
         for i in range(len_nodeNamesCurrents):
-            raw_data_currents[nodeNamesCurrents[i]]=currents[i]
+            raw_data_currents[str(nodeNamesCurrents[i]).lower()]=currents[i]
 
         for i in range(len_nodeNamesCurrents):
             element= [abs(x) for x in currents[i]]
-            data_currents[nodeNamesCurrents[i]]=max(element)
+            key=nodeNamesCurrents[i]
+            data_currents[key]=max(element)
 
+        data3 = {}
+        for key, value in data_currents.items():
+            node, phase = key.split(".", 1)
+            key_to_give = str(node).lower()
+            if node not in data3.keys():
+                data3[key_to_give] = {}
+            data3[key_to_give]["Phase " + phase] = value
+
+        ############################### Voltages ###################################
+        for i in range(len(nodeNames)):
+            raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
+            data_voltages[nodeNames[i]]={"max":max(voltages[i]), "min":min(voltages[i])}
 
         raw_data={"Voltages":raw_data_voltages, "Currents":raw_data_currents,"Losses":raw_data_losses}
 
@@ -348,41 +362,30 @@ class gridController(threading.Thread):
             node, phase = key.split(".", 1)
             if node not in data2.keys():
                 data2[node] = {}
-            data2[node]["Phase_" + phase] = value
+            data2[node]["Phase " + phase] = value
 
-        data3 = {}
-        for key, value in data_currents.items():
-            node, phase = key.split(".", 1)
-            if node not in data3.keys():
-                data3[node] = {}
-            data3[node]["Phase_" + phase] = value
-
-        dummy_power = {"Transformer.transformer_20082": 70}
-        data={"Voltages":data2, "Currents":data3,"Losses":data_losses, "Powers":dummy_power}
-        logger.debug("data "+str(data))
+        ###############################Max power in transformers###################################
+        S_total = []
+        mon_sample = []
+        for i in range(len(transformer_names)):
+            name_monitor="monitor_transformer_" + str(i)
+            logger.debug("i in sample monitor "+str(i)+" "+str(name_monitor))
+            S_total.append(self.sim.get_monitor_sample(name_monitor))
+        #logger.debug("S_total " + str(S_total))
+        #logger.debug("S_total[0] " + str(S_total[0]))
+        #logger.debug("S_total[0][0] " + str(S_total[0][0]))
+        power={}
+        for i in range(len(transformer_names)):
+            power["Transformer."+str(transformer_names[i])]=max(S_total[i])
+        logger.debug("power "+str(power))
+        data={"voltages":data2, "currents":data3,"losses":data_losses, "powers":power}
+        #logger.debug("data "+str(data))
 
 
 
 
         result=data
-        """logger.debug("result YNodeOrder: "+str(self.sim.get_YNodeOrder()))
-        logger.debug("Length YNodeOrder: " + str(len(self.sim.get_YNodeOrder())))
-        logger.debug("#####################################################################")
-        logger.debug("Y current" + str(self.sim.get_YCurrents()))
-        logger.debug("Length Y current"+str(len(self.sim.get_YCurrents())))
-        logger.debug("#####################################################################")
-        logger.debug("All node names "+str(self.sim.get_node_names()))
-        logger.debug("Length All node names " + str(len(self.sim.get_node_names())))
-        logger.debug("#####################################################################")
-        logger.debug("All Element names "+str(self.sim.get_element_names()))
-        logger.debug("Length All Element names " + str(len(self.sim.get_element_names())))
-        logger.debug("Number of elements "+str(self.sim.get_number_of_elements()))
-        logger.debug("#####################################################################")
-        logger.debug("All losses " + str(self.sim.get_all_element_losses()))
-        logger.debug("Length All losses " + str(len(self.sim.get_all_element_losses())))
 
-        logger.debug("#####################################################################")
-        logger.debug("result "+str(result))"""
 
 
         fname = (str(self.id))+"_result"
@@ -395,6 +398,9 @@ class gridController(threading.Thread):
         path = os.path.join("data", str(self.id), fname_row)
         #self.utils.store_data_raw(path, raw_data)
         #logger.debug("Raw data successfully stored")
+        logger.debug("#####################################################################################")
+        logger.debug("##########################   Simulation End   #######################################")
+        logger.debug("#####################################################################################")
         self.redisDB.set(self.finish_status_key, "True")
 
 

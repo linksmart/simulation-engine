@@ -1,5 +1,6 @@
 version: '3'
 services:
+
   redis:
     image: redis:latest
     container_name: "redis_S4G"
@@ -12,8 +13,6 @@ services:
         max-size: "10m"
         max-file: "10"
     restart: "always"
-  
-
   se:
     build:
       context: ""
