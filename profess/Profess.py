@@ -15,6 +15,12 @@ class Profess:
         self.httpClass = Http_commands()
         self.json_parser=JsonParser()
         self.json_parser.set_topology(topology)
+        self.storage_mapping={"soc": "SoC_Value", "charge_efficiency":{"meta":"ESS_Charging_Eff"},"discharge_efficiency"
+        :{"meta":"ESS_Discharging_Eff"},"kw_rated":[{"meta":"ESS_Max_Charge_Power"},{"meta":"ESS_Max_Discharge_Power"}],
+                              "kwh_rated":{"meta":"ESS_Capacity"},"max_charging_power":{"meta":"ESS_Max_Charge_Power"},
+                              "max_discharging_power":{"meta":"ESS_Max_Charge_Power"},
+                              "storage_capacity":{"meta":"ESS_Capacity"}}
+        self.percentage_mapping=["charge_efficiency","soc","discharge_efficiency"]
         self.dummy_data = {"load": {
          "meta": {
              "pf_Load": 1
@@ -173,43 +179,24 @@ class Profess:
             profess_id= element
         json_data_of_node= self.dataList[node_number][node_name][profess_id]
         for radial_number in range(len(self.json_parser.topology["radials"])):
-            if "storageUnits" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number].keys():
-                if "soc" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number][
-                    "storageUnits"]:
-                    json_data_of_node["ESS"]["SoC_Value"] = \
-                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]["soc"] / 100
-                    logger.debug("SoC_Value set to "+ str(self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]["soc"] / 100))
-                if "charge_efficiency" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number][
-                    "storageUnits"]:
-                    json_data_of_node["ESS"]["meta"]["ESS_Charging_Eff"] = \
-                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                            "charge_efficiency"] / 100
-                    logger.debug("ESS_Charging_Eff set to "+ str(self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                            "charge_efficiency"] / 100))
-                if "discharge_efficiency" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number][
-                    "storageUnits"]:
-                    json_data_of_node["ESS"]["meta"]["ESS_Discharging_Eff"] = \
-                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                            "discharge_efficiency"] / 100
-                    logger.debug("ESS_Discharging_Eff set to "+ str(self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                            "discharge_efficiency"] / 100))
-                if "kw_rated" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number][
-                    "storageUnits"]:
-                    json_data_of_node["ESS"]["meta"]["ESS_Max_Charge_Power"] = \
-                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                            "kw_rated"]
-                    logger.debug("ESS_Max_Charge_Power set to "+ str(self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                            "kw_rated"]))
-                if "kw_rated" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]:
-                    json_data_of_node["ESS"]["meta"]["ESS_Max_Discharge_Power"] = \
-                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                            "kw_rated"]
-                    logger.debug("ESS_Max_Discharge_Power set to "+ str(self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"][
-                            "kw_rated"]))
-                if "kwh_rated" in self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]:
-                    json_data_of_node["ESS"]["meta"]["ESS_Capacity"] = \
-                        self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]["kwh_rated"]
-                    logger.debug("ESS_Capacity set to "+ str(self.json_parser.get_node_element_list()[node_number][node_name][radial_number]["storageUnits"]["kwh_rated"]))
+            node_element_list=self.json_parser.get_node_element_list()[node_number][node_name][radial_number]
+            if "storageUnits" in node_element_list.keys():
+                for element in self.storage_mapping:
+                    if element in node_element_list["storageUnits"]:
+                        percentage = 1
+                        if element in self.percentage_mapping:
+                            percentage=100
+                        if type(self.storage_mapping[element]) == dict:
+                            json_data_of_node["ESS"]["meta"][self.storage_mapping[element]["meta"]]=node_element_list["storageUnits"][element]/percentage
+                        if type(self.storage_mapping[element]) == list:
+                            for part in self.storage_mapping[element]:
+                                if "meta" in part:
+                                    json_data_of_node["ESS"]["meta"][part["meta"]] = node_element_list["storageUnits"][element]/percentage
+                                else:
+                                    json_data_of_node["ESS"][part] = node_element_list["storageUnits"][element]/percentage
+                        if type(self.storage_mapping[element]) == str:
+                            json_data_of_node["ESS"][self.storage_mapping[element]] = node_element_list["storageUnits"][element]/percentage
+
 
     def set_config_json(self, node_name, profess_id, config_json):
         logger.debug("set_config_json "+node_name+" ,"+profess_id)
@@ -228,8 +215,9 @@ class Profess:
         logger.debug(pv_profiles)
         logger.debug(price_profiles)
         logger.debug(ess_con)
-        for nodeName in self.json_parser.get_node_name_list():
-            node_number = self.json_parser.get_node_name_list().index(nodeName)
+        node_name_list =self.json_parser.get_node_name_list()
+        for nodeName in node_name_list:
+            node_number = node_name_list.index(nodeName)
             if load_profiles is not None:
                 logger.debug("load profile set")
                 for element in load_profiles:
@@ -252,32 +240,45 @@ class Profess:
                                                     json_data_of_node["load"]["P_Load_T"][value]
                                 three_phase.append(three_phase_value)
                             json_data_of_node["load"]["P_Load"] = three_phase
-                        if nodeName + ".1.2.3" in phase:
-                            json_data_of_node["load"]["P_Load"] = phase[nodeName + ".1.2.3"]
+                        if nodeName + ".1.2.3" or nodeName in phase:
+                            if nodeName in phase:
+                                json_data_of_node["load"]["P_Load"] = phase[nodeName]
+                                for_list = phase[nodeName]
+                            if nodeName + ".1.2.3" in phase:
+                                json_data_of_node["load"]["P_Load"] = phase[nodeName + ".1.2.3"]
+                                for_list = phase[nodeName + ".1.2.3"]
                             single_phase = []
-                            for value in phase[nodeName + ".1.2.3"]:
+                            for value in for_list:
                                 value = value / 3
                                 single_phase.append(value)
                             json_data_of_node["load"]["P_Load_R"] = copy.deepcopy(single_phase)
                             json_data_of_node["load"]["P_Load_S"] = copy.deepcopy(single_phase)
                             json_data_of_node["load"]["P_Load_T"] = copy.deepcopy(single_phase)
-
+            else: logger.debug("no load profile was given")
             if pv_profiles is not None:
                 for element in pv_profiles:
+                    logger.debug(element)
                     profess_id = self.get_profess_id(nodeName)
                     json_data_of_node = self.dataList[node_number][nodeName][profess_id]
                     if nodeName in element:
                         phase = element[nodeName]
-                        if nodeName + ".1.2.3" in phase:
-                            json_data_of_node["photovoltaic"]["P_PV"] = phase[nodeName + ".1.2.3"]
+                        logger.debug("pv_profile match found")
+                        if nodeName + ".1.2.3" or nodeName in phase:
+                            if nodeName in phase:
+                                json_data_of_node["photovoltaic"]["P_PV"]= phase[nodeName]
+                                for_list=phase[nodeName]
+                            if nodeName + ".1.2.3" in phase:
+                                json_data_of_node["photovoltaic"]["P_PV"] = phase[nodeName + ".1.2.3"]
+                                for_list=phase[nodeName + ".1.2.3"]
                             single_phase = []
-                            for value in phase[nodeName + ".1.2.3"]:
+                            for value in for_list:
                                 value = value / 3
                                 single_phase.append(value)
                             json_data_of_node["photovoltaic"]["P_PV_R"] = copy.deepcopy(single_phase)
                             json_data_of_node["photovoltaic"]["P_PV_S"] = copy.deepcopy(single_phase)
                             json_data_of_node["photovoltaic"]["P_PV_T"] = copy.deepcopy(single_phase)
                             logger.debug("pv profile set")
+            else: logger.debug("no pv_profile was given")
             if ess_con is not None:
                 for element in ess_con:
                     profess_id = self.get_profess_id(nodeName)
@@ -286,6 +287,9 @@ class Profess:
                         phase = element[nodeName]
                         if nodeName + ".1.2.3" in phase:
                             json_data_of_node["generic"]["ESS_Control"] = phase[nodeName + ".1.2.3"]
+                            logger.debug("ess_con profile set")
+                        if nodeName in phase:
+                            json_data_of_node["generic"]["ESS_Control"] = phase[nodeName]
                             logger.debug("ess_con profile set")
             profess_id = self.get_profess_id(nodeName)
             json_data_of_node = self.dataList[node_number][nodeName][profess_id]
@@ -303,7 +307,7 @@ class Profess:
         nodeName=""
         name_list = self.json_parser.get_node_name_list()
         for name in name_list:
-            node_number = self.json_parser.get_node_name_list().index(name)
+            node_number = name_list.index(name)
             for element in self.dataList[node_number][name]:
                 if element==profess_id:
                     nodeName= name
@@ -323,18 +327,20 @@ class Profess:
 
     def set_up_profess(self,soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
         logging.debug("set_up_profess started")
-        self.set_data_list()
-        self.post_all_dummy_data()
+        if self.dataList == []:
+            self.set_data_list()
+            self.post_all_dummy_data()
         #TODO
         if soc_list is not None:
             if type(soc_list) is dict:
                 self.json_parser.set_topology(soc_list)
         self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                           ,ess_con=ess_con)
-        for nodeName in self.json_parser.get_node_name_list():
+        node_name_list = self.json_parser.get_node_name_list()
+        for nodeName in node_name_list:
             self.set_storage(nodeName)
             professID=self.get_profess_id(nodeName)
-            nodeNumber = self.json_parser.get_node_name_list().index(nodeName)
+            nodeNumber = node_name_list.index(nodeName)
             self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
         elements = self.json_parser.get_node_element_list()
         if soc_list is not None:
