@@ -18,7 +18,7 @@ class Profess:
         self.storage_mapping={"soc": "SoC_Value", "charge_efficiency":{"meta":"ESS_Charging_Eff"},"discharge_efficiency"
         :{"meta":"ESS_Discharging_Eff"},"kw_rated":[{"meta":"ESS_Max_Charge_Power"},{"meta":"ESS_Max_Discharge_Power"}],
                               "kwh_rated":{"meta":"ESS_Capacity"},"max_charging_power":{"meta":"ESS_Max_Charge_Power"},
-                              "max_discharging_power":{"meta":"ESS_Max_Charge_Power"},
+                              "max_discharging_power":{"meta":"ESS_Max_Discharge_Power"},
                               "storage_capacity":{"meta":"ESS_Capacity"}}
         self.percentage_mapping=["charge_efficiency","soc","discharge_efficiency"]
         self.dummy_data = {"load": {
@@ -46,7 +46,9 @@ class Profess:
 "ESS":{
 "meta":{
 "ESS_Max_SoC":1,
-"ESS_Min_SoC":0.2
+"ESS_Min_SoC":0.2,
+"ESS_Discharging_Eff":0.95,
+"ESS_Charging_Eff":0.95
 }
 }
 }
@@ -99,7 +101,7 @@ class Profess:
         data=self.dataList
         something_running = True
         while something_running:
-            time.sleep(.3)
+            time.sleep(5)
             opt_status = self.get_optimization_status()
             logging.debug("optimization status: ")
             logging.debug(opt_status)
@@ -134,7 +136,7 @@ class Profess:
             print(json_response +  ": " +profess_id)
             logger.debug(json_response +  ": " +profess_id)
             logger.debug("status code " +str(response.status_code))
-            if response.status_code == 200:
+            if response.status_code == 200 and json_response=="System started succesfully":
                 return 1
             else:
                 return 0
@@ -153,8 +155,9 @@ class Profess:
                     model = storage["storageUnits"]["optimization_model"]
             if optimization_model is None:
                 optimization_model=model
-            self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name))
-
+            if not self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name)):
+                return 0
+        return 1
     def stop(self, profess_id):
         if profess_id != "":
             response = self.httpClass.put(self.domain + "optimization/stop/" + profess_id)
