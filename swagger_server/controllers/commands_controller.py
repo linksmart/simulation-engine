@@ -90,6 +90,8 @@ class CommandController:
         self.id = id
         self.duration = json_object["sim_duration_in_hours"]
         logger.debug("Duration: "+str(self.duration))
+        self.redisDB.set("timestep_" + str(id), str(0))
+        self.redisDB.set("sim_days_" + str(id), str(self.duration))
 
         #gridController = gControl()
         #self.factory= jsonpickle.decode(self.redisDB.get("factory: "+id))
@@ -296,8 +298,7 @@ def run_simulation(id, body=None):  # noqa: E501
         else:
             try:
                 #start random values for the status to become zero
-                redisDB.set("timestep_" + str(id), 0)
-                redisDB.get("sim_days_" + str(id),10)
+
                 msg = variable.run(id, data)
                 if msg == 0:
                     msg_to_send = "System started succesfully"

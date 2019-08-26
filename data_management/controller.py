@@ -172,7 +172,7 @@ class gridController(threading.Thread):
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
         numSteps=self.sim_days
-        self.redisDB.set("sim_days_"+str(self.id),numSteps)
+        #self.redisDB.set("sim_days_"+str(self.id),numSteps)
         #numSteps=3
         logger.debug("Number of steps: "+str(numSteps))
         result=[]
