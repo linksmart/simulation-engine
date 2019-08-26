@@ -15,7 +15,10 @@ class JsonParser:
         self.topology = ""
 
     def search(self, search_in, search_for, search_id, returns_all):
-
+        #logger.debug("search ")
+        #logger.debug(search_in)
+        #logger.debug(search_for)
+        #logger.debug(search_id)
         search_result = []
         dummy_list = search_in
         if type(search_in) == list:
@@ -46,14 +49,21 @@ class JsonParser:
         return search_result
 
     def set_topology(self, json_topology):
+        logger.debug("topology was changed --------------------------------------------------------------------------")
+
+        logger.debug(self.topology)
         global topology
+
         self.topology = json_topology
+        logger.debug("to: ")
+        logger.debug(self.topology)
 
     def get_topology(self):
         return self.topology
 
     def get_node_element_list(self):
-        logger.debug("get_node_element_list started")
+        ##logger.debug("get_node_element_list started")
+
         node_element_list = []
         storage_node_list = []
         pv_node_list = []
@@ -66,6 +76,7 @@ class JsonParser:
                         element = m[0]
                         storage_node_list.append(element)
                     node_list=storage_node_list
+                    ##logger.debug("storages found")
 
 
                 if "photovoltaics" in self.topology["radials"][radial_number].keys():
@@ -75,8 +86,11 @@ class JsonParser:
                         element = m[0]
                         pv_node_list.append(element)
                     node_list=pv_node_list
+                    ##logger.debug("pvs found")
                 if storage_node_list is not None and pv_node_list is not None:
                     node_list= storage_node_list + list(set(pv_node_list) - set(storage_node_list))
+                ##logger.debug("list of nodes with pv or ess :")
+                ##logger.debug(node_list)
                 count = 0
                 for element in node_list:
                     if "storageUnits" in self.topology["radials"][radial_number]:
@@ -114,14 +128,20 @@ class JsonParser:
                     #print(element)
                     #print(count)
                     #print(node_element_list)
+
                     if node_element_list[count][element] is not None:
+                        ##logger.debug("load was added to "+str(element))
+                        ##logger.debug(self.search(self.topology["radials"][radial_number]["loads"], "bus", element, False)+self.search(self.topology["radials"][radial_number]["loads"], "id", element, False))
                         node_element_list[count][element].append(
                             {"loads": (
-                                self.search(self.topology["radials"][radial_number]["loads"], "bus", element, False))})
-
+                                self.search(self.topology["radials"][radial_number]["loads"], "bus", element, False)+self.search(self.topology["radials"][radial_number]["loads"], "id", element, False))})
+                    else:
+                        logger.debug("no load was added")
                         # TODO PV etc
                     count = count + 1
-        logger.debug(node_element_list)
+        else: logger.debug("no radials where found")
+
+        ##logger.debug(node_element_list)
         return node_element_list
 
     def get_node_name_list(self):
