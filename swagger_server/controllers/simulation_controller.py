@@ -68,26 +68,17 @@ def create_simulation(body):  # noqa: E501
 
         ####generates an id an makes a directory with the id for the data and for the registry
         try:
-            #dir = os.path.join(os.getcwd(), "utils", str(id))
-            #if not os.path.exists(dir):
-                #os.makedirs(dir)
+
             dir_data = os.path.join("data",  str(id))
 
             if not os.path.exists(dir_data):
                 os.makedirs(dir_data)
-            #if not os.path.exists("data"+str(id)):
-                #os.makedirs("data"+str(id))
 
-
-            #os.chdir(r"./data")
             fname = str(id)+"_input_grid"
             logger.debug("File name = " + str(fname))
             path = os.path.join("data",str(id), fname)
             utils.store_data(path, data)
-            #f = open(fname,'w')
-            #json.dump(data, f, ensure_ascii=False, indent=2)
-            #f.close()
-            #os.chdir(r"../")
+
         except Exception as e:
             logger.error(e)
 
@@ -124,25 +115,13 @@ def get_simulation_result(id):  # noqa: E501
 
     :rtype: Simulation result - array of nodes, and corresponding voltage
     """
-    #factory= ThreadFactory(id)
-    #variable.set(id, factory)
-    #result = factory.gridController.results()
-    #logger.info("Get Error")
+
     try:
         fname = str(id) + "_result"
         logger.debug("File name = " + str(fname))
         path = os.path.join("data", str(id), fname)
         result = utils.get_stored_data(path)
 
-
-        """os.chdir(r"./data")
-        f = open(str(id)+"_result") #open(str(id)+"_results.txt")
-        #logger.debug("GET file "+str(f))
-        content = f.read()
-        #logger.info(content)
-        result = json.loads(content)
-        f.close()
-        os.chdir(r"../")"""
     except Exception as e:
         logger.error(e)
         result = e
@@ -158,19 +137,16 @@ def delete_simulation(id):  # noqa: E501
 
     :rtype: None
     """
-    """factory= ThreadFactory(id)
-    try:
-        factory.gridController.disableCircuit(id)
-        status = 'Simulation ' + id + ' deleted!'
-    except:
-        status = "Could not delete Simulation " + id
-    return status"""
+
     status = "None"
     try:
-        util.rmfile(id, "data")
-        status = 'Simulation ' + id + ' deleted!'
+        import shutil
+        folder_name = os.path.join("data", str(id))
+        shutil.rmtree(folder_name)
+        #util.rmfile(id, "data")
+        status = 'Simulation ' + str(id) + ' deleted!'
     except:
-        status = "Could not delete Simulation " + id
+        status = "ERROR: Could not delete Simulation " + str(id)
     return status
 
 def mod_dict(data, k, v):
@@ -199,6 +175,17 @@ def update_simulation():  # noqa: E501 ##TODO: work in progress
     key = connexion.request.args.get('key')
     value = connexion.request.args.get('value')
     try:
+        dir_data = os.path.join("data", str(fileid))
+
+        if not os.path.exists(dir_data):
+            return "Id not existing"
+
+        fname = str(fileid) + "_input_grid"
+        logger.debug("File name = " + str(fname))
+        path = os.path.join("data", str(fileid), fname)
+
+
+
         os.chdir(r"./data")
         f = open(fileid+"_input_grid", 'a') #open(str(id)+"_results.txt")
         #logger.debug("GET file "+str(f))
@@ -206,6 +193,7 @@ def update_simulation():  # noqa: E501 ##TODO: work in progress
         #logger.info(content)
         data = json.loads(content)
         f.close()
+        utils.store_data(path, data)
         os.chdir(r"../")
         #key = body[0]
         #value = 
