@@ -150,6 +150,12 @@ class OpenDSS:
 
         return S_total
 
+    def get_total_losses(self):
+        return dss.Circuit.Losses()
+
+    def get_total_power(self):
+        return dss.Circuit.TotalPower()
+
     def setActivePowertoBatery(self,battery_name, power, max_power):
         self.set_active_element(battery_name)
         """storageName = "Storage.Akku1"

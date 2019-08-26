@@ -190,6 +190,7 @@ class gridController(threading.Thread):
         voltages = [[] for i in range(len(nodeNames))]
         currents = [[] for i in range(len_nodeNamesCurrents)]
         losses = [[] for i in range(len_elementNames)]
+        total_losses = []
         powers = [[] for i in range(len(nodeNames))]
 
         soc_list = self.get_soc_list(self.topology)
@@ -291,22 +292,19 @@ class gridController(threading.Thread):
 
 
             puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
-            #logger.debug("Voltage "+str(puVoltages[0]))
+            tot_losses = self.sim.get_total_losses()
+
             for i in range(len_nodeNames):
                 voltages[i].append(puVoltages[i])
 
             for i in range(len_elementNames):
-                #logger.debug("Step "+str(i))
-                #logger.debug("len Losses " + str(len(Losses)))
                 number = int(i+(len_elementNames))
-                #logger.debug("Number "+str(number))
-                #logger.debug("complex number "+str(complex(Losses[i], Losses[number])))
                 losses[i].append(complex(Losses[i], Losses[number]))
-                #logger.debug("len losses intern " + str(len(losses)))
-                #logger.debug("len losses intern[i] " + str(len(losses[i])))
 
             for i in range(len_nodeNamesCurrents):
                 currents[i].append(complex(Currents[i], Currents[int(i+(len_nodeNamesCurrents))]))
+
+            total_losses.append(complex(tot_losses[0],tot_losses[1]))
 
 
         #logger.debug("volt finish "+str(voltages))
@@ -327,12 +325,16 @@ class gridController(threading.Thread):
             raw_data_losses[elementNames[i]]=losses[i]
 
         for i in range(len_elementNames):
-            #losses[i] = [max(abs(x)) for x in losses[i]]
             element= [abs(x) for x in losses[i]]
-            #logger.debug("element "+str(element)+" type "+str(type(element)))
-            #logger.debug("max element "+str(max(element)))
             data_losses[elementNames[i]]= max(element)
 
+        abs_total_losses=[]
+        for element in total_losses:
+            abs_total_losses.append(abs(element))
+        data_losses["circuit_total_losses"]=max(abs_total_losses)
+
+        logger.debug("total_losses " + str(total_losses))
+        #data_losses
         ############################### Currents ###################################
         for i in range(len_nodeNamesCurrents):
             raw_data_currents[str(nodeNamesCurrents[i]).lower()]=currents[i]
@@ -346,16 +348,15 @@ class gridController(threading.Thread):
         for key, value in data_currents.items():
             node, phase = key.split(".", 1)
             key_to_give = str(node).lower()
-            if node not in data3.keys():
+            if key_to_give not in data3.keys():
                 data3[key_to_give] = {}
             data3[key_to_give]["Phase " + phase] = value
+
 
         ############################### Voltages ###################################
         for i in range(len(nodeNames)):
             raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
             data_voltages[nodeNames[i]]={"max":max(voltages[i]), "min":min(voltages[i])}
-
-        raw_data={"Voltages":raw_data_voltages, "Currents":raw_data_currents,"Losses":raw_data_losses}
 
         data2 = {}
         for key, value in data_voltages.items():
@@ -381,6 +382,7 @@ class gridController(threading.Thread):
         data={"voltages":data2, "currents":data3,"losses":data_losses, "powers":power}
         #logger.debug("data "+str(data))
 
+        raw_data = {"Voltages": raw_data_voltages, "Currents": raw_data_currents, "Losses": raw_data_losses}
 
 
 
