@@ -321,6 +321,7 @@ class gridController(threading.Thread):
         raw_data_voltages={}
         raw_data_currents={}
         raw_data_losses={}
+        raw_data_power={}
 
         ############################### Losses ###################################
 
@@ -332,6 +333,7 @@ class gridController(threading.Thread):
             data_losses[elementNames[i]]= max(element)
 
         abs_total_losses=[]
+        raw_data_losses["circuit_total_losses"]=total_losses
         for element in total_losses:
             abs_total_losses.append(abs(element))
         data_losses["circuit_total_losses"]=max(abs_total_losses)
@@ -378,12 +380,13 @@ class gridController(threading.Thread):
 
         power={}
         for i in range(len(transformer_names)):
+            raw_data_power[transformer_names[i]]=S_total[i]
             power["Transformer."+str(transformer_names[i])]=max(S_total[i])
-        logger.debug("power "+str(power))
+        #logger.debug("power "+str(power))
         data={"voltages":data2, "currents":data3,"losses":data_losses, "powers":power}
 
 
-        raw_data = {"Voltages": raw_data_voltages, "Currents": raw_data_currents, "Losses": raw_data_losses}
+        raw_data = {"voltages": raw_data_voltages, "currents": raw_data_currents, "losses": raw_data_losses, "powers": raw_data_power}
 
 
 
@@ -399,8 +402,8 @@ class gridController(threading.Thread):
         logger.debug("Stroring raw data in data folder")
         fname_row = (str(self.id)) + "_result_row.json"
         path = os.path.join("data", str(self.id), fname_row)
-        #self.utils.store_data_raw(path, raw_data)
-        #logger.debug("Raw data successfully stored")
+        self.utils.store_data_raw(path, raw_data)
+        logger.debug("Raw data successfully stored")
         logger.debug("#####################################################################################")
         logger.debug("##########################   Simulation End   #######################################")
         logger.debug("#####################################################################################")

@@ -42,16 +42,18 @@ class Utils(metaclass=Singleton):
 
 
     def store_data_raw(self, fname, data):
-        import pickle
+
         path = self.get_path(fname)
         #folder_path = self.getFolderPath(path)
         logger.debug("path " + str(path))
-        #path=self.get_path(fname)
-        #logger.debug("folderpath "+str(folder_path))
+
         try:
 
-            with open(path, 'w', encoding='utf-8') as outfile:
-                pickle.dumps(data, outfile) # working
+            #with open(path, "wb") as outfile:
+                #outfile.write(str(data).encode('utf8'))
+
+            with open(path, "w") as outfile:
+                outfile.write(str(data))
 
             logger.debug("input data saved in " + str(path))
         except Exception as e:
@@ -60,7 +62,7 @@ class Utils(metaclass=Singleton):
 
     def get_path(self, relative_path):
         path_to_send = os.path.abspath(relative_path)
-        logger.debug("abs path " + str(path_to_send))
+        #logger.debug("abs path " + str(path_to_send))
         return path_to_send
 
     def isFile(self, path):
