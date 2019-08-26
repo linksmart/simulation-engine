@@ -88,8 +88,9 @@ class CommandController:
     def run(self, id, json_object):
         logger.debug("Run in command controller started")
         self.id = id
-        self.duration = json_object["sim_duration_in_days"]
+        self.duration = json_object["sim_duration_in_hours"]
         logger.debug("Duration: "+str(self.duration))
+        self.redisDB.set("timestep_" + str(self.id), 0)
         #gridController = gControl()
         #self.factory= jsonpickle.decode(self.redisDB.get("factory: "+id))
         #self.redisDB.get("factory: " + id)

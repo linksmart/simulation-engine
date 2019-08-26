@@ -200,7 +200,7 @@ class OpenDSS:
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)"""
             percentage_charge = (power / max_power) * 100
-            dss_string = "Storage." + str(battery_name) + ".kW=" + str(power)
+            #dss_string = "Storage." + str(battery_name) + ".kW=" + str(power)
             dss_string = "Storage." + str(battery_name) + ".%Discharge=" + str(int(percentage_charge))
             #logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)

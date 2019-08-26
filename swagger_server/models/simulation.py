@@ -15,11 +15,11 @@ class Simulation(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, sim_duration_in_days: int=None, threshold_low: float=None, threshold_medium: float=None, threshold_high: float=None):  # noqa: E501
+    def __init__(self, sim_duration_in_hours: int=None, threshold_low: float=None, threshold_medium: float=None, threshold_high: float=None):  # noqa: E501
         """Simulation - a model defined in Swagger
 
-        :param sim_duration_in_days: The sim_duration_in_days of this Simulation.  # noqa: E501
-        :type sim_duration_in_days: int
+        :param sim_duration_in_hours: The sim_duration_in_hours of this Simulation.  # noqa: E501
+        :type sim_duration_in_hours: int
         :param threshold_low: The threshold_low of this Simulation.  # noqa: E501
         :type threshold_low: float
         :param threshold_medium: The threshold_medium of this Simulation.  # noqa: E501
@@ -28,20 +28,20 @@ class Simulation(Model):
         :type threshold_high: float
         """
         self.swagger_types = {
-            'sim_duration_in_days': int,
+            'sim_duration_in_hours': int,
             'threshold_low': float,
             'threshold_medium': float,
             'threshold_high': float
         }
 
         self.attribute_map = {
-            'sim_duration_in_days': 'sim_duration_in_days',
+            'sim_duration_in_hours': 'sim_duration_in_hours',
             'threshold_low': 'thresholdLow',
             'threshold_medium': 'thresholdMedium',
             'threshold_high': 'thresholdHigh'
         }
 
-        self._sim_duration_in_days = sim_duration_in_days
+        self._sim_duration_in_hours = sim_duration_in_hours
         self._threshold_low = threshold_low
         self._threshold_medium = threshold_medium
         self._threshold_high = threshold_high
@@ -58,27 +58,27 @@ class Simulation(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def sim_duration_in_days(self) -> int:
-        """Gets the sim_duration_in_days of this Simulation.
+    def sim_duration_in_hours(self) -> int:
+        """Gets the sim_duration_in_hours of this Simulation.
 
 
-        :return: The sim_duration_in_days of this Simulation.
+        :return: The sim_duration_in_hours of this Simulation.
         :rtype: int
         """
-        return self._sim_duration_in_days
+        return self._sim_duration_in_hours
 
-    @sim_duration_in_days.setter
-    def sim_duration_in_days(self, sim_duration_in_days: int):
-        """Sets the sim_duration_in_days of this Simulation.
+    @sim_duration_in_hours.setter
+    def sim_duration_in_hours(self, sim_duration_in_hours: int):
+        """Sets the sim_duration_in_hours of this Simulation.
 
 
-        :param sim_duration_in_days: The sim_duration_in_days of this Simulation.
-        :type sim_duration_in_days: int
+        :param sim_duration_in_hours: The sim_duration_in_hours of this Simulation.
+        :type sim_duration_in_hours: int
         """
-        if sim_duration_in_days is None:
-            raise ValueError("Invalid value for `sim_duration_in_days`, must not be `None`")  # noqa: E501
+        if sim_duration_in_hours is None:
+            raise ValueError("Invalid value for `sim_duration_in_hours`, must not be `None`")  # noqa: E501
 
-        self._sim_duration_in_days = sim_duration_in_days
+        self._sim_duration_in_hours = sim_duration_in_hours
 
     @property
     def threshold_low(self) -> float:

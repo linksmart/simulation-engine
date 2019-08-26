@@ -136,8 +136,6 @@ class gridController(threading.Thread):
         logger.debug("profess url: " + str(self.domain))
         self.profess = Profess(self.domain, self.topology)
 
-        self.profess.json_parser.set_topology(common)
-
         # ----------PROFILES----------------#
         self.profiles = Profiles()
         # profess.json_parser.set_topology(data)
@@ -234,10 +232,15 @@ class gridController(threading.Thread):
                 #soc_list=self.get_soc_list(self.topology)
                 soc_list_new = self.set_new_soc(soc_list)
 
-                #self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
-                #self.profess.start_all()
-                #profess_output=self.profess.wait_and_get_output()
-                #logger.debug("output profess "+str(profess_output))
+                self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+                status_profess=self.profess.start_all()
+                if not status_profess:
+                    profess_output=self.profess.wait_and_get_output()
+                    logger.debug("output profess " + str(profess_output))
+                else:
+                    logger.error("OFW instances could not be started")
+                    self.redisDB.set(self.finish_status_key, "True")
+
                 #logger.debug("######################Ending profess##################################")
 
 
@@ -370,17 +373,15 @@ class gridController(threading.Thread):
         mon_sample = []
         for i in range(len(transformer_names)):
             name_monitor="monitor_transformer_" + str(i)
-            logger.debug("i in sample monitor "+str(i)+" "+str(name_monitor))
+            #logger.debug("i in sample monitor "+str(i)+" "+str(name_monitor))
             S_total.append(self.sim.get_monitor_sample(name_monitor))
-        #logger.debug("S_total " + str(S_total))
-        #logger.debug("S_total[0] " + str(S_total[0]))
-        #logger.debug("S_total[0][0] " + str(S_total[0][0]))
+
         power={}
         for i in range(len(transformer_names)):
             power["Transformer."+str(transformer_names[i])]=max(S_total[i])
         logger.debug("power "+str(power))
         data={"voltages":data2, "currents":data3,"losses":data_losses, "powers":power}
-        #logger.debug("data "+str(data))
+
 
         raw_data = {"Voltages": raw_data_voltages, "Currents": raw_data_currents, "Losses": raw_data_losses}
 

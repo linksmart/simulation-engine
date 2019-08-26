@@ -7,7 +7,6 @@ logger = logging.getLogger(__file__)
 
 class Http_commands:
     def __init__(self):
-        print("Http_commands created.")
         logging.debug("Http_commands created.")
 
 

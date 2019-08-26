@@ -54,10 +54,8 @@ class Profess:
 }
         self.list_with_desired_output_words=["P_ESS_Output", "P_PV_Output", "P_PV_R_Output", "P_PV_S_Output"
             , "P_PV_T_Output", "Q_PV_Output", "Q_PV_R_Output", "Q_PV_S_Output", "Q_PV_T_Output"]
-        print("profess class created")
+
         logger.debug("Profess instance created")
-        logger.debug("Profess was started with "+ domain)
-        logger.debug(topology)
 
     def post_model(self, model_name, model_data):
         response=self.httpClass.put(self.domain + "models/" + model_name, model_data)
@@ -103,15 +101,15 @@ class Profess:
         while something_running:
             time.sleep(5)
             opt_status = self.get_optimization_status()
-            logging.debug("optimization status: ")
-            logging.debug(opt_status)
+            logger.debug("optimization status: ")
+            logger.debug(opt_status)
             something_running = False
             for element in data:
                 for value in element:
                     for key in element[value]:
                         if opt_status["status"][key]["status"] == "running":
                             something_running = True
-                            logging.debug("An optimization is still running "+key)
+                            logger.debug("An optimization is still running "+key)
         output_list=[]
         for element in data:
             for value in element:
@@ -146,7 +144,7 @@ class Profess:
             return 0
 
     def start_all(self, optimization_model=None):
-        logger.debug("All opzimizations are being started.")
+        logger.debug("All optimizations are being started.")
         for node_name in self.json_parser.get_node_name_list():
             element_node=(next(item for item in self.json_parser.get_node_element_list() if node_name in item))
             for item in element_node[node_name]:
@@ -156,14 +154,15 @@ class Profess:
             if optimization_model is None:
                 optimization_model=model
             if not self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name)):
-                return 0
-        return 1
+                return 1
+        return 0
+
     def stop(self, profess_id):
         if profess_id != "":
             response = self.httpClass.put(self.domain + "optimization/stop/" + profess_id)
             json_response = response.json()
             print(json_response)
-            logging.debug(json_response+" :"+profess_id)
+            logger.debug(json_response+" :"+str(profess_id))
         else:
             print("No Input to stop declared")
 
@@ -213,16 +212,17 @@ class Profess:
         self.dataList[node_number][node_name][profess_id]= {}
 
     def set_profiles(self, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
-        logger.debug("set_profiles ")
-        logger.debug(load_profiles)
+        logger.debug("setting_profiles ")
+        """logger.debug(load_profiles)
         logger.debug(pv_profiles)
         logger.debug(price_profiles)
-        logger.debug(ess_con)
+        logger.debug(ess_con)"""
         node_name_list =self.json_parser.get_node_name_list()
         for nodeName in node_name_list:
+
             node_number = node_name_list.index(nodeName)
             if load_profiles is not None:
-                logger.debug("load profile set")
+                #logger.debug("load profile set")
                 for element in load_profiles:
                     if nodeName in element:
                         profess_id = self.get_profess_id(nodeName)
@@ -260,12 +260,11 @@ class Profess:
             else: logger.debug("no load profile was given")
             if pv_profiles is not None:
                 for element in pv_profiles:
-                    logger.debug(element)
                     profess_id = self.get_profess_id(nodeName)
                     json_data_of_node = self.dataList[node_number][nodeName][profess_id]
                     if nodeName in element:
                         phase = element[nodeName]
-                        logger.debug("pv_profile match found")
+                        #logger.debug("pv_profile match found")
                         if nodeName + ".1.2.3" or nodeName in phase:
                             if nodeName in phase:
                                 json_data_of_node["photovoltaic"]["P_PV"]= phase[nodeName]
@@ -280,7 +279,7 @@ class Profess:
                             json_data_of_node["photovoltaic"]["P_PV_R"] = copy.deepcopy(single_phase)
                             json_data_of_node["photovoltaic"]["P_PV_S"] = copy.deepcopy(single_phase)
                             json_data_of_node["photovoltaic"]["P_PV_T"] = copy.deepcopy(single_phase)
-                            logger.debug("pv profile set")
+                            #logger.debug("pv profile set")
             else: logger.debug("no pv_profile was given")
             if ess_con is not None:
                 for element in ess_con:
@@ -290,15 +289,15 @@ class Profess:
                         phase = element[nodeName]
                         if nodeName + ".1.2.3" in phase:
                             json_data_of_node["generic"]["ESS_Control"] = phase[nodeName + ".1.2.3"]
-                            logger.debug("ess_con profile set")
+                            #logger.debug("ess_con profile set")
                         if nodeName in phase:
                             json_data_of_node["generic"]["ESS_Control"] = phase[nodeName]
-                            logger.debug("ess_con profile set")
+                            #logger.debug("ess_con profile set")
             profess_id = self.get_profess_id(nodeName)
             json_data_of_node = self.dataList[node_number][nodeName][profess_id]
             if price_profiles is not None:
                 json_data_of_node["generic"]["Price_Forecast"] = price_profiles #No reserved words for price
-                logger.debug("price profile set")
+                #logger.debug("price profile set")
 
     def get_profess_id(self, nodeName):
         node_number = self.json_parser.get_node_name_list().index(nodeName)
@@ -317,10 +316,9 @@ class Profess:
 
         return nodeName
     def set_data_list(self):
-        logger.debug("data for nodes is set")
+        #logger.debug("data for nodes is set")
         node_list = self.json_parser.get_node_element_list()
-        print("node element list ")
-        print(node_list)
+        logger.debug("node element list "+str(node_list))
         for element in range(len(node_list)):
             for nodeKey in (node_list[element]):
                 node_list[element] = {nodeKey: {}}
@@ -329,7 +327,7 @@ class Profess:
 
 
     def set_up_profess(self,soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
-        logging.debug("set_up_profess started")
+        logger.debug("set_up_profess started")
         if self.dataList == []:
             self.set_data_list()
             self.post_all_dummy_data()

@@ -49,14 +49,10 @@ class JsonParser:
         return search_result
 
     def set_topology(self, json_topology):
+        self.topology = json_topology
+        logger.debug(self.topology)
         logger.debug("topology was changed --------------------------------------------------------------------------")
 
-        logger.debug(self.topology)
-        global topology
-
-        self.topology = json_topology
-        logger.debug("to: ")
-        logger.debug(self.topology)
 
     def get_topology(self):
         return self.topology
@@ -67,7 +63,8 @@ class JsonParser:
         node_element_list = []
         storage_node_list = []
         pv_node_list = []
-        if "radials" in self.topology:
+        #logger.debug("topology "+str(self.topology))
+        if "radials" in self.topology.keys():
             for radial_number in range(len(self.topology["radials"])):
                 if "storageUnits" in self.topology["radials"][radial_number].keys():
                     for element in self.search(self.topology["radials"][radial_number]["storageUnits"], "bus1", "", True):
