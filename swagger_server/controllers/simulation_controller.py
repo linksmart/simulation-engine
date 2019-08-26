@@ -184,19 +184,14 @@ def update_simulation():  # noqa: E501 ##TODO: work in progress
         logger.debug("File name = " + str(fname))
         path = os.path.join("data", str(fileid), fname)
 
-
-
-        os.chdir(r"./data")
-        f = open(fileid+"_input_grid", 'a') #open(str(id)+"_results.txt")
+        f = open(path, 'a') #open(str(id)+"_results.txt")
         #logger.debug("GET file "+str(f))
         content = f.read()
         #logger.info(content)
         data = json.loads(content)
         f.close()
-        utils.store_data(path, data)
-        os.chdir(r"../")
-        #key = body[0]
-        #value = 
+        #utils.store_data(path, data)
+
         mod_dict(data, key, value)
     except:
         logger.debug("Error updating")

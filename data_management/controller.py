@@ -232,14 +232,14 @@ class gridController(threading.Thread):
                 #soc_list=self.get_soc_list(self.topology)
                 soc_list_new = self.set_new_soc(soc_list)
 
-                self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+                """self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
                 status_profess=self.profess.start_all()
                 if not status_profess:
                     profess_output=self.profess.wait_and_get_output()
                     logger.debug("output profess " + str(profess_output))
                 else:
                     logger.error("OFW instances could not be started")
-                    self.redisDB.set(self.finish_status_key, "True")
+                    #self.redisDB.set(self.finish_status_key, "True")"""
 
                 #logger.debug("######################Ending profess##################################")
 
