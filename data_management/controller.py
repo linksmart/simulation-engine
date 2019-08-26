@@ -336,7 +336,7 @@ class gridController(threading.Thread):
             abs_total_losses.append(abs(element))
         data_losses["circuit_total_losses"]=max(abs_total_losses)
 
-        logger.debug("total_losses " + str(total_losses))
+        #logger.debug("total_losses " + str(total_losses))
         #data_losses
         ############################### Currents ###################################
         for i in range(len_nodeNamesCurrents):
