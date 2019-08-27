@@ -13,11 +13,12 @@ services:
         max-size: "10m"
         max-file: "10"
     restart: "always"
+
   se:
     build:
       context: ""
       dockerfile: Dockerfile
-    image: "simulation-engine"
+    image: linksmart/simulation-engine
     container_name: "se"
     depends_on:
       - redis

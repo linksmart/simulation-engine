@@ -13,8 +13,11 @@ logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', le
 logger = logging.getLogger(__file__)
 
 def number_of_workers():
-    return (psutil.cpu_count(logical=False) * 2) + 1
-    #return multiprocessing.cpu_count()
+    #return (psutil.cpu_count(logical=False) * 2) + 1
+    cpu = psutil.cpu_count(logical=False)
+    if cpu is None:
+        cpu = psutil.cpu_count()
+    return (cpu * 2) + 1
 
 class StandaloneApplication(gunicorn.app.base.BaseApplication):
 
@@ -38,7 +41,7 @@ class StandaloneApplication(gunicorn.app.base.BaseApplication):
 def main():
     options = {
         'bind': '%s:%s' % ('0.0.0.0', '9090'),
-        'workers': 1,
+        'workers': int(number_of_workers()),
         'timeout': 30,
         'loglevel': 'debug',
     }
