@@ -19,16 +19,16 @@ class Profess:
         :{"meta":"ESS_Discharging_Eff"},"kw_rated":[{"meta":"ESS_Max_Charge_Power"},{"meta":"ESS_Max_Discharge_Power"}],
                               "kwh_rated":{"meta":"ESS_Capacity"},"max_charging_power":{"meta":"ESS_Max_Charge_Power"},
                               "max_discharging_power":{"meta":"ESS_Max_Discharge_Power"},
-                              "storage_capacity":{"meta":"ESS_Capacity"}}
-        self.percentage_mapping=["charge_efficiency","soc","discharge_efficiency"]
+                              "storage_capacity":{"meta":"ESS_Capacity"},"min_soc":{"meta":"ESS_Min_SoC"},"max_soc":
+                                  {"meta":"ESS_Max_SoC"}}
+        self.percentage_mapping=["charge_efficiency","soc","discharge_efficiency","min_soc","max_soc"]
+        self.pv_mapping={"max_power_kW":"PV_Inv_Max_Power"}
         self.dummy_data = {"load": {
          "meta": {
-             "pf_Load": 1
          }
      },
      "photovoltaic": {
          "meta": {
-             "PV_Inv_Max_Power": 15.00
          }
 
 },
@@ -40,8 +40,6 @@ class Profess:
 },
 "generic":{
 	"T_SoC":25,
-    "mu_P": 1.2,
-    "mu_Q": -1.5
 },
 "ESS":{
 "meta":{
@@ -93,23 +91,29 @@ class Profess:
         else:
             print("No Input get output declared")
         return response.json()
+    def is_running(self):
+        data=self.dataList
+        time.sleep(5)
+        opt_status = self.get_optimization_status()
+        logger.debug("optimization status: ")
+        logger.debug(opt_status)
+        something_running = False
+        for element in data:
+            for value in element:
+                for key in element[value]:
+                    if opt_status["status"][key]["status"] == "running":
+                        something_running = True
+                        logger.debug("An optimization is still running " + key)
+                        return True
+
+        return False
 
     def wait_and_get_output(self):
         logger.debug("wait for ofw output")
         data=self.dataList
         something_running = True
-        while something_running:
-            time.sleep(5)
-            opt_status = self.get_optimization_status()
-            logger.debug("optimization status: ")
-            logger.debug(opt_status)
-            something_running = False
-            for element in data:
-                for value in element:
-                    for key in element[value]:
-                        if opt_status["status"][key]["status"] == "running":
-                            something_running = True
-                            logger.debug("An optimization is still running "+key)
+        while self.is_running():
+            time.sleep(0.1)
         output_list=[]
         for element in data:
             for value in element:
@@ -177,28 +181,53 @@ class Profess:
         node_number = self.json_parser.get_node_name_list().index(node_name)
         for element in self.dataList[node_number]:
             node_name = element
-        for element in self.dataList[node_number][node_name]:
-            profess_id= element
-        json_data_of_node= self.dataList[node_number][node_name][profess_id]
-        for radial_number in range(len(self.json_parser.topology["radials"])):
-            node_element_list=self.json_parser.get_node_element_list()[node_number][node_name][radial_number]
-            if "storageUnits" in node_element_list.keys():
-                for element in self.storage_mapping:
-                    if element in node_element_list["storageUnits"]:
-                        percentage = 1
-                        if element in self.percentage_mapping:
-                            percentage=100
-                        if type(self.storage_mapping[element]) == dict:
-                            json_data_of_node["ESS"]["meta"][self.storage_mapping[element]["meta"]]=node_element_list["storageUnits"][element]/percentage
-                        if type(self.storage_mapping[element]) == list:
-                            for part in self.storage_mapping[element]:
-                                if "meta" in part:
-                                    json_data_of_node["ESS"]["meta"][part["meta"]] = node_element_list["storageUnits"][element]/percentage
-                                else:
-                                    json_data_of_node["ESS"][part] = node_element_list["storageUnits"][element]/percentage
-                        if type(self.storage_mapping[element]) == str:
-                            json_data_of_node["ESS"][self.storage_mapping[element]] = node_element_list["storageUnits"][element]/percentage
+        for profess_id in self.dataList[node_number][node_name]:
+            json_data_of_node= self.dataList[node_number][node_name][profess_id]
+            for radial_number in range(len(self.json_parser.topology["radials"])):
+                node_element_list=self.json_parser.get_node_element_list()[node_number][node_name]
+                storage_index=0
+                for element in node_element_list:
+                    if "storageUnits" in element:
+                        storage_index=node_element_list.index(element)
+                if "storageUnits" in node_element_list[storage_index].keys():
+                    for element in self.storage_mapping:
+                        if element in node_element_list[storage_index]["storageUnits"]:
+                            percentage = 1
+                            if element in self.percentage_mapping:
+                                percentage=100
+                            if type(self.storage_mapping[element]) == dict:
+                                json_data_of_node["ESS"]["meta"][self.storage_mapping[element]["meta"]]=\
+                                    node_element_list[storage_index]["storageUnits"][element]/percentage
+                            if type(self.storage_mapping[element]) == list:
+                                for part in self.storage_mapping[element]:
+                                    if "meta" in part:
+                                        json_data_of_node["ESS"]["meta"][part["meta"]] = node_element_list[storage_index]
+                                        ["storageUnits"][element]/percentage
+                                    else:
+                                        json_data_of_node["ESS"][part] = node_element_list[storage_index]["storageUnits"][element]/percentage
+                            if type(self.storage_mapping[element]) == str:
+                                json_data_of_node["ESS"][self.storage_mapping[element]] = node_element_list[storage_index]["storageUnits"][element]/percentage
 
+    def set_photovoltaics(self,node_name):
+        logger.debug("set photovoltaics "+ node_name)
+        node_number = self.json_parser.get_node_name_list().index(node_name)
+        for profess_id in self.dataList[node_number][node_name]:
+            json_data_of_node= self.dataList[node_number][node_name][profess_id]
+            for radial_number in range(len(self.json_parser.topology["radials"])):
+                node_element_list=self.json_parser.get_node_element_list()[node_number][node_name]
+                pv_index=0
+                for element in node_element_list:
+                    if "photovoltaics" in element:
+                        pv_index=node_element_list.index(element)
+                if "photovoltaics" in node_element_list[pv_index]:
+
+                    for element in self.pv_mapping:
+                        if element in node_element_list[pv_index]["photovoltaics"]:
+                            percentage = 1
+                            if element in self.percentage_mapping:
+                                percentage=100
+                            if type(self.pv_mapping[element]) == str:
+                                json_data_of_node["photovoltaic"][self.pv_mapping[element]] = node_element_list[pv_index]["photovoltaics"][element]/percentage
 
     def set_config_json(self, node_name, profess_id, config_json):
         logger.debug("set_config_json "+node_name+" ,"+profess_id)
@@ -340,6 +369,7 @@ class Profess:
         node_name_list = self.json_parser.get_node_name_list()
         for nodeName in node_name_list:
             self.set_storage(nodeName)
+            self.set_photovoltaics(nodeName)
             professID=self.get_profess_id(nodeName)
             nodeNumber = node_name_list.index(nodeName)
             self.update_config_json(professID, self.dataList[nodeNumber][nodeName][professID])
