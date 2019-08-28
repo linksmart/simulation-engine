@@ -56,11 +56,13 @@ class Profess:
         logger.debug("Profess instance created")
 
     def post_model(self, model_name, model_data):
+        logger.debug("postmodel started "+ model_name)
         response=self.httpClass.put(self.domain + "models/" + model_name, model_data)
         json_response = response.json()
-        print(json_response)
+        logger.debug(json_response)
 
     def post_data(self, input_data, node_name):
+        logger.debug("post data started "+ node_name)
         response = self.httpClass.post(self.domain + "inputs/dataset", input_data, "json")
         json_response = response.json()
         pattern = re.compile("/inputs*[/]([^']*)")  #regex to find profess_id
@@ -68,8 +70,8 @@ class Profess:
         if m != "":
             profess_id = m[0]
         else:
-            print("an error happened with regex")
-        print(json_response + ": " + profess_id)
+            logger.error("post_data failed at "+node_name)
+        logger.debug(json_response + ": " + profess_id)
         self.set_profess_id_for_node(node_name, profess_id)
         self.set_config_json(node_name, profess_id, input_data)
 
@@ -86,10 +88,11 @@ class Profess:
         json_response = response.json()
         return json_response
     def get_output(self, profess_id):
+
         if profess_id != "":
             response = self.httpClass.get(self.domain + "outputs/" + profess_id)
         else:
-            print("No Input get output declared")
+            logger.debug("No Input get output declared")
         return response.json()
     def is_running(self):
         data=self.dataList
@@ -97,12 +100,10 @@ class Profess:
         opt_status = self.get_optimization_status()
         logger.debug("optimization status: ")
         logger.debug(opt_status)
-        something_running = False
         for element in data:
             for value in element:
                 for key in element[value]:
                     if opt_status["status"][key]["status"] == "running":
-                        something_running = True
                         logger.debug("An optimization is still running " + key)
                         return True
 
@@ -111,7 +112,6 @@ class Profess:
     def wait_and_get_output(self):
         logger.debug("wait for ofw output")
         data=self.dataList
-        something_running = True
         while self.is_running():
             time.sleep(0.1)
         output_list=[]
@@ -126,6 +126,7 @@ class Profess:
 
 
     def start(self, freq, horizon, dt, model, repition, solver, optType, profess_id):
+        logger.debug("start "+profess_id)
         if profess_id != "":
             response = self.httpClass.put(self.domain + "optimization/start/" + profess_id, {"control_frequency": freq,
                                                                                     "horizon_in_steps": horizon,
@@ -135,17 +136,16 @@ class Profess:
                                                                                              "solver": solver,
                                                                                              "optimization_type": optType})
             json_response = response.json()
-            print(json_response +  ": " +profess_id)
             logger.debug(json_response +  ": " +profess_id)
             logger.debug("status code " +str(response.status_code))
             if response.status_code == 200 and json_response=="System started succesfully":
-                return 1
-            else:
                 return 0
+            else:
+
+                return response
         else:
-            print("No Input to start declared")
             logger.debug("No Input to start declared")
-            return 0
+            return 1
 
     def start_all(self, optimization_model=None):
         logger.debug("All optimizations are being started.")
@@ -157,24 +157,49 @@ class Profess:
                     model = storage["storageUnits"]["optimization_model"]
             if optimization_model is None:
                 optimization_model=model
-            if not self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name)):
+            start_response=self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name))
+            if start_response:
+                self.check_start_issue(start_response,node_name)
                 return 1
         return 0
-
+    def check_start_issue(self,response,node_name):
+        json_response=response.json()
+        if "Data source for following keys not declared:" in json_response:
+            logger.error("Missing data for optimization model, couldn't start")
+            pattern = re.compile("'(.*?)'")  # regex to find profess_id
+            m = pattern.findall(str(json_response))
+            for element in m:
+                if "PV" in element:
+                    node_element_list=self.json_parser.get_node_element_list()
+                    for bus_element in node_element_list:
+                        if node_name in bus_element:
+                            pv_flag=False
+                            storage_info=""
+                            for node_element in bus_element[node_name]:
+                                if "photovoltaic" in node_element:
+                                    pv_flag = True
+                                if "storageUnits" in node_element:
+                                    storage_info=node_element
+                            if pv_flag:
+                                logger.error("PV Information is missing but PV is connected at :"+node_name)
+                            else:
+                                logger.error(element+" is needed for the optimization, but no pv was connected to :" + node_name)
+                                logger.error(storage_info)
+        else:
+            logger.error("Failed to start because of other reasons")
+        logger.debug("--------------------------------------------------------------------------------------------------------")
     def stop(self, profess_id):
+        logger.debug("stop "+profess_id)
         if profess_id != "":
             response = self.httpClass.put(self.domain + "optimization/stop/" + profess_id)
             json_response = response.json()
-            print(json_response)
             logger.debug(json_response+" :"+str(profess_id))
         else:
-            print("No Input to stop declared")
-
+            logger.debug("No Input to stop declared")
     def update_config_json(self, profess_id, config_json):
         logger.debug("update_config_json has started")
         response = self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
         json_response = response.json()
-        print(json_response+ ": "+profess_id)
         logger.debug(json_response+ ": "+profess_id)
     def set_storage(self, node_name):
         logger.debug("set_storage of "+ node_name)
@@ -351,7 +376,6 @@ class Profess:
         for element in range(len(node_list)):
             for nodeKey in (node_list[element]):
                 node_list[element] = {nodeKey: {}}
-        print(node_list)
         self.dataList = node_list
 
 
@@ -389,6 +413,7 @@ class Profess:
                         self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
 
     def translate_output(self, output_data):
+        logger.debug("output of ofw is being translated to se ")
         #print(self.get)
         output_list=copy.deepcopy(output_data)
         #finding the lowest value of each variable
