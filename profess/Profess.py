@@ -586,7 +586,6 @@ class Profess:
         :return: translated output
         """
         logger.debug("output of ofw is being translated to se ")
-        logger.debug(output_data)
         output_list=copy.deepcopy(output_data)
         #finding the lowest value of each variable and delete all not needed timesteps
         for parameter_output_list in output_data:
@@ -596,7 +595,6 @@ class Profess:
                     index=output_data.index(parameter_output_list)
                     output_list[index][node_name][profess_id] = parameter_output_list[node_name][profess_id][min(sorted_output)]
 
-        logger.debug(output_list)
         #sets the right format node_name:{profess_id:{data}}
         for config in self.dataList:
             for node_name in config:
@@ -605,7 +603,6 @@ class Profess:
                         if profess_id in config[node_name]:
                             index=output_list.index(output_for_node)
                             output_list[index]={node_name:output_list[index]}
-        logger.debug(output_list)
         #TODO group phases together, i.e. translate phases into number
         # for node in output_list:
         #     for node_name in node:
