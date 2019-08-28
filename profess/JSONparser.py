@@ -14,47 +14,36 @@ class JsonParser:
     def __init__(self,parameter_topology):
         self.topology = parameter_topology
 
-    def search(self, search_in, search_for, search_id, returns_all):
+    def get_all_elements(self, element_name):
         """
-
-        :param search_in: in which list, dict is searched in
-        :param search_for: for which string are searching for for example "bus"
-        :param search_id: value searchFor should have
-        :param returns_all: boolean if all should be returned, example: search(topology, "StorageUnits","",True) returns
-        all storage units
-        :return: returns the result of the search
+        :param element_name: type of element, for example "storageUnits"
+        :return: all elements with the type element_name
         """
-        search_result = []
-        dummy_list = search_in
-        #in case we search in a list we have to create a list of indices, to have a consistent iteration
-        if type(search_in) == list:
-            dummy_list = []
-            for element in range(len(search_in)):
-                dummy_list.append(element)
-        for iteration_value in dummy_list:
-            if type(iteration_value) == dict or type(iteration_value) == list:
-                for element in iteration_value:
-                    if isinstance(iteration_value[element], Iterable) and type(iteration_value[element]) != str:
-                        search_result = search_result + self.search(iteration_value[element], search_for, search_id, returns_all)
-            else:
-                if str(iteration_value).startswith(search_for):
-                    if str(search_in[iteration_value]).startswith(search_id) or returns_all:
-                        if returns_all:
-                            if type(search_in[iteration_value]) == list:
-                                helpList = {}
-                                for element in search_in[iteration_value]:
-                                    search_result.append(element)
-                            else:
-                                search_result.append(search_in[iteration_value])
-                        else:
-
-                            search_result.append(search_in)
-                if isinstance(search_in[iteration_value], Iterable) and type(search_in[iteration_value]) != str:
-                    search_result = search_result + self.search(search_in[iteration_value], search_for, search_id, returns_all)
-
+        search_result=[]
+        if "radials" in self.topology:
+            for radial in self.topology["radials"]:
+                for element in radial:
+                    if element_name in element:
+                        search_result=search_result+radial[element]
         return search_result
+    def filter_search(self,search_key, search_value, element_list):
+        """
+        filters the element_list and returns it
+        :param search_key: name of key we want to match
+        :param search_value: value searchkey needs to be
+        :param element_list: List where we search in
+        :return: list where search_key and search_value fit
+        """
+        filter_result=[]
+        logger.debug(search_key+" ,"+search_value+", ")
+        logger.debug(element_list)
+        for element in element_list:
+            for element_key in element:
+                if element_key == search_key and element[element_key] == search_value:
+                    print(element)
+                    filter_result.append(element)
 
-
+        return filter_result
 
     def set_topology(self, json_topology):
         """
@@ -117,10 +106,11 @@ class JsonParser:
                     # adds loads to output list
                     if node_element_list[index][node_name] is not None:
                         #it depends on the topology
+                        load_elements_list=self.get_all_elements("loads")
                         node_element_list[index][node_name].append(
                             {"loads": (
-                                self.search(self.topology["radials"][radial_number]["loads"], "bus", node_name, False)+
-                                self.search(self.topology["radials"][radial_number]["loads"], "id", node_name, False))})
+                                self.filter_search("bus",node_name,load_elements_list)+
+                                self.filter_search("id",node_name,load_elements_list))})
                     else:
                         logger.debug("no load was added")
                     index = index + 1
@@ -141,9 +131,11 @@ class JsonParser:
             for radial_number in range(len(self.topology["radials"])):
                 # search for nodes with ESS
                 if "storageUnits" in self.topology["radials"][radial_number].keys():
-                    for storage_node in self.search(self.topology["radials"][radial_number]["storageUnits"], "bus1", "", True):
+
+                    for storage_node in self.get_all_elements("storageUnits"):
+                        storage_node_name=storage_node["bus1"]
                         pattern = re.compile("[^.]*")  # regex to shorten nodde_name.1.2.3 or node_name.1 etc to node_name
-                        storage_regex = pattern.findall(storage_node)
+                        storage_regex = pattern.findall(storage_node_name)
                         node_name = storage_regex[0]
                         storage_node_list.append(node_name)
                     node_list = storage_node_list

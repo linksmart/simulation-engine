@@ -45,11 +45,11 @@ print(p1.json_parser.get_node_element_list())
 p1.set_up_profess(pv_profiles=dummyPV)
 #print(p1.json_parser.get_node_element_list())
 
-print(p1.start_all())
+#print(p1.start_all())
 #print(p1.dataList)
 #print(p1.wait_and_get_output())
-
-
+print(p1.json_parser.get_all_elements("loads"))
+#print(p1.json_parser.filter_search("bus1","consumer_4006773",p1.json_parser.get_all_elements("storageUnits")))
 soc_list=[{"633":{"SoC":5}},{"671":{"SoC":4}},{"634":{"SoC":20}}]
 #p1.set_up_profess(load_profiles=dummyLoads, pv_profiles=dummyPV, price_profiles=dummyPrice,soc_list=soc_list,ess_con=dummyGESSCON)
 #p1.update(dummyLoads, dummyPV, dummyPrice,soc_list,dummyGESSCON)
