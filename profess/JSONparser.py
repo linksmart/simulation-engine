@@ -11,8 +11,8 @@ class JsonParser:
     # @searchIn is the dict/list we search in
     # @searchFor is the String we search for
     # @returnsAll if true, returns all where searchFor fits, even if searchID doesn't fit
-    def __init__(self):
-        self.topology = ""
+    def __init__(self,parameter_topology):
+        self.topology = parameter_topology
 
     def search(self, search_in, search_for, search_id, returns_all):
         #logger.debug("search ")
@@ -49,17 +49,22 @@ class JsonParser:
         return search_result
 
     def set_topology(self, json_topology):
+        """
+        changes the topology
+        :param json_topology: new topology
+        :return:
+        """
         self.topology = json_topology
         logger.debug(self.topology)
-        logger.debug("topology was changed --------------------------------------------------------------------------")
-
-
-    def get_topology(self):
-        return self.topology
+        logger.debug("-------------------------------------------------------------------------------------------------")
+        logger.debug("topology was changed")
+        logger.debug("-------------------------------------------------------------------------------------------------")
 
     def get_node_element_list(self):
+        """
+        :return: a list with all nodes that have a ess and all connected devices(loads, pvs)
+        """
         ##logger.debug("get_node_element_list started")
-
         node_element_list = []
         storage_node_list = []
         pv_node_list = []
@@ -76,18 +81,17 @@ class JsonParser:
                     ##logger.debug("storages found")
 
 
-                if "photovoltaics" in self.topology["radials"][radial_number].keys():
-                    for element in self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True):
-                        pattern = re.compile("[^.]*")  # regex to find professID
-                        m = pattern.findall(element)
-                        element = m[0]
-                        pv_node_list.append(element)
-                    node_list=pv_node_list
-                    ##logger.debug("pvs found")
-                if storage_node_list is not None and pv_node_list is not None:
-                    node_list= storage_node_list + list(set(pv_node_list) - set(storage_node_list))
-                ##logger.debug("list of nodes with pv or ess :")
-                ##logger.debug(node_list)
+                # if "photovoltaics" in self.topology["radials"][radial_number].keys():
+                #     for element in self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True):
+                #         pattern = re.compile("[^.]*")  # regex to find professID
+                #         m = pattern.findall(element)
+                #         element = m[0]
+                #         pv_node_list.append(element)
+                #     node_list=pv_node_list
+                #     ##logger.debug("pvs found")
+                # if storage_node_list is not None and pv_node_list is not None:
+                #     node_list= storage_node_list + list(set(pv_node_list) - set(storage_node_list))
+
                 count = 0
                 for element in node_list:
                     if "storageUnits" in self.topology["radials"][radial_number]:

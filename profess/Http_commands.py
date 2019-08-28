@@ -16,8 +16,18 @@ class Http_commands:
         return request
 
     def put(self,target,jsonLoad):
+        """
+        :param target: target domain
+        :param jsonLoad:
+        :return:
+        """
         return requests.put(target, json=jsonLoad)
     def get(self,target):
+        """
+
+        :param target: target domain
+        :return:
+        """
         logging.debug("get "+target)
         return requests.get(target)
 
