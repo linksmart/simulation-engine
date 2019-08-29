@@ -1,0 +1,76 @@
+version: '3'
+services:
+  gui:
+    container_name: s4g-professional-gui
+    build:
+      context: /home/garagon/s4g-professional-frontend
+      dockerfile: Dockerfile
+    ports:
+      - '4200:4200'
+    depends_on:
+      - api
+      - se
+    command: serve -s dist -l 4200
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  api:
+    container_name: se-mock-api
+    build:
+      context: /home/garagon/s4g-professional-frontend/api
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  redis:
+    image: redis:latest
+    container_name: "redis_S4G"
+    command: redis-server
+    ports:
+      - "6379:6379"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    restart: "always"
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 8085:8085
+    depends_on:
+      - gui
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+  se:
+    build:
+      context: ""
+      dockerfile: Dockerfile
+    image: linksmart/simulation-engine
+    container_name: "se"
+    depends_on:
+      - redis
+    volumes:
+       - /home/garagon/dsf-se/results:/usr/src/app/data
+    ports:
+        - "9090:9090"
+    command: ["python3", "-u", "main.py"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    entrypoint: ["python3", "-u", "main.py"]
