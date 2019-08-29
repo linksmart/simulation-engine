@@ -39,14 +39,15 @@ dummyGESSCON=[{'633':
 #print(dummyPV)
 #print(dummyPrice)
 
-print(p1.json_parser.get_node_element_list())
-
-p1.set_up_profess(pv_profiles=dummyPV)
 #print(p1.json_parser.get_node_element_list())
 
-print(p1.start_all())
+#p1.set_up_profess(pv_profiles=dummyPV)
+#print(p1.json_parser.get_node_element_list())
+
+
+#print(p1.start_all())
 #print(p1.dataList)
-print(p1.wait_and_get_output())
+#print(p1.wait_and_get_output())
 #print(p1.get_output())
 #print(p1.json_parser.get_all_elements("loads"))
 #print(p1.json_parser.filter_search("bus1","consumer_4006773",p1.json_parser.get_all_elements("storageUnits")))

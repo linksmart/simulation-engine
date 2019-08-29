@@ -43,6 +43,7 @@ class JsonParser:
 
         return filter_result
 
+
     def set_topology(self, json_topology):
         """
         changes the topology
@@ -68,51 +69,52 @@ class JsonParser:
             for radial_number in range(len(self.topology["radials"])):
                 node_list = self.get_node_name_list()
                 index = 0
-                for node_name in node_list:
-                    #adds ess to the output list
-                    if "storageUnits" in self.topology["radials"][radial_number]:
-                        for essunits in self.topology["radials"][radial_number]["storageUnits"]:
-                            pattern = re.compile("[^.]*")
-                            m = pattern.findall(essunits["bus1"])
-                            essunitsBus= m[0]
-                            if essunitsBus == node_name:
-                                ess_index = self.topology["radials"][radial_number]["storageUnits"].index(essunits)
-                                node_element_list.append(
-                                    {node_name: [
-                                        {"storageUnits": self.topology["radials"][radial_number]["storageUnits"][
-                                            ess_index]}]})
-                    #adds pv to ouput list
-                    if "photovoltaics" in self.topology["radials"][radial_number]:
-                        for pvunits in self.topology["radials"][radial_number]["photovoltaics"]:
-                            pattern = re.compile("[^.]*")
-                            m = pattern.findall(pvunits["bus1"])
-                            pvunitsBus= m[0]
-                            if pvunitsBus == node_name:
-                                alreadyInList=False
-                                for item in node_element_list:
-                                    if node_name in item.keys():
-                                        alreadyInList = True
-                                        listIndex= node_element_list.index(item)
-                                pv_index = self.topology["radials"][radial_number]["photovoltaics"].index(pvunits)
-                                if alreadyInList:
-                                    node_element_list[listIndex][node_name].append({"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
-                                                pv_index]})
-                                else:
+                if node_list!=0:
+                    for node_name in node_list:
+                        #adds ess to the output list
+                        if "storageUnits" in self.topology["radials"][radial_number]:
+                            for essunits in self.topology["radials"][radial_number]["storageUnits"]:
+                                pattern = re.compile("[^.]*")
+                                m = pattern.findall(essunits["bus1"])
+                                essunitsBus= m[0]
+                                if essunitsBus == node_name:
+                                    ess_index = self.topology["radials"][radial_number]["storageUnits"].index(essunits)
                                     node_element_list.append(
                                         {node_name: [
-                                            {"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
-                                                pv_index]}]})
-                    # adds loads to output list
-                    if node_element_list[index][node_name] is not None:
-                        #it depends on the topology
-                        load_elements_list=self.get_all_elements("loads")
-                        node_element_list[index][node_name].append(
-                            {"loads": (
-                                self.filter_search("bus",node_name,load_elements_list)+
-                                self.filter_search("id",node_name,load_elements_list))})
-                    else:
-                        logger.debug("no load was added for "+ str(node_name)+ " in get_node_elements")
-                    index = index + 1
+                                            {"storageUnits": self.topology["radials"][radial_number]["storageUnits"][
+                                                ess_index]}]})
+                        #adds pv to ouput list
+                        if "photovoltaics" in self.topology["radials"][radial_number]:
+                            for pvunits in self.topology["radials"][radial_number]["photovoltaics"]:
+                                pattern = re.compile("[^.]*")
+                                m = pattern.findall(pvunits["bus1"])
+                                pvunitsBus= m[0]
+                                if pvunitsBus == node_name:
+                                    alreadyInList=False
+                                    for item in node_element_list:
+                                        if node_name in item.keys():
+                                            alreadyInList = True
+                                            listIndex= node_element_list.index(item)
+                                    pv_index = self.topology["radials"][radial_number]["photovoltaics"].index(pvunits)
+                                    if alreadyInList:
+                                        node_element_list[listIndex][node_name].append({"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
+                                                    pv_index]})
+                                    else:
+                                        node_element_list.append(
+                                            {node_name: [
+                                                {"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
+                                                    pv_index]}]})
+                        # adds loads to output list
+                        if node_element_list[index][node_name] is not None:
+                            #it depends on the topology
+                            load_elements_list=self.get_all_elements("loads")
+                            node_element_list[index][node_name].append(
+                                {"loads": (
+                                    self.filter_search("bus",node_name,load_elements_list)+
+                                    self.filter_search("id",node_name,load_elements_list))})
+                        else:
+                            logger.debug("no load was added for "+ str(node_name)+ " in get_node_elements")
+                        index = index + 1
         else: logger.debug("no radials where found")
 
         ##logger.debug(node_element_list)

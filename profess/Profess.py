@@ -226,18 +226,20 @@ class Profess:
         :return: returns a list with the translated ouputs of all nodes see (@translate_output)
         """
         logger.debug("wait for OFW output")
-        while self.is_running():
-            pass
-        output_list=[]
-        node_name_list=self.json_parser.get_node_name_list()
-        for node_name in node_name_list:
-            profess_id=self.get_profess_id(node_name)
-            if profess_id != 0:
-                output_list.append({profess_id: self.get_output(profess_id)})
-        logger.debug("OFW finished, all optimizations stopped")
-        translated_output = self.translate_output(output_list)
-        return translated_output
+        node_name_list = self.json_parser.get_node_name_list()
+        if node_name_list!=0:
+            while self.is_running():
+                pass
+            output_list=[]
 
+            for node_name in node_name_list:
+                profess_id=self.get_profess_id(node_name)
+                if profess_id != 0:
+                    output_list.append({profess_id: self.get_output(profess_id)})
+            logger.debug("OFW finished, all optimizations stopped")
+            translated_output = self.translate_output(output_list)
+            return translated_output
+        else:return []
     def start(self, freq, horizon, dt, model, repition, solver, optType, profess_id):
         """
         starts an optimization of profess_id on the ofw
@@ -283,20 +285,24 @@ class Profess:
         :return: returns 0 when successful, else 1
         """
         logger.debug("All optimizations are being started.")
-        for node_name in self.json_parser.get_node_name_list():
-            #search for list with all elemens that are connected to bus: node_name
-            element_node=(next(item for item in self.json_parser.get_node_element_list() if node_name in item))
-            for node_element in element_node[node_name]:
-                if "storageUnits" in node_element:
-                    storage = node_element
-                    storage_opt_model = storage["storageUnits"]["optimization_model"]
-            if optimization_model is None:
-                optimization_model = storage_opt_model
-            start_response=self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name))
-            if start_response:
-                self.check_start_issue(start_response,node_name)
-                return 1
-        return 0
+        node_name_list =self.json_parser.get_node_name_list()
+        if node_name_list !=0:
+
+            for node_name in node_name_list:
+                #search for list with all elemens that are connected to bus: node_name
+                element_node=(next(item for item in self.json_parser.get_node_element_list() if node_name in item))
+                for node_element in element_node[node_name]:
+                    if "storageUnits" in node_element:
+                        storage = node_element
+                        storage_opt_model = storage["storageUnits"]["optimization_model"]
+                if optimization_model is None:
+                    optimization_model = storage_opt_model
+                start_response=self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name))
+                if start_response:
+                    self.check_start_issue(start_response,node_name)
+                    return 1
+            return 0
+        else:return 0
     def check_start_issue(self,response,node_name):
         """
         parses the response a failed optimization start returns, and  logs why it might have failed
@@ -478,90 +484,91 @@ class Profess:
         """
         logger.debug("Setting_profiles ")
         node_name_list =self.json_parser.get_node_name_list()
-        for node_name in node_name_list:
-            node_number = node_name_list.index(node_name)
-            if load_profiles is not None:
-                #logger.debug("load profile set")
-                for load_profile_for_node in load_profiles:
-                    if node_name in load_profile_for_node:
+        if node_name_list !=0:
+            for node_name in node_name_list:
+                node_number = node_name_list.index(node_name)
+                if load_profiles is not None:
+                    #logger.debug("load profile set")
+                    for load_profile_for_node in load_profiles:
+                        if node_name in load_profile_for_node:
+                            profess_id = self.get_profess_id(node_name)
+                            if profess_id!= 0:
+                                config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                                phase = load_profile_for_node[node_name]
+                                #checks which phases are used
+                                if node_name + ".1" in phase:
+                                    config_data_of_node["load"]["P_Load_R"] = phase[node_name + ".1"]
+                                if node_name + ".2" in phase:
+                                    config_data_of_node["load"]["P_Load_S"] = phase[node_name + ".2"]
+                                if node_name + ".3" in phase:
+                                    config_data_of_node["load"]["P_Load_T"] = phase[node_name + ".3"]
+                                if "P_Load_R" in config_data_of_node["load"] and "P_Load_S" in config_data_of_node["load"] and \
+                                        "P_Load_T" in config_data_of_node["load"]:
+                                    three_phase = []
+                                    for value in range(len(config_data_of_node["load"]["P_Load_T"])):
+                                        three_phase_value = config_data_of_node["load"]["P_Load_R"][value] + \
+                                                            config_data_of_node["load"]["P_Load_S"][value] + \
+                                                            config_data_of_node["load"]["P_Load_T"][value]
+                                        three_phase.append(three_phase_value)
+                                    config_data_of_node["load"]["P_Load"] = three_phase
+                                if node_name + ".1.2.3" or node_name in phase:
+                                    if node_name in phase:
+                                        config_data_of_node["load"]["P_Load"] = phase[node_name]
+                                        three_phase = phase[node_name]
+                                    if node_name + ".1.2.3" in phase:
+                                        config_data_of_node["load"]["P_Load"] = phase[node_name + ".1.2.3"]
+                                        three_phase = phase[node_name + ".1.2.3"]
+                                    single_phase = []
+                                    for value in three_phase:
+                                        value = value / 3
+                                        single_phase.append(value)
+                                    config_data_of_node["load"]["P_Load_R"] = copy.deepcopy(single_phase)
+                                    config_data_of_node["load"]["P_Load_S"] = copy.deepcopy(single_phase)
+                                    config_data_of_node["load"]["P_Load_T"] = copy.deepcopy(single_phase)
+                                logger.debug("load profile set for "+str(node_name))
+                else: logger.debug("no load profile was given")
+                if pv_profiles is not None:
+                    for pv_profiles_for_node in pv_profiles:
                         profess_id = self.get_profess_id(node_name)
-                        if profess_id!= 0:
+                        if profess_id != 0:
                             config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                            phase = load_profile_for_node[node_name]
-                            #checks which phases are used
-                            if node_name + ".1" in phase:
-                                config_data_of_node["load"]["P_Load_R"] = phase[node_name + ".1"]
-                            if node_name + ".2" in phase:
-                                config_data_of_node["load"]["P_Load_S"] = phase[node_name + ".2"]
-                            if node_name + ".3" in phase:
-                                config_data_of_node["load"]["P_Load_T"] = phase[node_name + ".3"]
-                            if "P_Load_R" in config_data_of_node["load"] and "P_Load_S" in config_data_of_node["load"] and \
-                                    "P_Load_T" in config_data_of_node["load"]:
-                                three_phase = []
-                                for value in range(len(config_data_of_node["load"]["P_Load_T"])):
-                                    three_phase_value = config_data_of_node["load"]["P_Load_R"][value] + \
-                                                        config_data_of_node["load"]["P_Load_S"][value] + \
-                                                        config_data_of_node["load"]["P_Load_T"][value]
-                                    three_phase.append(three_phase_value)
-                                config_data_of_node["load"]["P_Load"] = three_phase
-                            if node_name + ".1.2.3" or node_name in phase:
-                                if node_name in phase:
-                                    config_data_of_node["load"]["P_Load"] = phase[node_name]
-                                    three_phase = phase[node_name]
+                            if node_name in pv_profiles_for_node:
+                                phase = pv_profiles_for_node[node_name]
+                                if node_name + ".1.2.3" or node_name in phase:
+                                    if node_name in phase:
+                                        config_data_of_node["photovoltaic"]["P_PV"]= phase[node_name]
+                                        three_phase=phase[node_name]
+                                    if node_name + ".1.2.3" in phase:
+                                        config_data_of_node["photovoltaic"]["P_PV"] = phase[node_name + ".1.2.3"]
+                                        three_phase=phase[node_name + ".1.2.3"]
+                                    single_phase = []
+                                    for value in three_phase:
+                                        value = value / 3
+                                        single_phase.append(value)
+                                    config_data_of_node["photovoltaic"]["P_PV_R"] = copy.deepcopy(single_phase)
+                                    config_data_of_node["photovoltaic"]["P_PV_S"] = copy.deepcopy(single_phase)
+                                    config_data_of_node["photovoltaic"]["P_PV_T"] = copy.deepcopy(single_phase)
+                                    logger.debug("pv profile set for "+ str(node_name))
+                else: logger.debug("no pv_profile was given")
+                if ess_con is not None:
+                    for ess_con_global in ess_con:
+                        profess_id = self.get_profess_id(node_name)
+                        if profess_id != 0:
+                            config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                            if node_name in ess_con_global:
+                                phase = pv_profiles_for_node[node_name]
                                 if node_name + ".1.2.3" in phase:
-                                    config_data_of_node["load"]["P_Load"] = phase[node_name + ".1.2.3"]
-                                    three_phase = phase[node_name + ".1.2.3"]
-                                single_phase = []
-                                for value in three_phase:
-                                    value = value / 3
-                                    single_phase.append(value)
-                                config_data_of_node["load"]["P_Load_R"] = copy.deepcopy(single_phase)
-                                config_data_of_node["load"]["P_Load_S"] = copy.deepcopy(single_phase)
-                                config_data_of_node["load"]["P_Load_T"] = copy.deepcopy(single_phase)
-                            logger.debug("load profile set for "+str(node_name))
-            else: logger.debug("no load profile was given")
-            if pv_profiles is not None:
-                for pv_profiles_for_node in pv_profiles:
-                    profess_id = self.get_profess_id(node_name)
-                    if profess_id != 0:
-                        config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                        if node_name in pv_profiles_for_node:
-                            phase = pv_profiles_for_node[node_name]
-                            if node_name + ".1.2.3" or node_name in phase:
+                                    config_data_of_node["generic"]["ESS_Control"] = phase[node_name + ".1.2.3"]
+                                    #logger.debug("ess_con profile set")
                                 if node_name in phase:
-                                    config_data_of_node["photovoltaic"]["P_PV"]= phase[node_name]
-                                    three_phase=phase[node_name]
-                                if node_name + ".1.2.3" in phase:
-                                    config_data_of_node["photovoltaic"]["P_PV"] = phase[node_name + ".1.2.3"]
-                                    three_phase=phase[node_name + ".1.2.3"]
-                                single_phase = []
-                                for value in three_phase:
-                                    value = value / 3
-                                    single_phase.append(value)
-                                config_data_of_node["photovoltaic"]["P_PV_R"] = copy.deepcopy(single_phase)
-                                config_data_of_node["photovoltaic"]["P_PV_S"] = copy.deepcopy(single_phase)
-                                config_data_of_node["photovoltaic"]["P_PV_T"] = copy.deepcopy(single_phase)
-                                logger.debug("pv profile set for "+ str(node_name))
-            else: logger.debug("no pv_profile was given")
-            if ess_con is not None:
-                for ess_con_global in ess_con:
-                    profess_id = self.get_profess_id(node_name)
-                    if profess_id != 0:
-                        config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                        if node_name in ess_con_global:
-                            phase = pv_profiles_for_node[node_name]
-                            if node_name + ".1.2.3" in phase:
-                                config_data_of_node["generic"]["ESS_Control"] = phase[node_name + ".1.2.3"]
-                                #logger.debug("ess_con profile set")
-                            if node_name in phase:
-                                config_data_of_node["generic"]["ESS_Control"] = phase[node_name]
-                            logger.debug("ess_con profile set")
-            profess_id = self.get_profess_id(node_name)
-            if profess_id != 0:
-                config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                if price_profiles is not None:
-                    config_data_of_node["generic"]["Price_Forecast"] = price_profiles #No reserved words for price
-                    #logger.debug("price profile set")
+                                    config_data_of_node["generic"]["ESS_Control"] = phase[node_name]
+                                logger.debug("ess_con profile set")
+                profess_id = self.get_profess_id(node_name)
+                if profess_id != 0:
+                    config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                    if price_profiles is not None:
+                        config_data_of_node["generic"]["Price_Forecast"] = price_profiles #No reserved words for price
+                        #logger.debug("price profile set")
 
     def get_profess_id(self, node_name):
         """
@@ -636,27 +643,28 @@ class Profess:
         self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                           ,ess_con=ess_con)
         node_name_list = self.json_parser.get_node_name_list()
-        for nodeName in node_name_list:
-            self.set_storage(nodeName)
-            self.set_photovoltaics(nodeName)
-            profess_id=self.get_profess_id(nodeName)
-            if profess_id !=0:
-                node_index = node_name_list.index(nodeName)
-                self.update_config_json(profess_id, self.dataList[node_index][nodeName][profess_id])
-        node_element_list = self.json_parser.get_node_element_list()
-        if soc_list is not None:
-            if type(soc_list) is list:
-                for node_element in node_element_list:
-                    for node_name in node_element:
-                        index = node_element_list.index(node_element)
-                        profess_id = self.get_profess_id(node_name)
-                        if profess_id != 0:
-                            for node_soc in soc_list:
-                                if node_name in node_soc:
-                                    soc_index = soc_list.index(node_soc)
-                                    self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"] = (
-                                            soc_list[soc_index][node_name]["SoC"] / 100)
-                            self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
+        if node_name_list!=0:
+            for nodeName in node_name_list:
+                self.set_storage(nodeName)
+                self.set_photovoltaics(nodeName)
+                profess_id=self.get_profess_id(nodeName)
+                if profess_id !=0:
+                    node_index = node_name_list.index(nodeName)
+                    self.update_config_json(profess_id, self.dataList[node_index][nodeName][profess_id])
+            node_element_list = self.json_parser.get_node_element_list()
+            if soc_list is not None:
+                if type(soc_list) is list:
+                    for node_element in node_element_list:
+                        for node_name in node_element:
+                            index = node_element_list.index(node_element)
+                            profess_id = self.get_profess_id(node_name)
+                            if profess_id != 0:
+                                for node_soc in soc_list:
+                                    if node_name in node_soc:
+                                        soc_index = soc_list.index(node_soc)
+                                        self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"] = (
+                                                soc_list[soc_index][node_name]["SoC"] / 100)
+                                self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
 
     def translate_output(self, output_data):
         """
