@@ -11,17 +11,23 @@ class Http_commands:
 
 
     def post(self,target, payLoad, type):
+        """
+        :param target: target domain
+        :param payLoad: payload
+        :param type: which type the payload has, for example: json
+        :return:
+        """
         request = requests.post(target, json=payLoad, headers={"Content-Type": "application/"+type})
 
         return request
 
-    def put(self,target,jsonLoad):
+    def put(self, target, payLoad):
         """
         :param target: target domain
-        :param jsonLoad:
+        :param payLoad:
         :return:
         """
-        return requests.put(target, json=jsonLoad)
+        return requests.put(target, json=payLoad)
     def get(self,target):
         """
 

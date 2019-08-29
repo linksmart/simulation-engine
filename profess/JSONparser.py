@@ -17,7 +17,7 @@ class JsonParser:
     def get_all_elements(self, element_name):
         """
         :param element_name: type of element, for example "storageUnits"
-        :return: all elements with the type element_name
+        :return: all elements in the topology with the type element_name
         """
         search_result=[]
         if "radials" in self.topology:
@@ -28,15 +28,13 @@ class JsonParser:
         return search_result
     def filter_search(self,search_key, search_value, element_list):
         """
-        filters the element_list and returns it
+        filters the element_list and returns only the elements where search_key and search_value fit
         :param search_key: name of key we want to match
         :param search_value: value searchkey needs to be
         :param element_list: List where we search in
         :return: list where search_key and search_value fit
         """
         filter_result=[]
-        logger.debug(search_key+" ,"+search_value+", ")
-        logger.debug(element_list)
         for element in element_list:
             for element_key in element:
                 if element_key == search_key and element[element_key] == search_value:
@@ -60,6 +58,7 @@ class JsonParser:
     def get_node_element_list(self):
         """
         :return: a list with all nodes that have a ess and all connected devices(loads, pvs)
+        syntax: [{node_name1:["storageUnits":{...}, "photovoltaics" :{ ....}, "loads":{ ...}]},{node_name2:[ ....]}]
         """
         ##logger.debug("get_node_element_list started")
         node_element_list = []
@@ -112,7 +111,7 @@ class JsonParser:
                                 self.filter_search("bus",node_name,load_elements_list)+
                                 self.filter_search("id",node_name,load_elements_list))})
                     else:
-                        logger.debug("no load was added")
+                        logger.debug("no load was added for "+ str(node_name)+ " in get_node_elements")
                     index = index + 1
         else: logger.debug("no radials where found")
 
@@ -123,6 +122,7 @@ class JsonParser:
         """
 
         :return: a list of node_names where an ess is connected, otherwise 0 is returned
+        [node_name1, node_name2, ...]
         """
         storage_node_list = []
         pv_node_list = []
