@@ -88,23 +88,54 @@ def create_simulation(body):  # noqa: E501
         models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts"]
 
         for values in radial:
-            #logger.debug("values of the radial: "+str(values))
-            #for key in values.keys():
-                #logger.debug("keys of the radial: " + str(key))
+
+            if "powerLines" in values.keys() and values["powerLines"] is not None:
+                logger.debug("Checking Powerlines")
+
+                powerLines = values["powerLines"]
+                for power_lines_elements in powerLines:
+                    if "r1" in power_lines_elements.keys() and "linecode" in power_lines_elements.keys():
+                        message="r1 and linecode cannot be entered at the same time in power line with id: "+str(power_lines_elements["id"])
+                        logger.error(message)
+                        return message
+            logger.debug("Power lines succesfully checked")
+
+
 
             if "storageUnits" in values.keys() and values["storageUnits"] is not None:
-                # logger.debug("---------------Setting Storage-------------------------")
-                logger.debug("! ---------------Setting Storage------------------------- \n")
-                # radial=radial.to_dict()
+                logger.debug("Checking Storage")
+                if not is_PV(radial):
+                    message = "Error: no PV element defined for each storage element"
+                    return message
                 storage = values["storageUnits"]
                 for storage_elements in storage:
                     if not storage_elements["optimization_model"] in models_list:
-                        message = "Following optimization models are possible: " + str(models_list)
+                        message = "Solely the following optimization models for storage control are possible: " + str(models_list)
                         return message
+                    bus_pv = get_PV_nodes(values["photovoltaics"])
+                    if not storage_elements["bus1"] in bus_pv:
+                        message = "Error: no PV element defined for storage element with id: "+str(storage_elements["id"])
+                        return message
+
+            logger.debug("Storage successfully checked")
         return id
     else:
         return "Bad JSON Format"
-    
+
+def is_PV(radial):
+    for values in radial:
+        if "photovoltaics" in values:
+            return True
+        else:
+            return False
+
+def get_PV_nodes(list_pv):
+    bus=[]
+    for pv_element in list_pv:
+        bus.append(pv_element["bus1"])
+    return bus
+
+
 def get_simulation_result(id):  # noqa: E501
     """Get a simulation result
 
