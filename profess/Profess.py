@@ -109,7 +109,7 @@ class Profess:
                 profess_id = m[0]
             else:
                 logger.error("failed to post data to the ofw, no professID was returned " + str(node_name))
-            logger.debug("Response of OFW after post data: " + str(json_response) + ": " + str(profess_id))
+            logger.debug("Response of OFW after post data: " + str(json_response) + ": " + str(profess_id)+ " , statusCode: "+str(response.json()))
             # the professId is saved for futher referencing
             self.set_profess_id_for_node(node_name, profess_id)
             # the posted data is also saved internaly for other optimizations
@@ -118,7 +118,7 @@ class Profess:
                 return 0
             else:
                 logger.error("failed to post_data node: " + str(node_name) + " and input data: " + str(
-                    input_data) + "  Response from the OFW: " + str(response.json()))
+                    input_data) + "Response Code: "+str(response.status_code)+",  Response from the OFW: " + str(response.json()))
                 return 1
         except:
             logger.error("Failed to post data, No connection to the OFW could be established at :"+str(self.domain)+"/inputs/dataset")
@@ -207,6 +207,7 @@ class Profess:
         time.sleep(5)
         opt_status = self.get_optimization_status()
         #logger.debug("optimization status: " + str(opt_status))
+        running_flag=False
         node_name_list=self.json_parser.get_node_name_list()
         for node_name in node_name_list:
             profess_id=self.get_profess_id(node_name)
@@ -214,12 +215,13 @@ class Profess:
                 if profess_id in opt_status["status"]:
                     if opt_status["status"][profess_id]["status"] == "running":
                         logger.debug("An optimization is still running: " + str(profess_id))
-                        return True
+                        running_flag=True
                 else:
                     logger.error("Failed to check if "+str(profess_id)+ " is still running, not found in optimization status")
             else:
                 logger.error("Check connection to the OFW, we try to check a non existing profess_id: "+str(profess_id))
-        return False
+        if running_flag: return True
+        else: return False
 
     def wait_and_get_output(self):
         """
@@ -335,7 +337,7 @@ class Profess:
                                 logger.error(str(parameter)+" is needed for the optimization, but no pv was connected to :" + str(node_name)+ " , connected storage: "+ str(storage_info))
         else:
 
-            logger.error("start failed, but no data keys where missing, reason it failed: "+str(response))
+            logger.error("start failed, but no data keys where missing, reason it failed: "+str(json_response)+" response status code: "+str(response.status_code))
     def stop(self, profess_id):
         """
         stops the optimization with id: profess_id in the ofw
@@ -483,6 +485,7 @@ class Profess:
         :param ess_con: [{node_name:{node_name.1.2.3:[value1,value2, ...]}, ...}
         """
         logger.debug("Setting_profiles ")
+        #logger.debug("load profile: "+str(load_profiles)+" ,pv_profiles: "+str(pv_profiles)+" ,price_profile: "+str(price_profiles)+" ,ess_con "+str(ess_con))
         node_name_list =self.json_parser.get_node_name_list()
         if node_name_list !=0:
             for node_name in node_name_list:
@@ -495,15 +498,40 @@ class Profess:
                             if profess_id!= 0:
                                 config_data_of_node = self.dataList[node_number][node_name][profess_id]
                                 phase = load_profile_for_node[node_name]
+                                r_flag=False
+                                s_flag=False
+                                t_flag=False
                                 #checks which phases are used
                                 if node_name + ".1" in phase:
                                     config_data_of_node["load"]["P_Load_R"] = phase[node_name + ".1"]
+                                    r_flag=True
                                 if node_name + ".2" in phase:
                                     config_data_of_node["load"]["P_Load_S"] = phase[node_name + ".2"]
+                                    s_flag=True
                                 if node_name + ".3" in phase:
                                     config_data_of_node["load"]["P_Load_T"] = phase[node_name + ".3"]
-                                if "P_Load_R" in config_data_of_node["load"] and "P_Load_S" in config_data_of_node["load"] and \
-                                        "P_Load_T" in config_data_of_node["load"]:
+                                    t_flag=True
+                                length = 0
+                                if r_flag:
+                                    length = len(config_data_of_node["load"]["P_Load_R"])
+                                if s_flag:
+                                    length = len(config_data_of_node["load"]["P_Load_S"])
+                                if t_flag:
+                                    length = len(config_data_of_node["load"]["P_Load_T"])
+                                if not r_flag:
+                                    config_data_of_node["load"]["P_Load_R"] = [0] * length
+                                if not s_flag:
+                                    config_data_of_node["load"]["P_Load_S"] = [0] * length
+                                if not t_flag:
+                                    config_data_of_node["load"]["P_Load_T"] = [0] * length
+
+                                if ("P_Load_R" in config_data_of_node["load"]) and ("P_Load_S" in config_data_of_node["load"]) and \
+                                        ("P_Load_T" in config_data_of_node["load"]):
+                                    logger.debug("p_load_r :" + str(
+                                        config_data_of_node["load"]["P_Load_R"]) + " ,p_load_s :" + str(
+                                        config_data_of_node["load"]["P_Load_S"]) + " ,p_load_t :" + str(
+                                        config_data_of_node["load"]["P_Load_T"]))
+
                                     three_phase = []
                                     for value in range(len(config_data_of_node["load"]["P_Load_T"])):
                                         three_phase_value = config_data_of_node["load"]["P_Load_R"][value] + \
@@ -511,7 +539,19 @@ class Profess:
                                                             config_data_of_node["load"]["P_Load_T"][value]
                                         three_phase.append(three_phase_value)
                                     config_data_of_node["load"]["P_Load"] = three_phase
-                                if node_name + ".1.2.3" or node_name in phase:
+                                else:
+                                    three_phase = [0] * length
+                                    for value in range(length):
+
+                                        three_phase_value = config_data_of_node["load"]["P_Load_R"][value] + \
+                                                            config_data_of_node["load"]["P_Load_S"][value] + \
+                                                            config_data_of_node["load"]["P_Load_T"][value]
+
+                                        three_phase.append(three_phase_value)
+                                    config_data_of_node["load"]["P_Load"] = three_phase
+
+                                if node_name + ".1.2.3" in phase or node_name == phase:
+                                    three_phase=[]
                                     if node_name in phase:
                                         config_data_of_node["load"]["P_Load"] = phase[node_name]
                                         three_phase = phase[node_name]
