@@ -114,7 +114,7 @@ class Profess:
             self.set_profess_id_for_node(node_name, profess_id)
             # the posted data is also saved internaly for other optimizations
             self.set_config_json(node_name, profess_id, input_data)
-            if response.status_code == 200:
+            if response.status_code == 200 or response.status_code==201:
                 return 0
             else:
                 logger.error("failed to post_data node: " + str(node_name) + " and input data: " + str(
@@ -267,11 +267,10 @@ class Profess:
                                                                                              "optimization_type": optType})
             json_response = response.json()
             logger.debug(str(json_response) + ": " + str(profess_id)+" , Status code of start: "+str(response.status_code))
-            if response.status_code == 200 and json_response == "System started succesfully":
+            if (str(response.status_code) == 200):
                 # code 200 is returned even when the optimization couldn't start because of missing data for the optimization
                 return 0
             else:
-
                 return response
         except:
             logger.error("Failed to start optimization, No connection to the OFW could be established at :"+str(self.domain)+"optimization/start/")
@@ -300,7 +299,7 @@ class Profess:
                 if optimization_model is None:
                     optimization_model = storage_opt_model
                 start_response=self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name))
-                if start_response:
+                if start_response is not 0 and start_response is not None:
                     self.check_start_issue(start_response,node_name)
                     return 1
             return 0
