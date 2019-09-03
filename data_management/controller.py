@@ -111,9 +111,9 @@ class gridController(threading.Thread):
         return self.redisDB.get(self.finish_status_key)
 
 
-    def run(self, id, duration):
-        self.id = id
-        self.duration = duration
+    def run(self):#, id, duration):
+        #self.id = id
+        #self.duration = duration
 
         common = self.topology["common"]
         radial = self.topology["radials"]
