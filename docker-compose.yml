@@ -1,5 +1,11 @@
 version: '3'
 services:
+  mosquitto:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+    container_name: "mosquito_S4G1"
+
   redis:
     image: redis:latest
     command: redis-server

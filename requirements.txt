@@ -3,4 +3,8 @@ gunicorn
 psutil
 more_itertools
 jsonpickle
+simplejson
+flask-cors
+numpy
 senml
+paho-mqtt
