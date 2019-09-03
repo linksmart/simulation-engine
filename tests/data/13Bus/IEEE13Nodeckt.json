@@ -7,7 +7,12 @@
         "bus1": "SourceBus",
         "angle": 30,
         "MVAsc3": 20000,
-        "MVAsc1": 21000
+        "MVAsc1": 21000,
+        "base_frequency": 60,
+		"VoltageBases": [115, 4.16, 0.48],
+		"url_storage_controller": "http://192.168.99.100:8080",
+		"city": "Fur",
+		"country": "Denmark"
     },
     "radials": [
         {
@@ -79,8 +84,7 @@
                     "taps": [
                         1,
                         1
-                    ],
-                    "base_frequency": 60
+                    ]
                 },
                 {
                     "id": "Reg1",
@@ -114,8 +118,8 @@
                     "taps": [
                         1,
                         1
-                    ],
-                    "base_frequency": 60
+                    ]
+
                 },
                 {
                     "id": "Reg2",
@@ -149,8 +153,8 @@
                     "taps": [
                         1,
                         1
-                    ],
-                    "base_frequency": 60
+                    ]
+
                 },
                 {
                     "id": "Reg3",
@@ -184,8 +188,7 @@
                     "taps": [
                         1,
                         1
-                    ],
-                    "base_frequency": 60
+                    ]
                 },
                 {
                     "id": "XFM1",
@@ -220,15 +223,14 @@
                     "taps": [
                         1,
                         1
-                    ],
-                    "base_frequency": 60
+                    ]
                 }
             ],
             "linecode": [
                 {
                     "id": "mtx601",
                     "nphases": 3,
-                    "base_frequency": 60,
+
                     "rmatrix": [
                         [
                             0.3465
@@ -262,7 +264,7 @@
                 {
                     "id": "mtx602",
                     "nphases": 3,
-                    "base_frequency": 60,
+
                     "rmatrix": [
                         [
                             0.7526
@@ -296,7 +298,7 @@
                 {
                     "id": "mtx603",
                     "nphases": 2,
-                    "base_frequency": 60,
+
                     "rmatrix": [
                         [
                             1.3238
@@ -320,7 +322,7 @@
                 {
                     "id": "mtx604",
                     "nphases": 2,
-                    "base_frequency": 60,
+
                     "rmatrix": [
                         [
                             1.3238
@@ -344,7 +346,7 @@
                 {
                     "id": "mtx605",
                     "nphases": 1,
-                    "base_frequency": 60,
+
                     "rmatrix": [
                         [
                             1.3292
@@ -360,7 +362,7 @@
                 {
                     "id": "mtx606",
                     "nphases": 3,
-                    "base_frequency": 60,
+
                     "units": "mi",
                     "rmatrix": [
                         [
@@ -408,7 +410,7 @@
                 {
                     "id": "mtx607",
                     "nphases": 1,
-                    "base_frequency": 60,
+
                     "rmatrix": [
                         [
                             1.3425
@@ -740,21 +742,23 @@
                 }
             ],
                         "storageUnits": [
-                {
+						{
                   "id": "Akku1",
                   "bus1": "633",
                   "phases": 3,
-                  "connection": "wye",
-                  "soc": 100,
-                  "dod": 30,
+				  "connection": "wye",
+                  "soc": 60,
+                  "min_soc":15,
+                  "max_soc":100,
                   "kv": 4.16,
-                  "kw_rated": 75,
-                  "kwh_rated": 150,
-                  "kwh_stored": 150,
-                  "charge_efficiency": 95,
-                  "discharge_efficiency": 95,
-                  "powerfactor": 1
-                }
+                  "max_charging_power": 75,
+                  "max_discharging_power":75,
+                  "storage_capacity": 150,
+                  "optimization_model": "Maximize Self-Consumption",
+                  "powerfactor":1
+
+				}
+
             ]
         }
     ]

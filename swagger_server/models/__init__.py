@@ -9,9 +9,7 @@ from swagger_server.models.duration import Duration
 from swagger_server.models.error import Error
 from swagger_server.models.grid import Grid
 from swagger_server.models.grid_definition import GridDefinition
-from swagger_server.models.impedance import Impedance
 from swagger_server.models.linecode import Linecode
-from swagger_server.models.linecode_r_matrix import LinecodeRMatrix
 from swagger_server.models.load import Load
 from swagger_server.models.loadshape import Loadshape
 from swagger_server.models.node import Node
@@ -25,7 +23,8 @@ from swagger_server.models.simulation import Simulation
 from swagger_server.models.simulation_result import SimulationResult
 from swagger_server.models.storage import Storage
 from swagger_server.models.transformer import Transformer
-from swagger_server.models.transformer_windings import TransformerWindings
+from swagger_server.models.transformer_regcontrol import TransformerRegcontrol
+from swagger_server.models.transformer_wdgs import TransformerWdgs
 from swagger_server.models.tshape import Tshape
 from swagger_server.models.voltage import Voltage
 from swagger_server.models.winding import Winding

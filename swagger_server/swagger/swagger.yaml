@@ -97,7 +97,7 @@ paths:
           description: "successful operation"
       x-swagger-router-controller: "swagger_server.controllers.simulation_controller"
   /commands/run/{id}:
-    post:
+    put:
       tags:
       - "commands"
       summary: "Runs a simulation"
@@ -112,7 +112,7 @@ paths:
       - in: "body"
         name: "body"
         description: "Configuration data for the simulation e.g. duration"
-        required: true
+        required: false
         schema:
           $ref: "#/definitions/Simulation"
       responses:
@@ -128,7 +128,7 @@ paths:
           description: "Simulation ID not found"
       x-swagger-router-controller: "swagger_server.controllers.commands_controller"
   /commands/abort/{id}:
-    post:
+    put:
       tags:
       - "commands"
       summary: "Aborts a running simulation"
@@ -145,6 +145,28 @@ paths:
         200:
           description: "successful operation"
       x-swagger-router-controller: "swagger_server.controllers.commands_controller"
+  /commands/status/{id}:
+    get:
+      tags:
+      - "commands"
+      summary: "Get the status of the simulation"
+      operationId: "get_simulation_status"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of the simulation"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Status of the simulation"
+          schema:
+            type: "number"
+        400:
+          description: "Invalid simulation configuration data supplied"
+        404:
+          description: "Simulation ID not found"
+      x-swagger-router-controller: "swagger_server.controllers.commands_controller"
 definitions:
   Grid:
     type: "object"
@@ -157,6 +179,15 @@ definitions:
           $ref: "#/definitions/Radial"
   Grid_Definition:
     type: "object"
+    required:
+    - "MVAsc3"
+    - "VoltageBases"
+    - "angle"
+    - "base_frequency"
+    - "base_kV"
+    - "bus1"
+    - "id"
+    - "phases"
     properties:
       id:
         type: "string"
@@ -174,6 +205,20 @@ definitions:
         type: "number"
       MVAsc1:
         type: "number"
+      base_frequency:
+        type: "integer"
+        format: "int32"
+      VoltageBases:
+        type: "array"
+        items:
+          type: "number"
+      url_storage_controller:
+        type: "string"
+        default: "http://localhost:8080"
+      city:
+        type: "string"
+      country:
+        type: "string"
   Radial:
     type: "object"
     properties:
@@ -303,6 +348,7 @@ definitions:
     - "bus"
     - "id"
     - "kV"
+    - "kW"
     - "phases"
     properties:
       id:
@@ -335,7 +381,10 @@ definitions:
   Powerline:
     type: "object"
     required:
+    - "bus1"
+    - "bus2"
     - "id"
+    - "phases"
     properties:
       id:
         type: "string"
@@ -370,6 +419,12 @@ definitions:
         default: false
   Linecode:
     type: "object"
+    required:
+    - "id"
+    - "nphases"
+    - "rmatrix"
+    - "units"
+    - "xmatrix"
     properties:
       id:
         type: "string"
@@ -395,8 +450,6 @@ definitions:
             type: "number"
       units:
         type: "string"
-      base_frequency:
-        type: "number"
   XYCurve:
     type: "object"
     required:
@@ -459,7 +512,8 @@ definitions:
     - "bus1"
     - "id"
     - "kv"
-    - "kw_rated"
+    - "optimization_model"
+    - "storage_capacity"
     properties:
       id:
         type: "string"
@@ -474,22 +528,29 @@ definitions:
       soc:
         type: "number"
         description: "State of Charge in % of rated kWh (openDSS Name: %stored)"
-      dod:
+      min_soc:
         type: "number"
-        description: "Minimum Depth of Discharge recommended in % of rated kWh (%reserve)"
+      max_soc:
+        type: "number"
       kv:
         type: "number"
         description: "Nominal rated (1.0 per unit) voltage, kV, for Storage element."
       kw_rated:
         type: "number"
         description: "kW rating of power output. Side effect: Set KVA property."
-      kwh_rated:
+      storage_capacity:
         type: "number"
         description: "Rated storage capacity in kWh. Default is 50."
       kwh_stored:
         type: "number"
         description: "Present amount of energy stored, kWh. Default is same as kWh\
           \ rated."
+      max_charging_power:
+        type: "number"
+        description: "Maximal power to charge the storage"
+      max_discharging_power:
+        type: "number"
+        description: "Maximal power to discharge the storage"
       charge_efficiency:
         type: "number"
         description: "Efficiency for CHARGING the storage element. Default=90%. (%EffCharge)"
@@ -500,30 +561,29 @@ definitions:
       powerfactor:
         type: "number"
         description: "(openDSS Name: pf)"
+      optimization_model:
+        type: "string"
+        description: "(A value required by PROFFES)"
+      global_control:
+        type: "boolean"
   Photovoltaic:
     type: "object"
     required:
     - "bus1"
-    - "daily"
-    - "effcurve"
     - "id"
-    - "node"
-    - "pf"
+    - "kV"
+    - "max_power_kW"
     - "phases"
-    - "power"
-    - "ptcurve"
-    - "voltage"
     properties:
       id:
         type: "string"
-      node:
-        type: "string"
-        description: "ID for the connected node"
       inverterEfficiency:
         type: "number"
       phases:
         type: "integer"
       power:
+        type: "number"
+      max_power_kW:
         type: "number"
       powerunit:
         type: "string"
@@ -531,7 +591,7 @@ definitions:
         type: "number"
       bus1:
         type: "string"
-      voltage:
+      kV:
         type: "number"
       effcurve:
         type: "string"
@@ -541,7 +601,9 @@ definitions:
         type: "string"
       tdaily:
         type: "string"
-      pf:
+      temperature:
+        type: "number"
+      irrad:
         type: "number"
       voltageunit:
         type: "string"
@@ -588,13 +650,18 @@ definitions:
       wdg: 1
       bus: "SourceBus"
       connection_type: "wye"
-      kV: 4.160000000000000142108547152020037174224853515625
+      kV: 4.16
       kVA: 5000
       percent_resistance: 0.5
   Transformer:
     type: "object"
     required:
+    - "buses"
     - "id"
+    - "kvas"
+    - "kvs"
+    - "phases"
+    - "windings"
     properties:
       id:
         type: "string"
@@ -650,8 +717,6 @@ definitions:
           type: "number"
           minimum: 0
           maximum: 1
-      base_frequency:
-        type: "number"
   Duration:
     type: "object"
     properties:
@@ -670,37 +735,37 @@ definitions:
       day: 0
   Simulation:
     type: "object"
+    required:
+    - "sim_duration_in_hours"
     properties:
-      gridId:
-        type: "string"
-      duration:
-        $ref: "#/definitions/Duration"
+      sim_duration_in_hours:
+        type: "integer"
+        format: "int32"
       thresholdLow:
         type: "number"
         format: "float"
         description: "Lower threshold in % for voltage error"
+        minimum: 0
+        maximum: 100
       thresholdMedium:
         type: "number"
         format: "float"
         description: "Medium threshold in % for voltage error"
+        minimum: 0
+        maximum: 100
       thresholdHigh:
         type: "number"
         format: "float"
         description: "Maximum threshold in % for voltage error"
+        minimum: 0
+        maximum: 100
     example:
-      duration:
-        month: 6
-        year: 1
-        day: 0
-      thresholdMedium: 5.63737699999999986033571985899470746517181396484375
-      gridId: "gridId"
-      thresholdHigh: 2.30213599999999996015276337857358157634735107421875
-      thresholdLow: 5.96213399999999982270537657313980162143707275390625
+      sim_duration_in_days: 365
+      thresholdMedium: 5
+      thresholdHigh: 10
+      thresholdLow: 2.5
   SimulationResult:
     type: "object"
-    required:
-    - "nodeId"
-    - "voltage"
     properties:
       nodeId:
         type: "string"
@@ -715,9 +780,9 @@ definitions:
         voltageS: true
       nodeId: "nodeId"
       voltage:
-        voltageT: 1.46581298050294517310021547018550336360931396484375
-        voltageR: 0.80082819046101150206595775671303272247314453125
-        voltageS: 6.02745618307040320615897144307382404804229736328125
+        voltageT: 1.4658129805029452
+        voltageR: 0.8008281904610115
+        voltageS: 6.027456183070403
   Voltage:
     type: "object"
     properties:
@@ -728,9 +793,9 @@ definitions:
       voltageT:
         type: "number"
     example:
-      voltageT: 1.46581298050294517310021547018550336360931396484375
-      voltageR: 0.80082819046101150206595775671303272247314453125
-      voltageS: 6.02745618307040320615897144307382404804229736328125
+      voltageT: 1.4658129805029452
+      voltageR: 0.8008281904610115
+      voltageS: 6.027456183070403
   Error:
     type: "object"
     properties:

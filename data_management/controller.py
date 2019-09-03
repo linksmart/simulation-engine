@@ -1,192 +1,417 @@
 import logging
 import json
+import os
+import time
+import sys
 
+from profess.JSONparser import *
+from profess.Profess import *
 from simulator.openDSS import OpenDSS
+from data_management.redisDB import RedisDB
+from profiles.profiles import *
 #from simulation_management import simulation_management as SM
+from data_management.inputController import InputController
+from data_management.utils import Utils
+import threading
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
 
-class gridController:
+class gridController(threading.Thread):
 
-    def __init__(self, id):
+    def __init__(self, id, duration):
         super(gridController, self).__init__()
         logger.info("Initializing simulation controller")
-        self.sim = OpenDSS("S4G Simulation")
+        self.sim = OpenDSS(id)
         self.id = id
+        logger.debug("id "+str(id))
         self.nodeNames =[]
         self.allBusMagPu=[]
         self.yCurrent = []
         self.losses = []
+        self.voltage_bases = []
+        self.city = None
+        self.country = None
+        self.redisDB = RedisDB()
+        self.lock_key = "id_lock"
+        self.stop_signal_key = "opt_stop_" + self.id
+        self.finish_status_key = "finish_status_" + self.id
+        self.redisDB.set(self.stop_signal_key, "False")
+        self.redisDB.set(self.finish_status_key, "False")
+        self.sim_days = duration
+        logger.debug("Starting input controller")
+        self.input = InputController(id, self.sim, self.sim_days)
+        self.topology = self.input.get_topology()
+        self.utils = Utils()
 
-    def setNewCircuit(self, name):
-        logger.debug("Creating a new circuit with the name: "+str(name))
-        self.sim.setNewCircuit(name)
-        logger.debug("New circuit created")
+        self.stopRequest = threading.Event()
+        logger.debug("Simulation controller initiated")
 
-    def enableCircuit(self, name):
-        logger.debug("Enabling the circuit with the name: "+str(name))
-        self.sim.enableCircuit(name)
-        logger.debug("Circuit "+str(name)+" enabled")
 
-    def setParameters(self, id, duration):
-        self.id = id
-        self.duration = duration
+    def get_profess_url(self):
+        return self.profess_url
+
+    def get_soc_list(self,topology):
+        radial=topology["radials"]#["storageUnits"]
+        list_storages=[]
+        soc_list = []
+        soc_dict_intern = {"SoC":None}
+        for element in radial:
+
+            for key, value in element.items():
+                if key == "storageUnits":
+                    for element_intern in value:
+                        soc_dict = {}
+                        #logger.debug("element intern "+str(element_intern))
+                        soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"], "id":element_intern["id"]}
+                        soc_list.append(soc_dict)
+                        list_storages.append(element_intern)
+        #logger.debug("list_storages "+str(list_storages))
+        logger.debug("soc_list " + str(soc_list))
+        return soc_list
+
+    def set_new_soc(self, soc_list):
+        #self.sim.getSoCfromBattery("Akku1")
+
+        new_soc_list=[]
+        for element in soc_list:
+            for key, value in element.items():
+                element_id=value["id"]
+                logger.debug("ESS_id "+str(element_id))
+                #logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
+                SoC = float(self.sim.getSoCfromBattery(element_id))
+                value["SoC"]=SoC
+                new_soc_list.append(element)
+        logger.debug("new soc list: " + str(new_soc_list))
+        return new_soc_list
+
 
     def getId(self):
         return self.id
 
-    def getDuration(self):
-        return self.duration
 
-    def disableCircuit(self, name):
-        logger.debug("Disabling the circuit with the name: "+str(name))
-        self.sim.disableCircuit(name)
-        logger.debug("Circuit "+str(name)+" disabled")
 
-    def setLoads(self, id, object):
-        self.object=object
-        logger.debug("Charging loads into the simulator")
-        self.sim.setLoads(self.object)
-        logger.debug("Loads charged")
+    def join(self, timeout=None):
+        self.stopRequest.set()
+        super(gridController, self).join(timeout)
 
-    def setTransformers(self, id, object):
-        logger.debug("Charging transformers into the simulator")
-        self.object = object
-        self.sim.setTransformers(self.object)
-        logger.debug("Transformers charged")
+    def Stop(self):
+        try:
+            self.sim.Stop()
+        except Exception as e:
+            self.logger.error("error stopping simulator " + str(e))
 
-    def setRegControls(self, id, object):
-        logger.debug("Charging RegControls into the simulator")
-        self.object = object
-        self.sim.setRegControls(self.object)
-        logger.debug("RegControls charged")
+        self.redisDB.set(self.stop_signal_key, "True")
+        if self.isAlive():
+            self.join(1)
 
-    def setPowerLines(self, id, powerlines): #(self, id, powerlines, linecodes):
-        logger.debug("Charging power lines into the simulator")
-        #self.sim.setLineCodes(linecodes)
-        self.sim.setPowerLines(powerlines)
-        logger.debug("Power lines charged")
-        
-    def setCapacitors(self, id, capacitors):
-        logger.debug("Charging capacitors into the simulator")
-        #self.object = object
-        #self.sim.setCapacitors(self.object)
-        self.sim.setCapacitors(capacitors)
-        logger.debug("Capacitor charged")
-    def setLineCodes(self, id, linecode):
-        logger.debug("Charging LineCode into the simulator")
-        #self.object = object
-        #self.sim.setLineCodes(self.object)
-        self.sim.setLineCodes(linecode)
-        logger.debug("LineCode charged")
 
-    def setXYCurve(self, id, npts, xarray, yarray):
-        logger.debug("Setting the XYCurve into the simulator")
-        self.object = object
-        self.sim.setXYCurve(self.object)
-        logger.debug("XYCurve set")
+    def get_finish_status(self):
+        return self.redisDB.get(self.finish_status_key)
 
-    def setPhotovoltaic(self, id, photovoltaics, xycurves, loadshapes, tshapes):
-        logger.debug("Charging the photovoltaics into the simulator")
-        self.sim.setXYCurves(xycurves)
-        self.sim.setLoadshapes(loadshapes)
-        logger.debug("Tshape: "+str(tshapes))
-        self.sim.setTshapes(tshapes)
-        self.sim.setPhotovoltaics(photovoltaics)
-        logger.debug("Photovoltaics charged")
-
-    def setStorage(self, id, storage):
-        logger.debug("Charging the ESS into the simulator")
-        self.sim.setStorages(storage)
-        logger.debug("ESS charged")
-
-    def setChargingPoints(self, id, object):
-        logger.debug("Charging the charging points into the simulator")
-        self.object = object
-        self.sim.setChargingPoints(self.object)
-        logger.debug("Charging points charged")
 
     def run(self, id, duration):
         self.id = id
         self.duration = duration
 
+        common = self.topology["common"]
+        radial = self.topology["radials"]
+
+        self.input.setParameters(self.id, common)
+        self.sim.set_base_frequency(self.input.get_base_frequency())
+        self.sim.setNewCircuit(self.id, common)
+
+
+
+
+
+        # ----------PROFESS----------------#
+        if common["url_storage_controller"]:
+            self.profess_url = common["url_storage_controller"]
+            logger.debug("profess url "+str(self.profess_url))
+        else:
+            self.profess_url = "http://localhost:8080"
+        self.domain = self.get_profess_url() + "/v1/"
+        logger.debug("profess url: " + str(self.domain))
+        self.profess = Profess(self.domain, self.topology)
+
+        # ----------PROFILES----------------#
+        self.profiles = Profiles()
+        # profess.json_parser.set_topology(data)
+
+        self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
+        transformer_names=self.sim.get_transformer_names()
+        logger.debug("Transformer names: "+str(transformer_names))
+        logger.debug("Transformers in the circuit")
+        for i in range(len(transformer_names)):
+            self.sim.create_monitor("monitor_transformer_"+str(i), "Transformer."+str(transformer_names[i]),1,1)
+
+        logger.debug("#####################################################################")
         logger.debug("Simulation of grid " + self.id + " started")
-        logger.debug("These are the parameters")
         logger.debug("GridID: "+str(self.id))
-        """logger.debug("Duration: "+str(self.duration))
+        logger.debug("#####################################################################")
 
-        day = self.duration.to_dict()["day"]
-        logger.debug("Days: "+str(day))
-        month= self.duration.to_dict()["month"]
-        logger.debug("Months: " + str(month))
-        year = self.duration.to_dict()["year"]
-        logger.debug("year: " + str(year))
-        if day is 0 and month is 0 and year is 0:
-            return "Duration is no present"
-        if day > 0:
-            numSteps=1440*day
-        elif month > 0:
-            numSteps=1440*30*month
-        elif year > 0:
-            numSteps = 365
-
-        #self.sim.runNode13()"""
+        #self.sim.runNode13()
         self.sim.enableCircuit(self.id)
 
         logger.debug("Active circuit: "+str(self.sim.getActiveCircuit()))
-        #return "ok"
+
         ##################################################################################PROBLEM################################
-        self.sim.setVoltageBases(115, 4.16, 0.48)
-        logger.info("Solution mode: "+str(self.sim.getMode()))
-        logger.info("Solution step size: " + str(self.sim.getStepSize()))
-        logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
-        logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
-        self.sim.setMode("snap")
-        logger.info("Solution mode 2: " + str(self.sim.getMode()))
+      
+        #self.sim.setVoltageBases(115, 4.16, 0.48)
+        self.sim.setVoltageBases(self.input.get_voltage_bases())
+        #self.sim.setMode("snap")
+        #self.sim.setMode("daily")
+        self.sim.setMode("yearly")
         self.sim.setStepSize("hours")
-        #logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         self.sim.setNumberSimulations(1)
+        logger.info("Solution mode 2: " + str(self.sim.getMode()))
         logger.info("Number simulations 2: " + str(self.sim.getNumberSimulations()))
-        #self.sim.setVoltageBases(115,4.16,0.48)
+        logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        #self.sim.setVoltageBases()
-        numSteps= 5
-        #logger.info("Number of steps: "+str(numSteps))
-        #nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
+        numSteps=self.sim_days
+        #self.redisDB.set("sim_days_"+str(self.id),numSteps)
+        #numSteps=3
+        logger.debug("Number of steps: "+str(numSteps))
+        result=[]
+
+        nodeNames = self.sim.get_node_list()
+        len_nodeNames = len(nodeNames)
+        elementNames = self.sim.get_element_names()
+        len_elementNames= len(elementNames)
+        nodeNamesCurrents = self.sim.get_YNodeOrder()
+        len_nodeNamesCurrents = len(nodeNamesCurrents)
+
+        #logger.debug("node_ names "+str(nodeNames))
+        voltages = [[] for i in range(len(nodeNames))]
+        currents = [[] for i in range(len_nodeNamesCurrents)]
+        losses = [[] for i in range(len_elementNames)]
+        total_losses = []
+        powers = [[] for i in range(len(nodeNames))]
+
+        soc_list = self.get_soc_list(self.topology)
+        charging = True
+        logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
+        flag_is_storage = self.input.is_Storage_in_Topology(self.topology)
+
+        logger.debug("flag is storage "+str(flag_is_storage))
+
+
+
         for i in range(numSteps):
+            #time.sleep(0.1)
+            logger.info("#####################################################################")
             logger.info("loop  numSteps, i= " + str(i) )
-            nodeNames, allBusMagPu, yCurrent, losses = self.sim.solveCircuitSolution()
-        """df = self.sim.utils.lines_to_dataframe()
-        data = df[['Bus1', 'Bus2']].to_dict(orient="index")
-        for name in data:
-            self.sim.Circuit.SetActiveBus(f"{name}")
-            if phase in self.sim.Bus.Nodes():
-                index = self.sim.Bus.Nodes().index(phase)
-                re, im = self.sim.Bus.PuVoltage()[index:index+2]
-                V = abs(complex(re,im))
-        logger.info("Voltage: " + str(V))"""
-        logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
-        logger.info("Node Names: "+ str(nodeNames))
-        logger.info("All Bus MagPus: " + str(allBusMagPu))
-        #!TODO: return node names, voltage and current in json
-        #data = {"NodeNames": nodeNames, "Voltage": allBusMagPu}
-        #return json.dumps(data)
-        logger.info("YCurrent: " + str(yCurrent))
-        logger.info("losses: " + str(losses))
-        #return ("Nodes: " + str(nodeNames), "\nVoltages " + str(allBusMagPu))
-        #return (nodeNames, allBusMagPu)
-        #filename = str(id)+"_results.txt"
-        #!TODO: Create filename with id so serve multiple simultaneous simulations
-        json_data = json.dumps(allBusMagPu)
-        with open('/usr/src/app/tests/results/results.txt', 'w', encoding='utf-8') as outfile:
-            #outfile.write(json_data) # working
-            json.dump(allBusMagPu, outfile, ensure_ascii=False, indent=2) # working
-            #json.dump(json_data, outfile, ensure_ascii=False, indent=2)  # not working !!!
-        #logger.info(json_data)
-        return id
+            hours = self.sim.getStartingHour()
+            logger.info("Starting Hour : " + str(hours))
+            logger.info("#####################################################################")
+
+            self.redisDB.set("timestep_"+str(self.id), i)
+
+
+            terminal=self.sim.get_monitor_terminals("mon_transformer")
+            logger.debug("Number of terminals in monitor "+str(terminal))
+
+
+
+            #self.sim.get_power_Transformer("transformer_20082")
+            if flag_is_storage:
+            #if "storageUnits" in self.topology["radials"][0].keys():
+                #logger.debug("######################Setting profess##################################")
+                #
+                #logger.debug("timestep " + str(hours))
+                professLoads = self.sim.getProfessLoadschapes(hours, 24)
+                #logger.debug("professLoads: " + str(professLoads))
+                professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
+                #logger.debug("professPVs: " + str(professPVs))
+                dummyPrice = [3] * 24
+                dummyGESSCON = [3] * 24
+
+                #soc_list=self.get_soc_list(self.topology)
+                soc_list_new = self.set_new_soc(soc_list)
+
+                self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+                status_profess=self.profess.start_all()
+                if not status_profess:
+                    profess_output=self.profess.wait_and_get_output()
+                    logger.debug("output profess " + str(profess_output))
+                else:
+                    logger.error("OFW instances could not be started")
+                    #self.redisDB.set(self.finish_status_key, "True")"""
+
+                #logger.debug("######################Ending profess##################################")
+
+
+                """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
+                logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
+                logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
+                logger.debug("kW " + str(self.sim.getkWfromBattery("Akku1")))
+                logger.debug("Min_SoC " + str(self.sim.getMinSoCfromBattery("Akku1")))
+                logger.debug("bus " + str(self.sim.getBusfromBattery("Akku1")))
+                logger.debug("ESS state "+str(self.sim.getStatefromBattery("Akku1")))
+                max_charging_power_value=float(self.sim.getkWratedfromBattery("Akku1"))
+
+                SoC = float(self.sim.getSoCfromBattery("Akku1"))
+                logger.debug("SoC_value Akku1: " + str(SoC))
+                if i>0:
+
+                    if charging is True:
+
+                        if SoC >= 100:
+                            charging = False
+                            logger.debug("Entered to discharging")
+                            self.sim.setActivePowertoBatery("Akku1",0.5,max_charging_power_value)
+                        else:
+                            logger.debug("Entered to charging")
+                            self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
+                    else:
+
+                        if SoC <= 20:
+                            charging = True
+                            logger.debug("Entered to charging")
+                            self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
+                        else:
+                            logger.debug("Entered to discharging")
+                            self.sim.setActivePowertoBatery("Akku1",0.5, max_charging_power_value)
+                logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))"""
+
+                #logger.debug("######################Ending profess##################################")
+
+
+                #profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
+                """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
+                self.profess.start_all()
+                print("--------------------start profess results----------------------------")
+                print(self.profess.dataList)
+                print(self.profess.wait_and_get_output())
+                soc_list = [{"633": {"SoC": 5}}, {"671": {"SoC": 4}}, {"634": {"SoC": 20}}]
+                self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
+                print(self.profess.dataList)
+                print("--------------------end profess results----------------------------")"""
+            else:
+                logger.debug("No Storage Units present")
+
+
+            puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
+            tot_losses = self.sim.get_total_losses()
+
+            for i in range(len_nodeNames):
+                voltages[i].append(puVoltages[i])
+
+            for i in range(len_elementNames):
+                number = int(i+(len_elementNames))
+                losses[i].append(complex(Losses[i], Losses[number]))
+
+            for i in range(len_nodeNamesCurrents):
+                currents[i].append(complex(Currents[i], Currents[int(i+(len_nodeNamesCurrents))]))
+
+            total_losses.append(complex(tot_losses[0],tot_losses[1]))
+
+
+        #logger.debug("volt finish "+str(voltages))
+        logger.debug("#####################################################################################")
+
+        data ={}
+        data_voltages={}
+        data_currents={}
+        data_losses={}
+        raw_data={}
+        raw_data_voltages={}
+        raw_data_currents={}
+        raw_data_losses={}
+        raw_data_power={}
+
+        ############################### Losses ###################################
+
+        for i in range(len_elementNames):
+            raw_data_losses[elementNames[i]]=losses[i]
+
+        for i in range(len_elementNames):
+            element= [abs(x) for x in losses[i]]
+            data_losses[elementNames[i]]= max(element)
+
+        abs_total_losses=[]
+        raw_data_losses["circuit_total_losses"]=total_losses
+        for element in total_losses:
+            abs_total_losses.append(abs(element))
+        data_losses["circuit_total_losses"]=max(abs_total_losses)
+
+        #logger.debug("total_losses " + str(total_losses))
+        #data_losses
+        ############################### Currents ###################################
+        for i in range(len_nodeNamesCurrents):
+            raw_data_currents[str(nodeNamesCurrents[i]).lower()]=currents[i]
+
+        for i in range(len_nodeNamesCurrents):
+            element= [abs(x) for x in currents[i]]
+            key=nodeNamesCurrents[i]
+            data_currents[key]=max(element)
+
+        data3 = {}
+        for key, value in data_currents.items():
+            node, phase = key.split(".", 1)
+            key_to_give = str(node).lower()
+            if key_to_give not in data3.keys():
+                data3[key_to_give] = {}
+            data3[key_to_give]["Phase " + phase] = value
+
+
+        ############################### Voltages ###################################
+        for i in range(len(nodeNames)):
+            raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
+            data_voltages[nodeNames[i]]={"max":max(voltages[i]), "min":min(voltages[i])}
+
+        data2 = {}
+        for key, value in data_voltages.items():
+            node, phase = key.split(".", 1)
+            if node not in data2.keys():
+                data2[node] = {}
+            data2[node]["Phase " + phase] = value
+
+        ###############################Max power in transformers###################################
+        S_total = []
+        mon_sample = []
+        for i in range(len(transformer_names)):
+            name_monitor="monitor_transformer_" + str(i)
+            #logger.debug("i in sample monitor "+str(i)+" "+str(name_monitor))
+            S_total.append(self.sim.get_monitor_sample(name_monitor))
+
+        power={}
+        for i in range(len(transformer_names)):
+            raw_data_power[transformer_names[i]]=S_total[i]
+            power["Transformer."+str(transformer_names[i])]=max(S_total[i])
+        #logger.debug("power "+str(power))
+        data={"voltages":data2, "currents":data3,"losses":data_losses, "powers":power}
+
+
+        raw_data = {"voltages": raw_data_voltages, "currents": raw_data_currents, "losses": raw_data_losses, "powers": raw_data_power}
+
+
+
+        result=data
+
+
+
+        fname = (str(self.id))+"_result"
+        path = os.path.join("data", str(self.id), fname)
+        logger.debug("Storing results in data folder")
+        self.utils.store_data(path, result)
+        logger.debug("Results succesfully stored")
+        logger.debug("Stroring raw data in data folder")
+        fname_row = (str(self.id)) + "_result_raw.json"
+        path = os.path.join("data", str(self.id), fname_row)
+        self.utils.store_data_raw(path, raw_data)
+        logger.debug("Raw data successfully stored")
+        logger.debug("#####################################################################################")
+        logger.debug("##########################   Simulation End   #######################################")
+        logger.debug("#####################################################################################")
+        self.redisDB.set(self.finish_status_key, "True")
+
+
+
+        #return id
     
     #def results(self):   
         #return (self.nodeNames, self.allBusMagPu)
@@ -205,4 +430,27 @@ class gridController:
             #If
             #DSSSolution.Converged
             #Then
-            #V = DSSCircuit.AllBusVmagPu"""
+            #V = DSSCircuit.AllBusVmagPu
+
+        df = self.sim.utils.lines_to_dataframe()
+               data = df[['Bus1', 'Bus2']].to_dict(orient="index")
+               for name in data:
+                   self.sim.Circuit.SetActiveBus(f"{name}")
+                   if phase in self.sim.Bus.Nodes():
+                       index = self.sim.Bus.Nodes().index(phase)
+                       re, im = self.sim.Bus.PuVoltage()[index:index+2]
+                       V = abs(complex(re,im))
+               logger.info("Voltage: " + str(V))"""
+        # logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
+        """logger.info("Node Names: "+ str(nodeNames))
+        logger.info("All Bus MagPus: " + str(allBusMagPu))
+        # !TODO: return node names, voltage and current in json
+        # data = {"NodeNames": nodeNames, "Voltage": allBusMagPu}
+        # return json.dumps(data)
+        logger.info("YCurrent: " + str(yCurrent))
+        logger.info("losses: " + str(losses))
+        # return ("Nodes: " + str(nodeNames), "\nVoltages " + str(allBusMagPu))
+        # return (nodeNames, allBusMagPu)
+        # filename = str(id)+"_results.txt"
+        # !TODO: Create filename with id so serve multiple simultaneous simulations#DONE
+        # json_data = json.dumps(allBusMagPu)"""

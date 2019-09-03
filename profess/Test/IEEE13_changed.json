@@ -739,7 +739,14 @@
                     "c0": 0
                 }
             ],
-                        "storageUnits": [
+					"photovoltaics":[{
+				"bus1": "671",
+				"id": "PV_1",
+				"max_power_kW":4,
+				"phases":3,
+				"kV":0.23
+			}],
+			                        "storageUnits": [
                 {
                   "id": "Akku1",
                   "bus1": "633",
@@ -789,6 +796,7 @@
 				  "optimization_model":"MaximizePVNoLoad"
                 }
             ]
+			
         }
     ]
 }

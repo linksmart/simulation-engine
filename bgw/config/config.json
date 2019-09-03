@@ -25,3 +25,27 @@
    "aaa_client_openid_anonymous_user":"anonymous",
    "aaa_client_openid_anonymous_pass":"anonymous"
 }
+
+"""{
+  "ei_tls_key": "/bgw/config/simplon.fit.fraunhofer.de_sec_key_wo_pass.pem",
+  "ei_tls_cert": "/bgw/config/simplon.fit.fraunhofer.de_cert_with_chain.pem",
+  "http_proxy_domains": {
+    "simplon.fit.fraunhofer.de": {
+      "se": {
+        "local_address": "http://nginx:8085/se"
+      }
+    }
+  },
+  "aaa_client_log_level": "debug",
+  "auth_service_openid_connect_providers": {
+    "default": {
+      "issuer": "https://auth.fit.fraunhofer.de/kc/realms/S4G-dev",
+      "token_endpoint": "https://auth.fit.fraunhofer.de/kc/realms/S4G-dev/protocol/openid-connect/token",
+      "client_id": "s4g_client",
+      "realm_public_key_modulus": "mDwenaWAS2B-w184cF4mOl3zW8mjklWsDzVwHyzGKywAPjoNhYapAq5sHnKDT3rVcwK1661rOA31vmPs9lZi4ifMguId5tE5f1-TAzsXXdHpwWb9O8oF_GBnb8Q-llayc4fTfi1KbQsoyOIiRWUwv6ktwJ54Nujnj_gyquFo9j-CCe6h7wOV-kF_VfdmrN17AXc1hYMMfEL8ApAxgYG9Em9M9VQmDgGYwbiTdpcR6DybzeYIcnzm-GyWSWCiHpzjuhkYWEf0AylA7CnGuGJy703mozooSz1xfEDgnvyX4J2hp9pRCezHG2oBcPURLh7KPT5fEKRZQynNjkeHG3t8TQ",
+      "realm_public_key_exponent": "AQAB",
+      "anonymous_user": "anonymous",
+      "anonymous_pass": "anonymous"
+    }
+  }
+}"""
