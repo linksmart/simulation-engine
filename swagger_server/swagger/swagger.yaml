@@ -566,6 +566,7 @@ definitions:
         description: "(A value required by PROFFES)"
       global_control:
         type: "boolean"
+        default: false
   Photovoltaic:
     type: "object"
     required:
