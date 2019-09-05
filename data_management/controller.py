@@ -230,9 +230,9 @@ class gridController(threading.Thread):
             if flag_is_storage:
 
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
-                logger.debug("loads "+str(professLoads))
+                #logger.debug("loads "+str(professLoads))
                 professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
-                logger.debug("PVs "+str(professPVs))
+                #logger.debug("PVs "+str(professPVs))
 
                 if self.input.is_price_profile():
                     logger.debug("price profile present")
@@ -242,6 +242,8 @@ class gridController(threading.Thread):
 
                 if flag_global_control:
                     logger.debug("global control present")
+                    result = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
+                    logger.debug("GESSCon result "+str(result))
 
 
                 if self.input.is_price_profile():

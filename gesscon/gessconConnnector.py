@@ -2,6 +2,8 @@ import datetime
 import logging
 import json
 import numpy as np
+from data_management.utils import Utils
+
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 from gesscon.MQTTClient import MQTTClient
@@ -10,6 +12,7 @@ class GESSCon():
 	def __init__(self):
 		self.soc_nodes = ""
 		self.soc_ids = ""
+		self.utils = Utils()
 		
 	def get_ESS_data_format(self, storage):
 		"""
@@ -29,7 +32,7 @@ class GESSCon():
 			data['max_discharging_power'] = ess['pdmax']
 			ess_data[ess['bus1']] = data
 			ess_data_list.append(ess_data)
-		logging.info("ESS Data= %s", ess_data_list)
+		logger.debug("ESS Data= %s", ess_data_list)
 		return ess_data_list
 		
 	def aggregate(self, data_list):
@@ -104,7 +107,7 @@ class GESSCon():
 			"cycle": [0] * len_soc,
 			"loss": 0
 		}
-		logging.info("Soc = %s", soc_values)
+		logger.debug("Soc = %s", soc_values)
 		return tele, config
 		
 	def gesscon(self, load, pv, price, Soc, date = "2018.10.01 00:00:00"):
@@ -171,18 +174,20 @@ class GESSCon():
 	def on_msg_received(self, payload):
 		# Mock Output from GESSCon
 		output_list = []
-		with open("gesscon_output.json", "r") as file:
+		path = self.utils.get_path("gesscon/gesscon_output.json")
+		with open(path, "r") as file:
 			dict_data = json.load(file)
-		logging.info(dict_data)
+		logger.debug(dict_data)
 		dict_data = dict_data['data']
 		for node_data, node, id in zip(dict_data, self.soc_nodes, self.soc_ids):
 			id_output = {id: node_data}
 			output_node = {node: id_output}
 			output_list.append(output_node)
-		logging.info(output_list)
+		logger.debug(output_list)
 
 
 #### Dummy data ####
+"""
 price = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 storage = {"storageUnits": [
@@ -243,3 +248,4 @@ load = [{'633':
 # g = GESSCon()
 # Soc = g.get_ESS_data_format(storage)
 # g.gesscon(load, pv, price, Soc)
+"""
