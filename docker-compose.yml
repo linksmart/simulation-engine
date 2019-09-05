@@ -1,6 +1,13 @@
 version: '3'
 services:
 
+  mosquitto:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+    container_name: "mosquito_S4G1"
+
+
   redis:
     image: redis:latest
     container_name: "redis_S4G"
@@ -30,7 +37,7 @@ services:
     #network_mode: "host"
     ports:
         - "9090:9090"
-    command: ["python3", "-u", "main.py"]
+    command: ["python3", "-u", "./gesscon/gessconConnector.py"]
     logging:
       driver: "json-file"
       options:
