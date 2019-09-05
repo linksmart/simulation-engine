@@ -62,4 +62,4 @@ class ThreadFactory:
             return e
 
     def is_running(self):
-        return not self.gridController.get_finish_status()
+        return self.gridController.get_finish_status()

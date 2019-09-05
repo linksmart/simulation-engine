@@ -415,10 +415,12 @@ class gridController(threading.Thread):
         path = os.path.join("data", str(self.id), fname_row)
         self.utils.store_data_raw(path, raw_data)
         logger.debug("Raw data successfully stored")
+        self.redisDB.set(self.finish_status_key, "True")
+
         logger.debug("#####################################################################################")
         logger.debug("##########################   Simulation End   #######################################")
         logger.debug("#####################################################################################")
-        self.redisDB.set(self.finish_status_key, "True")
+
 
 
 

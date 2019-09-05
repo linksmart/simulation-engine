@@ -164,7 +164,7 @@ class Profiles:
             return
 
         if(type == "residential"):
-            file_path = "profiles/load_profiles/residential/profiles_" + str(randint) + ".txt"
+            file_path = "profiles/load_profiles/residential/profile_" + str(randint) + ".txt"
             with open(file_path, "r") as file:
                 data = file.readlines()
                 data_list = [float(i)for i in data]
