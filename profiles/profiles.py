@@ -80,7 +80,7 @@ class Profiles:
             logger.info("Price data = %s: ", price_list)
         return price_list
 
-    def pv_profile(self, city, country, days = 365):
+    def pv_profile(self, city, country, days = 365, max_power_kw=1):
         """
         Returns the pv profile for the given number of days
         Args:
@@ -138,8 +138,11 @@ class Profiles:
                 for i in range(no_of_years):
                     pv_list.extend(data)
                 pv_list.extend(data[0:days * 24])
-                logger.info("PV data = %s: ", pv_list)
-                return pv_list
+                #logger.info("PV data = %s: ", pv_list)
+                pv_list_2=[]
+                for element in pv_list:
+                    pv_list_2.append((element / 1000)*max_power_kw)
+                return pv_list_2
         except Exception as e:
             logger.error(str(e))
 
@@ -156,17 +159,17 @@ class Profiles:
         Returns:
             list: Number of elements = number of days * 24
         """
-        if(randint > 50 or randint < 0):
+        if(randint > 936 or randint < 0):
             logger.debug("Please provide randint values between 0-50")
             return
 
         if(type == "residential"):
-            file_path = "load_profiles/residential/profiles_" + str(randint) + ".txt"
+            file_path = "profiles/load_profiles/residential/profile_" + str(randint) + ".txt"
             with open(file_path, "r") as file:
                 data = file.readlines()
                 data_list = [float(i)for i in data]
         else:
-            with open("load_profiles/commercial/commercial_general.txt", "r") as file:
+            with open("profiles/load_profiles/commercial/commercial_general.txt", "r") as file:
                 data = file.readlines()
                 data_list = [float(i) for i in data]
                 data_list.extend(data_list[-24:])
@@ -179,5 +182,5 @@ class Profiles:
         for i in range(no_of_years):
             load_list.extend(data_list)
         load_list.extend(data_list[0:days * 24])
-        logger.info("Load data = %s: ",load_list)
+        #logger.info("Load data = %s: ",load_list)
         return load_list

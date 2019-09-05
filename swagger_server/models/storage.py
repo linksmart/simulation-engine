@@ -15,7 +15,7 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, dod: float=None, kv: float=None, kw_rated: float=None, kwh_rated: float=None, kwh_stored: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None):  # noqa: E501
+    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, min_soc: float=None, max_soc: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None, global_control: bool=None):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501
@@ -28,22 +28,32 @@ class Storage(Model):
         :type connection: str
         :param soc: The soc of this Storage.  # noqa: E501
         :type soc: float
-        :param dod: The dod of this Storage.  # noqa: E501
-        :type dod: float
+        :param min_soc: The min_soc of this Storage.  # noqa: E501
+        :type min_soc: float
+        :param max_soc: The max_soc of this Storage.  # noqa: E501
+        :type max_soc: float
         :param kv: The kv of this Storage.  # noqa: E501
         :type kv: float
         :param kw_rated: The kw_rated of this Storage.  # noqa: E501
         :type kw_rated: float
-        :param kwh_rated: The kwh_rated of this Storage.  # noqa: E501
-        :type kwh_rated: float
+        :param storage_capacity: The storage_capacity of this Storage.  # noqa: E501
+        :type storage_capacity: float
         :param kwh_stored: The kwh_stored of this Storage.  # noqa: E501
         :type kwh_stored: float
+        :param max_charging_power: The max_charging_power of this Storage.  # noqa: E501
+        :type max_charging_power: float
+        :param max_discharging_power: The max_discharging_power of this Storage.  # noqa: E501
+        :type max_discharging_power: float
         :param charge_efficiency: The charge_efficiency of this Storage.  # noqa: E501
         :type charge_efficiency: float
         :param discharge_efficiency: The discharge_efficiency of this Storage.  # noqa: E501
         :type discharge_efficiency: float
         :param powerfactor: The powerfactor of this Storage.  # noqa: E501
         :type powerfactor: float
+        :param optimization_model: The optimization_model of this Storage.  # noqa: E501
+        :type optimization_model: str
+        :param global_control: The global_control of this Storage.  # noqa: E501
+        :type global_control: bool
         """
         self.swagger_types = {
             'id': str,
@@ -51,14 +61,19 @@ class Storage(Model):
             'phases': int,
             'connection': str,
             'soc': float,
-            'dod': float,
+            'min_soc': float,
+            'max_soc': float,
             'kv': float,
             'kw_rated': float,
-            'kwh_rated': float,
+            'storage_capacity': float,
             'kwh_stored': float,
+            'max_charging_power': float,
+            'max_discharging_power': float,
             'charge_efficiency': float,
             'discharge_efficiency': float,
-            'powerfactor': float
+            'powerfactor': float,
+            'optimization_model': str,
+            'global_control': bool
         }
 
         self.attribute_map = {
@@ -67,14 +82,19 @@ class Storage(Model):
             'phases': 'phases',
             'connection': 'connection',
             'soc': 'soc',
-            'dod': 'dod',
+            'min_soc': 'min_soc',
+            'max_soc': 'max_soc',
             'kv': 'kv',
             'kw_rated': 'kw_rated',
-            'kwh_rated': 'kwh_rated',
+            'storage_capacity': 'storage_capacity',
             'kwh_stored': 'kwh_stored',
+            'max_charging_power': 'max_charging_power',
+            'max_discharging_power': 'max_discharging_power',
             'charge_efficiency': 'charge_efficiency',
             'discharge_efficiency': 'discharge_efficiency',
-            'powerfactor': 'powerfactor'
+            'powerfactor': 'powerfactor',
+            'optimization_model': 'optimization_model',
+            'global_control': 'global_control'
         }
 
         self._id = id
@@ -82,14 +102,19 @@ class Storage(Model):
         self._phases = phases
         self._connection = connection
         self._soc = soc
-        self._dod = dod
+        self._min_soc = min_soc
+        self._max_soc = max_soc
         self._kv = kv
         self._kw_rated = kw_rated
-        self._kwh_rated = kwh_rated
+        self._storage_capacity = storage_capacity
         self._kwh_stored = kwh_stored
+        self._max_charging_power = max_charging_power
+        self._max_discharging_power = max_discharging_power
         self._charge_efficiency = charge_efficiency
         self._discharge_efficiency = discharge_efficiency
         self._powerfactor = powerfactor
+        self._optimization_model = optimization_model
+        self._global_control = global_control
 
     @classmethod
     def from_dict(cls, dikt) -> 'Storage':
@@ -218,27 +243,46 @@ class Storage(Model):
         self._soc = soc
 
     @property
-    def dod(self) -> float:
-        """Gets the dod of this Storage.
+    def min_soc(self) -> float:
+        """Gets the min_soc of this Storage.
 
-        Minimum Depth of Discharge recommended in % of rated kWh (%reserve)  # noqa: E501
 
-        :return: The dod of this Storage.
+        :return: The min_soc of this Storage.
         :rtype: float
         """
-        return self._dod
+        return self._min_soc
 
-    @dod.setter
-    def dod(self, dod: float):
-        """Sets the dod of this Storage.
+    @min_soc.setter
+    def min_soc(self, min_soc: float):
+        """Sets the min_soc of this Storage.
 
-        Minimum Depth of Discharge recommended in % of rated kWh (%reserve)  # noqa: E501
 
-        :param dod: The dod of this Storage.
-        :type dod: float
+        :param min_soc: The min_soc of this Storage.
+        :type min_soc: float
         """
 
-        self._dod = dod
+        self._min_soc = min_soc
+
+    @property
+    def max_soc(self) -> float:
+        """Gets the max_soc of this Storage.
+
+
+        :return: The max_soc of this Storage.
+        :rtype: float
+        """
+        return self._max_soc
+
+    @max_soc.setter
+    def max_soc(self, max_soc: float):
+        """Sets the max_soc of this Storage.
+
+
+        :param max_soc: The max_soc of this Storage.
+        :type max_soc: float
+        """
+
+        self._max_soc = max_soc
 
     @property
     def kv(self) -> float:
@@ -285,33 +329,33 @@ class Storage(Model):
         :param kw_rated: The kw_rated of this Storage.
         :type kw_rated: float
         """
-        if kw_rated is None:
-            raise ValueError("Invalid value for `kw_rated`, must not be `None`")  # noqa: E501
 
         self._kw_rated = kw_rated
 
     @property
-    def kwh_rated(self) -> float:
-        """Gets the kwh_rated of this Storage.
+    def storage_capacity(self) -> float:
+        """Gets the storage_capacity of this Storage.
 
         Rated storage capacity in kWh. Default is 50.  # noqa: E501
 
-        :return: The kwh_rated of this Storage.
+        :return: The storage_capacity of this Storage.
         :rtype: float
         """
-        return self._kwh_rated
+        return self._storage_capacity
 
-    @kwh_rated.setter
-    def kwh_rated(self, kwh_rated: float):
-        """Sets the kwh_rated of this Storage.
+    @storage_capacity.setter
+    def storage_capacity(self, storage_capacity: float):
+        """Sets the storage_capacity of this Storage.
 
         Rated storage capacity in kWh. Default is 50.  # noqa: E501
 
-        :param kwh_rated: The kwh_rated of this Storage.
-        :type kwh_rated: float
+        :param storage_capacity: The storage_capacity of this Storage.
+        :type storage_capacity: float
         """
+        if storage_capacity is None:
+            raise ValueError("Invalid value for `storage_capacity`, must not be `None`")  # noqa: E501
 
-        self._kwh_rated = kwh_rated
+        self._storage_capacity = storage_capacity
 
     @property
     def kwh_stored(self) -> float:
@@ -335,6 +379,52 @@ class Storage(Model):
         """
 
         self._kwh_stored = kwh_stored
+
+    @property
+    def max_charging_power(self) -> float:
+        """Gets the max_charging_power of this Storage.
+
+        Maximal power to charge the storage  # noqa: E501
+
+        :return: The max_charging_power of this Storage.
+        :rtype: float
+        """
+        return self._max_charging_power
+
+    @max_charging_power.setter
+    def max_charging_power(self, max_charging_power: float):
+        """Sets the max_charging_power of this Storage.
+
+        Maximal power to charge the storage  # noqa: E501
+
+        :param max_charging_power: The max_charging_power of this Storage.
+        :type max_charging_power: float
+        """
+
+        self._max_charging_power = max_charging_power
+
+    @property
+    def max_discharging_power(self) -> float:
+        """Gets the max_discharging_power of this Storage.
+
+        Maximal power to discharge the storage  # noqa: E501
+
+        :return: The max_discharging_power of this Storage.
+        :rtype: float
+        """
+        return self._max_discharging_power
+
+    @max_discharging_power.setter
+    def max_discharging_power(self, max_discharging_power: float):
+        """Sets the max_discharging_power of this Storage.
+
+        Maximal power to discharge the storage  # noqa: E501
+
+        :param max_discharging_power: The max_discharging_power of this Storage.
+        :type max_discharging_power: float
+        """
+
+        self._max_discharging_power = max_discharging_power
 
     @property
     def charge_efficiency(self) -> float:
@@ -404,3 +494,49 @@ class Storage(Model):
         """
 
         self._powerfactor = powerfactor
+
+    @property
+    def optimization_model(self) -> str:
+        """Gets the optimization_model of this Storage.
+
+        (A value required by PROFFES)  # noqa: E501
+
+        :return: The optimization_model of this Storage.
+        :rtype: str
+        """
+        return self._optimization_model
+
+    @optimization_model.setter
+    def optimization_model(self, optimization_model: str):
+        """Sets the optimization_model of this Storage.
+
+        (A value required by PROFFES)  # noqa: E501
+
+        :param optimization_model: The optimization_model of this Storage.
+        :type optimization_model: str
+        """
+        if optimization_model is None:
+            raise ValueError("Invalid value for `optimization_model`, must not be `None`")  # noqa: E501
+
+        self._optimization_model = optimization_model
+
+    @property
+    def global_control(self) -> bool:
+        """Gets the global_control of this Storage.
+
+
+        :return: The global_control of this Storage.
+        :rtype: bool
+        """
+        return self._global_control
+
+    @global_control.setter
+    def global_control(self, global_control: bool):
+        """Sets the global_control of this Storage.
+
+
+        :param global_control: The global_control of this Storage.
+        :type global_control: bool
+        """
+
+        self._global_control = global_control

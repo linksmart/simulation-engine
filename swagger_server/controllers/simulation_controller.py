@@ -1,3 +1,5 @@
+import sys
+
 import connexion
 import six, logging, os, json
 import pickle
@@ -7,16 +9,22 @@ from swagger_server.controllers.commands_controller import variable
 from swagger_server.models.grid import Grid  # noqa: E501
 from swagger_server import util
 
-from swagger_server.controllers.utils import constant as c
+
 from data_management.redisDB import RedisDB
 
 from swagger_server.controllers.threadFactory import ThreadFactory
 from data_management.utils import Utils
 
+
+from profess.Profess import *
+from profess.JSONparser import *
+from profiles.profiles import *
+
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
 utils = Utils()
+
 
 def create_simulation(body):  # noqa: E501
     """Send grid data to simulation engine in order to create a new simulation
@@ -35,162 +43,99 @@ def create_simulation(body):  # noqa: E501
         #logger.debug("Data: " + str(temp)) #shows the raw data sent from client
         grid = Grid.from_dict(data)  # noqa: E501. SOMETHING IS NOT GOOD HERE
         #logger.debug("Grid: " + str(grid)) #shows the raw data sent from client
+        id = utils.create_and_get_ID()
+        redis_db = RedisDB()
+        redis_db.set(id, "created")
+        flag = redis_db.get(id)
+        logger.debug("id stored in RedisDB: "+str(flag))
+        redis_db.set("run:" + id, "created")
+        #----------Profiles---------------#
+
+        #pv_profile_data = prof.pv_profile("bolzano", "italy", days=365)
+        #print("pv_profile_data: " + str(pv_profile_data))
+        #load_profile_data = prof.load_profile(type="residential", randint=5, days=365)
+        #print("load_profile_data: " + str(load_profile_data))
+        #t_end = time.time() + 60
+        #days = 1
+        #while time.time() < t_end:
+        #    prof.price_profile("fur", "denmark", days)
+        #   days = days + 1
+        #   time.sleep(5)
+
+        #----------Profiles_end-----------#
+
+
 
         ####generates an id an makes a directory with the id for the data and for the registry
         try:
-            id = utils.create_and_get_ID()
-            redis_db = RedisDB()
-            redis_db.set(id, "created")
-            flag = redis_db.get(id)
-            logger.debug("id stored in RedisDB: "+str(flag))
-            #dir = os.path.join(os.getcwd(), "utils", str(id))
-            #if not os.path.exists(dir):
-                #os.makedirs(dir)
-            #dir_data = os.path.join(os.getcwd(), "optimization", str(id), "mqtt")
-            #if not os.path.exists(dir_data):
-                #os.makedirs(dir_data)
+
+            dir_data = os.path.join("data",  str(id))
+
+            if not os.path.exists(dir_data):
+                os.makedirs(dir_data)
+
+            fname = str(id)+"_input_grid"
+            logger.debug("File name = " + str(fname))
+            path = os.path.join("data",str(id), fname)
+            utils.store_data(path, data)
+
         except Exception as e:
             logger.error(e)
 
-        #logger.info("This is the Grid: " + str(grid))#Only for debugging purpose
-        radial = grid.radials
+        logger.debug("Grid data stored")
 
-        #logger.info("These are the radials: "+ str(radial))
-
-        #linecodes = [c().linecodes[0]]
-        #logger.debug("Linecode: "+str(linecodes))
-        #gridController= gControl()
-        factory= ThreadFactory(id)
-        variable.set(id, factory)
-        logger.debug("Factory instance stored")
-        #redis_db.set("factory: "+id, json.dumps(factory))
-        #logger.debug("Factory: "+str(factory[id]))
-        #object=redis_db.get("factory: "+id)
-        #logger.debug("Factory stored in redisDB: "+str(object))
-        #test= json.loads(object[id])
-        #logger.debug("Factory stored in redisDB: " + str(test)+" type: "+str(type(test)))
-        factory.gridController.setNewCircuit(id)
+        radial = data["radials"]
+        models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts"]
 
         for values in radial:
-            #logger.debug("values of the radial: "+str(values))
-            values=values.to_dict()
-            #logger.debug("Values: "+str(values))
+
+            if "powerLines" in values.keys() and values["powerLines"] is not None:
+                logger.debug("Checking Powerlines")
+
+                powerLines = values["powerLines"]
+                for power_lines_elements in powerLines:
+                    if "r1" in power_lines_elements.keys() and "linecode" in power_lines_elements.keys():
+                        message="r1 and linecode cannot be entered at the same time in power line with id: "+str(power_lines_elements["id"])
+                        logger.error(message)
+                        return message
+            logger.debug("Power lines succesfully checked")
 
 
-            if "transformer" in values.keys() and values["transformer"] is not None:
-                #logger.debug("!---------------Setting Transformers------------------------")
-                print("!---------------Setting Transformers------------------------ \n")
-                transformer = values["transformer"]
-#                logger.debug("Transformers" + str(transformer))
-                factory.gridController.setTransformers(id,transformer)
 
-            if "regcontrol" in values.keys() and values["regcontrol"] is not None:
-#                logger.debug("---------------Setting RegControl------------------------")
-                print("!---------------Setting RegControl------------------------ \n")
-                regcontrol = values["regcontrol"]
-#                logger.debug("RegControl" + str(regcontrol))
-                factory.gridController.setRegControls(id, regcontrol)
+            if "storageUnits" in values.keys() and values["storageUnits"] is not None:
+                logger.debug("Checking Storage")
+                if not is_PV(radial):
+                    message = "Error: no PV element defined for each storage element"
+                    return message
+                storage = values["storageUnits"]
+                for storage_elements in storage:
+                    if not storage_elements["optimization_model"] in models_list:
+                        message = "Solely the following optimization models for storage control are possible: " + str(models_list)
+                        return message
+                    bus_pv = get_PV_nodes(values["photovoltaics"])
+                    if not storage_elements["bus1"] in bus_pv:
+                        message = "Error: no PV element defined for storage element with id: "+str(storage_elements["id"])
+                        return message
 
-            if "linecode" in values.keys() and values["linecode"] is not None:
-                #logger.debug("---------------Setting LineCode-------------------------")
-                print("! ---------------Setting LineCode------------------------- \n")
-                linecode = values["linecode"]
-                # logger.debug("LineCode: " + str(linecode))
-                factory.gridController.setLineCodes(id, linecode)
-
-            if "loads" in values.keys() and values["loads"] is not None:
-                #logger.debug("---------------Setting Loads-------------------------")
-                print("! ---------------Setting Loads------------------------- \n")
-                # radial=radial.to_dict()
-                load = values["loads"]
-                # logger.debug("Loads" + str(load))
-                factory.gridController.setLoads(id, load)
-
-            if "capacitor" in values.keys() and values["capacitor"] is not None:
-                #logger.debug("---------------Setting Capacitors-------------------------")
-                print("! ---------------Setting Capacitors------------------------- \p")
-                capacitor = values["capacitor"]
-                # logger.debug("Capacitors: " + str(capacitor))
-                factory.gridController.setCapacitors(id, capacitor)
-
-            if "power_lines" in values.keys() and values["power_lines"] is not None:
-                #logger.debug("---------------Setting Powerlines-------------------------")
-                print("!---------------Setting Powerlines------------------------- \n")
-                powerLines = values["power_lines"]
-                #linecodes = values["linecode"]
-                #factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
-                #logger.debug("Powerlines" + str(powerLines))
-                factory.gridController.setPowerLines(id, powerLines)
-
-            if "powerProfile" in values.keys() and values["powerProfile"] is not None:
-#                logger.debug("---------------Setting powerProfile-------------------------")
-                print("!---------------Setting powerProfile------------------------- \n")
-                powerProfile = values["powerProfile"]
-                #logger.debug("Powerprofile" + str(powerProfile))
-                factory.gridController.setPowerProfile(id, powerProfile)
-
-            if "xycurves" in values.keys() and values["xycurves"] is not None:
-                xycurves = values["xycurves"]#TORemove
-                factory.gridController.setXYCurve(id, xycurves) 
-
-            if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
-                photovoltaics = values["photovoltaics"]
-                xycurves = radial["xycurves"]
-                loadshapes = radial["loadshapes"]
-                tshapes = radial["tshapes"]
-                factory.gridController.setPhotovoltaic(id, photovoltaics, xycurves, loadshapes, tshapes)
-
-            """
-            and "xycurves" in radial.values.keys()s() and radial["xycurves"] is not None 
-                            and "loadshapes" in radial.values.keys()s() and radial["loadshapes"] is not None 
-                            and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
-            """
-            if "storage_units" in values.keys() and values["storage_units"] is not None:
-                #logger.debug("---------------Setting Storage-------------------------")
-                print("! ---------------Setting Storage------------------------- \n")
-                # radial=radial.to_dict()
-                storage = values["storage_units"]
-                factory.gridController.setStorage(id, storage)
-            """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
-                # radial=radial.to_dict()
-                chargingPoints = values["chargingPoints"]
-                gridController.setChargingPoints(id, chargingPoints)
-            """
-            if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
-                #logger.debug("---------------Setting chargingPoints-------------------------")
-                chargingPoints = values["chargingPoints"]
-                factory.gridController.setChargingPoints(id, chargingPoints)               
-
-
-            """if "voltage_regulator" in values.keys() and values["voltage_regulator"] is not None:
-                logger.debug("---------------Setting Voltage regulator-------------------------")
-                voltage_regulator = values["voltage_regulator"]
-                logger.debug("Voltage Regulator: " + str(voltage_regulator))
-                factory.gridController.setVoltageRegulator(id, voltage_regulator)
-            """
-
-            if "loadshapes" in values.keys() and values["loadshapes"] is not None:
-#                logger.debug("---------------Setting loadshapes-------------------------")
-                print("! ---------------Setting loadshapes------------------------- \n")
-                loadshapes = values["loadshapes"]
-#                logger.debug("Load Shapes: " + str(loadshapes))
-                factory.gridController.setLoadShape(id, loadshapes) 
-            if "tshapes" in values.keys() and values["tshapes"] is not None:
-                logger.debug("---------------Setting tshapes-------------------------")
-                tshapes = values["tshapes"]
-                logger.debug("Tshapes: " + str(tshapes))
-                factory.gridController.setTShape(id, tshapes)                 
-        ######Disables circuits untilo the run simulation is started
-        #factory.gridController.disableCircuit(id)
-
-        result = factory.gridController.run()
-        #factory.gridController.run()
-        #return str(result) 
-        return id 
-        #return " Result: " + str(result)
+            logger.debug("Storage successfully checked")
+        return id
     else:
         return "Bad JSON Format"
-    
+
+def is_PV(radial):
+    for values in radial:
+        if "photovoltaics" in values:
+            return True
+        else:
+            return False
+
+def get_PV_nodes(list_pv):
+    bus=[]
+    for pv_element in list_pv:
+        bus.append(pv_element["bus1"])
+    return bus
+
+
 def get_simulation_result(id):  # noqa: E501
     """Get a simulation result
 
@@ -201,17 +146,16 @@ def get_simulation_result(id):  # noqa: E501
 
     :rtype: Simulation result - array of nodes, and corresponding voltage
     """
-    #factory= ThreadFactory(id)
-    #variable.set(id, factory)
-    #result = factory.gridController.results()
+
     try:
-        f = open('/usr/src/app/tests/results/results.txt') #open(str(id)+"_results.txt")
-        content = f.read()
-        #logger.info(content)
-        result = json.loads(content)
-        f.close()
-    except:
-        result = "None"
+        fname = str(id) + "_result"
+        logger.debug("File name = " + str(fname))
+        path = os.path.join("data", str(id), fname)
+        result = utils.get_stored_data(path)
+
+    except Exception as e:
+        logger.error(e)
+        result = e
     return result
 
 def delete_simulation(id):  # noqa: E501
@@ -224,15 +168,26 @@ def delete_simulation(id):  # noqa: E501
 
     :rtype: None
     """
-    factory= ThreadFactory(id)
+
+    status = "None"
     try:
-        factory.gridController.disableCircuit(id)
-        status = 'Simulation ' + id + ' deleted!'
+        import shutil
+        folder_name = os.path.join("data", str(id))
+        shutil.rmtree(folder_name)
+        #util.rmfile(id, "data")
+        status = 'Simulation ' + str(id) + ' deleted!'
     except:
-        status = "Could not delete Simulation " + id
+        status = "ERROR: Could not delete Simulation " + str(id)
     return status
 
-def update_simulation(id, body):  # noqa: E501
+def mod_dict(data, k, v):
+    for key in data.keys():
+        if key == k:
+            data[key] = v
+        elif type(data[key]) is dict:
+            mod_dict(data[key], k, v)
+            
+def update_simulation():  # noqa: E501 ##TODO: work in progress
     """Send new data to an existing simulation
 
      # noqa: E501
@@ -244,6 +199,31 @@ def update_simulation(id, body):  # noqa: E501
 
     :rtype: None
     """
-    if connexion.request.is_json:
+    """if connexion.request.is_json:
         body = Grid.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'Simulation ' + id + ' updated!'
+        logger.debug(body)"""
+    fileid = connexion.request.args.get('id')
+    key = connexion.request.args.get('key')
+    value = connexion.request.args.get('value')
+    try:
+        dir_data = os.path.join("data", str(fileid))
+
+        if not os.path.exists(dir_data):
+            return "Id not existing"
+
+        fname = str(fileid) + "_input_grid"
+        logger.debug("File name = " + str(fname))
+        path = os.path.join("data", str(fileid), fname)
+
+        f = open(path, 'a') #open(str(id)+"_results.txt")
+        #logger.debug("GET file "+str(f))
+        content = f.read()
+        #logger.info(content)
+        data = json.loads(content)
+        f.close()
+        #utils.store_data(path, data)
+
+        mod_dict(data, key, value)
+    except:
+        logger.debug("Error updating")
+    return 'Simulation ' + fileid + ' updated!'
