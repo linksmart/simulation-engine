@@ -242,11 +242,12 @@ class gridController(threading.Thread):
 
                 if flag_global_control:
                     logger.debug("global control present")
-                    result = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
-                    logger.debug("GESSCon result "+str(result))
+                    profess_global_profile = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
+                    logger.debug("GESSCon result "+str(profess_global_profile))
 
-
-                if self.input.is_price_profile():
+                if flag_global_control and self.input.is_price_profile():
+                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile, profess_global_profile)
+                elif not flag_global_control and self.input.is_price_profile():
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile)
                 else:
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs)

@@ -157,7 +157,8 @@ class GESSCon():
 	    "config": config }
 		payload = json.dumps(payload_var)
 		logger.info("Payload: %s", payload_var)
-		self.on_msg_received(payload)
+		result= self.on_msg_received(payload)
+		return result
 		# MQTT
 		# mqtt_send = MQTTClient("mosquito_S4G1", 1883, "gesscon_send")
 		# mqtt_receive = MQTTClient("mosquito_S4G1", 1883, "gesscon_receive")
@@ -183,7 +184,8 @@ class GESSCon():
 			id_output = {id: node_data}
 			output_node = {node: id_output}
 			output_list.append(output_node)
-		logger.debug(output_list)
+		logger.debug("output gesscon: "+str(output_list))
+		return output_list
 
 
 #### Dummy data ####
