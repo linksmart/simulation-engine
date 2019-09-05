@@ -248,10 +248,10 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Storage"
-      chargingPoints:
+      chargingStations:
         type: "array"
         items:
-          $ref: "#/definitions/ChargingPoint"
+          $ref: "#/definitions/ChargingStation"
       linecode:
         type: "array"
         items:
@@ -607,20 +607,51 @@ definitions:
         type: "number"
       voltageunit:
         type: "string"
-  ChargingPoint:
+  ChargingStation:
     type: "object"
     required:
+    - "bus"
     - "id"
-    - "node"
+    - "type_application"
     properties:
       id:
         type: "string"
-      node:
+      type_application:
         type: "string"
-        description: "ID for the connected node"
-    example:
-      node: "node"
-      id: "id"
+        description: "residential or commercial"
+        default: "residential"
+      bus:
+        type: "string"
+        description: "ID for the connected bus"
+      max_charging_power_kW:
+        type: "number"
+        format: "float"
+      hosted_ev:
+        type: "array"
+        items:
+          $ref: "#/definitions/ElectricVehicle"
+  ElectricVehicle:
+    type: "object"
+    required:
+    - "SoC"
+    - "battery_capacity_kWh"
+    - "id"
+    properties:
+      id:
+        type: "string"
+      SoC:
+        type: "number"
+        minimum: 0
+        maximum: 100
+      battery_capacity_kWh:
+        type: "number"
+        format: "float"
+      unit_consumption_assumption:
+        type: "number"
+        format: "float"
+        default: 5.0
+      unit_drop_penalty:
+        type: "number"
   Winding:
     type: "object"
     properties:

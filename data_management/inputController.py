@@ -28,6 +28,7 @@ class InputController:
         self.sim_days = sim_days
         self.voltage_bases = None
         self.base_frequency = 60
+        self.price_profile = None
         logger.debug("id " + str(id))
         self.utils = Utils()
 
@@ -41,6 +42,9 @@ class InputController:
             return 1
         else:
             return data
+
+    def get_price_profile(self):
+        return self.price_profile
 
     def setParameters(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
@@ -146,6 +150,16 @@ class InputController:
             logger.error(error)
             return error
 
+    def get_price_profile_from_server(self, city, country, sim_days):
+        price_profile_data= self.profiles.price_profile(city,country,sim_days)
+        return price_profile_data
+
+    def is_price_profile(self):
+        if not self.price_profile == None:
+            True
+        else:
+            False
+
     def setLoadshapes_Off(self, id, loadshapes):
         logger.debug("Charging the loadshapes into the simulator")
         message = self.sim.setLoadshapes(loadshapes)
@@ -177,6 +191,16 @@ class InputController:
         logger.debug("Charging points charged")
         return message
 
+    def is_Charging_Station_in_Topology(self, topology):
+        # topology = profess.json_parser.get_topology()
+        # logger.debug("type topology " + str(type(self.topology)))
+        radial = topology["radials"]
+        flag_to_return = False
+        for values in radial:
+            if "chargingStations" in values.keys():
+                flag_to_return = True
+        return flag_to_return
+
     def is_Storage_in_Topology(self, topology):
         # topology = profess.json_parser.get_topology()
         # logger.debug("type topology " + str(type(self.topology)))
@@ -190,6 +214,12 @@ class InputController:
             if "storageUnits" in values.keys():
                 flag_to_return = True
         return flag_to_return
+
+    def is_city(self, common):
+        if "city" in common.keys():
+            return True
+        else:
+            return False
 
     def get_city(self, common):
         if common["city"]:
@@ -261,6 +291,12 @@ class InputController:
         self.profess = profess
         common = topology["common"]
         radial = topology["radials"]
+        if self.is_city(common):
+            city = self.get_city(common)
+            logger.debug("city " + str(city))
+            country = self.get_country(common)
+            logger.debug("country " + str(country))
+            self.price_profile = self.get_price_profile_from_server(city,country,self.sim_days)
 
         for values in radial:
             #logger.debug("values of the radial: "+str(values))
@@ -410,10 +446,7 @@ class InputController:
                 # loadshapes = radial["loadshapes"]
                 # tshapes = radial["tshapes"]
 
-                city = self.get_city(common)
-                logger.debug("city " + str(city))
-                country = self.get_country(common)
-                logger.debug("country " + str(country))
+
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
                     message = self.setPVshapes(id, photovoltaics, city, country, self.sim_days)

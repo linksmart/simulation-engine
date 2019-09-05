@@ -1037,6 +1037,8 @@ class OpenDSS:
             logger.error(e)
             return e
 
+
+
     def setLoadshapes(self, loads, sim_days, profiles, profess):
 
         #!logger.debug("Setting up the loads")
@@ -1050,9 +1052,10 @@ class OpenDSS:
                 self.bus_name=bus_name
 
                 # ----------get_a_profile---------------#
-                randint_value=random.randrange(0, 50)
+                randint_value=random.randrange(0, 936)
+                logger.debug("load_profile_data: randint=" + str(randint_value))
                 load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
-                #print("load_profile_data: randint=" + str(randint_value))
+                logger.debug("load profile data "+str(load_profile_data))
 
                 #--------store_profile_for_line----------#
                 self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}
