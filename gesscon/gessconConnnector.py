@@ -2,6 +2,7 @@ import datetime
 import logging
 import json
 import numpy as np
+from data_management.utils import Utils
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 from gesscon.MQTTClient import MQTTClient
@@ -10,6 +11,7 @@ class GESSCon():
 	def __init__(self):
 		self.soc_nodes = ""
 		self.soc_ids = ""
+		self.utils=Utils()
 		
 	def get_ESS_data_format(self, storage):
 		"""
@@ -29,7 +31,7 @@ class GESSCon():
 			data['max_discharging_power'] = ess['pdmax']
 			ess_data[ess['bus1']] = data
 			ess_data_list.append(ess_data)
-		logging.info("ESS Data= %s", ess_data_list)
+		logger.debug("ESS Data= %s", ess_data_list)
 		return ess_data_list
 		
 	def aggregate(self, data_list):
@@ -51,7 +53,7 @@ class GESSCon():
 				aggregate = [sum(x) for x in zip(*agg_list)]
 				aggregate_list.append(list(np.sqrt(aggregate)))
 		aggregate_list = [sum(x) for x in zip(*aggregate_list)]
-		logger.info("Aggregated data = %s ", aggregate_list)
+		logger.debug("Aggregated data = %s ", aggregate_list)
 		return aggregate_list
 	
 	# def aggregated_load(self, load_list):
@@ -104,7 +106,7 @@ class GESSCon():
 			"cycle": [0] * len_soc,
 			"loss": 0
 		}
-		logging.info("Soc = %s", soc_values)
+		logger.debug("Soc = %s", soc_values)
 		return tele, config
 		
 	def gesscon(self, load, pv, price, Soc, date = "2018.10.01 00:00:00"):
@@ -153,13 +155,13 @@ class GESSCon():
 	    "tele": tele,
 	    "config": config }
 		payload = json.dumps(payload_var)
-		logger.info("Payload: %s", payload_var)
+		logger.debug("Payload: %s", payload_var)
 		output_list = self.on_msg_received(payload)
 		# MQTT
 		# mqtt_send = MQTTClient("mosquito_S4G1", 1883, "gesscon_send")
 		# mqtt_receive = MQTTClient("mosquito_S4G1", 1883, "gesscon_receive")
 		# mqtt_receive.subscribe_to_topics([("gesscon/data",2)], self.on_msg_received)
-		# logging.info("successfully subscribed")
+		# logger.debug("successfully subscribed")
 		#
 		# mqtt_send.publish("gesscon/data", payload, True)
 		# mqtt_send.MQTTExit()
@@ -171,74 +173,75 @@ class GESSCon():
 	def on_msg_received(self, payload):
 		# Mock Output from GESSCon
 		output_list = []
-		with open("gesscon_output.json", "r") as file:
+		path=self.utils.get_path("gesscon/gesscon_output.json")
+		with open(path, "r") as file:
 			dict_data = json.load(file)
-		logging.info(dict_data)
+		logger.debug(dict_data)
 		dict_data = dict_data['data']
 		for node_data, node, id in zip(dict_data, self.soc_nodes, self.soc_ids):
 			id_output = {id: node_data}
 			output_node = {node: id_output}
 			output_list.append(output_node)
-		logging.info(output_list)
+		logger.debug(output_list)
 		return output_list
 
 #### Dummy data ####
-price = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-storage = {"storageUnits": [
-	{
-		"id": "Akku1",
-		"bus1": "633",
-		"phases": 3,
-		"connection": "wye",
-		"soc": 0,
-		"dod": 0,
-		"kv": 0,
-		"kw_rated": 0,
-		
-		"pcmax": 1,
-		"pdmax": 2,
-		"kwh_rated": 1,
-		"kwh_stored": 0,
-		"charge_efficiency": 0,
-		"discharge_efficiency": 0,
-		"powerfactor": 0
-	},
-	{
-		"id": "Akku2",
-		"bus1": "671",
-		"phases": 3,
-		"connection": "wye",
-		"soc": 0,
-		"dod": 0,
-		"kv": 0,
-		"kw_rated": 0,
-		
-		"pcmax": 3,
-		"pdmax": 4,
-		"kwh_rated": 10,
-		"kwh_stored": 0,
-		"charge_efficiency": 0,
-		"discharge_efficiency": 0,
-		"powerfactor": 0
-	}
-]}
-
-pv = [{'633':
-	       {'633.1.2': [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,
-	                    0, 0, 0, 0]}},
-      {'671': {'671.1.2.3': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 4]}}]
-
-load = [{'633':
-{'633.1': [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0],
-'633.2': [3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0],
-'633.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 9]}},
-{'671': {'671.1.2.3': [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0]}}]
+# price = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+#
+# storage = {"storageUnits": [
+# 	{
+# 		"id": "Akku1",
+# 		"bus1": "633",
+# 		"phases": 3,
+# 		"connection": "wye",
+# 		"soc": 0,
+# 		"dod": 0,
+# 		"kv": 0,
+# 		"kw_rated": 0,
+#
+# 		"pcmax": 1,
+# 		"pdmax": 2,
+# 		"kwh_rated": 1,
+# 		"kwh_stored": 0,
+# 		"charge_efficiency": 0,
+# 		"discharge_efficiency": 0,
+# 		"powerfactor": 0
+# 	},
+# 	{
+# 		"id": "Akku2",
+# 		"bus1": "671",
+# 		"phases": 3,
+# 		"connection": "wye",
+# 		"soc": 0,
+# 		"dod": 0,
+# 		"kv": 0,
+# 		"kw_rated": 0,
+#
+# 		"pcmax": 3,
+# 		"pdmax": 4,
+# 		"kwh_rated": 10,
+# 		"kwh_stored": 0,
+# 		"charge_efficiency": 0,
+# 		"discharge_efficiency": 0,
+# 		"powerfactor": 0
+# 	}
+# ]}
+#
+# pv = [{'633':
+# 	       {'633.1.2': [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,
+# 	                    0, 0, 0, 0]}},
+#       {'671': {'671.1.2.3': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#                              0, 0, 0, 0, 0, 0, 0, 4]}}]
+#
+# load = [{'633':
+# {'633.1': [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+# 0, 0, 0, 0],
+# '633.2': [3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+# 0, 0, 0],
+# '633.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+# 0, 0, 9]}},
+# {'671': {'671.1.2.3': [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+# 0, 0, 0, 0, 0, 0, 0, 0]}}]
 
 # g = GESSCon()
 # Soc = g.get_ESS_data_format(storage)
