@@ -154,23 +154,21 @@ class GESSCon():
 	    "config": config }
 		payload = json.dumps(payload_var)
 		logger.info("Payload: %s", payload_var)
-		
-		#MQTT Publish
-		mqtt_send = MQTTClient("mosquito_S4G1", 1883, "gesscon_send")
-		#MQTT Subscribe
-		mqtt_receive = MQTTClient("mosquito_S4G1", 1883, "gesscon_receive")
-		mqtt_receive.subscribe_to_topics([("gesscon/data",2)], self.on_msg_received)
-		logging.info("successfully subscribed")
-
-		mqtt_send.publish("gesscon/data", payload, True)
-		mqtt_send.MQTTExit()
-		mqtt_receive.MQTTExit()
+		self.on_msg_received(payload)
+		# MQTT
+		# mqtt_send = MQTTClient("mosquito_S4G1", 1883, "gesscon_send")
+		# mqtt_receive = MQTTClient("mosquito_S4G1", 1883, "gesscon_receive")
+		# mqtt_receive.subscribe_to_topics([("gesscon/data",2)], self.on_msg_received)
+		# logging.info("successfully subscribed")
+		#
+		# mqtt_send.publish("gesscon/data", payload, True)
+		# mqtt_send.MQTTExit()
+		# mqtt_receive.MQTTExit()
 	
 		# return output_list
 	
 	
 	def on_msg_received(self, payload):
-		print(payload)
 		# Mock Output from GESSCon
 		output_list = []
 		with open("gesscon_output.json", "r") as file:
@@ -242,6 +240,6 @@ load = [{'633':
 {'671': {'671.1.2.3': [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0]}}]
 
-g = GESSCon()
-Soc = g.get_ESS_data_format(storage)
-g.gesscon(load, pv, price, Soc)
+# g = GESSCon()
+# Soc = g.get_ESS_data_format(storage)
+# g.gesscon(load, pv, price, Soc)
