@@ -9,6 +9,7 @@ from profess.Profess import *
 from simulator.openDSS import OpenDSS
 from data_management.redisDB import RedisDB
 from profiles.profiles import *
+from gesscon.gessconConnnector import GESSCon
 #from simulation_management import simulation_management as SM
 from data_management.inputController import InputController
 from data_management.utils import Utils
@@ -64,7 +65,11 @@ class gridController(threading.Thread):
                     for element_intern in value:
                         soc_dict = {}
                         #logger.debug("element intern "+str(element_intern))
-                        soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"], "id":element_intern["id"]}
+                        soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"],
+                                                          "id":element_intern["id"],
+                                                          "Battery_Capacity":element_intern["storage_capacity"],
+                                                          "max_charging_power":element_intern["max_charging_power"],
+                                                          "max_discharging_power":element_intern["max_discharging_power"]}
                         soc_list.append(soc_dict)
                         list_storages.append(element_intern)
         #logger.debug("list_storages "+str(list_storages))
@@ -138,6 +143,7 @@ class gridController(threading.Thread):
 
         # ----------PROFILES----------------#
         self.profiles = Profiles()
+        self.global_control = GESSCon()
         # profess.json_parser.set_topology(data)
 
         self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
@@ -224,18 +230,24 @@ class gridController(threading.Thread):
             if flag_is_storage:
 
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
+                #logger.debug("loads "+str(professLoads))
                 professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
+                #logger.debug("PVs "+str(professPVs))
 
                 if self.input.is_price_profile():
                     logger.debug("price profile present")
                     price_profile = price_profile_data[int(hours):int(hours+24)]
 
-                if flag_global_control:
-                    logger.debug("global control present")
-
                 soc_list_new = self.set_new_soc(soc_list)
 
-                if self.input.is_price_profile():
+                if flag_global_control:
+                    logger.debug("global control present")
+                    profess_global_profile = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
+                    logger.debug("GESSCon result "+str(profess_global_profile))
+
+                if flag_global_control and self.input.is_price_profile():
+                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile, profess_global_profile)
+                elif not flag_global_control and self.input.is_price_profile():
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile)
                 else:
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
