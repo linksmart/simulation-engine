@@ -112,18 +112,18 @@ def parse_relevant_results_to_latex():
 
 def plot_node(node_infos,phase):
     plt.plot(node_infos,label=phase)
-    print("plotted")
+    print("plotted "+str(phase))
 
 
-def parse_raw_data(file_name):
+def parse_and_plot_raw_data(file_name):
     for element in file_name['voltages']:
         splitted = element.split(".", 1)[0]
         if splitted in get_relevant_nodes():
             print(file_name["voltages"][element])
             plot_node(file_name["voltages"][element]["Voltages"],element)
 
-    plt.ylabel('Voltage in pu')
-    plt.xlabel("hours")
+    plt.ylabel('Voltage [pu]')
+    plt.xlabel("Time [hours]")
     plt.show()
 
 def iterate_through_profiles(directory_in_str,linecount):
@@ -144,6 +144,39 @@ def iterate_through_profiles(directory_in_str,linecount):
             plot_node(output_profile,filename)
         else:
             continue
+def plot_node_in_every_test(path,node_name):
+    mapping_file = open(path+'mapping.txt').read()
+    mapping=parse_mapping(mapping_file)
+    print(mapping)
+    percentage=0
+    for result_id in mapping:
+        path_of_results=path+result_id+"/"+result_id+"_result_raw.json"
+        flag_list=[False]*len(get_relevant_nodes())
+        result_file=open(path_of_results).read()
+        file_name=yaml.load(result_file)
+        for element in file_name['voltages']:
+            splitted = element.split(".", 1)[0]
+            if splitted ==node_name and not flag_list[get_relevant_nodes().index(splitted)]:
+                flag_list[get_relevant_nodes().index(splitted)]=True
+                average_over_phases=(calculate_average_of_phase(file_name["voltages"][splitted+".1"]["Voltage"],
+                                                 file_name["voltages"][splitted+".2"]["Voltage"],
+                                                 file_name["voltages"][splitted+".3"]["Voltage"]))
+                print(average_over_phases)
+                plot_node(average_over_phases,str(percentage)+"%")
+        percentage=percentage+10
+    plt.ylabel('Voltage [pu]')
+    plt.xlabel("Time [hours]")
+    plt.title(str(node_name))
+
+    plt.legend()
+    plt.savefig(node_name+".png")
+def calculate_average_of_phase(phase1,phase2,phase3):
+    output_list= []
+    for index in range(len(phase1)):
+        added=phase1[index]+phase2[index]+phase3[index]
+        added=added/3
+        output_list.append(added)
+    return output_list
 #define_all_topologies()
 #output_file=open("mapping.txt").write()
 #print(array_of_ids)
@@ -157,10 +190,10 @@ file=open("1295459c89e1_result_raw.json").read()
 
 file_json=yaml.load(file)
 
-iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",48)
-plt.ylabel('power in percentage of maximum')
-plt.xlabel("hours")
-plt.legend()
+#iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",48)
+
+plot_node_in_every_test("PVTest/","node_a2")
+
 plt.show()
 #file_json2=json.loads(file_json)
 #file_json3=json.loads(file_json2)
