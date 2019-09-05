@@ -214,8 +214,8 @@ class gridController(threading.Thread):
             self.redisDB.set("timestep_"+str(self.id), i)
 
 
-            terminal=self.sim.get_monitor_terminals("mon_transformer")
-            logger.debug("Number of terminals in monitor "+str(terminal))
+            #terminal=self.sim.get_monitor_terminals("mon_transformer")
+            #logger.debug("Number of terminals in monitor "+str(terminal))
 
 
             if flag_is_storage:
@@ -224,8 +224,9 @@ class gridController(threading.Thread):
                 professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
 
                 if self.input.is_price_profile():
-                    price_profile = price_profile_data[hours:hours+24]
-                    logger.debug("price profile "+str(price_profile))
+                    logger.debug("price profile present")
+                    price_profile = price_profile_data[int(hours):int(hours+24)]
+                    #logger.debug("price profile "+str(price_profile))
 
                 soc_list_new = self.set_new_soc(soc_list)
 

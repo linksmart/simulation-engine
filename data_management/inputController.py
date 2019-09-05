@@ -155,10 +155,14 @@ class InputController:
         return price_profile_data
 
     def is_price_profile(self):
-        if not self.price_profile == None:
-            True
+        self.price_profile
+        if isinstance(self.price_profile, list):
+            if len(self.price_profile) > 0:
+                return True
+            else:
+                return False
         else:
-            False
+            return False
 
     def setLoadshapes_Off(self, id, loadshapes):
         logger.debug("Charging the loadshapes into the simulator")
