@@ -154,7 +154,7 @@ class GESSCon():
 	    "config": config }
 		payload = json.dumps(payload_var)
 		logger.info("Payload: %s", payload_var)
-		self.on_msg_received(payload)
+		output_list = self.on_msg_received(payload)
 		# MQTT
 		# mqtt_send = MQTTClient("mosquito_S4G1", 1883, "gesscon_send")
 		# mqtt_receive = MQTTClient("mosquito_S4G1", 1883, "gesscon_receive")
@@ -165,7 +165,7 @@ class GESSCon():
 		# mqtt_send.MQTTExit()
 		# mqtt_receive.MQTTExit()
 	
-		# return output_list
+		return output_list
 	
 	
 	def on_msg_received(self, payload):
@@ -180,7 +180,7 @@ class GESSCon():
 			output_node = {node: id_output}
 			output_list.append(output_node)
 		logging.info(output_list)
-
+		return output_list
 
 #### Dummy data ####
 price = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
