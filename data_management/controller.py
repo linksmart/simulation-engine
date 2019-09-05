@@ -195,11 +195,14 @@ class gridController(threading.Thread):
         charging = True
         logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
         flag_is_storage = self.input.is_Storage_in_Topology(self.topology)
+        if flag_is_storage:
+            flag_global_control = self.input.is_global_control_in_Storage(self.topology)
         flag_is_charging_station = self.input.is_Charging_Station_in_Topology(self.topology)
         price_profile_data=self.input.get_price_profile()
 
 
         logger.debug("flag is storage "+str(flag_is_storage))
+        logger.debug("flag is global control "+str(flag_global_control))
 
 
 
@@ -226,7 +229,9 @@ class gridController(threading.Thread):
                 if self.input.is_price_profile():
                     logger.debug("price profile present")
                     price_profile = price_profile_data[int(hours):int(hours+24)]
-                    #logger.debug("price profile "+str(price_profile))
+
+                if flag_global_control:
+                    logger.debug("global control present")
 
                 soc_list_new = self.set_new_soc(soc_list)
 
