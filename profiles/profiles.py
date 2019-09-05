@@ -159,7 +159,7 @@ class Profiles:
         Returns:
             list: Number of elements = number of days * 24
         """
-        if(randint > 50 or randint < 0):
+        if(randint > 936 or randint < 0):
             logger.debug("Please provide randint values between 0-50")
             return
 
