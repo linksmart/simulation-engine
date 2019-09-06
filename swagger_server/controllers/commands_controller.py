@@ -54,7 +54,7 @@ class CommandController:
         logger.debug("Object in set: "+str(object))
         try:
             self.factory[id] = object
-            fname="factory_"+str(id)
+            #fname="factory_"+str(id)
             #path = os.path.join("data", fname)
             #self.utils.store_data(path, object)
         except Exception as e:
@@ -176,7 +176,8 @@ class CommandController:
             status = self.get(id).is_running()
             flag = self.redisDB.get("run:" + id)
             logger.debug("Control run_status: "+str(flag))
-            if not status or (flag is not None and flag == "stop"):
+            logger.debug("status " + str(status))
+            if status == "True" or (flag is not None and flag == "stop"):
                 logger.debug("Control run_status: "+str(flag))
                 self.redisDB.set("run:" + id, "stopping")
                 self.abort(id)

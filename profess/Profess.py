@@ -486,6 +486,7 @@ class Profess:
         :param ess_con: [{node_name:{node_name.1.2.3:[value1,value2, ...]}, ...}
         """
         logger.debug("Setting_profiles ")
+        logger.debug(str(pv_profiles))
         #logger.debug("load profile: "+str(load_profiles)+" ,pv_profiles: "+str(pv_profiles)+" ,price_profile: "+str(price_profiles)+" ,ess_con "+str(ess_con))
         node_name_list =self.json_parser.get_node_name_list()
         if node_name_list !=0:

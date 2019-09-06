@@ -159,12 +159,12 @@ class Profiles:
         Returns:
             list: Number of elements = number of days * 24
         """
-        if(randint > 50 or randint < 0):
+        if(randint > 475 or randint < 0):
             logger.debug("Please provide randint values between 0-50")
             return
 
         if(type == "residential"):
-            file_path = "profiles/load_profiles/residential/profiles_" + str(randint) + ".txt"
+            file_path = "profiles/load_profiles/residential/profile_" + str(randint) + ".txt"
             with open(file_path, "r") as file:
                 data = file.readlines()
                 data_list = [float(i)for i in data]

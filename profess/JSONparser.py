@@ -41,6 +41,23 @@ class JsonParser:
                     filter_result.append(element)
 
         return filter_result
+    def filter_search_helper(self,search_key, element_list):
+        """
+        filters the element_list and returns only the elements where search_key and search_value fit
+        :param search_key: name of key we want to match
+        :param search_value: value searchkey needs to be
+        :param element_list: List where we search in
+        :return: list where search_key and search_value fit
+        """
+        filter_result=[]
+        for element in element_list:
+            for element_key in element:
+                if element_key == search_key:
+                    bus=element[element_key].split(".")[0]
+                    if bus not in filter_result:
+                        filter_result.append(bus)
+
+        return filter_result
 
 
     def set_topology(self, json_topology):

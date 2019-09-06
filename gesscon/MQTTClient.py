@@ -69,13 +69,10 @@ class MQTTClient:
     def on_disconnect(self, *args):
         self.logger.error("Disconnected to broker")
         self.logger.info(str(args))
-        
-    # def message_received(self):
-    #    return message_payload
 	    
     def on_message(self,client, userdata, message):
-        print("Message received ", str(message.payload.decode()))
-        # self.callback_function(message.payload.decode())
+        # print("Message received")
+        self.callback_function(message.payload.decode())
 
 
     def sendResults(self, topic, data, qos):

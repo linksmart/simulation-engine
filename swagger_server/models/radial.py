@@ -7,7 +7,7 @@ from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
 from swagger_server.models.capacitor import Capacitor  # noqa: F401,E501
-from swagger_server.models.charging_point import ChargingPoint  # noqa: F401,E501
+from swagger_server.models.charging_station import ChargingStation  # noqa: F401,E501
 from swagger_server.models.linecode import Linecode  # noqa: F401,E501
 from swagger_server.models.load import Load  # noqa: F401,E501
 from swagger_server.models.loadshape import Loadshape  # noqa: F401,E501
@@ -28,7 +28,7 @@ class Radial(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, radial_id: str=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_profiles: List[PowerProfile]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_points: List[ChargingPoint]=None, linecode: List[Linecode]=None, capacitor: List[Capacitor]=None, regcontrol: List[RegControl]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None):  # noqa: E501
+    def __init__(self, radial_id: str=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_profiles: List[PowerProfile]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_stations: List[ChargingStation]=None, linecode: List[Linecode]=None, capacitor: List[Capacitor]=None, regcontrol: List[RegControl]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None):  # noqa: E501
         """Radial - a model defined in Swagger
 
         :param radial_id: The radial_id of this Radial.  # noqa: E501
@@ -45,8 +45,8 @@ class Radial(Model):
         :type photovoltaics: List[Photovoltaic]
         :param storage_units: The storage_units of this Radial.  # noqa: E501
         :type storage_units: List[Storage]
-        :param charging_points: The charging_points of this Radial.  # noqa: E501
-        :type charging_points: List[ChargingPoint]
+        :param charging_stations: The charging_stations of this Radial.  # noqa: E501
+        :type charging_stations: List[ChargingStation]
         :param linecode: The linecode of this Radial.  # noqa: E501
         :type linecode: List[Linecode]
         :param capacitor: The capacitor of this Radial.  # noqa: E501
@@ -68,7 +68,7 @@ class Radial(Model):
             'power_lines': List[Powerline],
             'photovoltaics': List[Photovoltaic],
             'storage_units': List[Storage],
-            'charging_points': List[ChargingPoint],
+            'charging_stations': List[ChargingStation],
             'linecode': List[Linecode],
             'capacitor': List[Capacitor],
             'regcontrol': List[RegControl],
@@ -85,7 +85,7 @@ class Radial(Model):
             'power_lines': 'powerLines',
             'photovoltaics': 'photovoltaics',
             'storage_units': 'storageUnits',
-            'charging_points': 'chargingPoints',
+            'charging_stations': 'chargingStations',
             'linecode': 'linecode',
             'capacitor': 'capacitor',
             'regcontrol': 'regcontrol',
@@ -101,7 +101,7 @@ class Radial(Model):
         self._power_lines = power_lines
         self._photovoltaics = photovoltaics
         self._storage_units = storage_units
-        self._charging_points = charging_points
+        self._charging_stations = charging_stations
         self._linecode = linecode
         self._capacitor = capacitor
         self._regcontrol = regcontrol
@@ -268,25 +268,25 @@ class Radial(Model):
         self._storage_units = storage_units
 
     @property
-    def charging_points(self) -> List[ChargingPoint]:
-        """Gets the charging_points of this Radial.
+    def charging_stations(self) -> List[ChargingStation]:
+        """Gets the charging_stations of this Radial.
 
 
-        :return: The charging_points of this Radial.
-        :rtype: List[ChargingPoint]
+        :return: The charging_stations of this Radial.
+        :rtype: List[ChargingStation]
         """
-        return self._charging_points
+        return self._charging_stations
 
-    @charging_points.setter
-    def charging_points(self, charging_points: List[ChargingPoint]):
-        """Sets the charging_points of this Radial.
+    @charging_stations.setter
+    def charging_stations(self, charging_stations: List[ChargingStation]):
+        """Sets the charging_stations of this Radial.
 
 
-        :param charging_points: The charging_points of this Radial.
-        :type charging_points: List[ChargingPoint]
+        :param charging_stations: The charging_stations of this Radial.
+        :type charging_stations: List[ChargingStation]
         """
 
-        self._charging_points = charging_points
+        self._charging_stations = charging_stations
 
     @property
     def linecode(self) -> List[Linecode]:

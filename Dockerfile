@@ -23,6 +23,7 @@ COPY simulator /usr/src/app/simulator
 COPY data_management /usr/src/app/data_management
 COPY profess /usr/src/app/profess
 COPY profiles /usr/src/app/profiles
+COPY gesscon /usr/src/app/gesscon
 
 
 

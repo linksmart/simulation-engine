@@ -1,14 +1,19 @@
 import datetime
 import logging
 import json
-from senml import senml
 import numpy as np
+from data_management.utils import Utils
+
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 from gesscon.MQTTClient import MQTTClient
 
 class GESSCon():
-	
+	def __init__(self):
+		self.soc_nodes = ""
+		self.soc_ids = ""
+		self.utils = Utils()
+		
 	def get_ESS_data_format(self, storage):
 		"""
 		returns ESS data in the following format:
@@ -27,7 +32,7 @@ class GESSCon():
 			data['max_discharging_power'] = ess['pdmax']
 			ess_data[ess['bus1']] = data
 			ess_data_list.append(ess_data)
-		logging.info("ESS Data= %s", ess_data_list)
+		logger.debug("ESS Data= %s", ess_data_list)
 		return ess_data_list
 		
 	def aggregate(self, data_list):
@@ -52,21 +57,21 @@ class GESSCon():
 		logger.info("Aggregated data = %s ", aggregate_list)
 		return aggregate_list
 	
-	def aggregated_load(self, load_list):
-		aggregate_list = []
-		for load in load_list:
-			load_ids = list(load.keys())
-			load_values = load[load_ids[0]]
-			if (isinstance(load_values, list)):
-				agg_list = []
-				aggregate = [0]*24
-				for val in load_values:
-					agg_list = (list(val.values())[0])
-					aggregate = [x + y**2 for x, y in zip(aggregate, agg_list)]
-				aggregate_list.append(list(np.sqrt(aggregate)))
-		aggregate_list = [sum(x) for x in zip(*aggregate_list)]
-		logger.info("Load data = %s ", aggregate_list)
-		return aggregate_list
+	# def aggregated_load(self, load_list):
+	# 	aggregate_list = []
+	# 	for load in load_list:
+	# 		load_ids = list(load.keys())
+	# 		load_values = load[load_ids[0]]
+	# 		if (isinstance(load_values, list)):
+	# 			agg_list = []
+	# 			aggregate = [0]*24
+	# 			for val in load_values:
+	# 				agg_list = (list(val.values())[0])
+	# 				aggregate = [x + y**2 for x, y in zip(aggregate, agg_list)]
+	# 			aggregate_list.append(list(np.sqrt(aggregate)))
+	# 	aggregate_list = [sum(x) for x in zip(*aggregate_list)]
+	# 	logger.info("Load data = %s ", aggregate_list)
+	# 	return aggregate_list
 	
 	def create_tele_config(self, Soc):
 		soc_values = {}
@@ -86,7 +91,8 @@ class GESSCon():
 			b_max.append(s[soc_node]['Battery_Capacity'])
 			pc_max.append(s[soc_node]['max_charging_power'])
 			pd_max.append(s[soc_node]['max_discharging_power'])
-			
+		self.soc_nodes = soc_nodes
+		self.soc_ids = soc_ids
 		tele = {"SOC": soc_values}
 		config = {
 			"ESS_number": len_soc,
@@ -101,8 +107,8 @@ class GESSCon():
 			"cycle": [0] * len_soc,
 			"loss": 0
 		}
-		logging.info("Soc = %s", soc_values)
-		return tele, config, soc_nodes, soc_ids
+		logger.debug("Soc = %s", soc_values)
+		return tele, config
 		
 	def gesscon(self, load, pv, price, Soc, date = "2018.10.01 00:00:00"):
 		"""
@@ -122,7 +128,7 @@ class GESSCon():
         """
 		aggregated_pv = self.aggregate(pv)
 		aggregated_load = self.aggregate(load)
-		tele, config, soc_nodes, soc_ids = self.create_tele_config(Soc)
+		tele, config = self.create_tele_config(Soc)
 		
 		#Creating JSON payload to be sent to GESSCon service
 		elprices = []
@@ -151,37 +157,37 @@ class GESSCon():
 	    "config": config }
 		payload = json.dumps(payload_var)
 		logger.info("Payload: %s", payload_var)
-		
-		#MQTT Publish
-		mqtt_send = MQTTClient("mosquito_S4G", 1883, "gesscon_send")
-		mqtt_send.publish("gesscon/data", payload, True)
-		
-		#MQTT Subscribe
-		mqtt_receive = MQTTClient("mosquito_S4G", 1883, "gesscon_receive")
-		mqtt_receive.subscribe_to_topics([("gesscon/data",2)], self.on_msg_received)
-		logging.info("successfully subscribed")
-		mqtt_send.MQTTExit()
-		mqtt_receive.MQTTExit()
-		
-		#Mock Output from GESSCon
+		self.on_msg_received(payload)
+		# MQTT
+		# mqtt_send = MQTTClient("mosquito_S4G1", 1883, "gesscon_send")
+		# mqtt_receive = MQTTClient("mosquito_S4G1", 1883, "gesscon_receive")
+		# mqtt_receive.subscribe_to_topics([("gesscon/data",2)], self.on_msg_received)
+		# logging.info("successfully subscribed")
+		#
+		# mqtt_send.publish("gesscon/data", payload, True)
+		# mqtt_send.MQTTExit()
+		# mqtt_receive.MQTTExit()
+	
+		# return output_list
+	
+	
+	def on_msg_received(self, payload):
+		# Mock Output from GESSCon
 		output_list = []
-		with open("gesscon_output.json","r") as file:
+		path = self.utils.get_path("gesscon/gesscon_output.json")
+		with open(path, "r") as file:
 			dict_data = json.load(file)
-		for node_data, node, id in zip(dict_data, soc_nodes, soc_ids):
-			doc = senml.SenMLDocument.from_json(node_data)
-			meas_list = []
-			for meas in doc.measurements:
-				meas_list.append(meas.value)
-			id_output = {id : meas_list}
-			output_node= {node : id_output}
+		logger.debug(dict_data)
+		dict_data = dict_data['data']
+		for node_data, node, id in zip(dict_data, self.soc_nodes, self.soc_ids):
+			id_output = {id: node_data}
+			output_node = {node: id_output}
 			output_list.append(output_node)
-		return output_list
-	
-	
-	def on_msg_received(self, payload=""):
-		pass
+		logger.debug(output_list)
+
 
 #### Dummy data ####
+"""
 price = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 storage = {"storageUnits": [
@@ -242,3 +248,4 @@ load = [{'633':
 # g = GESSCon()
 # Soc = g.get_ESS_data_format(storage)
 # g.gesscon(load, pv, price, Soc)
+"""

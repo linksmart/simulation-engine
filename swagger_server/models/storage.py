@@ -15,7 +15,7 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, min_soc: float=None, max_soc: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None, global_control: bool=None):  # noqa: E501
+    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, min_soc: float=None, max_soc: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None, global_control: bool=False):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501

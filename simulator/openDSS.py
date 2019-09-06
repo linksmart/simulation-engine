@@ -1010,6 +1010,7 @@ class OpenDSS:
         #!logger.debug("Setting up the loads")
         self.pvs=pvs
         try:
+
             for element in self.pvs:
                 #for kskd in element.keys():
                     #logger.debug("key "+str(kskd))
@@ -1031,11 +1032,15 @@ class OpenDSS:
                 loadshape_id=pv_name
 
                 self.setLoadshapePV(loadshape_id, sim_days * 24, 1, pv_profile_data)
+
             return 0
 
         except Exception as e:
             logger.error(e)
             return e
+
+    def get_loadshape_pv(self):
+        return self.loadshapes_for_pv
 
     def setLoadshapes(self, loads, sim_days, profiles, profess):
 
@@ -1050,14 +1055,18 @@ class OpenDSS:
                 self.bus_name=bus_name
 
                 # ----------get_a_profile---------------#
-                randint_value=random.randrange(0, 50)
-                logger.debug("name of bus "+bus_name)
-                bus_phases=str(bus_name).split("a", 1)[1]
-                logger.debug("bus phase "+bus_phases)
-                bus_index=str(bus_phases).split(".",1)[0]
-                logger.debug("we use load "+ bus_index)
+
+                randint_value=random.randrange(0, 475)
+                logger.debug("name of bus " + bus_name)
+                bus_phases = str(bus_name).split("a", 1)[1]
+                logger.debug("bus phase " + bus_phases)
+                bus_index = str(bus_phases).split(".", 1)[0]
+                logger.debug("we use load " + bus_index)
+
+                logger.debug("load_profile_data: randint=" + str(randint_value))
                 load_profile_data = profiles.load_profile(type="residential", randint=int(bus_index), days=sim_days)
-                #print("load_profile_data: randint=" + str(randint_value))
+                logger.debug("load profile data "+str(load_profile_data))
+
 
                 #--------store_profile_for_line----------#
                 self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}

@@ -9,6 +9,7 @@ from profess.Profess import *
 from simulator.openDSS import OpenDSS
 from data_management.redisDB import RedisDB
 from profiles.profiles import *
+from gesscon.gessconConnnector import GESSCon
 #from simulation_management import simulation_management as SM
 from data_management.inputController import InputController
 from data_management.utils import Utils
@@ -64,7 +65,11 @@ class gridController(threading.Thread):
                     for element_intern in value:
                         soc_dict = {}
                         #logger.debug("element intern "+str(element_intern))
-                        soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"], "id":element_intern["id"]}
+                        soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"],
+                                                          "id":element_intern["id"],
+                                                          "Battery_Capacity":element_intern["storage_capacity"],
+                                                          "max_charging_power":element_intern["max_charging_power"],
+                                                          "max_discharging_power":element_intern["max_discharging_power"]}
                         soc_list.append(soc_dict)
                         list_storages.append(element_intern)
         #logger.debug("list_storages "+str(list_storages))
@@ -79,7 +84,7 @@ class gridController(threading.Thread):
             for key, value in element.items():
                 element_id=value["id"]
                 logger.debug("ESS_id "+str(element_id))
-                #logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
+                logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
                 SoC = float(self.sim.getSoCfromBattery(element_id))
                 value["SoC"]=SoC
                 new_soc_list.append(element)
@@ -138,6 +143,7 @@ class gridController(threading.Thread):
 
         # ----------PROFILES----------------#
         self.profiles = Profiles()
+        self.global_control = GESSCon()
         # profess.json_parser.set_topology(data)
 
         self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
@@ -195,8 +201,14 @@ class gridController(threading.Thread):
         charging = True
         logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
         flag_is_storage = self.input.is_Storage_in_Topology(self.topology)
+        if flag_is_storage:
+            flag_global_control = self.input.is_global_control_in_Storage(self.topology)
+        flag_is_charging_station = self.input.is_Charging_Station_in_Topology(self.topology)
+        price_profile_data=self.input.get_price_profile()
+
 
         logger.debug("flag is storage "+str(flag_is_storage))
+        logger.debug("flag is global control "+str(flag_global_control))
 
 
 
@@ -211,37 +223,41 @@ class gridController(threading.Thread):
             self.redisDB.set("timestep_"+str(self.id), i)
 
 
-            terminal=self.sim.get_monitor_terminals("mon_transformer")
-            logger.debug("Number of terminals in monitor "+str(terminal))
+            #terminal=self.sim.get_monitor_terminals("mon_transformer")
+            #logger.debug("Number of terminals in monitor "+str(terminal))
 
 
-
-            #self.sim.get_power_Transformer("transformer_20082")
             if flag_is_storage:
-            #if "storageUnits" in self.topology["radials"][0].keys():
-                #logger.debug("######################Setting profess##################################")
-                #
-                #logger.debug("timestep " + str(hours))
-                professLoads = self.sim.getProfessLoadschapes(hours, 24)
-                #logger.debug("professLoads: " + str(professLoads))
-                professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
-                #logger.debug("professPVs: " + str(professPVs))
-                dummyPrice = [3] * 24
-                dummyGESSCON = [3] * 24
 
-                #soc_list=self.get_soc_list(self.topology)
+                professLoads = self.sim.getProfessLoadschapes(hours, 24)
+                #logger.debug("loads "+str(professLoads))
+                professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
+                #logger.debug("PVs "+str(professPVs))
+
+                if self.input.is_price_profile():
+                    logger.debug("price profile present")
+                    price_profile = price_profile_data[int(hours):int(hours+24)]
+
                 soc_list_new = self.set_new_soc(soc_list)
 
-                self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+                if flag_global_control:
+                    logger.debug("global control present")
+                    result = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
+                    logger.debug("GESSCon result "+str(result))
+
+
+                if self.input.is_price_profile():
+                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile)
+                else:
+                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
                 status_profess=self.profess.start_all()
                 if not status_profess:
                     profess_output=self.profess.wait_and_get_output()
                     logger.debug("output profess " + str(profess_output))
                 else:
                     logger.error("OFW instances could not be started")
-                    #self.redisDB.set(self.finish_status_key, "True")"""
 
-                #logger.debug("######################Ending profess##################################")
+
 
 
                 """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
@@ -292,6 +308,18 @@ class gridController(threading.Thread):
                 print("--------------------end profess results----------------------------")"""
             else:
                 logger.debug("No Storage Units present")
+
+            if flag_is_charging_station:
+                logger.debug("charging stations present in the simulation")
+                #check if is residential or commercial
+
+                #check if ev is present per charging station and receive a mapping list
+                #flag_is_EV = self.input.is_EV(charging_station)
+
+                #send it to profev
+
+            else:
+                logger.debug("No charging stations present in the simulation")
 
 
             puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
@@ -404,10 +432,12 @@ class gridController(threading.Thread):
         path = os.path.join("data", str(self.id), fname_row)
         self.utils.store_data_raw(path, raw_data)
         logger.debug("Raw data successfully stored")
+        self.redisDB.set(self.finish_status_key, "True")
+
         logger.debug("#####################################################################################")
         logger.debug("##########################   Simulation End   #######################################")
         logger.debug("#####################################################################################")
-        self.redisDB.set(self.finish_status_key, "True")
+
 
 
 
