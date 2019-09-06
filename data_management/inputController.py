@@ -143,6 +143,11 @@ class InputController:
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
             message = self.sim.setPVshapes(pvs, city, country, sim_days, self.profiles, self.profess)
+
+            fname = (str(id)) + "_result_pv"
+            path = os.path.join("data", str(id), fname)
+            logger.debug(self.sim.get_loadshape_pv)
+            self.utils.store_data_raw(path, self.sim.get_loadshape_pv)
             logger.debug("loadshapes from profiles charged")
             return message
         else:
@@ -310,7 +315,7 @@ class InputController:
             logger.debug("city " + str(city))
             country = self.get_country(common)
             logger.debug("country " + str(country))
-            self.price_profile = self.get_price_profile_from_server(city,country,self.sim_days)
+            self.price_profile = None#self.get_price_profile_from_server(city,country,self.sim_days)
 
         for values in radial:
             #logger.debug("values of the radial: "+str(values))

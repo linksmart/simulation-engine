@@ -211,6 +211,8 @@ class gridController(threading.Thread):
         logger.debug("flag is global control "+str(flag_global_control))
 
 
+        fname = (str(self.id)) + "_result_pv"
+
 
         for i in range(numSteps):
             #time.sleep(0.1)
@@ -226,7 +228,8 @@ class gridController(threading.Thread):
             #terminal=self.sim.get_monitor_terminals("mon_transformer")
             #logger.debug("Number of terminals in monitor "+str(terminal))
 
-
+            professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
+            logger.debug("PVs "+str(professPVs))
             if flag_is_storage:
 
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
@@ -432,7 +435,11 @@ class gridController(threading.Thread):
         path = os.path.join("data", str(self.id), fname_row)
         self.utils.store_data_raw(path, raw_data)
         logger.debug("Raw data successfully stored")
+        path = os.path.join("data", str(self.id), fname)
+        result=self.sim.get_loadshape_pv
+        self.utils.store_data(path, result)
         self.redisDB.set(self.finish_status_key, "True")
+
 
         logger.debug("#####################################################################################")
         logger.debug("##########################   Simulation End   #######################################")
