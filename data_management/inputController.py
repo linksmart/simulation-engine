@@ -144,10 +144,12 @@ class InputController:
             logger.debug("Charging the pvshapes into the simulator from profiles")
             message = self.sim.setPVshapes(pvs, city, country, sim_days, self.profiles, self.profess)
 
-            fname = (str(id)) + "_result_pv"
-            path = os.path.join("data", str(id), fname)
-            logger.debug(self.sim.get_loadshape_pv)
-            self.utils.store_data_raw(path, self.sim.get_loadshape_pv)
+            fname = (str(self.id)) + "_pv_result_raw"
+            #logger.debug(self.id)
+            #logger.debug(type(self.id))
+            #path = os.path.join("data", str(self.id), fname)
+            #result = self.sim.get_loadshape_pv()
+            #self.utils.store_data(path, result)
             logger.debug("loadshapes from profiles charged")
             return message
         else:

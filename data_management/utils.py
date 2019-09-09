@@ -33,6 +33,7 @@ class Utils(metaclass=Singleton):
         try:
 
             with open(path, 'w', encoding='utf-8') as outfile:
+                logger.debug(str(data)+"  "+str(outfile))
                 json.dump(data, outfile, ensure_ascii=False, indent=2) # working
 
             logger.debug("input data saved in " + str(path))

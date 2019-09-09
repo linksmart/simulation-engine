@@ -436,8 +436,9 @@ class gridController(threading.Thread):
         path = os.path.join("data", str(self.id), fname_row)
         self.utils.store_data_raw(path, raw_data)
         logger.debug("Raw data successfully stored")
+        fname = (str(self.id))+"_pv_result"
         path = os.path.join("data", str(self.id), fname)
-        result=self.sim.get_loadshape_pv
+        result=self.sim.get_loadshape_pv()
         self.utils.store_data(path, result)
         self.redisDB.set(self.finish_status_key, "True")
 

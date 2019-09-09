@@ -19,14 +19,22 @@ def post_topology(topology):
 def run_simulation(id,hours):
     payload={"sim_duration_in_hours":hours
 }
-    response= http.put(domain+"commands/run/"+id,payload)
+    response= http.put(domain+"commands/run/"+str(id),payload)
     return response.json()
 def run_all(hours):
     for id in array_of_ids:
         run_simulation(id,hours)
-        response = http.get(domain + "commands/status/" + id)
-        print(str(response.json()))
-        time.sleep(10)
+        response = http.get(domain + "commands/status/" + str(id))
+        if id !=0:
+            while str(response.json()) != str(100):
+                print("still running")
+                time.sleep(1)
+                response = http.get(domain + "commands/status/" + str(id))
+
+        print("next started")
+
+    output_file = open("mapping.txt", "w+")
+    output_file.write(str(array_of_ids))
 def change_kw_value(percentage):
     new_topology=copy.deepcopy(ref_topology)
     for element in new_topology["radials"][0]["photovoltaics"]:
@@ -35,6 +43,7 @@ def change_kw_value(percentage):
     return new_topology
 def define_all_topologies():
     percentage_list=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
+    percentage_list=[1]
     for percentage in percentage_list:
         new_topology=change_kw_value(percentage)
         index=percentage_list.index(percentage)
@@ -129,12 +138,15 @@ def parse_and_plot_raw_data(file_name):
     plt.xlabel("Time [hours]")
     plt.show()
 
-def iterate_through_profiles(directory_in_str,linecount):
+def iterate_through_profiles(directory_in_str,linecount,number_of_files):
     directory = os.fsencode(directory_in_str)
-
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
-        plot_profile(directory_in_str,filename,linecount)
+        number_and_txt=filename.split("_")[1]
+        number=number_and_txt.split(".")[0]
+        print(number)
+        if int(number)<number_of_files:
+            plot_profile(directory_in_str,filename,linecount)
     plt.ylabel('Load power [Percentage of Max Power]')
     plt.xlabel("Time [hours]")
     plt.legend()
@@ -146,13 +158,15 @@ def plot_profile(directory_in_str,filename,linecount):
         count = 0
         output_profile = []
         for line in open(directory_in_str + "/" + filename):
-            if count < linecount:
+            if count < linecount or linecount==-1:
                 output_profile.append(float(line.rstrip()))
                 count = count + 1
         print(output_profile)
         plot_node(output_profile, filename)
 
 def plot_node_in_every_test(path,node_name):
+    plt.figure(figsize=(10,10))
+    
     mapping_file = open(path+'mapping.txt').read()
     mapping=parse_mapping(mapping_file)
     print(mapping)
@@ -169,15 +183,23 @@ def plot_node_in_every_test(path,node_name):
                 average_over_phases=(calculate_average_of_phase(file_name["voltages"][splitted+".1"]["Voltage"],
                                                  file_name["voltages"][splitted+".2"]["Voltage"],
                                                  file_name["voltages"][splitted+".3"]["Voltage"]))
+                time=len(average_over_phases)
                 print(average_over_phases)
                 plot_node(average_over_phases,str(percentage)+"%")
         percentage=percentage+10
+
+    node_number=node_name.split("_a")[1]
+
+    profile_path="C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential/"
+    plot_profile(profile_path,"profile_"+str(node_number)+".txt",time)
+    plot_pv_profile(path,time)
     plt.ylabel('Voltage [pu]')
     plt.xlabel("Time [hours]")
     plt.title(str(node_name))
 
     plt.legend()
     plt.savefig(node_name+".png")
+    plt.show()
 def calculate_average_of_phase(phase1,phase2,phase3):
     output_list= []
     for index in range(len(phase1)):
@@ -185,14 +207,34 @@ def calculate_average_of_phase(phase1,phase2,phase3):
         added=added/3
         output_list.append(added)
     return output_list
-define_all_topologies()
-output_file=open("mapping.txt","w+")
+def plot_pv_profile(path,time):
+    mapping_file = open(path+'mapping.txt').read()
+    mapping=parse_mapping(mapping_file)
+    ##########
+    for result_id in mapping:
+        pv_file = open(path + result_id + "/" + result_id + "_pv_result").read()
+        PV_loadshapes = json.loads(pv_file)
+        flag_plotted=False
+        for PV in PV_loadshapes:
+            if not flag_plotted:
+                print("fitting pv " + PV)
+                loadshape = PV_loadshapes[PV]["loadshape"]
+                if time != -1:
+                    shape_to_plot=loadshape[:time]
+                else:
+                    shape_to_plot = loadshape
+                plot_node(shape_to_plot," PV_profile")
+                flag_plotted=True
+            # plt.plot(loadshape[15])
+    ##############
+#define_all_topologies()
+
 #print(array_of_ids)
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
-run_all(48)
+#run_all(96)
 #print(array_of_ids)
-output_file.write(str(array_of_ids))
+
 #iterate_result("PVTest/")
 #file=open("4a88bbde8854_result_raw.json").read()
 file=open("PvProfile/result_pv.txt").read()
@@ -201,13 +243,16 @@ file_json=yaml.load(file)
 #plt.plot(file_json[:48])
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",48)
 
-#plot_node_in_every_test("PVTest/","node_a12")
+#iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
+
+plot_node_in_every_test("PVTest/","node_a12")
 excluded=[0,7,12,13,19]
 # for i in range(25):
 #     if i not in excluded:
 #         plot_profile("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential","profile_"+str(i)+".txt",48)
-plt.legend()
-plt.show()
+
+
+
 #file_json2=json.loads(file_json)
 #file_json3=json.loads(file_json2)
 #print(type(file_json3))
