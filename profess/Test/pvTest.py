@@ -6,7 +6,8 @@ import os
 import yaml
 import matplotlib.pyplot as plt
 domain = "http://localhost:9090/se/"
-dummyInputData = open('PVgrid.json').read()
+#dummyInputData = open('PVgrid.json').read()
+dummyInputData = open('StorageGrid.json').read()
 ref_topology=json.loads(dummyInputData)
 array_of_ids=[0]*11
 
@@ -166,7 +167,7 @@ def plot_profile(directory_in_str,filename,linecount):
 
 def plot_node_in_every_test(path,node_name):
     plt.figure(figsize=(10,10))
-    
+
     mapping_file = open(path+'mapping.txt').read()
     mapping=parse_mapping(mapping_file)
     print(mapping)
@@ -191,8 +192,8 @@ def plot_node_in_every_test(path,node_name):
     node_number=node_name.split("_a")[1]
 
     profile_path="C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential/"
-    plot_profile(profile_path,"profile_"+str(node_number)+".txt",time)
-    plot_pv_profile(path,time)
+    #plot_profile(profile_path,"profile_"+str(node_number)+".txt",time)
+    #plot_pv_profile(path,time)
     plt.ylabel('Voltage [pu]')
     plt.xlabel("Time [hours]")
     plt.title(str(node_name))
@@ -227,25 +228,23 @@ def plot_pv_profile(path,time):
                 flag_plotted=True
             # plt.plot(loadshape[15])
     ##############
-#define_all_topologies()
+define_all_topologies()
 
 #print(array_of_ids)
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
-#run_all(96)
+run_all(24)
 #print(array_of_ids)
 
 #iterate_result("PVTest/")
 #file=open("4a88bbde8854_result_raw.json").read()
-file=open("PvProfile/result_pv.txt").read()
 
-file_json=yaml.load(file)
 #plt.plot(file_json[:48])
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",48)
 
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 
-plot_node_in_every_test("PVTest/","node_a12")
+#plot_node_in_every_test("StorageTest/","node_a12")
 excluded=[0,7,12,13,19]
 # for i in range(25):
 #     if i not in excluded:

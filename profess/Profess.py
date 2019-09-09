@@ -301,9 +301,10 @@ class Profess:
                 if optimization_model is None:
                     optimization_model = storage_opt_model
                 start_response=self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete", self.get_profess_id(node_name))
-                if start_response is not 0 and start_response is not None:
+                if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response,node_name)
                     return 1
+                time.sleep(5)
             return 0
         else:return 0
     def check_start_issue(self,response,node_name):
