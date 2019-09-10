@@ -401,8 +401,7 @@ class Profess:
                                 #this means a value in the storageunit is mapped to multiple values in the ofw
                                 for part in self.storage_mapping[storage_key]:
                                     if "meta" in part:
-                                        config_data_of_node["ESS"]["meta"][part["meta"]] = node_element_list[storage_index]
-                                        ["storageUnits"][storage_key] / percentage
+                                        config_data_of_node["ESS"]["meta"][part["meta"]] = node_element_list[storage_index]["storageUnits"][storage_key] / percentage
                                     else:
                                         config_data_of_node["ESS"][part] = node_element_list[storage_index]["storageUnits"][
                                                                              storage_key] / percentage
@@ -606,6 +605,7 @@ class Profess:
                                 logger.debug("ess_con profile set")
                 else: logger.debug("no ess_con profile was given")
                 if soc_list is not None:
+                    #sets new values for storage: soc, charging ,...
                     if type(soc_list) is list:
                         for soc_list_for_node in soc_list:
                             profess_id=self.get_profess_id(node_name)
@@ -638,19 +638,6 @@ class Profess:
                                                 # the key can be directly mapped
                                                 config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
                                                     storage_information[storage_key] / percentage
-
-                                    
-                            # for node_name in node_element:
-                            #     index = node_element_list.index(node_element)
-                            #     profess_id = self.get_profess_id(node_name)
-                            #     if profess_id != 0:
-                            #         for node_soc in soc_list:
-                            #             if node_name in node_soc:
-                            #                 soc_index = soc_list.index(node_soc)
-                            #
-                            #                 self.dataList[index][node_name][profess_id]["ESS"]["SoC_Value"] = (
-                            #                         soc_list[soc_index][node_name]["SoC"] / 100)
-                            #         self.update_config_json(profess_id, self.dataList[index][node_name][profess_id])
 
                 profess_id = self.get_profess_id(node_name)
                 if profess_id != 0:
