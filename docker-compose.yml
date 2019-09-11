@@ -50,11 +50,12 @@ services:
     #network_mode: "host"
     ports:
         - "9090:9090"
-    command: ["python3", "-u", "./gesscon/gessconConnector.py"]
+
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "10"
     # restart: "always"
-    entrypoint: ["python3", "-u", "main.py"]
+    entrypoint: ["python3", "-u", "./gesscon/gessconConnector.py"]
+    #entrypoint: ["python3", "-u", "main.py"]
