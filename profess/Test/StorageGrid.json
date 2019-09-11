@@ -221,7 +221,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -236,7 +236,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -251,7 +251,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -266,7 +266,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -281,7 +281,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -296,7 +296,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -311,7 +311,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -326,7 +326,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -341,7 +341,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -356,7 +356,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -371,7 +371,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -386,7 +386,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -401,7 +401,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -416,7 +416,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -431,7 +431,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -446,7 +446,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 },
@@ -461,7 +461,7 @@
 "max_charging_power": 1.5,
 "max_discharging_power":1.5,
 "storage_capacity": 3,
-"optimization_model": "Maximize Self-Production",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1
 
 }

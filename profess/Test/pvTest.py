@@ -5,6 +5,7 @@ import time
 import os
 import yaml
 import matplotlib.pyplot as plt
+import datetime
 domain = "http://localhost:9090/se/"
 #dummyInputData = open('PVgrid.json').read()
 dummyInputData = open('StorageGrid.json').read()
@@ -23,6 +24,8 @@ def run_simulation(id,hours):
     response= http.put(domain+"commands/run/"+str(id),payload)
     return response.json()
 def run_all(hours):
+    define_all_topologies()
+
     for id in array_of_ids:
         run_simulation(id,hours)
         response = http.get(domain + "commands/status/" + str(id))
@@ -163,7 +166,9 @@ def plot_profile(directory_in_str,filename,linecount):
                 output_profile.append(float(line.rstrip()))
                 count = count + 1
         print(output_profile)
-        plot_node(output_profile, filename)
+        file_without_txt=filename.split(".txt")[0]
+        file_label=file_without_txt+" load "
+        plot_node(output_profile, file_label)
 
 def plot_node_in_every_test(path,node_name):
     plt.figure(figsize=(10,10))
@@ -194,6 +199,7 @@ def plot_node_in_every_test(path,node_name):
     profile_path="C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential/"
     #plot_profile(profile_path,"profile_"+str(node_number)+".txt",time)
     #plot_pv_profile(path,time)
+    #plt.ylabel('Power [kW]')
     plt.ylabel('Voltage [pu]')
     plt.xlabel("Time [hours]")
     plt.title(str(node_name))
@@ -208,6 +214,11 @@ def calculate_average_of_phase(phase1,phase2,phase3):
         added=added/3
         output_list.append(added)
     return output_list
+def help_function_for_timestamps(date):
+    now = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
+    timestamp = now.timestamp()
+    return timestamp
+
 def plot_pv_profile(path,time):
     mapping_file = open(path+'mapping.txt').read()
     mapping=parse_mapping(mapping_file)
@@ -228,12 +239,12 @@ def plot_pv_profile(path,time):
                 flag_plotted=True
             # plt.plot(loadshape[15])
     ##############
-#define_all_topologies()
+
 
 #print(array_of_ids)
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
-#run_all(24)
+run_all(24)
 #print(array_of_ids)
 
 #iterate_result("PVTest/")
@@ -244,7 +255,11 @@ def plot_pv_profile(path,time):
 
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 
-plot_node_in_every_test("StorageTest/","node_a12")
+#plot_node_in_every_test("StorageTest/","node_a12")
+#plot_node_in_every_test("PVTest/","node_a12")
+
+#print(help_function_for_timestamps("2018.07.03 00:00:00"))
+
 excluded=[0,7,12,13,19]
 # for i in range(25):
 #     if i not in excluded:

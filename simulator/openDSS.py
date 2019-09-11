@@ -1022,7 +1022,7 @@ class OpenDSS:
                 #self.bus_name=bus_name
 
                 # ----------get_a_profile---------------#
-                pv_profile_data = profiles.pv_profile(city, country, sim_days, max_power)
+                pv_profile_data = profiles.pv_profile(city, country, sim_days, max_power,1530568800.0) #timestamp of "2018.07.03 00:00:00"
                 #logger.debug("pv profile: "+str(pv_profile_data))
                 #print("load_profile_data: randint=" + str(randint_value))
 
