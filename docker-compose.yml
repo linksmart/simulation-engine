@@ -58,4 +58,4 @@ services:
         max-file: "10"
     # restart: "always"
     command: ["python3", "-u", "./profiles.py"]
-    #entrypoint: ["python3", "-u", "main.py"]
+    entrypoint: ["python3", "-u", "main.py"]

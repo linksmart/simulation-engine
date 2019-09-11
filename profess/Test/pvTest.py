@@ -244,7 +244,7 @@ def plot_pv_profile(path,time):
 #print(array_of_ids)
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
-run_all(24)
+run_all(1)
 #print(array_of_ids)
 
 #iterate_result("PVTest/")

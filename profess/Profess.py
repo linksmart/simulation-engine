@@ -743,7 +743,10 @@ class Profess:
         :param output_data: data which has to be translated
         :return: translated output, syntax: [{node_name:{ profess_id:{ variable1: value1, variable2:value2, ...]}, ...]
         """
+        if output_data=={}:
+            logger.error("empty output from the OFW")
         logger.debug("output of ofw is being translated to se ")
+        logger.debug(output_data)
         output_list=copy.deepcopy(output_data)
         #finding the lowest value of each variable and delete all not needed timesteps
         for parameter_output_list in output_data:
