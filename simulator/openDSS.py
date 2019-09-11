@@ -1056,7 +1056,7 @@ class OpenDSS:
 
                 # ----------get_a_profile---------------#
 
-                randint_value=random.randrange(0, 475)
+                randint_value=random.randrange(1, 475)
                 logger.debug("name of bus " + bus_name)
                 bus_phases = str(bus_name).split("a", 1)[1]
                 logger.debug("bus phase " + bus_phases)

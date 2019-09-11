@@ -228,12 +228,12 @@ def plot_pv_profile(path,time):
                 flag_plotted=True
             # plt.plot(loadshape[15])
     ##############
-define_all_topologies()
+#define_all_topologies()
 
 #print(array_of_ids)
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
-run_all(24)
+#run_all(24)
 #print(array_of_ids)
 
 #iterate_result("PVTest/")
@@ -244,7 +244,7 @@ run_all(24)
 
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 
-#plot_node_in_every_test("StorageTest/","node_a12")
+plot_node_in_every_test("StorageTest/","node_a12")
 excluded=[0,7,12,13,19]
 # for i in range(25):
 #     if i not in excluded:
