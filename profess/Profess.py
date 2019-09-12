@@ -744,7 +744,8 @@ class Profess:
         :return: translated output, syntax: [{node_name:{ profess_id:{ variable1: value1, variable2:value2, ...]}, ...]
         """
         if output_data=={}:
-            logger.error("empty output from the OFW")
+            logger.error("No results were returned by the OFW")
+
         logger.debug("output of ofw is being translated to se ")
         #logger.debug(output_data)
         output_list=copy.deepcopy(output_data)
