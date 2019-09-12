@@ -278,9 +278,9 @@ class gridController(threading.Thread):
                                     profess_result_intern[node_name][key_results] = powers
 
                         profess_result.append(profess_result_intern)
-                    logger.debug("profess result: "+str(profess_result_intern))
+                    logger.debug("profess result: "+str(profess_result))
 
-                    for element in profess_result_intern:
+                    for element in profess_result:
                         ess_name = None
                         p_ess_output = None
                         for key, value in element.items():

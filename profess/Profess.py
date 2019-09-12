@@ -143,6 +143,7 @@ class Profess:
             logger.error("failed to post_all_standard_data ")
             return 1
 
+
     def set_standard_data(self, standard_data):
         """
         function to change standard values
@@ -169,6 +170,7 @@ class Profess:
             response = self.httpClass.get(self.domain + "optimization/status")
             json_response = response.json()
             if response.status_code == 200:
+
 
                 return json_response
             else:
@@ -302,6 +304,7 @@ class Profess:
                 if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response,node_name)
                     return 1
+                time.sleep(5)
             return 0
         else:return 0
     def check_start_issue(self,response,node_name):
@@ -483,6 +486,7 @@ class Profess:
         :param ess_con: [{node_name:{node_name.1.2.3:[value1,value2, ...]}, ...}
         """
         logger.debug("Setting_profiles ")
+        logger.debug(str(pv_profiles))
         #logger.debug("load profile: "+str(load_profiles)+" ,pv_profiles: "+str(pv_profiles)+" ,price_profile: "+str(price_profiles)+" ,ess_con "+str(ess_con))
         node_name_list =self.json_parser.get_node_name_list()
         if node_name_list !=0:
@@ -525,10 +529,6 @@ class Profess:
 
                                 if ("P_Load_R" in config_data_of_node["load"]) and ("P_Load_S" in config_data_of_node["load"]) and \
                                         ("P_Load_T" in config_data_of_node["load"]):
-                                    logger.debug("p_load_r :" + str(
-                                        config_data_of_node["load"]["P_Load_R"]) + " ,p_load_s :" + str(
-                                        config_data_of_node["load"]["P_Load_S"]) + " ,p_load_t :" + str(
-                                        config_data_of_node["load"]["P_Load_T"]))
 
                                     three_phase = []
                                     for value in range(len(config_data_of_node["load"]["P_Load_T"])):
@@ -563,6 +563,7 @@ class Profess:
                                     config_data_of_node["load"]["P_Load_R"] = copy.deepcopy(single_phase)
                                     config_data_of_node["load"]["P_Load_S"] = copy.deepcopy(single_phase)
                                     config_data_of_node["load"]["P_Load_T"] = copy.deepcopy(single_phase)
+
                                 logger.debug("load profile set for "+str(node_name))
                 else: logger.debug("no load profile was given")
                 if pv_profiles is not None:
@@ -645,6 +646,13 @@ class Profess:
                     if price_profiles is not None:
                         config_data_of_node["generic"]["Price_Forecast"] = price_profiles #No reserved words for price
                         #logger.debug("price profile set")
+                    #updates the profiles in the ofw
+                    node_index = node_name_list.index(node_name)
+                    self.update_config_json(profess_id, self.dataList[node_index][node_name][profess_id])
+
+
+
+
 
     def get_profess_id(self, node_name):
         """
@@ -713,24 +721,22 @@ class Profess:
             #this happends just for the first set_up
             self.set_data_list()
             self.post_all_standard_data()
+            node_name_list = self.json_parser.get_node_name_list()
+            if node_name_list != 0:
+                for nodeName in node_name_list:
+                    self.set_storage(nodeName)
+                    self.set_photovoltaics(nodeName)
+
+                node_element_list = self.json_parser.get_node_element_list()
         if soc_list is not None:
             if type(soc_list) is dict:          #if soc_list is a dict it is a new topology for the grid, otherwise the list are the updated soc values
                 self.json_parser.set_topology(soc_list)
                 self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
-                                  ,ess_con=ess_con,soc_list=soc_list)
+                                  ,ess_con=ess_con)
             else:
                 self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
-                                  ,ess_con=ess_con)
-        node_name_list = self.json_parser.get_node_name_list()
-        if node_name_list!=0:
-            for nodeName in node_name_list:
-                self.set_storage(nodeName)
-                self.set_photovoltaics(nodeName)
-                profess_id=self.get_profess_id(nodeName)
-                if profess_id !=0:
-                    node_index = node_name_list.index(nodeName)
-                    self.update_config_json(profess_id, self.dataList[node_index][nodeName][profess_id])
-            node_element_list = self.json_parser.get_node_element_list()
+                                  ,ess_con=ess_con,soc_list=soc_list)
+
 
 
     def translate_output(self, output_data):
@@ -741,7 +747,9 @@ class Profess:
         """
         if output_data=={}:
             logger.error("No results were returned by the OFW")
+
         logger.debug("output of ofw is being translated to se ")
+        #logger.debug(output_data)
         output_list=copy.deepcopy(output_data)
         #finding the lowest value of each variable and delete all not needed timesteps
         for parameter_output_list in output_data:
@@ -798,7 +806,7 @@ class Profess:
                         if not values_output_for_node in self.list_with_desired_output_parameters:
                             index=sorted_output.index(output_for_node)
                             output_list[index][node_name][profess_id].pop(values_output_for_node, None)
-        logger.debug("the translated output of the OFW: "+str(output_list))
+        #logger.debug("the translated output of the OFW: "+str(output_list))
         return output_list
 
 
