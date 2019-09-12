@@ -746,7 +746,7 @@ class Profess:
         if output_data=={}:
             logger.error("empty output from the OFW")
         logger.debug("output of ofw is being translated to se ")
-        logger.debug(output_data)
+        #logger.debug(output_data)
         output_list=copy.deepcopy(output_data)
         #finding the lowest value of each variable and delete all not needed timesteps
         for parameter_output_list in output_data:
