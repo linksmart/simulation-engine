@@ -251,15 +251,52 @@ class gridController(threading.Thread):
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile)
                 else:
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+
                 status_profess=self.profess.start_all()
+
                 if not status_profess:
                     profess_output=self.profess.wait_and_get_output()
                     logger.debug("output profess " + str(profess_output))
+
+                    # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
+                    # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
+
+                    profess_result=[]
+                    for element in profess_output:
+                        profess_result_intern = {}
+                        for key, value in element.items():
+                            node_name = key
+                            profess_result_intern[node_name]={}
+                            for element_soc in soc_list:
+                                for key_node in element_soc.keys():
+                                    if key_node == node_name:
+                                        profess_result_intern[node_name]["id"] = element_soc[key_node]["id"]
+                                        profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["max_charging_power"]
+                                        profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["max_discharging_power"]
+                            for profess_id, results in value.items():
+                                for key_results, powers in results.items():
+                                    profess_result_intern[node_name][key_results] = powers
+
+                        profess_result.append(profess_result_intern)
+                    logger.debug("profess result: "+str(profess_result))
+
+                    for element in profess_result:
+                        ess_name = None
+                        p_ess_output = None
+                        for key, value in element.items():
+                            ess_name = value["id"]
+                            p_ess_output = value["P_ESS_Output"]
+                            max_charging_power = value["max_charging_power"]
+                            max_discharging_power = value["max_discharging_power"]
+                        self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
                 else:
                     logger.error("OFW instances could not be started")
 
+                # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
 
+                #soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
 
+                #self.redisDB.set(self.finish_status_key, "True")
 
                 logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
                 logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
