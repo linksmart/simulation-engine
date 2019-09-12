@@ -240,9 +240,7 @@ class gridController(threading.Thread):
                 if self.input.is_price_profile():
                     logger.debug("price profile present")
                     price_profile = price_profile_data[int(hours):int(hours+24)]
-
                 soc_list_new = self.set_new_soc(soc_list)
-
                 if flag_global_control:
                     logger.debug("global control present")
                     profess_global_profile = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
@@ -283,9 +281,10 @@ class gridController(threading.Thread):
                         profess_result.append(profess_result_intern)
                     logger.debug("profess result: "+str(profess_result_intern))
 
-                    for element in profess_result_intern:
+                    for element in profess_result:
                         ess_name = None
                         p_ess_output = None
+                        logger.debug("element: "+str(element))
                         for key, value in element.items():
                             ess_name = value["id"]
                             p_ess_output = value["P_ESS_Output"]
@@ -347,6 +346,9 @@ class gridController(threading.Thread):
                 self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
                 print(self.profess.dataList)
                 print("--------------------end profess results----------------------------")"""
+
+
+
             else:
                 logger.debug("No Storage Units present")
 
