@@ -961,8 +961,6 @@ class OpenDSS:
         except Exception as e:
             logger.error(e)
             return e
-        
-
 
     def setXYCurves(self, xycurves):
         #!logger.info("Setting up the XYCurves")

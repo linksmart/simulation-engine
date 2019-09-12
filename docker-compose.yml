@@ -37,5 +37,5 @@ services:
         max-size: "10m"
         max-file: "10"
     # restart: "always"
-    entrypoint: ["python3", "-u", "./gesscon/gessconConnector.py"]
-    #entrypoint: ["python3", "-u", "main.py"]
+#    command: ["python3", "-u", "./gesscon/gessconConnector.py"]
+    command: ["python3", "-u", "main.py"]

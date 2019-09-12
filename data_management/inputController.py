@@ -131,6 +131,20 @@ class InputController:
         message = self.sim.setXYCurve(self.object)
         logger.debug("XYCurve set")
         return message
+    
+    ############################
+    def setPowerProfile(self, id, powerprofile):
+        logger.debug("Setting the Powerprofile into the simulator")
+        self.object = object
+        for element in powerprofile:
+            items = element['items']
+            if element['multiplier']:
+                items = items * element['multiplier']
+            npts = len(items)
+            message = self.sim.setLoadshape(element['id'], npts, element['interval'], items)
+        # message = self.sim.setPowerProfiles(powerprofile)
+        logger.debug("Powerprofile set")
+        return message
 
     def setPhotovoltaic(self, id, photovoltaics):
         logger.debug("Charging the photovoltaics into the simulator")
@@ -310,7 +324,7 @@ class InputController:
             logger.debug("city " + str(city))
             country = self.get_country(common)
             logger.debug("country " + str(country))
-            self.price_profile = self.get_price_profile_from_server(city,country,self.sim_days)
+            #self.price_profile = self.get_price_profile_from_server(city,country,self.sim_days)
 
         for values in radial:
             #logger.debug("values of the radial: "+str(values))
@@ -378,12 +392,13 @@ class InputController:
                 logger.debug(str(message))
                 if not message == 0:
                     return message
-
+                
             if "powerProfile" in values.keys() and values["powerProfile"] is not None:
                 logger.debug("!---------------Setting powerProfile------------------------- \n")
                 powerProfile = values["powerProfile"]
                 # logger.debug("Powerprofile" + str(powerProfile))
                 message = self.setPowerProfile(id, powerProfile)
+                logger.debug(str(message))
                 if not message == 0:
                     return message
 

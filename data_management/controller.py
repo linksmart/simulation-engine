@@ -227,7 +227,7 @@ class gridController(threading.Thread):
             #logger.debug("Number of terminals in monitor "+str(terminal))
 
 
-            if flag_is_storage:
+            """if flag_is_storage:
 
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
                 #logger.debug("loads "+str(professLoads))
@@ -236,7 +236,7 @@ class gridController(threading.Thread):
 
                 if self.input.is_price_profile():
                     logger.debug("price profile present")
-                    price_profile = price_profile_data[int(hours):int(hours+24)]
+                    #price_profile = price_profile_data[int(hours):int(hours+24)]
 
                 soc_list_new = self.set_new_soc(soc_list)
 
@@ -261,7 +261,7 @@ class gridController(threading.Thread):
 
 
 
-                """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
+                logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
                 logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
                 logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
                 logger.debug("kW " + str(self.sim.getkWfromBattery("Akku1")))
@@ -292,13 +292,13 @@ class gridController(threading.Thread):
                         else:
                             logger.debug("Entered to discharging")
                             self.sim.setActivePowertoBatery("Akku1",0.5, max_charging_power_value)
-                logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))"""
+                logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))
 
                 #logger.debug("######################Ending profess##################################")
 
 
                 #profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
-                """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
+                self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
                 self.profess.start_all()
                 print("--------------------start profess results----------------------------")
                 print(self.profess.dataList)
@@ -306,7 +306,7 @@ class gridController(threading.Thread):
                 soc_list = [{"633": {"SoC": 5}}, {"671": {"SoC": 4}}, {"634": {"SoC": 20}}]
                 self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
                 print(self.profess.dataList)
-                print("--------------------end profess results----------------------------")"""
+                print("--------------------end profess results----------------------------")
             else:
                 logger.debug("No Storage Units present")
 
@@ -320,7 +320,7 @@ class gridController(threading.Thread):
                 #send it to profev
 
             else:
-                logger.debug("No charging stations present in the simulation")
+                logger.debug("No charging stations present in the simulation")"""
 
 
             puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
