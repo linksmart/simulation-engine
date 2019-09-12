@@ -253,9 +253,14 @@ class gridController(threading.Thread):
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
 
                 status_profess=self.profess.start_all()
+
                 if not status_profess:
                     profess_output=self.profess.wait_and_get_output()
                     logger.debug("output profess " + str(profess_output))
+
+                    # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
+                    # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
+
                     profess_result=[]
                     for element in profess_output:
                         profess_result_intern = {}
@@ -291,7 +296,7 @@ class gridController(threading.Thread):
 
                 #soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
 
-                self.redisDB.set(self.finish_status_key, "True")
+                #self.redisDB.set(self.finish_status_key, "True")
 
                 """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
                 logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
