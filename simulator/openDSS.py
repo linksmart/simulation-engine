@@ -1048,19 +1048,28 @@ class OpenDSS:
 
                 self.load_name=load_name
                 self.bus_name=bus_name
-
-                # ----------get_a_profile---------------#
-                randint_value=random.randrange(0, 475)
-                logger.debug("load_profile_data: randint=" + str(randint_value))
-                load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
-                logger.debug("load profile data "+str(load_profile_data))
-
-                #--------store_profile_for_line----------#
-                self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}
-                #loadshape_id=load_name + bus_name
-                loadshape_id=load_name
-
-                self.setLoadshape(loadshape_id, sim_days*24, 1, load_profile_data)
+                
+                if 'powerProfiles' in element.keys() and element["powerProfiles"] is not None:
+                    powerprofiles = element['powerProfiles']
+                    load_profile_data = []
+                    for powerprofile in powerprofiles:
+                        items = powerprofile['items']
+                        if powerprofile['multiplier']:
+                            items = [item * powerprofile['multiplier'] for item in items]
+                        load_profile_data.extend(items)
+                else:
+                    # ----------get_a_profile---------------#
+                    randint_value=random.randrange(0, 475)
+                    logger.debug("load_profile_data: randint=" + str(randint_value))
+                    load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
+                    logger.debug("load profile data "+str(load_profile_data))
+    
+                    #--------store_profile_for_line----------#
+                    self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}
+                    #loadshape_id=load_name + bus_name
+                    loadshape_id=load_name
+    
+                    self.setLoadshape(loadshape_id, sim_days*24, 1, load_profile_data)
             return 0
         except Exception as e:
             logger.error(e)

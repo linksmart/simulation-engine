@@ -99,8 +99,28 @@ def create_simulation(body):  # noqa: E501
                         logger.error(message)
                         return message
             logger.debug("Power lines succesfully checked")
+            logger.debug("***Checking")
 
+            if "powerProfile" in values.keys():
+                logger.debug("****Checking power profile IDs")
+                power_profiles = values["powerProfile"]
+                power_profile_ids = []
+                for power_profile in power_profiles:
+                    power_profile_ids.append(power_profile['id'])
+                    
+                load_profiles = values['loads']
+                for load_profile in load_profiles:
+                    if load_profile['power_profile_id'] not in power_profile_ids:
+                        message = "Power profile IDs do not match"
+                        logger.error(message)
+                        return message
+    
+                logger.debug("Checking Power Profile ID")
+                logger.debug("power_profile_ids",str(power_profile_ids))
 
+            else:
+                logger.debug("blah blah")
+            logger.debug("***Power Profile ID successfully checked")
 
             if "storageUnits" in values.keys() and values["storageUnits"] is not None:
                 logger.debug("Checking Storage")
@@ -118,6 +138,8 @@ def create_simulation(body):  # noqa: E501
                         return message
 
             logger.debug("Storage successfully checked")
+
+            
         return id
     else:
         return "Bad JSON Format"

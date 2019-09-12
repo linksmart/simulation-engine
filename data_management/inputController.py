@@ -132,7 +132,6 @@ class InputController:
         logger.debug("XYCurve set")
         return message
     
-    ############################
     def setPowerProfile(self, id, powerprofile):
         logger.debug("Setting the Powerprofile into the simulator")
         self.object = object
