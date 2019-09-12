@@ -15,26 +15,36 @@ class PowerProfile(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, items: float=None):  # noqa: E501
+    def __init__(self, id: str=None, items: List[float]=None, interval: float=None, multiplier: float=None):  # noqa: E501
         """PowerProfile - a model defined in Swagger
 
         :param id: The id of this PowerProfile.  # noqa: E501
         :type id: str
         :param items: The items of this PowerProfile.  # noqa: E501
-        :type items: float
+        :type items: List[float]
+        :param interval: The interval of this PowerProfile.  # noqa: E501
+        :type interval: float
+        :param multiplier: The multiplier of this PowerProfile.  # noqa: E501
+        :type multiplier: float
         """
         self.swagger_types = {
             'id': str,
-            'items': float
+            'items': List[float],
+            'interval': float,
+            'multiplier': float
         }
 
         self.attribute_map = {
             'id': 'id',
-            'items': 'items'
+            'items': 'items',
+            'interval': 'interval',
+            'multiplier': 'multiplier'
         }
 
         self._id = id
         self._items = items
+        self._interval = interval
+        self._multiplier = multiplier
 
     @classmethod
     def from_dict(cls, dikt) -> 'PowerProfile':
@@ -65,26 +75,74 @@ class PowerProfile(Model):
         :param id: The id of this PowerProfile.
         :type id: str
         """
+        if id is None:
+            raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
 
     @property
-    def items(self) -> float:
+    def items(self) -> List[float]:
         """Gets the items of this PowerProfile.
 
 
         :return: The items of this PowerProfile.
-        :rtype: float
+        :rtype: List[float]
         """
         return self._items
 
     @items.setter
-    def items(self, items: float):
+    def items(self, items: List[float]):
         """Sets the items of this PowerProfile.
 
 
         :param items: The items of this PowerProfile.
-        :type items: float
+        :type items: List[float]
         """
+        if items is None:
+            raise ValueError("Invalid value for `items`, must not be `None`")  # noqa: E501
 
         self._items = items
+
+    @property
+    def interval(self) -> float:
+        """Gets the interval of this PowerProfile.
+
+
+        :return: The interval of this PowerProfile.
+        :rtype: float
+        """
+        return self._interval
+
+    @interval.setter
+    def interval(self, interval: float):
+        """Sets the interval of this PowerProfile.
+
+
+        :param interval: The interval of this PowerProfile.
+        :type interval: float
+        """
+        if interval is None:
+            raise ValueError("Invalid value for `interval`, must not be `None`")  # noqa: E501
+
+        self._interval = interval
+
+    @property
+    def multiplier(self) -> float:
+        """Gets the multiplier of this PowerProfile.
+
+
+        :return: The multiplier of this PowerProfile.
+        :rtype: float
+        """
+        return self._multiplier
+
+    @multiplier.setter
+    def multiplier(self, multiplier: float):
+        """Sets the multiplier of this PowerProfile.
+
+
+        :param multiplier: The multiplier of this PowerProfile.
+        :type multiplier: float
+        """
+
+        self._multiplier = multiplier

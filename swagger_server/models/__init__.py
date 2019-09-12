@@ -12,7 +12,6 @@ from swagger_server.models.grid import Grid
 from swagger_server.models.grid_definition import GridDefinition
 from swagger_server.models.linecode import Linecode
 from swagger_server.models.load import Load
-from swagger_server.models.loadshape import Loadshape
 from swagger_server.models.node import Node
 from swagger_server.models.phases import Phases
 from swagger_server.models.photovoltaic import Photovoltaic

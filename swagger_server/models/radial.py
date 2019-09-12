@@ -10,7 +10,6 @@ from swagger_server.models.capacitor import Capacitor  # noqa: F401,E501
 from swagger_server.models.charging_station import ChargingStation  # noqa: F401,E501
 from swagger_server.models.linecode import Linecode  # noqa: F401,E501
 from swagger_server.models.load import Load  # noqa: F401,E501
-from swagger_server.models.loadshape import Loadshape  # noqa: F401,E501
 from swagger_server.models.photovoltaic import Photovoltaic  # noqa: F401,E501
 from swagger_server.models.power_profile import PowerProfile  # noqa: F401,E501
 from swagger_server.models.powerline import Powerline  # noqa: F401,E501
@@ -28,7 +27,7 @@ class Radial(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, radial_id: str=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_profiles: List[PowerProfile]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_stations: List[ChargingStation]=None, linecode: List[Linecode]=None, capacitor: List[Capacitor]=None, regcontrol: List[RegControl]=None, xycurves: List[XYCurve]=None, loadshapes: List[Loadshape]=None, tshapes: List[Tshape]=None):  # noqa: E501
+    def __init__(self, radial_id: str=None, transformer: List[Transformer]=None, loads: List[Load]=None, power_profiles: List[PowerProfile]=None, power_lines: List[Powerline]=None, photovoltaics: List[Photovoltaic]=None, storage_units: List[Storage]=None, charging_stations: List[ChargingStation]=None, linecode: List[Linecode]=None, capacitor: List[Capacitor]=None, regcontrol: List[RegControl]=None, xycurves: List[XYCurve]=None, tshapes: List[Tshape]=None):  # noqa: E501
         """Radial - a model defined in Swagger
 
         :param radial_id: The radial_id of this Radial.  # noqa: E501
@@ -55,8 +54,6 @@ class Radial(Model):
         :type regcontrol: List[RegControl]
         :param xycurves: The xycurves of this Radial.  # noqa: E501
         :type xycurves: List[XYCurve]
-        :param loadshapes: The loadshapes of this Radial.  # noqa: E501
-        :type loadshapes: List[Loadshape]
         :param tshapes: The tshapes of this Radial.  # noqa: E501
         :type tshapes: List[Tshape]
         """
@@ -73,7 +70,6 @@ class Radial(Model):
             'capacitor': List[Capacitor],
             'regcontrol': List[RegControl],
             'xycurves': List[XYCurve],
-            'loadshapes': List[Loadshape],
             'tshapes': List[Tshape]
         }
 
@@ -90,7 +86,6 @@ class Radial(Model):
             'capacitor': 'capacitor',
             'regcontrol': 'regcontrol',
             'xycurves': 'xycurves',
-            'loadshapes': 'loadshapes',
             'tshapes': 'tshapes'
         }
 
@@ -106,7 +101,6 @@ class Radial(Model):
         self._capacitor = capacitor
         self._regcontrol = regcontrol
         self._xycurves = xycurves
-        self._loadshapes = loadshapes
         self._tshapes = tshapes
 
     @classmethod
@@ -371,27 +365,6 @@ class Radial(Model):
         """
 
         self._xycurves = xycurves
-
-    @property
-    def loadshapes(self) -> List[Loadshape]:
-        """Gets the loadshapes of this Radial.
-
-
-        :return: The loadshapes of this Radial.
-        :rtype: List[Loadshape]
-        """
-        return self._loadshapes
-
-    @loadshapes.setter
-    def loadshapes(self, loadshapes: List[Loadshape]):
-        """Sets the loadshapes of this Radial.
-
-
-        :param loadshapes: The loadshapes of this Radial.
-        :type loadshapes: List[Loadshape]
-        """
-
-        self._loadshapes = loadshapes
 
     @property
     def tshapes(self) -> List[Tshape]:

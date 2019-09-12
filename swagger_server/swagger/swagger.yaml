@@ -268,10 +268,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/XYCurve"
-      loadshapes:
-        type: "array"
-        items:
-          $ref: "#/definitions/Loadshape"
       tshapes:
         type: "array"
         items:
@@ -373,10 +369,20 @@ definitions:
         type: "number"
   PowerProfile:
     type: "object"
+    required:
+    - "id"
+    - "interval"
+    - "items"
     properties:
       id:
         type: "string"
       items:
+        type: "array"
+        items:
+          type: "number"
+      interval:
+        type: "number"
+      multiplier:
         type: "number"
   Powerline:
     type: "object"
@@ -467,24 +473,6 @@ definitions:
         items:
           type: "number"
       yarray:
-        type: "array"
-        items:
-          type: "number"
-  Loadshape:
-    type: "object"
-    required:
-    - "id"
-    - "interval"
-    - "mult"
-    - "npts"
-    properties:
-      id:
-        type: "string"
-      npts:
-        type: "number"
-      interval:
-        type: "number"
-      mult:
         type: "array"
         items:
           type: "number"

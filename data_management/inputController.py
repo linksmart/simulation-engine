@@ -139,7 +139,7 @@ class InputController:
         for element in powerprofile:
             items = element['items']
             if element['multiplier']:
-                items = items * element['multiplier']
+                items = [item * element['multiplier'] for item in items]
             npts = len(items)
             message = self.sim.setLoadshape(element['id'], npts, element['interval'], items)
         # message = self.sim.setPowerProfiles(powerprofile)
@@ -396,7 +396,6 @@ class InputController:
             if "powerProfile" in values.keys() and values["powerProfile"] is not None:
                 logger.debug("!---------------Setting powerProfile------------------------- \n")
                 powerProfile = values["powerProfile"]
-                # logger.debug("Powerprofile" + str(powerProfile))
                 message = self.setPowerProfile(id, powerProfile)
                 logger.debug(str(message))
                 if not message == 0:
