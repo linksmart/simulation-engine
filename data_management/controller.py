@@ -213,7 +213,14 @@ class gridController(threading.Thread):
 
         fname = (str(self.id)) + "_result_pv"
 
+        SoC_values_logger={}
 
+        for element in soc_list:
+            for node_name in element:
+                battery_name = element[node_name]["id"]
+                logger.debug("battery added " + str(battery_name))
+                SoC_values_logger[battery_name]=[]
+        logger.debug("final soc_values_logger "+ str(SoC_values_logger))
         for i in range(numSteps):
             #time.sleep(0.1)
             logger.info("#####################################################################")
@@ -279,7 +286,7 @@ class gridController(threading.Thread):
                                     profess_result_intern[node_name][key_results] = powers
 
                         profess_result.append(profess_result_intern)
-                    logger.debug("profess result: "+str(profess_result_intern))
+                    logger.debug("profess result: "+str(profess_result))
 
                     for element in profess_result:
                         ess_name = None
@@ -299,7 +306,14 @@ class gridController(threading.Thread):
                 #soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
 
                 #self.redisDB.set(self.finish_status_key, "True")
-
+                #########################################################################################
+                for element in soc_list:
+                    for node_name in element:
+                        battery_name=element[node_name]["id"]
+                        SoC = float(self.sim.getSoCfromBattery(battery_name))
+                        logger.debug("SoC_value "+str(battery_name)+" : " + str(SoC))
+                        SoC_values_logger[battery_name].append(int(SoC))
+                ###############################################################################################
                 """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
                 logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
                 logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
@@ -309,8 +323,7 @@ class gridController(threading.Thread):
                 logger.debug("ESS state "+str(self.sim.getStatefromBattery("Akku1")))
                 max_charging_power_value=float(self.sim.getkWratedfromBattery("Akku1"))
 
-                SoC = float(self.sim.getSoCfromBattery("Akku1"))
-                logger.debug("SoC_value Akku1: " + str(SoC))
+
                 if i>0:
 
                     if charging is True:
@@ -479,6 +492,9 @@ class gridController(threading.Thread):
         path = os.path.join("data", str(self.id), fname)
         result=self.sim.get_loadshape_pv()
         self.utils.store_data(path, result)
+        fname = (str(self.id))+"_soc_result"
+        path = os.path.join("data", str(self.id), fname)
+        self.utils.store_data(path, SoC_values_logger)
         self.redisDB.set(self.finish_status_key, "True")
 
 

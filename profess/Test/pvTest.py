@@ -12,6 +12,8 @@ dummyInputData = open('StorageGrid.json').read()
 ref_topology=json.loads(dummyInputData)
 array_of_ids=[0]*11
 
+array_of_ids = [0]
+
 http = Http_commands()
 
 
@@ -29,6 +31,7 @@ def run_all(hours):
     for id in array_of_ids:
         run_simulation(id,hours)
         response = http.get(domain + "commands/status/" + str(id))
+        print(response)
         if id !=0:
             while str(response.json()) != str(100):
                 print("still running")
@@ -48,6 +51,7 @@ def change_kw_value(percentage):
 def define_all_topologies():
     percentage_list=[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
     percentage_list=[1]
+
     for percentage in percentage_list:
         new_topology=change_kw_value(percentage)
         index=percentage_list.index(percentage)
@@ -241,10 +245,16 @@ def plot_pv_profile(path,time):
     ##############
 
 
-#print(array_of_ids)
+
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
-run_all(1)
+
+#define_all_topologies()
+#print(array_of_ids)
+#run_simulation(array_of_ids[0],10)
+#response = http.get(domain + "commands/status/" + str(array_of_ids[0]))
+#print(response)
+run_all(5)
 #print(array_of_ids)
 
 #iterate_result("PVTest/")
