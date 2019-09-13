@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import datetime
 domain = "http://localhost:9090/se/"
 #dummyInputData = open('PVgrid.json').read()
-dummyInputData = open('StorageGrid.json').read()
+dummyInputData = open('StorageGridFew.json').read()
 ref_topology=json.loads(dummyInputData)
 array_of_ids=[0]*11
 
@@ -254,7 +254,7 @@ def plot_pv_profile(path,time):
 #run_simulation(array_of_ids[0],10)
 #response = http.get(domain + "commands/status/" + str(array_of_ids[0]))
 #print(response)
-run_all(5)
+run_all(48)
 #print(array_of_ids)
 
 #iterate_result("PVTest/")

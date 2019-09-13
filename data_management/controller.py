@@ -312,7 +312,7 @@ class gridController(threading.Thread):
                         battery_name=element[node_name]["id"]
                         SoC = float(self.sim.getSoCfromBattery(battery_name))
                         logger.debug("SoC_value "+str(battery_name)+" : " + str(SoC))
-                        SoC_values_logger[battery_name].append(int(SoC))
+                        SoC_values_logger[battery_name].append(SoC)
                 ###############################################################################################
                 """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
                 logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
