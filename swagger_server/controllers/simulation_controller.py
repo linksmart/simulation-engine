@@ -85,7 +85,7 @@ def create_simulation(body):  # noqa: E501
         logger.debug("Grid data stored")
 
         radial = data["radials"]
-        models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts"]
+        models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts", "testmodel"] #added testmodel
 
         for values in radial:
 

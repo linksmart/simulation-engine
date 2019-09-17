@@ -14,7 +14,7 @@
       0.4,
       0.23
     ],
-    "url_storage_controller": "http://172.18.0.4:8080",
+    "url_storage_controller": "http://172.18.0.3:8080",
     "city": "Fur",
     "country": "Denmark"
   },

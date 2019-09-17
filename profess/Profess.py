@@ -33,6 +33,11 @@ class Profess:
         self.percentage_mapping=["charge_efficiency","discharge_efficiency","min_soc","max_soc"]
         #pv mapping has the same syntax as storage_mapping
         self.pv_mapping={"max_power_kW":{"meta":"PV_Inv_Max_Power"}}
+        #informations about the grid have to be at the pv
+        self.grid_mapping={"Q_Grid_Max_Export_Power":{"meta":"Q_Grid_Max_Export_Power"},
+"P_Grid_Max_Export_Power":{"meta":"P_Grid_Max_Export_Power"}}
+        # at the moment all generic informations are at the storage
+        self.generic_mapping={"T_SoC":"T_SoC"}
         #a dict with standard values for the ofw
         self.standard_data = {"load": {
          "meta": {
@@ -45,21 +50,16 @@ class Profess:
 },
 "grid":{
 "meta":{
-"Q_Grid_Max_Export_Power":15,
-"P_Grid_Max_Export_Power":15
+
 }
 },
 "generic":{
-	"T_SoC":25,
 },
 "ESS":{
 "meta":{
-"ESS_Max_SoC":1,
-"ESS_Min_SoC":0.2,
-"ESS_Discharging_Eff":0.95,
-"ESS_Charging_Eff":0.95
 }
-}
+},
+            "global_control":{}
 }
         self.list_with_desired_output_parameters=["P_ESS_Output", "P_PV_Output", "P_PV_R_Output", "P_PV_S_Output"
             , "P_PV_T_Output", "Q_PV_Output", "Q_PV_R_Output", "Q_PV_S_Output", "Q_PV_T_Output"]
@@ -121,7 +121,7 @@ class Profess:
                     input_data) + "Response Code: "+str(response.status_code)+",  Response from the OFW: " + str(response.json()))
                 return 1
         except:
-            logger.error("Failed to post data, No connection to the OFW could be established at :"+str(self.domain)+"/inputs/dataset")
+            logger.error("Failed to post data, No connection to the OFW could be established at :"+str(self.domain)+"inputs/dataset")
             return 1
 
 
@@ -278,8 +278,6 @@ class Profess:
             logger.error("Failed to start optimization, No connection to the OFW could be established at :"+str(self.domain)+"optimization/start/")
 
 
-
-
     def start_all(self, optimization_model=None):
         """
         starts all optimizations on the relevant nodes (nodes with ESS)
@@ -385,33 +383,55 @@ class Profess:
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
             for radial_number in range(len(self.json_parser.topology["radials"])):
                 node_element_list = self.json_parser.get_node_element_list()[node_number][node_name]
-                storage_index = 0
-                for node_element in node_element_list:
-                    if "storageUnits" in node_element:
-                        #searche for the index where the storage is
-                        storage_index = node_element_list.index(node_element)
-                if "storageUnits" in node_element_list[storage_index].keys():
-                    for storage_key in self.storage_mapping:
-                        if storage_key in node_element_list[storage_index]["storageUnits"]:
-                            if storage_key in self.percentage_mapping:
-                                percentage = 100
-                            else: percentage = 1
-                            if type(self.storage_mapping[storage_key]) == dict:
-                                #this means the key is mapped to meta data
-                                config_data_of_node["ESS"]["meta"][self.storage_mapping[storage_key]["meta"]] = \
-                                    node_element_list[storage_index]["storageUnits"][storage_key] / percentage
-                            if type(self.storage_mapping[storage_key]) == list:
-                                #this means a value in the storageunit is mapped to multiple values in the ofw
-                                for part in self.storage_mapping[storage_key]:
-                                    if "meta" in part:
-                                        config_data_of_node["ESS"]["meta"][part["meta"]] = node_element_list[storage_index]["storageUnits"][storage_key] / percentage
-                                    else:
-                                        config_data_of_node["ESS"][part] = node_element_list[storage_index]["storageUnits"][
-                                                                             storage_key] / percentage
-                            if type(self.storage_mapping[storage_key]) == str:
-                                #the key can be directly mapped
-                                config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
-                                    node_element_list[storage_index]["storageUnits"][storage_key] / percentage
+
+                self.iterate_mapping(self.storage_mapping,"ESS","storageUnits",node_element_list,config_data_of_node)
+                self.iterate_mapping(self.generic_mapping, "generic", "storageUnits", node_element_list,
+                                     config_data_of_node)
+                self.iterate_mapping(self.grid_mapping, "grid", "storageUnits", node_element_list,
+                                     config_data_of_node)
+
+    def iterate_mapping(self,mapping,name_in_ofw,name_in_topology,node_element_list,config_data_of_node):
+        """
+        helper function to iterate trough a mapping and set the values in the config_data
+        :param mapping: which mapping is used, see mappings of profess for further information
+        :param name_in_ofw: to which category the values will be mapped, usual values: load, photovoltaic, grid, ESS, generic
+        :param name_in_topology: name of the element where values should, be retrieved, usualy photovoltaics and StorageUnits
+        :param node_element_list: all connected elements at a specific node
+        :param config_data_of_node: data for the ofw
+        :return:
+        """
+        logger.debug("iterate mapping "+str(name_in_ofw)+" ,"+str(name_in_topology))
+        element_index = 0
+        for node_element in node_element_list:
+            if name_in_topology in node_element:
+                # searche for the index where the storage is
+                element_index = node_element_list.index(node_element)
+        if name_in_topology in node_element_list[element_index].keys():
+            for mapping_key in mapping:
+                if mapping_key in node_element_list[element_index][name_in_topology]:
+                    if mapping_key in self.percentage_mapping:
+                        percentage = 100
+                    else:
+                        percentage = 1
+                    logger.debug("mappingkey "+str(mapping_key)+" and type "+str(type(mapping_key)))
+                    if type(mapping[mapping_key]) == dict:
+                        # this means the key is mapped to meta data
+                        config_data_of_node[name_in_ofw]["meta"][mapping[mapping_key]["meta"]] = \
+                            node_element_list[element_index][name_in_topology][mapping_key] / percentage
+                    if type(mapping[mapping_key]) == list:
+                        # this means a value in the storageunit is mapped to multiple values in the ofw
+                        for part in mapping[mapping_key]:
+                            if "meta" in part:
+                                config_data_of_node[name_in_ofw]["meta"][part["meta"]] = \
+                                node_element_list[element_index][name_in_topology][mapping_key] / percentage
+                            else:
+                                config_data_of_node[name_in_ofw][part] = node_element_list[element_index][name_in_topology][
+                                                                       mapping_key] / percentage
+                    if type(mapping[mapping_key]) == str:
+                        # the key can be directly mapped
+                        config_data_of_node[name_in_ofw][mapping[mapping_key]] = \
+                            node_element_list[element_index][name_in_topology][mapping_key] / percentage
+
 
 
     def set_photovoltaics(self,node_name):
@@ -426,24 +446,11 @@ class Profess:
             config_data_of_node= self.dataList[node_number][node_name][profess_id]
             for radial_number in range(len(self.json_parser.topology["radials"])):
                 node_element_list=self.json_parser.get_node_element_list()[node_number][node_name]
-                pv_index=0
-                for node_element in node_element_list:
-                    if "photovoltaics" in node_element:
-                        #searches for the index where the pv is
-                        pv_index=node_element_list.index(node_element)
-                if "photovoltaics" in node_element_list[pv_index]:
+                self.iterate_mapping(self.pv_mapping,"photovoltaic","photovoltaics",node_element_list,config_data_of_node)
+                self.iterate_mapping(self.grid_mapping,"grid","photovoltaics",node_element_list,config_data_of_node)
+                self.iterate_mapping(self.generic_mapping, "generic", "photovoltaics", node_element_list, config_data_of_node)
 
-                    for pv_key in self.pv_mapping:
-                        if pv_key in node_element_list[pv_index]["photovoltaics"]:
-                            if pv_key in self.percentage_mapping:
-                                percentage=100
-                            else: percentage = 1
-                            if type(self.pv_mapping[pv_key]) == str:
-                                #can be directly mapped
-                                config_data_of_node["photovoltaic"][self.pv_mapping[pv_key]] = node_element_list[pv_index]["photovoltaics"][pv_key]/percentage
-                            if type(self.pv_mapping[pv_key]) == dict:
-                                #this means the key is mapped to meta data
-                                config_data_of_node["photovoltaic"]["meta"][self.pv_mapping[pv_key]["meta"]] = node_element_list[pv_index]["photovoltaics"][pv_key]/percentage
+
 
     def set_config_json(self, node_name, profess_id, config_json):
         """
@@ -599,10 +606,10 @@ class Profess:
                             if node_name in ess_con_global:
                                 phase = pv_profiles_for_node[node_name]
                                 if node_name + ".1.2.3" in phase:
-                                    config_data_of_node["generic"]["ESS_Control"] = phase[node_name + ".1.2.3"]
+                                    config_data_of_node["global_control"]["ESS_Control"] = phase[node_name + ".1.2.3"]
                                     #logger.debug("ess_con profile set")
                                 if node_name in phase:
-                                    config_data_of_node["generic"]["ESS_Control"] = phase[node_name]
+                                    config_data_of_node["global_control"]["ESS_Control"] = phase[node_name]
                                 logger.debug("ess_con profile set")
                 else: logger.debug("no ess_con profile was given")
                 if soc_list is not None:

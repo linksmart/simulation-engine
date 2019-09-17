@@ -219,7 +219,7 @@ class gridController(threading.Thread):
             for node_name in element:
                 battery_name = element[node_name]["id"]
                 logger.debug("battery added " + str(battery_name))
-                SoC_values_logger[battery_name]=[]
+                SoC_values_logger[battery_name]={"SoC":[],"P_ESS":[]}
         logger.debug("final soc_values_logger "+ str(SoC_values_logger))
         for i in range(numSteps):
             #time.sleep(0.1)
@@ -310,9 +310,18 @@ class gridController(threading.Thread):
                 for element in soc_list:
                     for node_name in element:
                         battery_name=element[node_name]["id"]
+                        for element in profess_result:
+                            ess_name_profess_result = None
+                            p_ess_output = None
+                            logger.debug("element: " + str(element))
+                            for key, value in element.items():
+                                ess_name_profess_result = value["id"]
+                                p_ess_output = value["P_ESS_Output"]
+                                if ess_name_profess_result==battery_name:
+                                    SoC_values_logger[battery_name]["P_ESS"].append(p_ess_output)
                         SoC = float(self.sim.getSoCfromBattery(battery_name))
                         logger.debug("SoC_value "+str(battery_name)+" : " + str(SoC))
-                        SoC_values_logger[battery_name].append(SoC)
+                        SoC_values_logger[battery_name]["SoC"].append(SoC)
                 ###############################################################################################
                 """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
                 logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))

@@ -1,14 +1,14 @@
 from profess.Http_commands import Http_commands
 import json
 import copy
-import time
 import os
 import yaml
 import matplotlib.pyplot as plt
 import datetime
+import time
 domain = "http://localhost:9090/se/"
-#dummyInputData = open('PVgrid.json').read()
-dummyInputData = open('StorageGridFew.json').read()
+#dummyInputData = open('topologies\PVgridTest.json').read()
+dummyInputData = open('topologies\StorageGrid.json').read()
 ref_topology=json.loads(dummyInputData)
 array_of_ids=[0]*11
 
@@ -26,8 +26,10 @@ def run_simulation(id,hours):
     response= http.put(domain+"commands/run/"+str(id),payload)
     return response.json()
 def run_all(hours):
+    start_time=time.time()
+    print(str(start_time))
     define_all_topologies()
-
+    time.sleep(10)
     for id in array_of_ids:
         run_simulation(id,hours)
         response = http.get(domain + "commands/status/" + str(id))
@@ -42,6 +44,7 @@ def run_all(hours):
 
     output_file = open("mapping.txt", "w+")
     output_file.write(str(array_of_ids))
+    print("finished in "+(str(time.time()-start_time))+" seconds")
 def change_kw_value(percentage):
     new_topology=copy.deepcopy(ref_topology)
     for element in new_topology["radials"][0]["photovoltaics"]:
@@ -64,6 +67,16 @@ def get_relevant_nodes():
         bus=element["bus1"]
         bus_name=bus.split(".",1)[0]
         node_list.append(bus_name)
+    phase_count=[0]*len(node_list)
+    for element in new_topology["radials"][0]["loads"]:
+        bus = element["bus"]
+        #print(bus)
+        bus_name = bus.split(".", 1)[0]
+        if bus_name in node_list:
+            #print(bus_name)
+            index=node_list.index(bus_name)
+            phase_count[index]=phase_count[index]+1
+    #print(str(phase_count))
     return node_list
 def get_result_information(result):
     relevant_results={}
@@ -161,6 +174,7 @@ def iterate_through_profiles(directory_in_str,linecount,number_of_files):
     plt.show()
     plt.savefig("load_profiles.png")
 def plot_profile(directory_in_str,filename,linecount):
+
     if filename.endswith(".txt") or filename.endswith(".py"):
         print("we got here with " + filename)
         count = 0
@@ -173,14 +187,39 @@ def plot_profile(directory_in_str,filename,linecount):
         file_without_txt=filename.split(".txt")[0]
         file_label=file_without_txt+" load "
         plot_node(output_profile, file_label)
+        return output_profile
 
-def plot_node_in_every_test(path,node_name):
+def plot_node_in_every_test(path,node_name,mapping_name):
     plt.figure(figsize=(10,10))
+    #mapping_file = open(path + 'mappingSelfConsumption.txt').read()
 
-    mapping_file = open(path+'mapping.txt').read()
+    average=calculate_voltage(path,node_name,mapping_name)
+    for percentage in average:
+        linecount=len(average[percentage])
+        #plot_node(average[percentage],percentage)
+    node_number=node_name.split("_a")[1]
+
+    profile_path="C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential/"
+    profile_name=str("profile_"+str(node_number)+".txt")
+    load=plot_profile(profile_path,profile_name ,linecount)
+    pv=plot_pv_profile(path,linecount,mapping_name)
+    pess=plot_pess(path,linecount, "Akku"+str(node_number),mapping_name)
+    #TODO for multiple plotted shapes
+    plot_P_Grid(path,linecount,pv,load,pess)
+    #plt.ylabel('Power [kW]')
+    plt.ylabel('Power [kW]')
+    plt.xlabel("Time [hours]")
+    plt.title(str(node_name))
+    plt.legend()
+    plt.savefig(node_name + ".png")
+    plt.show()
+
+def calculate_voltage(path,node_name,mapping_name):
+    mapping_file = open(path+mapping_name+'.txt').read()
     mapping=parse_mapping(mapping_file)
     print(mapping)
     percentage=0
+    returned_averages={}
     for result_id in mapping:
         path_of_results=path+result_id+"/"+result_id+"_result_raw.json"
         flag_list=[False]*len(get_relevant_nodes())
@@ -195,22 +234,12 @@ def plot_node_in_every_test(path,node_name):
                                                  file_name["voltages"][splitted+".3"]["Voltage"]))
                 time=len(average_over_phases)
                 print(average_over_phases)
-                plot_node(average_over_phases,str(percentage)+"%")
+                print("length of voltage list "+str(time))
+                returned_averages[str(percentage)+"%"]=average_over_phases
+                #plot_node(average_over_phases,str(percentage)+"%")
         percentage=percentage+10
+    return returned_averages
 
-    node_number=node_name.split("_a")[1]
-
-    profile_path="C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential/"
-    #plot_profile(profile_path,"profile_"+str(node_number)+".txt",time)
-    #plot_pv_profile(path,time)
-    #plt.ylabel('Power [kW]')
-    plt.ylabel('Voltage [pu]')
-    plt.xlabel("Time [hours]")
-    plt.title(str(node_name))
-
-    plt.legend()
-    plt.savefig(node_name+".png")
-    plt.show()
 def calculate_average_of_phase(phase1,phase2,phase3):
     output_list= []
     for index in range(len(phase1)):
@@ -223,8 +252,8 @@ def help_function_for_timestamps(date):
     timestamp = now.timestamp()
     return timestamp
 
-def plot_pv_profile(path,time):
-    mapping_file = open(path+'mapping.txt').read()
+def plot_pv_profile(path,time,mapping_name):
+    mapping_file = open(path+mapping_name+'.txt').read()
     mapping=parse_mapping(mapping_file)
     ##########
     for result_id in mapping:
@@ -242,10 +271,139 @@ def plot_pv_profile(path,time):
                 plot_node(shape_to_plot," PV_profile")
                 flag_plotted=True
             # plt.plot(loadshape[15])
+    return shape_to_plot
     ##############
+def plot_pess(path,time,target,mapping_name):
+    mapping_file = open(path+mapping_name+'.txt').read()
+    mapping=parse_mapping(mapping_file)
+    ##########
+    for result_id in mapping:
+        pess_file = open(path + result_id + "/" + result_id + "_soc_result").read()
+        pess_loadshapes = json.loads(pess_file)
+        flag_plotted=False
+        for batteryName in pess_loadshapes:
+            if batteryName==target:
+                print("fitting batteryname " + str(batteryName))
+                loadshape = pess_loadshapes[batteryName]["P_ESS"]
+                if time != -1:
+                    shape_to_plot=loadshape[:time]
+                else:
+                    shape_to_plot = loadshape
+                plot_node(shape_to_plot," P_ESS")
+    return shape_to_plot
+    #TODO for multiple
+            # plt.plot(loadshape[15])
+    ##############
+def plot_P_Grid(path,time,pv,load,pess=None):
+    if pess == None:
+        pess=[0]*time
+    result=[]
+    for index in range(time):
+        p_grid=-pv[index]-pess[index]+load[index]
+        result.append(p_grid)
 
+    print(result)
+    plot_node(result,"P Grid")
+def calculate_pv_size(pathPv,pathProfile):
+    output_file = open("proposed_PV_ESS.txt", "w+")
+    pv_raw=open(pathPv).read()
+    pv=yaml.load(pv_raw)
+    pv_kw=0
+    peak_pv=0
+    for element in pv["PV_1"]["loadshape"]:
+        if float(element)>float(peak_pv):
+            peak_pv=element
+        pv_kw=float(pv_kw)+float(element)
+    daily_average_pv=pv_kw/len(pv["PV_1"]["loadshape"])*24
+    output_file.write("timehorizon kw for pv "+str(pv_kw)+" average over day "+str(daily_average_pv)+" and peak pv "+str(peak_pv))
+    output_file.write(("\n"))
+    directory = os.fsencode(pathProfile)
+    number_of_files=20
+    linecount=48
+    wanted_profiles=[1,2,3,4,5,6,8,9,10,11,12,14,15,17,18,29,20]
+    kw=3
+    peak_load_list = {}
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        number_and_txt=filename.split("_")[1]
+        number=number_and_txt.split(".")[0]
+        if int(number) in wanted_profiles:
+            peak=0
+            count=0
+            kw_for_timehorizon=0
+            for line in open(pathProfile + "/" + filename):
+                if count<linecount:
+                    if float(line.rstrip()) > peak:
+                        peak=float(line.rstrip())
+                    count=count+1
+                    kw_for_timehorizon=kw_for_timehorizon+float(line.rstrip())*kw
+            peak_load_list[number]=peak
+            daily_average_load=kw_for_timehorizon/count*24
+            final_result=(daily_average_load*peak_pv)/(daily_average_pv)
 
+            final_result_ESS=daily_average_load/1
+            # output_file.write("timesteps in load_profile "+str(count)+" , kw in timehorizon "+str(kw_for_timehorizon)+" ,average over day "+ str(daily_average_load))
+            # output_file.write(("\n"))
+            # output_file.write("final result of pv size for "+str(number)+" is "+str(final_result))
+            # output_file.write(("\n"))
+            # output_file.write("proposed ess_size in kw "+str(final_result_ESS))
+            # output_file.write(("\n"))
+    print(str(peak_load_list)+" and "+str(peak_pv))
 
+def calculate_difference_between_profiles(path_to_profileA,path_to_profileB,node):
+    result_fileA = open(path_to_profileA).read()
+    file_nameA = yaml.load(result_fileA)
+    result_fileB = open(path_to_profileB).read()
+    file_nameB= yaml.load(result_fileB)
+    difference={}
+    for elementA in file_nameA['voltages']:
+        splittedA = elementA.split(".", 1)[0]
+        if splittedA in get_relevant_nodes():
+            for elementB in file_nameB['voltages']:
+                splittedB = elementB.split(".", 1)[0]
+                if splittedB == splittedA:
+                    difference[splittedB]=[]
+                    min_len=min(len(file_nameA['voltages'][elementA]["Voltage"]),len(file_nameB['voltages'][elementB]["Voltage"]))
+                    #print(min_len)
+                    #print(file_nameA['voltages'][elementA]["Voltage"])
+                    #print(file_nameB['voltages'][elementB]["Voltage"])
+                    for i in range(min_len):
+                        valueA=file_nameA['voltages'][elementA]["Voltage"][i]
+                        valueB=file_nameB['voltages'][elementB]["Voltage"][i]
+                        difference_i= float(valueA-valueB)
+                        #print("valueA "+str(valueA)+" valueB "+str(valueB)+" and difference "+str(difference_i))
+                        difference[splittedB].append(difference_i)
+    difference_result=open("difference_profiles.txt","w+")
+    difference_result.write(str(difference))
+    return difference
+
+def plot_differences(pathA,pathB,node,nameA,nameB,mappingA,mappingB):
+    plt.figure(figsize=(10,10))
+    voltageA=calculate_voltage(pathA,node,mappingA)
+    voltageB=calculate_voltage(pathB,node,mappingB)
+    difference={}
+    for percentageA in voltageA:
+        profileA=voltageA[percentageA]
+        for percentageB in voltageB:
+            profileB=voltageB[percentageB]
+            if percentageA==percentageB:
+                difference_for_percentage_value=[]
+                min_length=min(len(profileA),len(profileB))
+                for index in range(min_length):
+                    difference_for_percentage_value.append(profileA[index]-profileB[index])
+                #label=percentageA
+                label="100% pv penetration"
+                difference[percentageA]=difference_for_percentage_value
+                plot_node(profileA[:min_length],nameA+str(label))
+                plot_node(profileB[:min_length],nameB+str(label))
+                plot_node(difference[percentageA],"difference "+str(label))
+    print(str(difference))
+    plt.ylabel('Voltage [pu]')
+    plt.xlabel("Time [hours]")
+    plt.title("Voltage deviations")
+    plt.legend()
+    plt.savefig(node + "_deviations.png")
+    plt.show()
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
 
@@ -254,7 +412,9 @@ def plot_pv_profile(path,time):
 #run_simulation(array_of_ids[0],10)
 #response = http.get(domain + "commands/status/" + str(array_of_ids[0]))
 #print(response)
-run_all(48)
+
+#run_all(24)
+#calculate_pv_size("PVTest/cc589737d784/cc589737d784_pv_result","C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential")
 #print(array_of_ids)
 
 #iterate_result("PVTest/")
@@ -265,11 +425,14 @@ run_all(48)
 
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 
-#plot_node_in_every_test("StorageTest/","node_a12")
-#plot_node_in_every_test("PVTest/","node_a12")
+#plot_node_in_every_test("StorageTest/","node_a12","mappingSelfProd5kw")
+#plot_node_in_every_test("PVTest/","node_a12","mapping")
+plot_differences("PVTest/","StorageTest/","node_a12","Only PV","Self production and 5kw max export","mapping","mappingSelfProd5kw")
+#plot_differences("StorageTest/","StorageTest/","node_a12","Self Consumption and 5kw max export","Self Consumption and 1kw max export","mapping_5kw_export","mapping_1kw_export")
+
 
 #print(help_function_for_timestamps("2018.07.03 00:00:00"))
-
+#print(calculate_difference_between_profiles("PVTest/312a9208e97b/312a9208e97b_result_raw.json","StorageTest/ce08e0f4d52a/ce08e0f4d52a_result_raw.json","node_a12"))
 excluded=[0,7,12,13,19]
 # for i in range(25):
 #     if i not in excluded:
