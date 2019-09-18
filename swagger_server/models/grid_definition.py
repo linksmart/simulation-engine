@@ -15,7 +15,7 @@ class GridDefinition(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, base_frequency: int=None, voltage_bases: List[float]=None, url_storage_controller: str='http://localhost:8080', city: str=None, country: str=None):  # noqa: E501
+    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, base_frequency: int=None, voltage_bases: List[float]=None, url_storage_controller: str='http://localhost:8080', city: str=None, country: str=None, max_real_power_in_k_w_to_grid: float=None, max_reactive_power_in_k_var_to_grid: float=None):  # noqa: E501
         """GridDefinition - a model defined in Swagger
 
         :param id: The id of this GridDefinition.  # noqa: E501
@@ -44,6 +44,10 @@ class GridDefinition(Model):
         :type city: str
         :param country: The country of this GridDefinition.  # noqa: E501
         :type country: str
+        :param max_real_power_in_k_w_to_grid: The max_real_power_in_k_w_to_grid of this GridDefinition.  # noqa: E501
+        :type max_real_power_in_k_w_to_grid: float
+        :param max_reactive_power_in_k_var_to_grid: The max_reactive_power_in_k_var_to_grid of this GridDefinition.  # noqa: E501
+        :type max_reactive_power_in_k_var_to_grid: float
         """
         self.swagger_types = {
             'id': str,
@@ -58,7 +62,9 @@ class GridDefinition(Model):
             'voltage_bases': List[float],
             'url_storage_controller': str,
             'city': str,
-            'country': str
+            'country': str,
+            'max_real_power_in_k_w_to_grid': float,
+            'max_reactive_power_in_k_var_to_grid': float
         }
 
         self.attribute_map = {
@@ -74,7 +80,9 @@ class GridDefinition(Model):
             'voltage_bases': 'VoltageBases',
             'url_storage_controller': 'url_storage_controller',
             'city': 'city',
-            'country': 'country'
+            'country': 'country',
+            'max_real_power_in_k_w_to_grid': 'max_real_power_in_kW_to_grid',
+            'max_reactive_power_in_k_var_to_grid': 'max_reactive_power_in_kVar_to_grid'
         }
 
         self._id = id
@@ -90,6 +98,8 @@ class GridDefinition(Model):
         self._url_storage_controller = url_storage_controller
         self._city = city
         self._country = country
+        self._max_real_power_in_k_w_to_grid = max_real_power_in_k_w_to_grid
+        self._max_reactive_power_in_k_var_to_grid = max_reactive_power_in_k_var_to_grid
 
     @classmethod
     def from_dict(cls, dikt) -> 'GridDefinition':
@@ -390,3 +400,45 @@ class GridDefinition(Model):
         """
 
         self._country = country
+
+    @property
+    def max_real_power_in_k_w_to_grid(self) -> float:
+        """Gets the max_real_power_in_k_w_to_grid of this GridDefinition.
+
+
+        :return: The max_real_power_in_k_w_to_grid of this GridDefinition.
+        :rtype: float
+        """
+        return self._max_real_power_in_k_w_to_grid
+
+    @max_real_power_in_k_w_to_grid.setter
+    def max_real_power_in_k_w_to_grid(self, max_real_power_in_k_w_to_grid: float):
+        """Sets the max_real_power_in_k_w_to_grid of this GridDefinition.
+
+
+        :param max_real_power_in_k_w_to_grid: The max_real_power_in_k_w_to_grid of this GridDefinition.
+        :type max_real_power_in_k_w_to_grid: float
+        """
+
+        self._max_real_power_in_k_w_to_grid = max_real_power_in_k_w_to_grid
+
+    @property
+    def max_reactive_power_in_k_var_to_grid(self) -> float:
+        """Gets the max_reactive_power_in_k_var_to_grid of this GridDefinition.
+
+
+        :return: The max_reactive_power_in_k_var_to_grid of this GridDefinition.
+        :rtype: float
+        """
+        return self._max_reactive_power_in_k_var_to_grid
+
+    @max_reactive_power_in_k_var_to_grid.setter
+    def max_reactive_power_in_k_var_to_grid(self, max_reactive_power_in_k_var_to_grid: float):
+        """Sets the max_reactive_power_in_k_var_to_grid of this GridDefinition.
+
+
+        :param max_reactive_power_in_k_var_to_grid: The max_reactive_power_in_k_var_to_grid of this GridDefinition.
+        :type max_reactive_power_in_k_var_to_grid: float
+        """
+
+        self._max_reactive_power_in_k_var_to_grid = max_reactive_power_in_k_var_to_grid

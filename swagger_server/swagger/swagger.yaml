@@ -219,6 +219,10 @@ definitions:
         type: "string"
       country:
         type: "string"
+      max_real_power_in_kW_to_grid:
+        type: "number"
+      max_reactive_power_in_kVar_to_grid:
+        type: "number"
   Radial:
     type: "object"
     properties:

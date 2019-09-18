@@ -40,9 +40,9 @@ class gridController(threading.Thread):
         self.finish_status_key = "finish_status_" + self.id
         self.redisDB.set(self.stop_signal_key, "False")
         self.redisDB.set(self.finish_status_key, "False")
-        self.sim_days = duration
+        self.sim_hours = duration
         logger.debug("Starting input controller")
-        self.input = InputController(id, self.sim, self.sim_days)
+        self.input = InputController(id, self.sim, self.sim_hours)
         self.topology = self.input.get_topology()
         self.utils = Utils()
 
@@ -53,8 +53,9 @@ class gridController(threading.Thread):
     def get_profess_url(self):
         return self.profess_url
 
-    def get_soc_list(self,topology):
+    def get_soc_list(self,topology, sim_hours):
         radial=topology["radials"]#["storageUnits"]
+        common=topology["common"]
         list_storages=[]
         soc_list = []
         soc_dict_intern = {"SoC":None}
@@ -66,10 +67,13 @@ class gridController(threading.Thread):
                         soc_dict = {}
                         #logger.debug("element intern "+str(element_intern))
                         soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"],
+                                                          "T_SoC":int(sim_hours+1),
                                                           "id":element_intern["id"],
                                                           "Battery_Capacity":element_intern["storage_capacity"],
                                                           "max_charging_power":element_intern["max_charging_power"],
-                                                          "max_discharging_power":element_intern["max_discharging_power"]}
+                                                          "max_discharging_power":element_intern["max_discharging_power"],
+                                                          "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
+                                                          "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}
                         soc_list.append(soc_dict)
                         list_storages.append(element_intern)
         #logger.debug("list_storages "+str(list_storages))
@@ -177,7 +181,7 @@ class gridController(threading.Thread):
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        numSteps=self.sim_days
+        numSteps=self.sim_hours
         #self.redisDB.set("sim_days_"+str(self.id),numSteps)
         #numSteps=3
         logger.debug("Number of steps: "+str(numSteps))
@@ -197,18 +201,17 @@ class gridController(threading.Thread):
         total_losses = []
         powers = [[] for i in range(len(nodeNames))]
 
-        soc_list = self.get_soc_list(self.topology)
+        soc_list = self.get_soc_list(self.topology, self.sim_hours)
         charging = True
         logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
         flag_is_storage = self.input.is_Storage_in_Topology(self.topology)
+        logger.debug("Storage flag: "+str(flag_is_storage))
         if flag_is_storage:
             flag_global_control = self.input.is_global_control_in_Storage(self.topology)
+            logger.debug("Global control flag: "+str(flag_global_control))
         flag_is_charging_station = self.input.is_Charging_Station_in_Topology(self.topology)
+        logger.debug("Charging station flag "+str(flag_is_charging_station))
         price_profile_data=self.input.get_price_profile()
-
-
-        logger.debug("flag is storage "+str(flag_is_storage))
-        logger.debug("flag is global control "+str(flag_global_control))
 
 
 
