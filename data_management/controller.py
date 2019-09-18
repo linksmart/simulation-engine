@@ -59,23 +59,31 @@ class gridController(threading.Thread):
         list_storages=[]
         soc_list = []
         soc_dict_intern = {"SoC":None}
+        storages=[]
+        photovoltaics=[]
         for element in radial:
-
             for key, value in element.items():
                 if key == "storageUnits":
-                    for element_intern in value:
-                        soc_dict = {}
-                        #logger.debug("element intern "+str(element_intern))
-                        soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"],
-                                                          "T_SoC":int(sim_hours+1),
-                                                          "id":element_intern["id"],
-                                                          "Battery_Capacity":element_intern["storage_capacity"],
-                                                          "max_charging_power":element_intern["max_charging_power"],
-                                                          "max_discharging_power":element_intern["max_discharging_power"],
-                                                          "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
-                                                          "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}
-                        soc_list.append(soc_dict)
-                        list_storages.append(element_intern)
+                    storages=value
+                if key == "photovoltaics":
+                    photovoltaics=value
+
+        for ess_element in storages:
+            soc_dict = {}
+            #logger.debug("element intern "+str(ess_element))
+            soc_dict[ess_element["bus1"]]={"SoC":ess_element["soc"],
+                                              "T_SoC":int(sim_hours+1),
+                                              "id":ess_element["id"],
+                                              "Battery_Capacity":ess_element["storage_capacity"],
+                                              "max_charging_power":ess_element["max_charging_power"],
+                                              "max_discharging_power":ess_element["max_discharging_power"],
+                                              "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
+                                              "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}
+            for pv_element in photovoltaics:
+                if pv_element["bus1"] == ess_element["bus1"]:
+                    soc_dict[ess_element["bus1"]]["pv_name"]=pv_element["id"]
+            soc_list.append(soc_dict)
+            #list_storages.append(ess_element)
         #logger.debug("list_storages "+str(list_storages))
         logger.debug("soc_list " + str(soc_list))
         return soc_list
@@ -273,7 +281,8 @@ class gridController(threading.Thread):
                             for element_soc in soc_list:
                                 for key_node in element_soc.keys():
                                     if key_node == node_name:
-                                        profess_result_intern[node_name]["id"] = element_soc[key_node]["id"]
+                                        profess_result_intern[node_name]["ess_name"] = element_soc[key_node]["id"]
+                                        profess_result_intern[node_name]["pv_name"] = element_soc[key_node]["pv_name"]
                                         profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["max_charging_power"]
                                         profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["max_discharging_power"]
                             for profess_id, results in value.items():
@@ -285,13 +294,18 @@ class gridController(threading.Thread):
 
                     for element in profess_result:
                         ess_name = None
+                        pv_name = None
                         p_ess_output = None
+                        p_pv_output = None
                         for key, value in element.items():
-                            ess_name = value["id"]
+                            ess_name = value["ess_name"]
                             p_ess_output = value["P_ESS_Output"]
+                            pv_name = value["pv_name"]
+                            p_pv_output = value["P_PV_Output"]
                             max_charging_power = value["max_charging_power"]
                             max_discharging_power = value["max_discharging_power"]
                         self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
+                        self.sim.setActivePowertoPV(pv_name, p_pv_output)
                 else:
                     logger.error("OFW instances could not be started")
 

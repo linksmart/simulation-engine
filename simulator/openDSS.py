@@ -156,6 +156,19 @@ class OpenDSS:
     def get_total_power(self):
         return dss.Circuit.TotalPower()
 
+    def setActivePowertoPV(self, pv_name, power):
+        self.set_active_element(pv_name)
+        logger.debug("pv power " + str(power))
+        if power >= 0:
+            dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            return 0
+        else:
+            return 1
+
+
+
     def setActivePowertoBatery(self,battery_name, power, max_power):
         self.set_active_element(battery_name)
         """storageName = "Storage.Akku1"
