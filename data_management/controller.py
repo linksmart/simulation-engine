@@ -258,7 +258,16 @@ class gridController(threading.Thread):
                 elif not flag_global_control and self.input.is_price_profile():
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile)
                 else:
-                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+                    #We add price
+                    file_path = "profiles/price_profile/price_profile.txt"
+                    with open(file_path, "r") as file:
+                        data = file.readlines()
+                        data_without_beginning=data[0].split("[")[1]
+                        data_without_end=data_without_beginning.split("]")[0]
+                        data_without_commas=data_without_end.split(", ")
+                        data_list = [float(i)*100 for i in data_without_commas]
+                    price_profile = data_list[int(hours):int(hours + 24)]
+                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs,price_profile)
 
                 status_profess=self.profess.start_all()
 

@@ -95,8 +95,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a2",
@@ -104,8 +104,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a3",
@@ -113,8 +113,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a4",
@@ -122,8 +122,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a5",
@@ -131,8 +131,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a6",
@@ -140,8 +140,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a8",
@@ -149,8 +149,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a9",
@@ -158,8 +158,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a10",
@@ -167,8 +167,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a11",
@@ -176,8 +176,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a12",
@@ -185,8 +185,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a14",
@@ -194,8 +194,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a15",
@@ -203,8 +203,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a17",
@@ -212,8 +212,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a18",
@@ -221,8 +221,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a19",
@@ -230,8 +230,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         },
         {
           "bus1": "node_a20",
@@ -239,8 +239,8 @@
           "max_power_kW": 3,
           "phases": 3,
           "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 5,
-		  "P_Grid_Max_Export_Power": 5
+		  "Q_Grid_Max_Export_Power": 1,
+		  "P_Grid_Max_Export_Power": 1
         }
       ],
       "storageUnits": [

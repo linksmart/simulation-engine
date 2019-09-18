@@ -8,7 +8,7 @@ import datetime
 import time
 domain = "http://localhost:9090/se/"
 #dummyInputData = open('topologies\PVgridTest.json').read()
-dummyInputData = open('topologies\StorageGrid.json').read()
+dummyInputData = open('topologies\StorageGridBiggerESS.json').read()
 ref_topology=json.loads(dummyInputData)
 array_of_ids=[0]*11
 
@@ -394,9 +394,9 @@ def plot_differences(pathA,pathB,node,nameA,nameB,mappingA,mappingB):
                 #label=percentageA
                 label="100% pv penetration"
                 difference[percentageA]=difference_for_percentage_value
-                plot_node(profileA[:min_length],nameA+str(label))
-                plot_node(profileB[:min_length],nameB+str(label))
-                plot_node(difference[percentageA],"difference "+str(label))
+                plot_node(profileA[:min_length],nameA+" "+str(label))
+                plot_node(profileB[:min_length],nameB+" "+str(label))
+                plot_node(difference[percentageA],"difference, penetration "+str(label))
     print(str(difference))
     plt.ylabel('Voltage [pu]')
     plt.xlabel("Time [hours]")
@@ -425,10 +425,11 @@ def plot_differences(pathA,pathB,node,nameA,nameB,mappingA,mappingB):
 
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 
-#plot_node_in_every_test("StorageTest/","node_a12","mappingSelfProd5kw")
+#plot_node_in_every_test("StorageTest/","node_a12","mapping_SC_1kw_P_Bigger_ESS")
 #plot_node_in_every_test("PVTest/","node_a12","mapping")
-plot_differences("PVTest/","StorageTest/","node_a12","Only PV","Self production and 5kw max export","mapping","mappingSelfProd5kw")
-#plot_differences("StorageTest/","StorageTest/","node_a12","Self Consumption and 5kw max export","Self Consumption and 1kw max export","mapping_5kw_export","mapping_1kw_export")
+plot_differences("PVTest/","StorageTest/","node_a12","Only PV","Minimize costs 1kw max export","mapping","mappingBigESS1kwMC")
+path="C:/Users/klingenb/Documents/BAThesis/Results/TestStorages/self-consumption/"
+#plot_differences(path,"StorageTest/","node_a12","Self Consumption,1kw max export and small ess","Self Consumption,1kw max export and bigger ess","mapping_1kw_export","mapping_SC_1kw_P_Bigger_ESS")
 
 
 #print(help_function_for_timestamps("2018.07.03 00:00:00"))
