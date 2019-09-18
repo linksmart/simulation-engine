@@ -154,6 +154,16 @@ class InputController:
         price_profile_data= self.profiles.price_profile(city,country,sim_days)
         return price_profile_data
 
+    def is_price_profile_needed(self,topology):
+        radial = topology["radials"]
+        flag_to_return = False
+        for values in radial:
+            if "storageUnits" in values.keys():
+                for ess_element in values["storageUnits"]:
+                    if ess_element["optimization_model"] == "MinimizeCosts":
+                        return True
+        return flag_to_return
+
     def is_price_profile(self):
         self.price_profile
         if isinstance(self.price_profile, list):
