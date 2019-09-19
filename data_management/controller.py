@@ -40,9 +40,9 @@ class gridController(threading.Thread):
         self.finish_status_key = "finish_status_" + self.id
         self.redisDB.set(self.stop_signal_key, "False")
         self.redisDB.set(self.finish_status_key, "False")
-        self.sim_days = duration
+        self.sim_hours = duration
         logger.debug("Starting input controller")
-        self.input = InputController(id, self.sim, self.sim_days)
+        self.input = InputController(id, self.sim, self.sim_hours)
         self.topology = self.input.get_topology()
         self.utils = Utils()
 
@@ -53,25 +53,37 @@ class gridController(threading.Thread):
     def get_profess_url(self):
         return self.profess_url
 
-    def get_soc_list(self,topology):
+    def get_soc_list(self,topology, sim_hours):
         radial=topology["radials"]#["storageUnits"]
+        common=topology["common"]
         list_storages=[]
         soc_list = []
         soc_dict_intern = {"SoC":None}
+        storages=[]
+        photovoltaics=[]
         for element in radial:
-
             for key, value in element.items():
                 if key == "storageUnits":
-                    for element_intern in value:
-                        soc_dict = {}
-                        #logger.debug("element intern "+str(element_intern))
-                        soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"],
-                                                          "id":element_intern["id"],
-                                                          "Battery_Capacity":element_intern["storage_capacity"],
-                                                          "max_charging_power":element_intern["max_charging_power"],
-                                                          "max_discharging_power":element_intern["max_discharging_power"]}
-                        soc_list.append(soc_dict)
-                        list_storages.append(element_intern)
+                    storages=value
+                if key == "photovoltaics":
+                    photovoltaics=value
+
+        for ess_element in storages:
+            soc_dict = {}
+            #logger.debug("element intern "+str(ess_element))
+            soc_dict[ess_element["bus1"]]={"SoC":ess_element["soc"],
+                                              "T_SoC":int(sim_hours+1),
+                                              "id":ess_element["id"],
+                                              "Battery_Capacity":ess_element["storage_capacity"],
+                                              "max_charging_power":ess_element["max_charging_power"],
+                                              "max_discharging_power":ess_element["max_discharging_power"],
+                                              "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
+                                              "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}
+            for pv_element in photovoltaics:
+                if pv_element["bus1"] == ess_element["bus1"]:
+                    soc_dict[ess_element["bus1"]]["pv_name"]=pv_element["id"]
+            soc_list.append(soc_dict)
+            #list_storages.append(ess_element)
         #logger.debug("list_storages "+str(list_storages))
         logger.debug("soc_list " + str(soc_list))
         return soc_list
@@ -177,7 +189,7 @@ class gridController(threading.Thread):
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        numSteps=self.sim_days
+        numSteps=self.sim_hours
         #self.redisDB.set("sim_days_"+str(self.id),numSteps)
         #numSteps=3
         logger.debug("Number of steps: "+str(numSteps))
@@ -197,15 +209,17 @@ class gridController(threading.Thread):
         total_losses = []
         powers = [[] for i in range(len(nodeNames))]
 
-        soc_list = self.get_soc_list(self.topology)
+        soc_list = self.get_soc_list(self.topology, self.sim_hours)
         charging = True
         logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
         flag_is_storage = self.input.is_Storage_in_Topology(self.topology)
+        logger.debug("Storage flag: "+str(flag_is_storage))
         if flag_is_storage:
             flag_global_control = self.input.is_global_control_in_Storage(self.topology)
+            logger.debug("Global control flag: "+str(flag_global_control))
         flag_is_charging_station = self.input.is_Charging_Station_in_Topology(self.topology)
+        logger.debug("Charging station flag "+str(flag_is_charging_station))
         price_profile_data=self.input.get_price_profile()
-
 
         logger.debug("flag is storage "+str(flag_is_storage))
         logger.debug("flag is global control "+str(flag_global_control))
@@ -213,13 +227,14 @@ class gridController(threading.Thread):
 
         fname = (str(self.id)) + "_result_pv"
 
+
         SoC_values_logger={}
 
         for element in soc_list:
             for node_name in element:
                 battery_name = element[node_name]["id"]
                 logger.debug("battery added " + str(battery_name))
-                SoC_values_logger[battery_name]={"SoC":[],"P_ESS":[]}
+                SoC_values_logger[battery_name]={"SoC":[],"P_ESS":[],"P_PV":[]}
         logger.debug("final soc_values_logger "+ str(SoC_values_logger))
         for i in range(numSteps):
             #time.sleep(0.1)
@@ -287,7 +302,8 @@ class gridController(threading.Thread):
                             for element_soc in soc_list:
                                 for key_node in element_soc.keys():
                                     if key_node == node_name:
-                                        profess_result_intern[node_name]["id"] = element_soc[key_node]["id"]
+                                        profess_result_intern[node_name]["ess_name"] = element_soc[key_node]["id"]
+                                        profess_result_intern[node_name]["pv_name"] = element_soc[key_node]["pv_name"]
                                         profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["max_charging_power"]
                                         profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["max_discharging_power"]
                             for profess_id, results in value.items():
@@ -299,14 +315,20 @@ class gridController(threading.Thread):
 
                     for element in profess_result:
                         ess_name = None
+                        pv_name = None
                         p_ess_output = None
+                        p_pv_output = None
                         logger.debug("element: "+str(element))
+                        p_pv_output = None
                         for key, value in element.items():
-                            ess_name = value["id"]
+                            ess_name = value["ess_name"]
                             p_ess_output = value["P_ESS_Output"]
+                            pv_name = value["pv_name"]
+                            p_pv_output = value["P_PV_Output"]
                             max_charging_power = value["max_charging_power"]
                             max_discharging_power = value["max_discharging_power"]
                         self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
+                        self.sim.setActivePowertoPV(pv_name, p_pv_output)
                 else:
                     logger.error("OFW instances could not be started")
 
@@ -326,8 +348,10 @@ class gridController(threading.Thread):
                             for key, value in element.items():
                                 ess_name_profess_result = value["id"]
                                 p_ess_output = value["P_ESS_Output"]
+                                p_pv_output=value["P_PV_Output"]
                                 if ess_name_profess_result==battery_name:
                                     SoC_values_logger[battery_name]["P_ESS"].append(p_ess_output)
+                                    SoC_values_logger[battery_name]["P_PV"].append(p_pv_output)
                         SoC = float(self.sim.getSoCfromBattery(battery_name))
                         logger.debug("SoC_value "+str(battery_name)+" : " + str(SoC))
                         SoC_values_logger[battery_name]["SoC"].append(SoC)

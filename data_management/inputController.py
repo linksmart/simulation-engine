@@ -233,7 +233,8 @@ class InputController:
         flag_to_return = False
         for values in storages_elements:
             if "global_control" in values.keys():
-                flag_to_return = True
+                if values["global_control"]:
+                    flag_to_return = True
         return flag_to_return
 
     def is_city(self, common):
