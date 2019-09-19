@@ -16,7 +16,9 @@
     ],
     "url_storage_controller": "http://172.18.0.4:8080",
     "city": "Fur",
-    "country": "Denmark"
+    "country": "Denmark",
+    "max_real_power_in_kW_to_grid":1,
+"max_reactive_power_in_kVar_to_grid":1
   },
   "radials": [
     {
@@ -94,153 +96,119 @@
           "id": "PV_1",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a2",
           "id": "PV_2",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a3",
           "id": "PV_3",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a4",
           "id": "PV_4",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a5",
           "id": "PV_5",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a6",
           "id": "PV_6",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a8",
           "id": "PV_8",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a9",
           "id": "PV_9",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a10",
           "id": "PV_10",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a11",
           "id": "PV_11",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a12",
           "id": "PV_12",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a14",
           "id": "PV_14",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a15",
           "id": "PV_15",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a17",
           "id": "PV_17",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a18",
           "id": "PV_18",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a19",
           "id": "PV_19",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         },
         {
           "bus1": "node_a20",
           "id": "PV_20",
           "max_power_kW": 3,
           "phases": 3,
-          "kV": 0.23,
-		  "Q_Grid_Max_Export_Power": 1,
-		  "P_Grid_Max_Export_Power": 1
+          "kV": 0.23
         }
       ],
       "storageUnits": [
@@ -255,9 +223,8 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -273,9 +240,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -291,9 +258,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -309,9 +276,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -327,9 +294,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -345,9 +312,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -363,9 +330,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -381,9 +348,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -399,9 +366,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -417,9 +384,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -435,9 +402,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -453,9 +420,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -471,9 +438,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -489,9 +456,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -507,9 +474,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -525,9 +492,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
@@ -543,9 +510,9 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "MinimizeCosts",
+"optimization_model": "Maximize Self-Consumption",
 "powerfactor":1,
-"T_SoC":25,
+
 "charge_efficiency": 90,
 "discharge_efficiency": 90
 
