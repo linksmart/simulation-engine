@@ -72,7 +72,7 @@ class gridController(threading.Thread):
             soc_dict = {}
             logger.debug("element intern "+str(ess_element))
             soc_dict[ess_element["bus1"]]={"SoC":ess_element["soc"],
-                                              "T_SoC":int(sim_hours+1),
+                                              "T_SoC":25,
                                               "id":ess_element["id"],
                                               "Battery_Capacity":ess_element["storage_capacity"],
                                               "max_charging_power":ess_element["max_charging_power"],
