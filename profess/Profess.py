@@ -648,7 +648,7 @@ class Profess:
                         if profess_id != 0:
                             config_data_of_node = self.dataList[node_number][node_name][profess_id]
                             if node_name in ess_con_global:
-                                phase = pv_profiles_for_node[node_name]
+                                phase = ess_con_global[node_name]
                                 if node_name + ".1.2.3" in phase:
                                     config_data_of_node["global_control"]["ESS_Control"] = phase[node_name + ".1.2.3"]
 

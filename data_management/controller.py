@@ -70,13 +70,15 @@ class gridController(threading.Thread):
 
         for ess_element in storages:
             soc_dict = {}
-            #logger.debug("element intern "+str(ess_element))
+            logger.debug("element intern "+str(ess_element))
             soc_dict[ess_element["bus1"]]={"SoC":ess_element["soc"],
-                                              "T_SoC":int(sim_hours+1),
+                                              "T_SoC":25,
                                               "id":ess_element["id"],
                                               "Battery_Capacity":ess_element["storage_capacity"],
                                               "max_charging_power":ess_element["max_charging_power"],
                                               "max_discharging_power":ess_element["max_discharging_power"],
+                                                "charge_efficiency":ess_element["charge_efficiency"],
+                                           "discharge_efficiency":ess_element["discharge_efficiency"],
                                               "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
                                               "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}
             for pv_element in photovoltaics:
@@ -219,7 +221,10 @@ class gridController(threading.Thread):
             logger.debug("Global control flag: "+str(flag_global_control))
         flag_is_charging_station = self.input.is_Charging_Station_in_Topology(self.topology)
         logger.debug("Charging station flag "+str(flag_is_charging_station))
-        price_profile_data=self.input.get_price_profile()
+        flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
+        logger.debug("Flag price profile needed: "+str(flag_is_price_profile_needed))
+        if flag_is_price_profile_needed:
+            price_profile_data=self.input.get_price_profile()
 
         logger.debug("flag is storage "+str(flag_is_storage))
         logger.debug("flag is global control "+str(flag_global_control))
@@ -259,7 +264,7 @@ class gridController(threading.Thread):
                 professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
                 #logger.debug("PVs "+str(professPVs))
 
-                if self.input.is_price_profile():
+                if flag_is_price_profile_needed and self.input.is_price_profile():
                     logger.debug("price profile present")
                     price_profile = price_profile_data[int(hours):int(hours+24)]
                 soc_list_new = self.set_new_soc(soc_list)
@@ -268,9 +273,9 @@ class gridController(threading.Thread):
                     profess_global_profile = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
                     logger.debug("GESSCon result "+str(profess_global_profile))
 
-                if flag_global_control and self.input.is_price_profile():
+                if flag_global_control and flag_is_price_profile_needed:
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile, profess_global_profile)
-                elif not flag_global_control and self.input.is_price_profile():
+                elif not flag_global_control and flag_is_price_profile_needed:
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile)
                 else:
                     #We add price

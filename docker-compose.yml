@@ -41,8 +41,8 @@ services:
       dockerfile: Dockerfile
     image: linksmart/simulation-engine
     container_name: "se"
-    depends_on:
-      - redis
+    #depends_on:
+      #- redis
     volumes:
        - ../simulation-engine/results:/usr/src/app/data
        #- .:/usr/src/app
