@@ -92,7 +92,7 @@ class Uncertainty:
 
         behaviour_model = []
 
-        logger.debug("position proof " + str(position_proof) + " length " + str(len(position_proof)))
+        #logger.debug("position proof " + str(position_proof) + " length " + str(len(position_proof)))
         for time_step, car_label in position_proof.keys():
             #logger.debug("timestep "+str(time_step)+" type "+str(type(time_step)))
             #logger.debug("car label " + str(car_label))

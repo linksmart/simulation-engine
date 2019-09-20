@@ -6,6 +6,7 @@ Created on Jul 16 14:13 2018
 import json
 
 import os
+import math
 
 import datetime
 import logging
@@ -17,7 +18,7 @@ logger = logging.getLogger(__file__)
 
 class InputController:
 
-    def __init__(self, id, sim_instance, sim_days):
+    def __init__(self, id, sim_instance, sim_hours):
         self.stop_request = False
         self.id = id
         self.sim= sim_instance
@@ -25,7 +26,7 @@ class InputController:
         self.country = None
         self.profiles = None
         self.profess = None
-        self.sim_days = sim_days
+        self.sim_hours = sim_hours
         self.voltage_bases = None
         self.base_frequency = 60
         self.price_profile = None
@@ -150,8 +151,8 @@ class InputController:
             logger.error(error)
             return error
 
-    def get_price_profile_from_server(self, city, country, sim_days):
-        price_profile_data= self.profiles.price_profile(city,country,sim_days)
+    def get_price_profile_from_server(self, city, country, sim_hours):
+        price_profile_data= self.profiles.price_profile(city, country, sim_hours)
         return price_profile_data
 
     def is_price_profile_needed(self,topology):
@@ -180,9 +181,9 @@ class InputController:
         logger.debug("loadshapes charged")
         return message
 
-    def setLoadshapes(self, id, loads, sim_days):
+    def setLoadshapes(self, id, loads, sim_hours):
         logger.debug("Charging the loadshapes into the simulator from profiles")
-        message = self.sim.setLoadshapes(loads, sim_days, self.profiles, self.profess)
+        message = self.sim.setLoadshapes(loads, sim_hours, self.profiles, self.profess)
         logger.debug("loadshapes from profiles charged")
         return message
 
@@ -260,7 +261,7 @@ class InputController:
             return 1
 
     def get_sim_days(self):
-        return self.sim_days
+        return self.sim_hours
 
 
     def setup_elements_in_simulator(self, topology, profiles, profess):
@@ -315,6 +316,7 @@ class InputController:
         self.profess = profess
         common = topology["common"]
         radial = topology["radials"]
+        time_in_days = math.ceil(self.sim_hours / 24) + 1
         if self.is_city(common):
             city = self.get_city(common)
             logger.debug("city " + str(city))
@@ -323,7 +325,8 @@ class InputController:
             flag_is_price_profile_needed = self.is_price_profile_needed(topology)
             logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
             if flag_is_price_profile_needed:
-                self.price_profile = self.get_price_profile_from_server(city,country,self.sim_days)
+                self.price_profile = self.get_price_profile_from_server(city, country, time_in_days)
+                #logger.debug("length price profile "+str(len(self.price_profile)))
 
         for values in radial:
             #logger.debug("values of the radial: "+str(values))
@@ -362,7 +365,7 @@ class InputController:
                 load = values["loads"]
                 # logger.debug("Loads" + str(load))
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                message = self.setLoadshapes(id, load, self.sim_days)
+                message = self.setLoadshapes(id, load, time_in_days)
                 if not message == 0:
                     return message
                 logger.debug("! >>>  ---------------and the Loads afterwards ------------------------- \n")
@@ -452,7 +455,7 @@ class InputController:
 
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(id, photovoltaics, city, country, self.sim_days)
+                    message = self.setPVshapes(id, photovoltaics, city, country, time_in_days)
                     if not message == 0:
                         return message
                     logger.debug("! >>>  ---------------and the PVs afterwards ------------------------- \n")

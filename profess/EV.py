@@ -78,7 +78,7 @@ class EV:
     def calculate_position(self, horizon, repetition):
         self.position_profile = self.uncertainty.monte_carlo_simulation(3600, horizon, repetition, self.unplugged_mean, self.unplugged_mean_std,
                                                                self.plugged_mean, self.plugged_mean_std, 1)
-        logger.debug("position profile "+str(self.position_profile))
+        #logger.debug("position profile "+str(self.position_profile))
 
 
 

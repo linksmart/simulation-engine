@@ -71,7 +71,7 @@ class gridController(threading.Thread):
 
         for ess_element in storages:
             soc_dict = {}
-            logger.debug("element intern "+str(ess_element))
+            #logger.debug("element intern "+str(ess_element))
             soc_dict[ess_element["bus1"]]={"SoC":ess_element["soc"],
                                               "T_SoC":25,
                                               "id":ess_element["id"],
@@ -237,11 +237,14 @@ class gridController(threading.Thread):
                     ev_unit.calculate_position(self.sim_hours, 1)
                     #ev_unit.calculate_position(64, 1)
                     position_profile = ev_unit.get_position_profile()
-                    logger.debug("length position profile " + str(len(position_profile)))
+                    #logger.debug("length position profile " + str(len(position_profile)))
         flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
         logger.debug("Flag price profile needed: "+str(flag_is_price_profile_needed))
+
+
         if flag_is_price_profile_needed:
             price_profile_data=self.input.get_price_profile()
+            logger.debug("length price profile " + str(len(price_profile_data)))
 
         #sys.exit(0)
 
