@@ -1,4 +1,5 @@
 import logging, os, json
+from profess.MonteCarloSimulator import Uncertainty
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -10,8 +11,27 @@ class EV:
         self.consumption = consumption_pro_100_km
         self.Soc = SoC
         self.id = id
+        self.uncertainty = Uncertainty()
+        self.position_profile = None
+        self.unplugged_mean = 7.32
+        self.unplugged_mean_std = 0.78
+        self.plugged_mean = 18.76
+        self.plugged_mean_std = 1.3
         logger.debug("EV "+str(self.id)+" created")
 
+    def get_plugged_values(self):
+        return (self.plugged_mean, self.plugged_mean_std)
+
+    def get_unplugged_values(self):
+        return (self.unplugged_mean, self.unplugged_mean_std)
+
+    def set_plugged_values(self, plugged_mean, plugged_mean_std):
+        self.plugged_mean = plugged_mean
+        self.plugged_mean_std = plugged_mean_std
+
+    def set_unplugged_values(self, unplugged_mean, unplugged_mean_std):
+        self.unplugged_mean = unplugged_mean
+        self.unplugged_mean_std = unplugged_mean_std
 
     def get_id(self):
         return self.id
@@ -51,6 +71,14 @@ class EV:
                 return 1
             else:
                 return value
+
+    def get_position_profile(self):
+        return self.position_profile
+
+    def calculate_position(self, horizon, repetition):
+        self.position_profile = self.uncertainty.monte_carlo_simulation(3600, horizon, repetition, self.unplugged_mean, self.unplugged_mean_std,
+                                                               self.plugged_mean, self.plugged_mean_std, 1)
+        logger.debug("position profile "+str(self.position_profile))
 
 
 

@@ -1010,10 +1010,10 @@ class OpenDSS:
                 self.bus_name=bus_name
 
                 # ----------get_a_profile---------------#
-                randint_value=random.randrange(0, 475)
+                randint_value=random.randrange(1, 475)
                 logger.debug("load_profile_data: randint=" + str(randint_value))
                 load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
-                logger.debug("load profile data "+str(load_profile_data))
+                #logger.debug("load profile data "+str(load_profile_data))
 
                 #--------store_profile_for_line----------#
                 self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}
@@ -1273,6 +1273,10 @@ class OpenDSS:
                         ev_object = []
                         for evs in value:
                             self.EVs[evs["id"]] = EV(evs["id"], evs["battery_capacity_kWh"], evs["SoC"], evs["consumption_in_kW_pro_100_km"])
+                            if "unplugged_mean" in evs.keys() and "unplugged_mean_std" in evs.keys():
+                                self.EVs[evs["id"]].set_unplugged_values(evs["unplugged_mean"], evs["unplugged_mean_std"])
+                            if "plugged_mean" in evs.keys() and "plugged_mean_std" in evs.keys():
+                                self.EVs[evs["id"]].set_plugged_values(evs["plugged_mean"], evs["plugged_mean_std"])
                             ev_object.append(self.EVs[evs["id"]])
                     else:
                         logger.debug("key not registered: "+str(key))
@@ -1281,19 +1285,25 @@ class OpenDSS:
                 self.Chargers[id] = Charger(kw_rated, ev_object, type_application)
 
 
-                bus2 = bus1+"_2"
+
                 #logger.debug("bus 2 "+str(bus2))
-                self.setPowerLine(id, phases, bus1, bus2, r1=0.0001, r0=0.0001, x1=0,x0=0, c1=0, c0=0, switch="y")
+
                 list_ev = self.Chargers[id].get_EV_connected()
                 logger.debug("list ev "+str(list_ev))
+                counter = 1
                 for ev in list_ev:
+                    bus2 = bus1 + "_"+str(counter)
+                    self.setPowerLine(ev.get_id(), phases, bus1, bus2, r1=0.0001, r0=0.0001, x1=0, x0=0, c1=0, c0=0, switch="y")
                     self.setStorage(ev.get_id(),bus2, phases, connection, ev.get_SoC(),min_soc=0, kv=kv, kw_rated=kw_rated, kwh_rated=ev.get_Battery_Capacity(), kwh_stored=ev.get_Battery_Capacity(), charge_efficiency=charge_efficiency, discharge_efficiency=1, powerfactor=powerfactor)
-
+                    counter = counter + 1
 
             return 0
         except Exception as e:
             logger.error(e)
             return e
+
+    def get_chargers(self):
+        return self.Chargers
 
     def setStorages(self, storage):
         #logger.info("Setting up the Storages")

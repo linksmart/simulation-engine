@@ -6,6 +6,7 @@ import sys
 
 from profess.JSONparser import *
 from profess.Profess import *
+
 from simulator.openDSS import OpenDSS
 from data_management.redisDB import RedisDB
 from profiles.profiles import *
@@ -155,6 +156,8 @@ class gridController(threading.Thread):
         logger.debug("profess url: " + str(self.domain))
         self.profess = Profess(self.domain, self.topology)
 
+
+
         # ----------PROFILES----------------#
         self.profiles = Profiles()
         self.global_control = GESSCon()
@@ -222,14 +225,25 @@ class gridController(threading.Thread):
         if flag_is_storage:
             flag_global_control = self.input.is_global_control_in_Storage(self.topology)
             logger.debug("Global control flag: "+str(flag_global_control))
+
         flag_is_charging_station = self.input.is_Charging_Station_in_Topology(self.topology)
         logger.debug("Charging station flag "+str(flag_is_charging_station))
+        if flag_is_charging_station:
+            chargers = self.sim.get_chargers()
+            logger.debug("type chargers " + str(type(chargers)))
+            for key, charger_element in chargers.items():
+                evs_connected = charger_element.get_EV_connected()
+                for ev_unit in evs_connected:
+                    ev_unit.calculate_position(self.sim_hours, 1)
+                    #ev_unit.calculate_position(64, 1)
+                    position_profile = ev_unit.get_position_profile()
+                    logger.debug("length position profile " + str(len(position_profile)))
         flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
         logger.debug("Flag price profile needed: "+str(flag_is_price_profile_needed))
         if flag_is_price_profile_needed:
             price_profile_data=self.input.get_price_profile()
 
-
+        #sys.exit(0)
 
         for i in range(numSteps):
             #time.sleep(0.1)
@@ -245,6 +259,9 @@ class gridController(threading.Thread):
             #terminal=self.sim.get_monitor_terminals("mon_transformer")
             #logger.debug("Number of terminals in monitor "+str(terminal))
 
+            ######################################################################################
+            ################  Storage control  ###################################################
+            ######################################################################################
 
             if flag_is_storage:
 
@@ -323,61 +340,27 @@ class gridController(threading.Thread):
 
                 #self.redisDB.set(self.finish_status_key, "True")
 
-                """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
-                logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
-                logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
-                logger.debug("kW " + str(self.sim.getkWfromBattery("Akku1")))
-                logger.debug("Min_SoC " + str(self.sim.getMinSoCfromBattery("Akku1")))
-                logger.debug("bus " + str(self.sim.getBusfromBattery("Akku1")))
-                logger.debug("ESS state "+str(self.sim.getStatefromBattery("Akku1")))
-                max_charging_power_value=float(self.sim.getkWratedfromBattery("Akku1"))
 
-                SoC = float(self.sim.getSoCfromBattery("Akku1"))
-                logger.debug("SoC_value Akku1: " + str(SoC))
-                if i>0:
-
-                    if charging is True:
-
-                        if SoC >= 100:
-                            charging = False
-                            logger.debug("Entered to discharging")
-                            self.sim.setActivePowertoBatery("Akku1",0.5,max_charging_power_value)
-                        else:
-                            logger.debug("Entered to charging")
-                            self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
-                    else:
-
-                        if SoC <= 20:
-                            charging = True
-                            logger.debug("Entered to charging")
-                            self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
-                        else:
-                            logger.debug("Entered to discharging")
-                            self.sim.setActivePowertoBatery("Akku1",0.5, max_charging_power_value)
-                logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))"""
-
-                #logger.debug("######################Ending profess##################################")
-
-
-                #profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
-                """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
-                self.profess.start_all()
-                print("--------------------start profess results----------------------------")
-                print(self.profess.dataList)
-                print(self.profess.wait_and_get_output())
-                soc_list = [{"633": {"SoC": 5}}, {"671": {"SoC": 4}}, {"634": {"SoC": 20}}]
-                self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
-                print(self.profess.dataList)
-                print("--------------------end profess results----------------------------")"""
             else:
                 logger.debug("No Storage Units present")
+
+            ######################################################################################
+            ################  Charging station control  ###################################################
+            ######################################################################################
 
             if flag_is_charging_station:
                 logger.debug("charging stations present in the simulation")
                 #check if is residential or commercial
+                if i is not 0:
+                    if not (i % 23):
+                        #every 24 timesteps we calculate a new position profile for each EV
+                        logger.debug("timestep % 23 " + str(i))
 
-                #check if ev is present per charging station and receive a mapping list
-                #flag_is_EV = self.input.is_EV(charging_station)
+
+                else:
+                    #first timestep of the simulation
+                    logger.debug("timestep % 23 " + str(i))
+
 
                 #send it to profev
 
@@ -547,3 +530,49 @@ class gridController(threading.Thread):
         # filename = str(id)+"_results.txt"
         # !TODO: Create filename with id so serve multiple simultaneous simulations#DONE
         # json_data = json.dumps(allBusMagPu)"""
+
+    """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
+                    logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
+                    logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
+                    logger.debug("kW " + str(self.sim.getkWfromBattery("Akku1")))
+                    logger.debug("Min_SoC " + str(self.sim.getMinSoCfromBattery("Akku1")))
+                    logger.debug("bus " + str(self.sim.getBusfromBattery("Akku1")))
+                    logger.debug("ESS state "+str(self.sim.getStatefromBattery("Akku1")))
+                    max_charging_power_value=float(self.sim.getkWratedfromBattery("Akku1"))
+
+                    SoC = float(self.sim.getSoCfromBattery("Akku1"))
+                    logger.debug("SoC_value Akku1: " + str(SoC))
+                    if i>0:
+
+                        if charging is True:
+
+                            if SoC >= 100:
+                                charging = False
+                                logger.debug("Entered to discharging")
+                                self.sim.setActivePowertoBatery("Akku1",0.5,max_charging_power_value)
+                            else:
+                                logger.debug("Entered to charging")
+                                self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
+                        else:
+
+                            if SoC <= 20:
+                                charging = True
+                                logger.debug("Entered to charging")
+                                self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
+                            else:
+                                logger.debug("Entered to discharging")
+                                self.sim.setActivePowertoBatery("Akku1",0.5, max_charging_power_value)
+                    logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))"""
+
+    # logger.debug("######################Ending profess##################################")
+
+    # profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
+    """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
+    self.profess.start_all()
+    print("--------------------start profess results----------------------------")
+    print(self.profess.dataList)
+    print(self.profess.wait_and_get_output())
+    soc_list = [{"633": {"SoC": 5}}, {"671": {"SoC": 4}}, {"634": {"SoC": 20}}]
+    self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
+    print(self.profess.dataList)
+    print("--------------------end profess results----------------------------")"""

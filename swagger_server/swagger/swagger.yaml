@@ -670,6 +670,14 @@ definitions:
         default: 5.0
       unit_drop_penalty:
         type: "number"
+      unplugged_mean:
+        type: "number"
+      unplugged_mean_std:
+        type: "number"
+      plugged_mean:
+        type: "number"
+      plugged_mean_std:
+        type: "number"
   Winding:
     type: "object"
     properties:
