@@ -351,7 +351,7 @@ class gridController(threading.Thread):
                             p_ess_output = None
                             logger.debug("element: " + str(element))
                             for key, value in element.items():
-                                ess_name_profess_result = value["id"]
+                                ess_name_profess_result = value["ess_name"]
                                 p_ess_output = value["P_ESS_Output"]
                                 p_pv_output=value["P_PV_Output"]
                                 if ess_name_profess_result==battery_name:

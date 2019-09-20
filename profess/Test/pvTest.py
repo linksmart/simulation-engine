@@ -205,7 +205,16 @@ def plot_node_in_every_test(path,node_name,mapping_name):
     pv=plot_pv_profile(path,linecount,mapping_name)
     pess=plot_pess(path,linecount, "Akku"+str(node_number),mapping_name)
     #TODO for multiple plotted shapes
-    plot_P_Grid(path,linecount,pv,load,pess)
+    p_pv_curt=plot_P_PV_curt(path,linecount,"Akku"+str(node_number),mapping_name)
+    plot_P_Grid(path,linecount,pv,load,pess,p_pv_curt)
+    #################################
+    pv_difference=[]
+    for element in range(linecount):
+        pv_difference.append(pv[element] - p_pv_curt[element])
+    print("difference between pv and curt "+str(pv_difference))
+
+    ######################
+
     #plt.ylabel('Power [kW]')
     plt.ylabel('Power [kW]')
     plt.xlabel("Time [hours]")
@@ -294,12 +303,34 @@ def plot_pess(path,time,target,mapping_name):
     #TODO for multiple
             # plt.plot(loadshape[15])
     ##############
-def plot_P_Grid(path,time,pv,load,pess=None):
+def plot_P_PV_curt(path,time,target,mapping_name):
+    mapping_file = open(path+mapping_name+'.txt').read()
+    mapping=parse_mapping(mapping_file)
+    ##########
+    for result_id in mapping:
+        pess_file = open(path + result_id + "/" + result_id + "_soc_result").read()
+        p_pv_curt_loadshapes = json.loads(pess_file)
+        flag_plotted=False
+        for batteryName in p_pv_curt_loadshapes:
+            if batteryName==target:
+                print("fitting batteryname " + str(batteryName))
+                loadshape = p_pv_curt_loadshapes[batteryName]["P_PV"]
+                if time != -1:
+                    shape_to_plot=loadshape[:time]
+                else:
+                    shape_to_plot = loadshape
+                print("the load shape of p_pv_curtailed :" +str(shape_to_plot))
+                plot_node(shape_to_plot," P_PV curtailed")
+    return shape_to_plot
+def plot_P_Grid(path,time,pv,load,pess=None, p_pv_curt=None):
     if pess == None:
         pess=[0]*time
+    if p_pv_curt == None:
+        p_pv_curt=pv
+        print("p_pv_curtailed not given")
     result=[]
     for index in range(time):
-        p_grid=-pv[index]-pess[index]+load[index]
+        p_grid=-p_pv_curt[index]-pess[index]+load[index]
         result.append(p_grid)
 
     print(result)
@@ -413,7 +444,7 @@ def plot_differences(pathA,pathB,node,nameA,nameB,mappingA,mappingB):
 #response = http.get(domain + "commands/status/" + str(array_of_ids[0]))
 #print(response)
 
-run_all(24)
+#run_all(24)
 #calculate_pv_size("PVTest/cc589737d784/cc589737d784_pv_result","C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential")
 #print(array_of_ids)
 
@@ -424,12 +455,13 @@ run_all(24)
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",48)
 
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
-
-#plot_node_in_every_test("StorageTest/","node_a12","mapping_SC_1kw_P_Bigger_ESS")
+path="C:/Users/klingenb/Documents/BAThesis/Results/TestStorages/self-consumption/"
+#plot_node_in_every_test(path,"node_a12","mapping_SC_1kw_P_Bigger_ESS")
+plot_node_in_every_test("StorageTest/","node_a12","mappingSC_big_ESS_Curt")
 #plot_node_in_every_test("PVTest/","node_a12","mapping")
 #plot_differences("PVTest/","StorageTest/","node_a12","Only PV","Minimize costs 1kw max export","mapping","mappingBigESS1kwMC")
-path="C:/Users/klingenb/Documents/BAThesis/Results/TestStorages/self-consumption/"
-#plot_differences(path,"StorageTest/","node_a12","Self Consumption,1kw max export and small ess","Self Consumption,1kw max export and bigger ess","mapping_1kw_export","mapping_SC_1kw_P_Bigger_ESS")
+
+#plot_differences(path,"StorageTest/","node_a12","Self Consumption,1kw max export and bigger ess","Self Consumption,1kw max export and P_pv curtailment","mapping_SC_1kw_P_Bigger_ESS","mappingSC_big_ESS_Curt")
 
 
 #print(help_function_for_timestamps("2018.07.03 00:00:00"))
