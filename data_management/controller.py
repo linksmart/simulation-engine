@@ -161,6 +161,9 @@ class gridController(threading.Thread):
         # profess.json_parser.set_topology(data)
 
         self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
+        logger.debug("!---------------Elements added to simulator------------------------ \n")
+
+
         transformer_names=self.sim.get_transformer_names()
         logger.debug("Transformer names: "+str(transformer_names))
         logger.debug("Transformers in the circuit")

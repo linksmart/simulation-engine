@@ -198,11 +198,10 @@ class InputController:
         logger.debug("ESS charged")
         return message
 
-    def setChargingPoints(self, id, object):
-        logger.debug("Charging the charging points into the simulator")
-        self.object = object
-        message = self.sim.setChargingPoints(self.object)
-        logger.debug("Charging points charged")
+    def setChargingStations(self, id, object):
+        logger.debug("Charging the charging stations into the simulator")
+        message = self.sim.setChargingStations(object)
+        logger.debug("Charging stations charged")
         return message
 
     def is_Charging_Station_in_Topology(self, topology):
@@ -321,7 +320,10 @@ class InputController:
             logger.debug("city " + str(city))
             country = self.get_country(common)
             logger.debug("country " + str(country))
-            self.price_profile = self.get_price_profile_from_server(city,country,self.sim_days)
+            flag_is_price_profile_needed = self.is_price_profile_needed(topology)
+            logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
+            if flag_is_price_profile_needed:
+                self.price_profile = self.get_price_profile_from_server(city,country,self.sim_days)
 
         for values in radial:
             #logger.debug("values of the radial: "+str(values))
@@ -382,9 +384,6 @@ class InputController:
                 logger.debug("!---------------Setting Powerlines------------------------- \n")
 
                 powerLines = values["powerLines"]
-                # linecodes = values["linecode"]
-                # factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
-                # logger.debug("Powerlines" + str(powerLines))
                 message = self.setPowerLines(id, powerLines)
                 logger.debug(str(message))
                 if not message == 0:
@@ -404,18 +403,7 @@ class InputController:
                 if not message == 0:
                     return message
 
-            """if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
-                photovoltaics = values["photovoltaics"]
-                #xycurves = radial["xycurves"]
-                #loadshapes = radial["loadshapes"]
-                #tshapes = radial["tshapes"]
-                factory.gridController.setPhotovoltaic(id, photovoltaics)"""  # TODO: fix and remove comment
 
-            """
-            and "xycurves" in radial.values.keys()s() and radial["xycurves"] is not None 
-                            and "loadshapes" in radial.values.keys()s() and radial["loadshapes"] is not None 
-                            and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
-            """
             if "storageUnits" in values.keys() and values["storageUnits"] is not None:
                 # logger.debug("---------------Setting Storage-------------------------")
                 logger.debug("! ---------------Setting Storage------------------------- \n")
@@ -429,15 +417,11 @@ class InputController:
                 if not message == 0:
                     return message
 
-            """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
-                # radial=radial.to_dict()
-                chargingPoints = values["chargingPoints"]
-                gridController.setChargingPoints(id, chargingPoints)
-            """
-            if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
-                # logger.debug("---------------Setting chargingPoints-------------------------")
-                chargingPoints = values["chargingPoints"]
-                message = self.setChargingPoints(id, chargingPoints)
+
+            if "chargingStations" in values.keys() and values["chargingStations"] is not None:
+                logger.debug("---------------Setting charging stations-------------------------")
+                chargingStations = values["chargingStations"]
+                message = self.setChargingStations(id, chargingStations)
                 if not message == 0:
                     return message
 
@@ -449,10 +433,8 @@ class InputController:
             """
 
             if "loadshapes" in values.keys() and values["loadshapes"] is not None:
-                #                logger.debug("---------------Setting loadshapes-------------------------")
                 logger.debug("! ---------------Setting loadshapes------------------------- \n")
                 loadshapes = values["loadshapes"]
-                #                logger.debug("Load Shapes: " + str(loadshapes))
 
                 message = self.setLoadShape(id, loadshapes)
                 if not message == 0:
@@ -467,10 +449,6 @@ class InputController:
             if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
                 logger.debug("! ---------------Setting Photovoltaic------------------------- \n")
                 photovoltaics = values["photovoltaics"]
-                # xycurves = radial["xycurves"]
-                # loadshapes = radial["loadshapes"]
-                # tshapes = radial["tshapes"]
-
 
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
@@ -488,13 +466,9 @@ class InputController:
                     return error
                 logger.debug("! >>>  ---------------PVs finished ------------------------- \n")
 
-        ######Disables circuits untilo the run simulation is started
-        # factory.gridController.disableCircuit(id)
-
-        # result = factory.gridController.run(profess)
 
         return id
-        # return " Result: " + str(result)
+
 
 
 
