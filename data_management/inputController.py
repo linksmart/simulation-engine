@@ -6,6 +6,7 @@ Created on Jul 16 14:13 2018
 import json
 
 import os
+import math
 
 import datetime
 import logging
@@ -17,7 +18,7 @@ logger = logging.getLogger(__file__)
 
 class InputController:
 
-    def __init__(self, id, sim_instance, sim_days):
+    def __init__(self, id, sim_instance, sim_hours):
         self.stop_request = False
         self.id = id
         self.sim= sim_instance
@@ -25,9 +26,10 @@ class InputController:
         self.country = None
         self.profiles = None
         self.profess = None
-        self.sim_days = sim_days
+        self.sim_hours = sim_hours
         self.voltage_bases = None
         self.base_frequency = 60
+        self.price_profile = None
         logger.debug("id " + str(id))
         self.utils = Utils()
 
@@ -41,6 +43,9 @@ class InputController:
             return 1
         else:
             return data
+
+    def get_price_profile(self):
+        return self.price_profile
 
     def setParameters(self, name, object):
         logger.debug("Creating a new circuit with the name: "+str(name))
@@ -146,15 +151,39 @@ class InputController:
             logger.error(error)
             return error
 
+    def get_price_profile_from_server(self, city, country, sim_hours):
+        price_profile_data= self.profiles.price_profile(city, country, sim_hours)
+        return price_profile_data
+
+    def is_price_profile_needed(self,topology):
+        radial = topology["radials"]
+        flag_to_return = False
+        for values in radial:
+            if "storageUnits" in values.keys():
+                for ess_element in values["storageUnits"]:
+                    if ess_element["optimization_model"] == "MinimizeCosts":
+                        return True
+        return flag_to_return
+
+    def is_price_profile(self):
+        self.price_profile
+        if isinstance(self.price_profile, list):
+            if len(self.price_profile) > 0:
+                return True
+            else:
+                return False
+        else:
+            return False
+
     def setLoadshapes_Off(self, id, loadshapes):
         logger.debug("Charging the loadshapes into the simulator")
         message = self.sim.setLoadshapes(loadshapes)
         logger.debug("loadshapes charged")
         return message
 
-    def setLoadshapes(self, id, loads, sim_days):
+    def setLoadshapes(self, id, loads, sim_hours):
         logger.debug("Charging the loadshapes into the simulator from profiles")
-        message = self.sim.setLoadshapes(loads, sim_days, self.profiles, self.profess)
+        message = self.sim.setLoadshapes(loads, sim_hours, self.profiles, self.profess)
         logger.debug("loadshapes from profiles charged")
         return message
 
@@ -170,12 +199,21 @@ class InputController:
         logger.debug("ESS charged")
         return message
 
-    def setChargingPoints(self, id, object):
-        logger.debug("Charging the charging points into the simulator")
-        self.object = object
-        message = self.sim.setChargingPoints(self.object)
-        logger.debug("Charging points charged")
+    def setChargingStations(self, id, object):
+        logger.debug("Charging the charging stations into the simulator")
+        message = self.sim.setChargingStations(object)
+        logger.debug("Charging stations charged")
         return message
+
+    def is_Charging_Station_in_Topology(self, topology):
+        # topology = profess.json_parser.get_topology()
+        # logger.debug("type topology " + str(type(self.topology)))
+        radial = topology["radials"]
+        flag_to_return = False
+        for values in radial:
+            if "chargingStations" in values.keys():
+                flag_to_return = True
+        return flag_to_return
 
     def is_Storage_in_Topology(self, topology):
         # topology = profess.json_parser.get_topology()
@@ -190,6 +228,23 @@ class InputController:
             if "storageUnits" in values.keys():
                 flag_to_return = True
         return flag_to_return
+
+    def is_global_control_in_Storage(self, topology):
+        radial = topology["radials"]
+        for element in radial:
+            storages_elements = element["storageUnits"]
+        flag_to_return = False
+        for values in storages_elements:
+            if "global_control" in values.keys():
+                if values["global_control"]:
+                    flag_to_return = True
+        return flag_to_return
+
+    def is_city(self, common):
+        if "city" in common.keys():
+            return True
+        else:
+            return False
 
     def get_city(self, common):
         if common["city"]:
@@ -206,7 +261,7 @@ class InputController:
             return 1
 
     def get_sim_days(self):
-        return self.sim_days
+        return self.sim_hours
 
 
     def setup_elements_in_simulator(self, topology, profiles, profess):
@@ -261,6 +316,17 @@ class InputController:
         self.profess = profess
         common = topology["common"]
         radial = topology["radials"]
+        time_in_days = math.ceil(self.sim_hours / 24) + 1
+        if self.is_city(common):
+            city = self.get_city(common)
+            logger.debug("city " + str(city))
+            country = self.get_country(common)
+            logger.debug("country " + str(country))
+            flag_is_price_profile_needed = self.is_price_profile_needed(topology)
+            logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
+            if flag_is_price_profile_needed:
+                self.price_profile = self.get_price_profile_from_server(city, country, time_in_days)
+                #logger.debug("length price profile "+str(len(self.price_profile)))
 
         for values in radial:
             #logger.debug("values of the radial: "+str(values))
@@ -299,7 +365,7 @@ class InputController:
                 load = values["loads"]
                 # logger.debug("Loads" + str(load))
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                message = self.setLoadshapes(id, load, self.sim_days)
+                message = self.setLoadshapes(id, load, time_in_days)
                 if not message == 0:
                     return message
                 logger.debug("! >>>  ---------------and the Loads afterwards ------------------------- \n")
@@ -321,9 +387,6 @@ class InputController:
                 logger.debug("!---------------Setting Powerlines------------------------- \n")
 
                 powerLines = values["powerLines"]
-                # linecodes = values["linecode"]
-                # factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
-                # logger.debug("Powerlines" + str(powerLines))
                 message = self.setPowerLines(id, powerLines)
                 logger.debug(str(message))
                 if not message == 0:
@@ -343,18 +406,7 @@ class InputController:
                 if not message == 0:
                     return message
 
-            """if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
-                photovoltaics = values["photovoltaics"]
-                #xycurves = radial["xycurves"]
-                #loadshapes = radial["loadshapes"]
-                #tshapes = radial["tshapes"]
-                factory.gridController.setPhotovoltaic(id, photovoltaics)"""  # TODO: fix and remove comment
 
-            """
-            and "xycurves" in radial.values.keys()s() and radial["xycurves"] is not None 
-                            and "loadshapes" in radial.values.keys()s() and radial["loadshapes"] is not None 
-                            and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
-            """
             if "storageUnits" in values.keys() and values["storageUnits"] is not None:
                 # logger.debug("---------------Setting Storage-------------------------")
                 logger.debug("! ---------------Setting Storage------------------------- \n")
@@ -368,15 +420,11 @@ class InputController:
                 if not message == 0:
                     return message
 
-            """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
-                # radial=radial.to_dict()
-                chargingPoints = values["chargingPoints"]
-                gridController.setChargingPoints(id, chargingPoints)
-            """
-            if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
-                # logger.debug("---------------Setting chargingPoints-------------------------")
-                chargingPoints = values["chargingPoints"]
-                message = self.setChargingPoints(id, chargingPoints)
+
+            if "chargingStations" in values.keys() and values["chargingStations"] is not None:
+                logger.debug("---------------Setting charging stations-------------------------")
+                chargingStations = values["chargingStations"]
+                message = self.setChargingStations(id, chargingStations)
                 if not message == 0:
                     return message
 
@@ -388,10 +436,8 @@ class InputController:
             """
 
             if "loadshapes" in values.keys() and values["loadshapes"] is not None:
-                #                logger.debug("---------------Setting loadshapes-------------------------")
                 logger.debug("! ---------------Setting loadshapes------------------------- \n")
                 loadshapes = values["loadshapes"]
-                #                logger.debug("Load Shapes: " + str(loadshapes))
 
                 message = self.setLoadShape(id, loadshapes)
                 if not message == 0:
@@ -406,17 +452,10 @@ class InputController:
             if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
                 logger.debug("! ---------------Setting Photovoltaic------------------------- \n")
                 photovoltaics = values["photovoltaics"]
-                # xycurves = radial["xycurves"]
-                # loadshapes = radial["loadshapes"]
-                # tshapes = radial["tshapes"]
 
-                city = self.get_city(common)
-                logger.debug("city " + str(city))
-                country = self.get_country(common)
-                logger.debug("country " + str(country))
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(id, photovoltaics, city, country, self.sim_days)
+                    message = self.setPVshapes(id, photovoltaics, city, country, time_in_days)
                     if not message == 0:
                         return message
                     logger.debug("! >>>  ---------------and the PVs afterwards ------------------------- \n")
@@ -430,13 +469,9 @@ class InputController:
                     return error
                 logger.debug("! >>>  ---------------PVs finished ------------------------- \n")
 
-        ######Disables circuits untilo the run simulation is started
-        # factory.gridController.disableCircuit(id)
-
-        # result = factory.gridController.run(profess)
 
         return id
-        # return " Result: " + str(result)
+
 
 
 

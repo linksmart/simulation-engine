@@ -4,8 +4,9 @@
 from __future__ import absolute_import
 # import models into model package
 from swagger_server.models.capacitor import Capacitor
-from swagger_server.models.charging_point import ChargingPoint
+from swagger_server.models.charging_station import ChargingStation
 from swagger_server.models.duration import Duration
+from swagger_server.models.electric_vehicle import ElectricVehicle
 from swagger_server.models.error import Error
 from swagger_server.models.grid import Grid
 from swagger_server.models.grid_definition import GridDefinition

@@ -49,23 +49,61 @@ def create_simulation(body):  # noqa: E501
         flag = redis_db.get(id)
         logger.debug("id stored in RedisDB: "+str(flag))
         redis_db.set("run:" + id, "created")
-        #----------Profiles---------------#
 
-        #pv_profile_data = prof.pv_profile("bolzano", "italy", days=365)
-        #print("pv_profile_data: " + str(pv_profile_data))
-        #load_profile_data = prof.load_profile(type="residential", randint=5, days=365)
-        #print("load_profile_data: " + str(load_profile_data))
-        #t_end = time.time() + 60
-        #days = 1
-        #while time.time() < t_end:
-        #    prof.price_profile("fur", "denmark", days)
-        #   days = days + 1
-        #   time.sleep(5)
+        radial = data["radials"]
+        models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts"]
 
-        #----------Profiles_end-----------#
+        for values in radial:
 
+            if "powerLines" in values.keys() and values["powerLines"] is not None:
+                logger.debug("Checking Powerlines")
 
+                powerLines = values["powerLines"]
+                for power_lines_elements in powerLines:
+                    if "r1" in power_lines_elements.keys() and "linecode" in power_lines_elements.keys():
+                        message = "r1 and linecode cannot be entered at the same time in power line with id: " + str(
+                            power_lines_elements["id"])
+                        logger.error(message)
+                        return message
+            logger.debug("Power lines succesfully checked")
 
+            data_to_store=[]
+            if "storageUnits" in values.keys() and values["storageUnits"] is not None:
+                logger.debug("Checking Storage")
+
+                if not is_PV(radial):
+                    message = "Error: no PV element defined for each storage element"
+                    return message
+                storage = values["storageUnits"]
+                for storage_elements in storage:
+                    # checking if default values are given
+                    storage_eleement_change = storage_elements
+                    if not "charge_efficiency" in storage_elements.keys():
+                        storage_eleement_change["charge_efficiency"] = 90
+                    if not "discharge_efficiency" in storage_elements.keys():
+                        storage_eleement_change["discharge_efficiency"] = 90
+
+                    data_to_store.append(storage_eleement_change)
+
+                    #checking if there is a PV in the node of the ESS
+                    if not storage_elements["optimization_model"] in models_list:
+                        message = "Solely the following optimization models for storage control are possible: " + str(
+                            models_list)
+                        return message
+                    bus_pv = get_PV_nodes(values["photovoltaics"])
+                    if not storage_elements["bus1"] in bus_pv:
+                        message = "Error: no PV element defined for storage element with id: " + str(
+                            storage_elements["id"])
+                        return message
+
+            logger.debug("Storage successfully checked")
+
+            #logger.debug("data to store "+str(data_to_store))
+
+            data["radials"][0]["storageUnits"] = data_to_store
+
+        #logger.debug("data"+str(data))
+        #logger.debug("data" + str(data["radials"][0]["storageUnits"]))
         ####generates an id an makes a directory with the id for the data and for the registry
         try:
 
@@ -84,27 +122,25 @@ def create_simulation(body):  # noqa: E501
 
         logger.debug("Grid data stored")
 
-        radial = data["radials"]
-        models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts"]
 
-        for values in radial:
-            #logger.debug("values of the radial: "+str(values))
-            #for key in values.keys():
-                #logger.debug("keys of the radial: " + str(key))
-
-            if "storageUnits" in values.keys() and values["storageUnits"] is not None:
-                # logger.debug("---------------Setting Storage-------------------------")
-                logger.debug("! ---------------Setting Storage------------------------- \n")
-                # radial=radial.to_dict()
-                storage = values["storageUnits"]
-                for storage_elements in storage:
-                    if not storage_elements["optimization_model"] in models_list:
-                        message = "Following optimization models are possible: " + str(models_list)
-                        return message
         return id
     else:
         return "Bad JSON Format"
-    
+
+def is_PV(radial):
+    for values in radial:
+        if "photovoltaics" in values:
+            return True
+        else:
+            return False
+
+def get_PV_nodes(list_pv):
+    bus=[]
+    for pv_element in list_pv:
+        bus.append(pv_element["bus1"])
+    return bus
+
+
 def get_simulation_result(id):  # noqa: E501
     """Get a simulation result
 
