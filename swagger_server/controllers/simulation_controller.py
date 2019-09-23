@@ -51,7 +51,7 @@ def create_simulation(body):  # noqa: E501
         redis_db.set("run:" + id, "created")
 
         radial = data["radials"]
-        models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts", "testmodel"] #added testmodel
+        models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts", "testmodel","voltage-stabilization"] #added testmodel
 
         for values in radial:
 

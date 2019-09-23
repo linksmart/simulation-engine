@@ -14,9 +14,11 @@
       0.4,
       0.23
     ],
-    "url_storage_controller": "http://172.19.0.4:8080",
+    "url_storage_controller": "http://172.18.0.4:8080",
     "city": "Fur",
-    "country": "Denmark"
+    "country": "Denmark",
+    "max_real_power_in_kW_to_grid":1,
+"max_reactive_power_in_kVar_to_grid":1
   },
   "radials": [
     {
@@ -209,7 +211,8 @@
           "kV": 0.23
         }
       ],
-      "storageUnits": [],
+      "storageUnits": [
+      ],
       "loads": [
         {
           "id": "consumer_4018368",

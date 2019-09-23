@@ -210,7 +210,9 @@ def plot_node_in_every_test(path,node_name,mapping_name):
     #################################
     pv_difference=[]
     for element in range(linecount):
+
         pv_difference.append(pv[element] - p_pv_curt[element])
+        pass
     print("difference between pv and curt "+str(pv_difference))
 
     ######################
@@ -435,6 +437,14 @@ def plot_differences(pathA,pathB,node,nameA,nameB,mappingA,mappingB):
     plt.legend()
     plt.savefig(node + "_deviations.png")
     plt.show()
+def voltage_prediction(path,mapping_name):
+    output_file = open("voltage_prediction.txt", "w+")
+    output_json={}
+    for node_name in get_relevant_nodes():
+
+        voltage_profile=calculate_voltage(path,node_name,mapping_name)
+        output_json[node_name]=voltage_profile["0%"]
+    output_file.write(str(output_json))
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
 
@@ -443,8 +453,9 @@ def plot_differences(pathA,pathB,node,nameA,nameB,mappingA,mappingB):
 #run_simulation(array_of_ids[0],10)
 #response = http.get(domain + "commands/status/" + str(array_of_ids[0]))
 #print(response)
+#voltage_prediction("PVTest/","mapping")
 
-#run_all(24)
+#run_all(48)
 #calculate_pv_size("PVTest/cc589737d784/cc589737d784_pv_result","C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential")
 #print(array_of_ids)
 
@@ -457,7 +468,7 @@ def plot_differences(pathA,pathB,node,nameA,nameB,mappingA,mappingB):
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 path="C:/Users/klingenb/Documents/BAThesis/Results/TestStorages/self-consumption/"
 #plot_node_in_every_test(path,"node_a12","mapping_SC_1kw_P_Bigger_ESS")
-plot_node_in_every_test("StorageTest/","node_a12","mappingSC_big_ESS_Curt")
+plot_node_in_every_test("StorageTest/","node_a12","SP_big_ESS_Curt48hours")
 #plot_node_in_every_test("PVTest/","node_a12","mapping")
 #plot_differences("PVTest/","StorageTest/","node_a12","Only PV","Minimize costs 1kw max export","mapping","mappingBigESS1kwMC")
 
