@@ -10,7 +10,7 @@ logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', le
 logger = logging.getLogger(__file__)
 
 
-class Profess:
+class Profev:
     def __init__(self, domain, topology):
         """
 
@@ -315,10 +315,8 @@ class Profess:
                         storage = node_element
                         storage_opt_model = storage["storageUnits"]["optimization_model"]
                 if optimization_model is None:
-                    #ToDo setup an error and then break
                     optimization_model = storage_opt_model
-                    break
-                start_response = self.start(1, 24, 3600, optimization_model, 1, "cbc", "discrete",
+                start_response = self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete",
                                             self.get_profess_id(node_name))
                 if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response, node_name)
