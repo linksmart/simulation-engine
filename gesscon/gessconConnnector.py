@@ -2,6 +2,7 @@ import datetime
 import logging
 import json
 import numpy as np
+import time
 from data_management.utils import Utils
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
@@ -12,6 +13,7 @@ class GESSCon():
 	def __init__(self):
 		self.soc_nodes = ""
 		self.soc_ids = ""
+		self.payload = []
 		self.utils = Utils()
 		
 	def get_ESS_data_format(self, storage):
@@ -74,7 +76,7 @@ class GESSCon():
 	# 	return aggregate_list
 	
 	def create_tele_config(self, Soc):
-		soc_values = {}
+		soc_values = []
 		len_soc = len(Soc)
 		b_max = []
 		pc_max = []
@@ -82,12 +84,12 @@ class GESSCon():
 		soc_nodes = []
 		soc_ids = []
 		for s in (Soc):
-			soc_value = {}
+			# soc_value = {}
 			soc_node = list(s.keys())[0]
-			soc_nodes.append(soc_node)
-			soc_ids.append(s[soc_node]['id'])
-			soc_value["SoC"] = s[soc_node]['SoC']
-			soc_values[soc_node] = soc_value
+			# soc_nodes.append(soc_node)
+			# soc_ids.append(s[soc_node]['id'])
+			# soc_value["SoC"] = s[soc_node]['SoC']
+			soc_values.append(s[soc_node]['SoC'])
 			b_max.append(s[soc_node]['Battery_Capacity'])
 			pc_max.append(s[soc_node]['max_charging_power'])
 			pd_max.append(s[soc_node]['max_discharging_power'])
@@ -135,7 +137,9 @@ class GESSCon():
 		demand = []
 		pv_list = []
 		ev_list  =[]
+		#string to date
 		start_date = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
+		#timestamp from date to date format
 		start_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
 		for val in range(24):
 			date = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
@@ -158,34 +162,44 @@ class GESSCon():
 		payload = json.dumps(payload_var)
 
 		logger.info("Payload: %s", payload_var)
-		result= self.on_msg_received(payload)
-		return result
+		# result= self.on_msg_received(payload)
+		# return result
 		# MQTT
-		# mqtt_send = MQTTClient("mosquito_S4G1", 1883, "gesscon_send")
-		# mqtt_receive = MQTTClient("mosquito_S4G1", 1883, "gesscon_receive")
-		# mqtt_receive.subscribe_to_topics([("gesscon/data",2)], self.on_msg_received)
+		mqtt_send = MQTTClient("mosquito_S4G1", 1883, "gesscon_send")
+		# mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path="/etc/openvpn/s4g-ca.crt",
+        #          set_insecure=True, id=None)
+		# mqtt_receive = MQTTClient("10.8.0.50", 8883, "gesscon_receive", keepalive=60, username="fronius-fur",
+		#                        password="r>U@U7J8xZ+fu_vq", ca_cert_path="/etc/openvpn/s4g-ca.crt",
+		#                        set_insecure=True, id=None)
+		mqtt_receive = MQTTClient("mosquito_S4G1", 1883, "gesscon_receive")
+		mqtt_receive.subscribe_to_topics([("gesscon/data",2)], self.on_msg_received)
 		# logger.debug("successfully subscribed")
 		#
-		# mqtt_send.publish("gesscon/data", payload, True)
-		# mqtt_send.MQTTExit()
-		# mqtt_receive.MQTTExit()
+		mqtt_send.publish("gesscon/data", payload, True)
+		time.sleep(5)
+		# mqtt_send.publish("GessconSimulationInput", "hello", True)
+		mqtt_send.MQTTExit()
+		mqtt_receive.MQTTExit()
+		return self.payload
 		
 
 	def on_msg_received(self, payload):
 		# Mock Output from GESSCon
 		output_list = []
-
-		path = self.utils.get_path("gesscon/gesscon_output.json")
-		with open(path, "r") as file:
-			dict_data = json.load(file)
-		logger.debug(dict_data)
-		dict_data = dict_data['data']
-		for node_data, node, id in zip(dict_data, self.soc_nodes, self.soc_ids):
-			id_output = {id: node_data}
-			output_node = {node: id_output}
-			output_list.append(output_node)
-		logger.debug(output_list)
-		return output_list
+		print("hello")
+		self.payload = []
+		return(payload)
+		# path = self.utils.get_path("gesscon/gesscon_output.json")
+		# with open(path, "r") as file:
+		# 	dict_data = json.load(file)
+		# logger.debug(dict_data)
+		# dict_data = dict_data['data']
+		# for node_data, node, id in zip(dict_data, self.soc_nodes, self.soc_ids):
+		# 	id_output = {id: node_data}
+		# 	output_node = {node: id_output}
+		# 	output_list.append(output_node)
+		# logger.debug(output_list)
+		# return output_list
 
 #### Dummy data ####
 # price = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -248,8 +262,8 @@ class GESSCon():
 
 
 #### Dummy data ####
-"""
-price = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+price = [1.909825, 1.83985, 1.8422625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.019425]
 
 storage = {"storageUnits": [
 	{
@@ -257,7 +271,7 @@ storage = {"storageUnits": [
 		"bus1": "633",
 		"phases": 3,
 		"connection": "wye",
-		"soc": 0,
+		"soc": 0.1,
 		"dod": 0,
 		"kv": 0,
 		"kw_rated": 0,
@@ -275,7 +289,7 @@ storage = {"storageUnits": [
 		"bus1": "671",
 		"phases": 3,
 		"connection": "wye",
-		"soc": 0,
+		"soc": 0.2,
 		"dod": 0,
 		"kv": 0,
 		"kw_rated": 0,
@@ -305,9 +319,7 @@ load = [{'633':
 0, 0, 9]}},
 {'671': {'671.1.2.3': [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0]}}]
->>>>>>> origin/gustavo
 
-# g = GESSCon()
-# Soc = g.get_ESS_data_format(storage)
-# g.gesscon(load, pv, price, Soc)
-"""
+g = GESSCon()
+Soc = g.get_ESS_data_format(storage)
+g.gesscon(load, pv, price, Soc)
