@@ -15,7 +15,7 @@ class ElectricVehicle(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, so_c: float=None, battery_capacity_k_wh: float=None, unit_consumption_assumption: float=5.0, unit_drop_penalty: float=None):  # noqa: E501
+    def __init__(self, id: str=None, so_c: float=None, battery_capacity_k_wh: float=None, consumption_in_k_w_pro_100_km: float=None, unit_consumption_assumption: float=5.0, unit_drop_penalty: float=None, unplugged_mean: float=None, unplugged_mean_std: float=None, plugged_mean: float=None, plugged_mean_std: float=None):  # noqa: E501
         """ElectricVehicle - a model defined in Swagger
 
         :param id: The id of this ElectricVehicle.  # noqa: E501
@@ -24,32 +24,57 @@ class ElectricVehicle(Model):
         :type so_c: float
         :param battery_capacity_k_wh: The battery_capacity_k_wh of this ElectricVehicle.  # noqa: E501
         :type battery_capacity_k_wh: float
+        :param consumption_in_k_w_pro_100_km: The consumption_in_k_w_pro_100_km of this ElectricVehicle.  # noqa: E501
+        :type consumption_in_k_w_pro_100_km: float
         :param unit_consumption_assumption: The unit_consumption_assumption of this ElectricVehicle.  # noqa: E501
         :type unit_consumption_assumption: float
         :param unit_drop_penalty: The unit_drop_penalty of this ElectricVehicle.  # noqa: E501
         :type unit_drop_penalty: float
+        :param unplugged_mean: The unplugged_mean of this ElectricVehicle.  # noqa: E501
+        :type unplugged_mean: float
+        :param unplugged_mean_std: The unplugged_mean_std of this ElectricVehicle.  # noqa: E501
+        :type unplugged_mean_std: float
+        :param plugged_mean: The plugged_mean of this ElectricVehicle.  # noqa: E501
+        :type plugged_mean: float
+        :param plugged_mean_std: The plugged_mean_std of this ElectricVehicle.  # noqa: E501
+        :type plugged_mean_std: float
         """
         self.swagger_types = {
             'id': str,
             'so_c': float,
             'battery_capacity_k_wh': float,
+            'consumption_in_k_w_pro_100_km': float,
             'unit_consumption_assumption': float,
-            'unit_drop_penalty': float
+            'unit_drop_penalty': float,
+            'unplugged_mean': float,
+            'unplugged_mean_std': float,
+            'plugged_mean': float,
+            'plugged_mean_std': float
         }
 
         self.attribute_map = {
             'id': 'id',
             'so_c': 'SoC',
             'battery_capacity_k_wh': 'battery_capacity_kWh',
+            'consumption_in_k_w_pro_100_km': 'consumption_in_kW_pro_100_km',
             'unit_consumption_assumption': 'unit_consumption_assumption',
-            'unit_drop_penalty': 'unit_drop_penalty'
+            'unit_drop_penalty': 'unit_drop_penalty',
+            'unplugged_mean': 'unplugged_mean',
+            'unplugged_mean_std': 'unplugged_mean_std',
+            'plugged_mean': 'plugged_mean',
+            'plugged_mean_std': 'plugged_mean_std'
         }
 
         self._id = id
         self._so_c = so_c
         self._battery_capacity_k_wh = battery_capacity_k_wh
+        self._consumption_in_k_w_pro_100_km = consumption_in_k_w_pro_100_km
         self._unit_consumption_assumption = unit_consumption_assumption
         self._unit_drop_penalty = unit_drop_penalty
+        self._unplugged_mean = unplugged_mean
+        self._unplugged_mean_std = unplugged_mean_std
+        self._plugged_mean = plugged_mean
+        self._plugged_mean_std = plugged_mean_std
 
     @classmethod
     def from_dict(cls, dikt) -> 'ElectricVehicle':
@@ -136,6 +161,29 @@ class ElectricVehicle(Model):
         self._battery_capacity_k_wh = battery_capacity_k_wh
 
     @property
+    def consumption_in_k_w_pro_100_km(self) -> float:
+        """Gets the consumption_in_k_w_pro_100_km of this ElectricVehicle.
+
+
+        :return: The consumption_in_k_w_pro_100_km of this ElectricVehicle.
+        :rtype: float
+        """
+        return self._consumption_in_k_w_pro_100_km
+
+    @consumption_in_k_w_pro_100_km.setter
+    def consumption_in_k_w_pro_100_km(self, consumption_in_k_w_pro_100_km: float):
+        """Sets the consumption_in_k_w_pro_100_km of this ElectricVehicle.
+
+
+        :param consumption_in_k_w_pro_100_km: The consumption_in_k_w_pro_100_km of this ElectricVehicle.
+        :type consumption_in_k_w_pro_100_km: float
+        """
+        if consumption_in_k_w_pro_100_km is None:
+            raise ValueError("Invalid value for `consumption_in_k_w_pro_100_km`, must not be `None`")  # noqa: E501
+
+        self._consumption_in_k_w_pro_100_km = consumption_in_k_w_pro_100_km
+
+    @property
     def unit_consumption_assumption(self) -> float:
         """Gets the unit_consumption_assumption of this ElectricVehicle.
 
@@ -176,3 +224,87 @@ class ElectricVehicle(Model):
         """
 
         self._unit_drop_penalty = unit_drop_penalty
+
+    @property
+    def unplugged_mean(self) -> float:
+        """Gets the unplugged_mean of this ElectricVehicle.
+
+
+        :return: The unplugged_mean of this ElectricVehicle.
+        :rtype: float
+        """
+        return self._unplugged_mean
+
+    @unplugged_mean.setter
+    def unplugged_mean(self, unplugged_mean: float):
+        """Sets the unplugged_mean of this ElectricVehicle.
+
+
+        :param unplugged_mean: The unplugged_mean of this ElectricVehicle.
+        :type unplugged_mean: float
+        """
+
+        self._unplugged_mean = unplugged_mean
+
+    @property
+    def unplugged_mean_std(self) -> float:
+        """Gets the unplugged_mean_std of this ElectricVehicle.
+
+
+        :return: The unplugged_mean_std of this ElectricVehicle.
+        :rtype: float
+        """
+        return self._unplugged_mean_std
+
+    @unplugged_mean_std.setter
+    def unplugged_mean_std(self, unplugged_mean_std: float):
+        """Sets the unplugged_mean_std of this ElectricVehicle.
+
+
+        :param unplugged_mean_std: The unplugged_mean_std of this ElectricVehicle.
+        :type unplugged_mean_std: float
+        """
+
+        self._unplugged_mean_std = unplugged_mean_std
+
+    @property
+    def plugged_mean(self) -> float:
+        """Gets the plugged_mean of this ElectricVehicle.
+
+
+        :return: The plugged_mean of this ElectricVehicle.
+        :rtype: float
+        """
+        return self._plugged_mean
+
+    @plugged_mean.setter
+    def plugged_mean(self, plugged_mean: float):
+        """Sets the plugged_mean of this ElectricVehicle.
+
+
+        :param plugged_mean: The plugged_mean of this ElectricVehicle.
+        :type plugged_mean: float
+        """
+
+        self._plugged_mean = plugged_mean
+
+    @property
+    def plugged_mean_std(self) -> float:
+        """Gets the plugged_mean_std of this ElectricVehicle.
+
+
+        :return: The plugged_mean_std of this ElectricVehicle.
+        :rtype: float
+        """
+        return self._plugged_mean_std
+
+    @plugged_mean_std.setter
+    def plugged_mean_std(self, plugged_mean_std: float):
+        """Sets the plugged_mean_std of this ElectricVehicle.
+
+
+        :param plugged_mean_std: The plugged_mean_std of this ElectricVehicle.
+        :type plugged_mean_std: float
+        """
+
+        self._plugged_mean_std = plugged_mean_std

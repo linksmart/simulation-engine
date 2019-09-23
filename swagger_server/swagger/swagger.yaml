@@ -621,16 +621,26 @@ definitions:
     properties:
       id:
         type: "string"
+      bus:
+        type: "string"
+        description: "ID for the connected bus"
+      phases:
+        type: "integer"
+      kV:
+        type: "number"
+      max_charging_power_kW:
+        type: "number"
+        format: "float"
+      charging_efficiency:
+        type: "number"
+        minimum: 0
+        maximum: 100
+      powerfactor:
+        type: "number"
       type_application:
         type: "string"
         description: "residential or commercial"
         default: "residential"
-      bus:
-        type: "string"
-        description: "ID for the connected bus"
-      max_charging_power_kW:
-        type: "number"
-        format: "float"
       hosted_ev:
         type: "array"
         items:
@@ -640,6 +650,7 @@ definitions:
     required:
     - "SoC"
     - "battery_capacity_kWh"
+    - "consumption_in_kW_pro_100_km"
     - "id"
     properties:
       id:
@@ -651,11 +662,21 @@ definitions:
       battery_capacity_kWh:
         type: "number"
         format: "float"
+      consumption_in_kW_pro_100_km:
+        type: "number"
       unit_consumption_assumption:
         type: "number"
         format: "float"
         default: 5.0
       unit_drop_penalty:
+        type: "number"
+      unplugged_mean:
+        type: "number"
+      unplugged_mean_std:
+        type: "number"
+      plugged_mean:
+        type: "number"
+      plugged_mean_std:
         type: "number"
   Winding:
     type: "object"

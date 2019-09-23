@@ -1,5 +1,7 @@
 from profess.Http_commands import Http_commands
 import re
+import os
+from data_management.utils import Utils
 import copy
 from profess.JSONparser import *
 import simplejson as json
@@ -11,12 +13,14 @@ logger = logging.getLogger(__file__)
 
 
 class Profess:
-    def __init__(self, domain, topology):
+    def __init__(self, domain, topology, id):
         """
 
         :param domain: domain where the ofw is reached
         :param topology: grid topology which is used for the optimization
         """
+        self.id=id
+        self.utils = Utils()
         self.domain = domain  # domainName is different on operating systems
         self.dataList = []  # list where all config data of nodes are saved
         self.httpClass = Http_commands()
@@ -61,7 +65,6 @@ class Profess:
                 }
             },
             "generic": {
-            "mu_P": 0.666
             },
             "ESS": {
                 "meta": {
@@ -72,7 +75,7 @@ class Profess:
         self.list_with_desired_output_parameters = ["P_ESS_Output", "P_PV_Output", "P_PV_R_Output", "P_PV_S_Output"
 
             , "P_PV_T_Output", "Q_PV_Output", "Q_PV_R_Output", "Q_PV_S_Output", "Q_PV_T_Output"]
-
+        self.profess_output_list=[]
         logger.debug("Profess instance created")
 
     def post_model(self, model_name, model_data):
@@ -260,6 +263,27 @@ class Profess:
                     output_list.append({profess_id: self.get_output(profess_id)})
             logger.debug("OFW finished, all optimizations stopped")
             translated_output = self.translate_output(output_list)
+            output_this_timestep={}
+            for node_name in self.json_parser.get_node_name_list():
+                output_this_timestep[node_name]={"input":{},"output":{}}
+                node_number = self.json_parser.get_node_name_list().index(node_name)
+                input_for_profess = self.dataList[node_number][node_name]
+
+                output_this_timestep[node_name]["input"]=copy.deepcopy(input_for_profess)
+                for parameter_output_list in output_list:
+                    for profess_id in parameter_output_list:
+                        logger.debug("profess output "+str(profess_id)+" , and: "+str(parameter_output_list))
+                        for element in output_this_timestep[node_name]["input"]:
+                            profess_id_for_node=element
+
+                        logger.debug("profess id "+ str(profess_id_for_node))
+                        if profess_id==profess_id_for_node:
+                            output_this_timestep[node_name]["output"] = copy.deepcopy(parameter_output_list)
+                self.profess_output_list.append(output_this_timestep)
+            fname = (str(self.id)) + "_profess_result"
+            path = os.path.join("data", str(self.id), fname)
+            self.utils.store_data(path, self.profess_output_list)
+
             return translated_output
         else:
             return []
