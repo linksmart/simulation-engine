@@ -445,6 +445,20 @@ def voltage_prediction(path,mapping_name):
         voltage_profile=calculate_voltage(path,node_name,mapping_name)
         output_json[node_name]=voltage_profile["0%"]
     output_file.write(str(output_json))
+def helper():
+    desired="node_a12"
+    output=[]
+    input_file = open("professresults.txt").read()#
+    input_yaml=yaml.load(input_file)
+    output_file = open("profess_result_a12.txt","w+")
+    for timestep in input_yaml:
+        for node_name in timestep:
+            #print(node_name)
+            print(timestep)
+            if node_name ==desired:
+                output.append(timestep[node_name])
+
+
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
 
@@ -458,7 +472,7 @@ def voltage_prediction(path,mapping_name):
 run_all(24)
 #calculate_pv_size("PVTest/cc589737d784/cc589737d784_pv_result","C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential")
 #print(array_of_ids)
-
+#helper()
 #iterate_result("PVTest/")
 #file=open("4a88bbde8854_result_raw.json").read()
 
