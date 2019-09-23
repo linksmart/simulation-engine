@@ -3,6 +3,8 @@ import json
 import os
 import time
 import sys
+import yaml
+import copy
 
 from profess.JSONparser import *
 from profess.Profess import *
@@ -231,8 +233,10 @@ class gridController(threading.Thread):
 
 
         fname = (str(self.id)) + "_result_pv"
-
-
+        voltage_prediction_path = "profiles/Voltageprediction/voltage_prediction100.txt"
+        voltage_prediction_file = open(voltage_prediction_path).read()
+        voltage_prediction = yaml.load(voltage_prediction_file)
+        logger.debug("voltage prediction "+str(voltage_prediction))
         SoC_values_logger={}
 
         for element in soc_list:
@@ -241,6 +245,9 @@ class gridController(threading.Thread):
                 logger.debug("battery added " + str(battery_name))
                 SoC_values_logger[battery_name]={"SoC":[],"P_ESS":[],"P_PV":[]}
         logger.debug("final soc_values_logger "+ str(SoC_values_logger))
+        node_name_for_logging= "node_a12"
+        output_logger=[]
+        pv_profile_profess = []
         for i in range(numSteps):
             #time.sleep(0.1)
             logger.info("#####################################################################")
@@ -287,8 +294,21 @@ class gridController(threading.Thread):
                         data_without_commas=data_without_end.split(", ")
                         data_list = [float(i)*100 for i in data_without_commas]
                     price_profile = data_list[int(hours):int(hours + 24)]
-                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs,price_profile)
+                    voltage_prediction_output={}
+                    for element in voltage_prediction:
+                        voltage_prediction_output[element]=voltage_prediction[element][int(hours):int(hours + 24)]
+                    logger.debug("the voltage prediction : "+ str(voltage_prediction_output))
+                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs,price_profile, None,voltage_prediction_output)
+                    ###############################################
+                    for element in soc_list_new:
+                        logger.debug(" element name in soc "+str(element))
+                        if node_name_for_logging in element:
+                            output_logger.append({"input":{"soc":element[node_name_for_logging]}})
 
+                        else:
+                            logger.debug("element "+str(element)+" ,node_name "+node_name_for_logging)
+
+                    ###############################################
                 status_profess=self.profess.start_all()
 
                 if not status_profess:
@@ -299,6 +319,7 @@ class gridController(threading.Thread):
                     # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
 
                     profess_result=[]
+
                     for element in profess_output:
                         profess_result_intern = {}
                         for key, value in element.items():
@@ -314,10 +335,15 @@ class gridController(threading.Thread):
                             for profess_id, results in value.items():
                                 for key_results, powers in results.items():
                                     profess_result_intern[node_name][key_results] = powers
+                            #############################
+                            if node_name == node_name_for_logging:
 
+                                output_logger[i]["output"]=value
                         profess_result.append(profess_result_intern)
+
                     logger.debug("profess result: "+str(profess_result))
 
+                    pv_profile_profess_intern = []
                     for element in profess_result:
                         ess_name = None
                         pv_name = None
@@ -332,8 +358,12 @@ class gridController(threading.Thread):
                             p_pv_output = value["P_PV_Output"]
                             max_charging_power = value["max_charging_power"]
                             max_discharging_power = value["max_discharging_power"]
+
+
                         self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
                         self.sim.setActivePowertoPV(pv_name, p_pv_output)
+                        pv_profile_profess_intern.append({str(pv_name):p_pv_output})
+                    pv_profile_profess.append(pv_profile_profess_intern)
                 else:
                     logger.error("OFW instances could not be started")
 
@@ -542,6 +572,12 @@ class gridController(threading.Thread):
         fname = (str(self.id))+"_soc_result"
         path = os.path.join("data", str(self.id), fname)
         self.utils.store_data(path, SoC_values_logger)
+        fname = (str(self.id))+"_pv_curt_result"
+        path = os.path.join("data", str(self.id), fname)
+        self.utils.store_data(path, pv_profile_profess)
+        fname = (str(self.id))+"_profess_result_a12"
+        path = os.path.join("data", str(self.id), fname)
+        self.utils.store_data(path, output_logger)
         self.redisDB.set(self.finish_status_key, "True")
 
 
