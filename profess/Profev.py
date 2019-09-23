@@ -49,7 +49,7 @@ class Profev:
         self.standard_data = {"load": {
             "meta": {
             }
-        },
+            },
             "photovoltaic": {
                 "meta": {
                 }
@@ -66,12 +66,38 @@ class Profev:
                 "meta": {
                 }
             },
+            "EV":{
+                "meta": {
+
+                }
+            },
+            "chargers":{
+
+            },
+            "uncertainty": {
+                "Plugged_Time": {
+
+                },
+                "Unplugged_Time": {
+
+                },
+                "ESS_States": {
+
+                },
+                "VAC_States": {
+
+                },
+                "meta": {
+                    "monte_carlo_repetition": 1000
+                }
+            },
+
             "global_control": {}
         }
         self.list_with_desired_output_parameters = ["P_ESS_Output", "P_PV_Output", "P_PV_R_Output", "P_PV_S_Output"
             , "P_PV_T_Output", "Q_PV_Output", "Q_PV_R_Output", "Q_PV_S_Output", "Q_PV_T_Output"]
 
-        logger.debug("Profess instance created")
+        logger.debug("Profev instance created")
 
     def post_model(self, model_name, model_data):
         """

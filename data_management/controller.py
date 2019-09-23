@@ -6,6 +6,7 @@ import sys
 
 from profess.JSONparser import *
 from profess.Profess import *
+from profess.Profev import *
 
 from simulator.openDSS import OpenDSS
 from data_management.redisDB import RedisDB
@@ -183,6 +184,7 @@ class gridController(threading.Thread):
         self.domain = self.get_profess_url() + "/v1/"
         logger.debug("profess url: " + str(self.domain))
         self.profess = Profess(self.domain, self.topology)
+        self.profev = Profev(self.domain, self.topology)
 
 
 
@@ -303,7 +305,7 @@ class gridController(threading.Thread):
             ################  Storage control  ###################################################
             ######################################################################################
 
-            if flag_is_storage:
+            """if flag_is_storage:
 
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
                 #logger.debug("loads "+str(professLoads))
@@ -386,7 +388,7 @@ class gridController(threading.Thread):
 
 
             else:
-                logger.debug("No Storage Units present")
+                logger.debug("No Storage Units present")"""
 
             ######################################################################################
             ################  Charging station control  ###################################################
@@ -394,6 +396,18 @@ class gridController(threading.Thread):
 
             if flag_is_charging_station:
                 logger.debug("charging stations present in the simulation")
+                node_names_for_profiles = self.profev.json_parser.get_node_element_list()
+                logger.debug("node names "+str(node_names_for_profiles))
+                profevLoads = self.sim.getProfessLoadschapes(node_names_for_profiles, hours, 24)
+                logger.debug("profev loads "+str(profevLoads))
+                profevPVs = self.sim.getProfessLoadschapesPV(hours, 24)
+                logger.debug("profev PVs "+str(profevPVs))
+
+                if flag_is_price_profile_needed and self.input.is_price_profile():
+                    logger.debug("price profile present")
+                    price_profile = price_profile_data[int(hours):int(hours + 24)]
+
+                soc_list_new = self.set_new_soc(soc_list)
 
                 chargers = self.sim.get_chargers()
                 for key, charger_element in chargers.items():

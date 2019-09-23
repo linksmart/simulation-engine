@@ -591,16 +591,17 @@ class OpenDSS:
 
 
 
-    def getProfessLoadschapes(self, start: int, size=24):
+    def getProfessLoadschapes(self, node_name_list, start: int, size=24):
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
-        logger.debug( "getProfessLoadschapes")
+        #logger.debug( "getProfessLoadschapes")
         try:
             for key, value in self.loadshapes_for_loads.items():
                 load_id = key
                 bus_name = value["bus"]
                 main_bus_name = bus_name.split('.', 1)[0]
+                logger.debug("main bus name "+str(main_bus_name))
                 #print("bus_name: " + str(bus_name) + ", main_bus_name: " + str(main_bus_name))
                 loadshape = value["loadshape"]
                 #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
