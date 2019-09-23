@@ -55,6 +55,33 @@ class gridController(threading.Thread):
     def get_profess_url(self):
         return self.profess_url
 
+    def get_PV_names(self, topology):
+        PV_names = []
+        radial = topology["radials"]  # ["storageUnits"]
+        photovoltaics = []
+        for element in radial:
+            for key, value in element.items():
+                if key == "photovoltaics":
+                    photovoltaics = value
+
+        for pv_element in photovoltaics:
+            PV_names.append(pv_element["id"])
+        return PV_names
+
+    def get_Storage_names(self, topology):
+        Storage_names = []
+        radial = topology["radials"]  # ["storageUnits"]
+        storages = []
+
+        for element in radial:
+            for key, value in element.items():
+                if key == "storageUnits":
+                    storages = value
+
+        for ess_element in storages:
+            Storage_names.append(ess_element["id"])
+        return Storage_names
+
     def get_soc_list(self,topology, sim_hours):
         radial=topology["radials"]#["storageUnits"]
         common=topology["common"]
@@ -215,8 +242,12 @@ class gridController(threading.Thread):
         voltages = [[] for i in range(len(nodeNames))]
         currents = [[] for i in range(len_nodeNamesCurrents)]
         losses = [[] for i in range(len_elementNames)]
+
+        PV_names= self.get_PV_names(self.topology)
+        logger.debug("PV_names "+str(PV_names))
         total_losses = []
-        powers = [[] for i in range(len(nodeNames))]
+        #powers_pv_curtailed = [[] for i in range(len(nodeNames))]
+        powers_pv_curtailed = [[] for i in range(len(PV_names))]
 
         soc_list = self.get_soc_list(self.topology, self.sim_hours)
         charging = True
@@ -267,7 +298,7 @@ class gridController(threading.Thread):
             ################  Storage control  ###################################################
             ######################################################################################
 
-            """if flag_is_storage:
+            if flag_is_storage:
 
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
                 #logger.debug("loads "+str(professLoads))
@@ -335,6 +366,8 @@ class gridController(threading.Thread):
                             max_discharging_power = value["max_discharging_power"]
                         self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
                         self.sim.setActivePowertoPV(pv_name, p_pv_output)
+                        #### Creating lists for storing values
+                        powers_pv_curtailed[PV_names.index(pv_name)].append(p_pv_output)
                 else:
                     logger.error("OFW instances could not be started")
 
@@ -346,7 +379,7 @@ class gridController(threading.Thread):
 
 
             else:
-                logger.debug("No Storage Units present")"""
+                logger.debug("No Storage Units present")
 
             ######################################################################################
             ################  Charging station control  ###################################################
@@ -417,6 +450,7 @@ class gridController(threading.Thread):
         raw_data_currents={}
         raw_data_losses={}
         raw_data_power={}
+        raw_data_pv_curtailment = {}
 
         ############################### Losses ###################################
 
@@ -483,6 +517,9 @@ class gridController(threading.Thread):
 
         raw_data = {"voltages": raw_data_voltages, "currents": raw_data_currents, "losses": raw_data_losses, "powers": raw_data_power}
 
+        for i in range(len(PV_names)):
+            raw_data_pv_curtailment[PV_names[i]] = powers_pv_curtailed[i]
+
 
 
         result=data
@@ -498,6 +535,9 @@ class gridController(threading.Thread):
         fname_row = (str(self.id)) + "_result_raw.json"
         path = os.path.join("data", str(self.id), fname_row)
         self.utils.store_data_raw(path, raw_data)
+        fname_row = (str(self.id)) + "_pv_curtailed_raw.json"
+        path = os.path.join("data", str(self.id), fname_row)
+        self.utils.store_data_raw(path, raw_data_pv_curtailment)
         logger.debug("Raw data successfully stored")
         self.redisDB.set(self.finish_status_key, "True")
 

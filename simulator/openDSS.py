@@ -156,6 +156,7 @@ class OpenDSS:
 
         return S_total
 
+
     def get_total_losses(self):
         return dss.Circuit.Losses()
 
