@@ -37,6 +37,7 @@ class OpenDSS:
         dss_string="Set DefaultBaseFrequency="+str(frequency)
         logger.debug(dss_string)
         dss.run_command(dss_string)
+        self.dss_script += (dss_string + "\n")
 
     def setNewCircuit(self, name, common):
         self.common = common
@@ -73,6 +74,7 @@ class OpenDSS:
             )
             print(dss_string + "\n")
             dss.run_command(dss_string)
+            self.dss_script += (dss_string + "\n")
         except Exception as e:
             logger.error(e)
 
@@ -112,6 +114,7 @@ class OpenDSS:
             dss_string=dss_string+" terminal="+str(terminal)
         logger.debug(dss_string)
         dss.run_command(dss_string)
+        self.dss_script += (dss_string + "\n")
         #dss.Monitors.Name(name)
         #logger.debug("Name " + str(dss.Monitors.Name()))
         #dss.Monitors.Element(element_name)
@@ -192,6 +195,7 @@ class OpenDSS:
             dss_string="Storage."+str(battery_name)+".State = Charging"
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
+            self.dss_script += (dss_string + "\n")
         else:
             """route_name="Storage."+str(battery_name)
             dss_string=route_name+".kWrated = "+str(power)
@@ -208,6 +212,7 @@ class OpenDSS:
             dss_string = "Storage." + str(battery_name) + ".State = Discharging"
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
+
 
     def update_storage(self):
         dss.Circuit.UpdateStorage()
