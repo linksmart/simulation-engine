@@ -600,22 +600,24 @@ class OpenDSS:
             for key, value in self.loadshapes_for_loads.items():
                 load_id = key
                 bus_name = value["bus"]
+                logger.debug("bus name " + str(bus_name))
                 main_bus_name = bus_name.split('.', 1)[0]
                 logger.debug("main bus name "+str(main_bus_name))
-                #print("bus_name: " + str(bus_name) + ", main_bus_name: " + str(main_bus_name))
-                loadshape = value["loadshape"]
-                #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
-                loadshape_portion=loadshape[int(start):int(start+size)]
-                #print("loadshape_portion: " + str(loadshape_portion))
-                bus_loadshape={bus_name:loadshape_portion}
-                #print("bus_loadshape: " + str(bus_loadshape))
+                if main_bus_name in node_name_list:
+                    #print("bus_name: " + str(bus_name) + ", main_bus_name: " + str(main_bus_name))
+                    loadshape = value["loadshape"]
+                    #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
+                    loadshape_portion=loadshape[int(start):int(start+size)]
+                    #print("loadshape_portion: " + str(loadshape_portion))
+                    bus_loadshape={bus_name:loadshape_portion}
+                    #print("bus_loadshape: " + str(bus_loadshape))
 
-                if main_bus_name in result:
-                    # extend existing  element
-                    result[main_bus_name].update(bus_loadshape)
-                else:
-                    # add new element
-                    result[main_bus_name] = bus_loadshape
+                    if main_bus_name in result:
+                        # extend existing  element
+                        result[main_bus_name].update(bus_loadshape)
+                    else:
+                        # add new element
+                        result[main_bus_name] = bus_loadshape
         except Exception as e:
             logger.error(e)
         #print("resulting_loadshape_profess: " + str(result))
