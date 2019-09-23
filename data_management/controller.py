@@ -242,12 +242,17 @@ class gridController(threading.Thread):
         voltages = [[] for i in range(len(nodeNames))]
         currents = [[] for i in range(len_nodeNamesCurrents)]
         losses = [[] for i in range(len_elementNames)]
+        total_losses = []
+
 
         PV_names= self.get_PV_names(self.topology)
         logger.debug("PV_names "+str(PV_names))
-        total_losses = []
-        #powers_pv_curtailed = [[] for i in range(len(nodeNames))]
         powers_pv_curtailed = [[] for i in range(len(PV_names))]
+
+        ESS_names = self.get_Storage_names(self.topology)
+        logger.debug("ESS_names " + str(ESS_names))
+        soc_from_profess = [[] for i in range(len(ESS_names))]
+        ess_powers_from_profess = [[] for i in range(len(ESS_names))]
 
         soc_list = self.get_soc_list(self.topology, self.sim_hours)
         charging = True
@@ -368,6 +373,8 @@ class gridController(threading.Thread):
                         self.sim.setActivePowertoPV(pv_name, p_pv_output)
                         #### Creating lists for storing values
                         powers_pv_curtailed[PV_names.index(pv_name)].append(p_pv_output)
+                        soc_from_profess[ESS_names.index(ess_name)].append(self.sim.getSoCfromBattery(ess_name))
+                        ess_powers_from_profess[ESS_names.index(ess_name)].append(p_ess_output)
                 else:
                     logger.error("OFW instances could not be started")
 
@@ -450,7 +457,7 @@ class gridController(threading.Thread):
         raw_data_currents={}
         raw_data_losses={}
         raw_data_power={}
-        raw_data_pv_curtailment = {}
+
 
         ############################### Losses ###################################
 
@@ -517,9 +524,17 @@ class gridController(threading.Thread):
 
         raw_data = {"voltages": raw_data_voltages, "currents": raw_data_currents, "losses": raw_data_losses, "powers": raw_data_power}
 
+        raw_data_pv_curtailment = {}
         for i in range(len(PV_names)):
             raw_data_pv_curtailment[PV_names[i]] = powers_pv_curtailed[i]
 
+        raw_ess_power = {}
+        raw_ess_soc = {}
+        for i in range(len(ESS_names)):
+            raw_ess_soc[PV_names[i]]= soc_from_profess[i]
+            raw_ess_power[PV_names[i]]= ess_powers_from_profess[i]
+
+        raw_data_control = {"pv_curtailment": raw_data_pv_curtailment, "ESS_SoC": raw_ess_soc, "ESS_power": raw_ess_power}
 
 
         result=data
@@ -537,7 +552,7 @@ class gridController(threading.Thread):
         self.utils.store_data_raw(path, raw_data)
         fname_row = (str(self.id)) + "_pv_curtailed_raw.json"
         path = os.path.join("data", str(self.id), fname_row)
-        self.utils.store_data_raw(path, raw_data_pv_curtailment)
+        self.utils.store_data_raw(path, raw_data_control)
         logger.debug("Raw data successfully stored")
         self.redisDB.set(self.finish_status_key, "True")
 
