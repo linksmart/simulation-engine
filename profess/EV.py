@@ -40,11 +40,11 @@ class EV:
         return self.Soc
 
     def set_SoC(self, value):
-        if value < 0 or value >1:
+        if value < 0 or value >100:
             return 0
         else:
             self.Soc = value
-            return 1
+            return 100
 
     def get_Battery_Capacity(self):
         return self.Battery_Capacity
@@ -58,22 +58,27 @@ class EV:
         #Capacity = 18.700  # kWh
         if P_ev == -1:
             # logger.debug("car " + str(car) + " power " + str(power))
-            value = (self.Soc - (consumption_for_x_km / self.Battery_Capacity))
+            value = 100*((self.Soc/100) - (consumption_for_x_km / self.Battery_Capacity))
             logger.debug("value "+str(value))
             if value < 0:
                 return 0
             else:
                 return value
         else:
-            value = (self.Soc + (P_ev / self.Battery_Capacity))
+            value = 100*((self.Soc/100) + (P_ev / self.Battery_Capacity))
             logger.debug("value " + str(value))
-            if value > 1:
-                return 1
+            if value > 100:
+                return 100
             else:
                 return value
 
-    def get_position_profile(self):
-        return self.position_profile
+    def get_position_profile(self, start=None, number_of_elements=None):
+        if not start == None and not number_of_elements == None:
+            position_profile = self.position_profile[int(start):int(start + number_of_elements)]
+            return position_profile
+        else:
+            return self.position_profile
+
 
     def calculate_position(self, horizon, repetition):
         self.position_profile = self.uncertainty.monte_carlo_simulation(3600, horizon, repetition, self.unplugged_mean, self.unplugged_mean_std,
@@ -83,10 +88,14 @@ class EV:
 
 
 class Charger:
-    def __init__(self, Max_Capacity, list_EV_connected, type_application):
+    def __init__(self, Max_Capacity, list_EV_connected, max_charging_power, type_application):
         self.Max_Capacity = Max_Capacity
         self.EV_connected = list_EV_connected
+        self.max_charging_power = max_charging_power
         self.type_application = type_application
+
+    def get_max_charging_power(self):
+        return self.max_charging_power
 
     def get_type_application(self):
         return self.type_application

@@ -15,6 +15,7 @@ from gesscon.gessconConnnector import GESSCon
 from data_management.inputController import InputController
 from data_management.utils import Utils
 import threading
+import random
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -234,9 +235,9 @@ class gridController(threading.Thread):
             for key, charger_element in chargers.items():
                 evs_connected = charger_element.get_EV_connected()
                 for ev_unit in evs_connected:
-                    ev_unit.calculate_position(self.sim_hours, 1)
+                    ev_unit.calculate_position(self.sim_hours+24, 1)
                     #ev_unit.calculate_position(64, 1)
-                    position_profile = ev_unit.get_position_profile()
+                    #position_profile = ev_unit.get_position_profile()
                     #logger.debug("length position profile " + str(len(position_profile)))
         flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
         logger.debug("Flag price profile needed: "+str(flag_is_price_profile_needed))
@@ -266,7 +267,7 @@ class gridController(threading.Thread):
             ################  Storage control  ###################################################
             ######################################################################################
 
-            if flag_is_storage:
+            """if flag_is_storage:
 
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
                 #logger.debug("loads "+str(professLoads))
@@ -345,7 +346,7 @@ class gridController(threading.Thread):
 
 
             else:
-                logger.debug("No Storage Units present")
+                logger.debug("No Storage Units present")"""
 
             ######################################################################################
             ################  Charging station control  ###################################################
@@ -353,19 +354,36 @@ class gridController(threading.Thread):
 
             if flag_is_charging_station:
                 logger.debug("charging stations present in the simulation")
-                #check if is residential or commercial
-                if i is not 0:
-                    if not (i % 23):
-                        #every 24 timesteps we calculate a new position profile for each EV
-                        logger.debug("timestep % 23 " + str(i))
 
+                chargers = self.sim.get_chargers()
+                for key, charger_element in chargers.items():
+                    evs_connected = charger_element.get_EV_connected()
+                    for ev_unit in evs_connected:
+                        position_profile = ev_unit.get_position_profile(hours, 1)
+                        logger.debug("position profile: " + str(position_profile))
+                        if position_profile[0] == 1:
+                            #EV connected to the grid
+                            name = "Line_"+ev_unit.get_id()
+                            self.sim.set_switch(name, False)
+                            element_id = "ESS_"+ev_unit.get_id()
+                            #logger.debug("SoC EV " + str(self.sim.getSoCfromBattery(element_id)))
+                            SoC = float(self.sim.getSoCfromBattery(element_id))
+                            ev_unit.set_SoC(SoC)
+                            logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
+                            self.sim.setActivePowertoBatery(element_id, -1 * charger_element.get_max_charging_power(), charger_element.get_max_charging_power())
 
-                else:
-                    #first timestep of the simulation
-                    logger.debug("timestep % 23 " + str(i))
-
-
-                #send it to profev
+                        else:
+                            #EV not connected. Calculate EV SoC
+                            name = "Line_" + ev_unit.get_id()
+                            self.sim.set_switch(name, True)
+                            logger.debug(str(ev_unit.get_id())+" SoC: "+str(ev_unit.get_SoC()))
+                            number_km_driven = int(random.uniform(0,6))
+                            logger.debug("km driven "+str(number_km_driven))
+                            SoC = ev_unit.calculate_S0C_next_timestep(-1, number_km_driven)
+                            ev_unit.set_SoC(SoC)
+                            element_id = "ESS_" + ev_unit.get_id()
+                            self.sim.setSoCBattery(element_id, SoC)
+                            logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
 
             else:
                 logger.debug("No charging stations present in the simulation")

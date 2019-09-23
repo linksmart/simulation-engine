@@ -173,7 +173,21 @@ class OpenDSS:
         else:
             return 1
 
+    def set_switch(self, line_name, opened):
+        self.set_active_element(line_name)
+        if opened:
+            dss_string = "Line." + str(line_name) + ".Switch=y"
+        else:
+            dss_string = "Line." + str(line_name) + ".Switch=n"
 
+        logger.debug("dss_string " + str(dss_string))
+        dss.run_command(dss_string)
+
+    def setSoCtoBatery(self, battery_name, soc_value):
+        self.set_active_element(battery_name)
+        dss_string = "Storage." + str(battery_name) + ".%stored=" + str(int(soc_value))
+        logger.debug("dss_string " + str(dss_string))
+        dss.run_command(dss_string)
 
     def setActivePowertoBatery(self,battery_name, power, max_power):
         self.set_active_element(battery_name)
@@ -193,7 +207,7 @@ class OpenDSS:
                        dss.run_command('Storage.Akku1.kWrated = 30') # kWrated should be replaced with the value from PROFESS )
                        #dss.run_command('Storage.Akku1.kW = -5')
                        dss.run_command('Storage.Akku1.State = charging')"""
-        logger.debug("power " + str(power))
+        #logger.debug("power " + str(power))
         if power < 0:
             """route_name = "Storage." + str(battery_name)
             dss_string = route_name + ".kWrated = " + str(abs(power))
@@ -575,6 +589,7 @@ class OpenDSS:
 
 
 
+
     def getProfessLoadschapes(self, start: int, size=24):
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
@@ -709,7 +724,7 @@ class OpenDSS:
                     dss_string = dss_string + " kVar=" + str(self.k_var)
                 #---------- chek for available loadschape and attach it to the load
                 if self.load_name in self.loadshapes_for_loads:
-                    dss_string = dss_string + " Yearly=" + load_name
+                    dss_string = dss_string + " Yearly=" + self.loadshapes_for_loads[self.load_name]["name"]
 
                 #logger.info("dss_string: " + dss_string)
                 logger.debug(dss_string + "\n")
@@ -1016,9 +1031,10 @@ class OpenDSS:
                 #logger.debug("load profile data "+str(load_profile_data))
 
                 #--------store_profile_for_line----------#
-                self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}
+                loadshape_id = "Lsp_" + str(randint_value)
+                self.loadshapes_for_loads[load_name] = {"name": loadshape_id, "bus":bus_name, "loadshape":load_profile_data}
                 #loadshape_id=load_name + bus_name
-                loadshape_id=load_name
+
 
                 self.setLoadshape(loadshape_id, sim_days*24, 1, load_profile_data)
             return 0
@@ -1282,7 +1298,7 @@ class OpenDSS:
                         logger.debug("key not registered: "+str(key))
 
 
-                self.Chargers[id] = Charger(kw_rated, ev_object, type_application)
+                self.Chargers[id] = Charger(kw_rated, ev_object, kw_rated, type_application)
 
 
 
@@ -1293,8 +1309,8 @@ class OpenDSS:
                 counter = 1
                 for ev in list_ev:
                     bus2 = bus1 + "_"+str(counter)
-                    self.setPowerLine(ev.get_id(), phases, bus1, bus2, r1=0.0001, r0=0.0001, x1=0, x0=0, c1=0, c0=0, switch="y")
-                    self.setStorage(ev.get_id(),bus2, phases, connection, ev.get_SoC(),min_soc=0, kv=kv, kw_rated=kw_rated, kwh_rated=ev.get_Battery_Capacity(), kwh_stored=ev.get_Battery_Capacity(), charge_efficiency=charge_efficiency, discharge_efficiency=1, powerfactor=powerfactor)
+                    self.setPowerLine("Line_"+ev.get_id(), phases, bus1, bus2, r1=0.0001, r0=0.0001, x1=0, x0=0, c1=0, c0=0, switch="y")
+                    self.setStorage("ESS_"+ev.get_id(),bus2, phases, connection, ev.get_SoC(),min_soc=0, kv=kv, kw_rated=kw_rated, kwh_rated=ev.get_Battery_Capacity(), kwh_stored=ev.get_Battery_Capacity(), charge_efficiency=charge_efficiency, discharge_efficiency=1, powerfactor=powerfactor)
                     counter = counter + 1
 
             return 0
