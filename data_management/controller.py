@@ -79,7 +79,7 @@ class gridController(threading.Thread):
             for key, value in element.items():
                 element_id=value["id"]
                 logger.debug("ESS_id "+str(element_id))
-                #logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
+                logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
                 SoC = float(self.sim.getSoCfromBattery(element_id))
                 value["SoC"]=SoC
                 new_soc_list.append(element)
@@ -232,7 +232,7 @@ class gridController(threading.Thread):
                 #soc_list=self.get_soc_list(self.topology)
                 soc_list_new = self.set_new_soc(soc_list)
 
-                self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+                """self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
                 status_profess=self.profess.start_all()
                 if not status_profess:
                     profess_output=self.profess.wait_and_get_output()

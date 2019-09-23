@@ -23,7 +23,8 @@ services:
     depends_on:
       - redis
     volumes:
-       - ../simulation-engine/results:/usr/src/app/data
+       - /storage4grid/dsf_se/results:/usr/src/app/data
+       #- ../simulation-engine/results:/usr/src/app/data
        #- .:/usr/src/app
         #- host_path:${CONTAINER_PATH}#this in combination with the code below does not work on windows
         #- 'tests: /usr/src/app/tests'

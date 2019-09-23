@@ -22,6 +22,7 @@ class OpenDSS:
         logger.debug("grid_name in opendss "+str(grid_name))
         self.grid_name= str(grid_name)
         dss.run_command("Clear")
+        self.dss_script = "Clear \n" #String to be written go a file for run with OpenDSS under Windows
 
         #dss.Basic.NewCircuit("Test 1")
         #dss.run_command("New circuit.{circuit_name}".format(circuit_name="Test 1"))
@@ -690,7 +691,8 @@ class OpenDSS:
                     dss_string = dss_string + " kVar=" + str(self.k_var)
                 #---------- chek for available loadschape and attach it to the load
                 if self.load_name in self.loadshapes_for_loads:
-                    dss_string = dss_string + " Yearly=" + load_name
+                    loadshape_id=self.loadshapes_for_loads[self.load_name]["profile_id"]
+                    dss_string = dss_string + " Yearly=" + loadshape_id
 
                 #logger.info("dss_string: " + dss_string)
                 logger.debug(dss_string + "\n")
@@ -1054,10 +1056,13 @@ class OpenDSS:
                 load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
                 #print("load_profile_data: randint=" + str(randint_value))
 
-                #--------store_profile_for_line----------#
-                self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}
+                #--------store_profile_for_line----------#"
+                loadshape_id = "Lsp_" + str(randint_value)   # changing the loadshape name to the number of loaded profile
+                                                    # this name schould be used in the load definition
+                self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data, "profile_id":loadshape_id}
                 #loadshape_id=load_name + bus_name
-                loadshape_id=load_name
+                #loadshape_id=load_name
+
 
                 self.setLoadshape(loadshape_id, sim_days*24, 1, load_profile_data)
             return 0
@@ -1093,7 +1098,8 @@ class OpenDSS:
 
     def setLoadshape(self, id, npts, interval, mult):
         try:
-            logger.debug("New Loadshape." + id)
+            logger.debug("New Loadshape for ID: " + id)
+
             # New Loadshape.assumed_irrad npts=24 interval=1 mult=[0 0 0 0 0 0 .1 .2 .3  .5  .8  .9  1.0  1.0  .99  .9  .7  .4  .1 0  0  0  0  0]
             dss_string = "New Loadshape.{id} npts={npts} interval={interval} mult=({mult})".format(
                 id=id,
@@ -1104,6 +1110,7 @@ class OpenDSS:
             )
             #!logger.info(dss_string)
             #print(dss_string + "\n")
+            #print("profile count:" +  str(len((str(mult)).split(" ")))+ " npts: " + str(npts) + "\n")
             #dss_string="New Loadshape1 npts=24 interval=1 mult=(0 0 0 0 0 0 .1 .2 .3 .5 .8 .9 1.0 1.0 .99 .9 .7 .4 .1 0 0 0 0 0)"
             #print(dss_string + "\n")
             dss.run_command(dss_string)
@@ -1138,8 +1145,8 @@ class OpenDSS:
             #dss_string = "? Loadshape1.mult"
             #print(dss_string + "\n")
             result = dss.run_command(dss_string)
-            logger.debug("Loadshape.Shape_" + str(id) + ".mult count:" +  str(len((str(result)).split(" "))) + "\n")
-            #print("Loadshape." + str(id) + ".mmult:" +  str(result) + "\n")
+            #logger.debug("setLoadshapePV: Loadshape.Shape_" + str(id) + ".mult count:" +  str(len((str(result)).split(" "))) + "\n")
+            print("Read LoadshapePV: Loadshape." + str(id) + ".mmult:" +  str(result) + "\n")
         except Exception as e:
             logger.error(e)
 
