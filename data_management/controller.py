@@ -287,10 +287,10 @@ class gridController(threading.Thread):
                             for element_soc in soc_list:
                                 for key_node in element_soc.keys():
                                     if key_node == node_name:
-                                        profess_result_intern[node_name]["ess_name"] = element_soc[key_node]["id"]
-                                        profess_result_intern[node_name]["pv_name"] = element_soc[key_node]["pv_name"]
-                                        profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["max_charging_power"]
-                                        profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["max_discharging_power"]
+                                        profess_result_intern[node_name]["ess_name"] = element_soc[key_node]["ESS"]["id"]
+                                        profess_result_intern[node_name]["pv_name"] = element_soc[key_node]["PV"]["pv_name"]
+                                        profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["ESS"]["max_charging_power"]
+                                        profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["ESS"]["max_discharging_power"]
                             for profess_id, results in value.items():
                                 for key_results, powers in results.items():
                                     profess_result_intern[node_name][key_results] = powers

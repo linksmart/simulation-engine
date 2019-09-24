@@ -222,7 +222,7 @@ class Profess:
         opt_status = self.get_optimization_status()
         # logger.debug("optimization status: " + str(opt_status))
         running_flag = False
-        node_name_list = self.json_parser.get_node_name_list()
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
         for node_name in node_name_list:
             profess_id = self.get_profess_id(node_name, soc_list)
             if profess_id != 0:
@@ -689,6 +689,7 @@ class Profess:
                                                 # the key can be directly mapped
                                                 config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
                                                     storage_information["ESS"][storage_key] / percentage
+                                    #T_SoC is the only information at the moment, and it is saved in ESS
                                     for generic_key in self.generic_mapping:
                                         if generic_key in storage_information["ESS"]:
                                             if generic_key in self.percentage_mapping:
@@ -699,20 +700,20 @@ class Profess:
                                                 # this means the key is mapped to meta data
                                                 config_data_of_node["generic"][
                                                     self.generic_mapping[generic_key]["meta"]] = \
-                                                    storage_information[generic_key] / percentage
+                                                    storage_information["ESS"][generic_key] / percentage
                                             if type(self.generic_mapping[generic_key]) == list:
                                                 # this means a value in the storageunit is mapped to multiple values in the ofw
                                                 for part in self.generic_mapping[generic_key]:
                                                     if "meta" in part:
                                                         config_data_of_node["generic"]["meta"][part["meta"]] = \
-                                                            storage_information[generic_key] / percentage
+                                                            storage_information["ESS"][generic_key] / percentage
                                                     else:
                                                         config_data_of_node["generic"][part] = \
-                                                            storage_information[generic_key] / percentage
+                                                            storage_information["ESS"][generic_key] / percentage
                                             if type(self.generic_mapping[generic_key]) == str:
                                                 # the key can be directly mapped
                                                 config_data_of_node["generic"][self.generic_mapping[generic_key]] = \
-                                                    storage_information[generic_key] / percentage
+                                                    storage_information["ESS"][generic_key] / percentage
                                     for grid_key in self.grid_mapping:
                                         if grid_key in storage_information["Grid"]:
                                             if grid_key in self.percentage_mapping:
