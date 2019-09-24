@@ -242,7 +242,7 @@ class gridController(threading.Thread):
             ################  Storage control  ###################################################
             ######################################################################################
 
-            if flag_is_storage:
+            """if flag_is_storage:
 
                 node_names_for_profiles = self.profev.json_parser.get_node_name_list(soc_list)
                 logger.debug("node names " + str(node_names_for_profiles))
@@ -327,7 +327,7 @@ class gridController(threading.Thread):
 
 
             else:
-                logger.debug("No Storage Units present")
+                logger.debug("No Storage Units present")"""
 
             ######################################################################################
             ################  Charging station control  ###################################################
@@ -335,7 +335,7 @@ class gridController(threading.Thread):
 
             if flag_is_charging_station:
                 logger.debug("charging stations present in the simulation")
-                node_names_for_profiles = self.profev.json_parser.get_node_name_list_charging_stations(soc_list_evs)
+                node_names_for_profiles = self.profev.json_parser.get_node_name_list(soc_list_evs)
                 logger.debug("node names "+str(node_names_for_profiles))
                 profevLoads = self.sim.getProfessLoadschapes(node_names_for_profiles, hours, 24)
                 #logger.debug("profev loads "+str(profevLoads))
@@ -394,7 +394,7 @@ class gridController(threading.Thread):
                 else:
                     self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs)
 
-                status_profev = self.profev.start_all()
+                #status_profev = self.profev.start_all(soc_list_evs)
 
             else:
                 logger.debug("No charging stations present in the simulation")
