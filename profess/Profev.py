@@ -511,7 +511,8 @@ class Profev:
         """
         logger.debug("set photovoltaics config data of " + str(node_name))
         node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
-        for profess_id in self.dataList[node_number][node_name]:
+        profess_id = self.get_profess_id(node_name, soc_list)
+        if profess_id != 0:
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
             for radial_number in range(len(self.json_parser.topology["radials"])):
                 node_element_list = self.json_parser.get_node_element_list(soc_list)[node_number][node_name]
