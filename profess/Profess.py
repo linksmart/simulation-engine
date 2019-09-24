@@ -97,7 +97,7 @@ class Profess:
 
             return 1
 
-    def post_data(self, input_data, node_name):
+    def post_data(self, input_data, node_name, soc_list):
         """
         posts the ofw input data on bus: node_name, and saves the profess_id of the submitted data together with the
         submitted data
@@ -122,10 +122,10 @@ class Profess:
             logger.debug("Response of OFW after post data: " + str(json_response) + ": " + str(
                 profess_id) + " , statusCode: " + str(response.json()))
             # the professId is saved for futher referencing
-            self.set_profess_id_for_node(node_name, profess_id)
+            self.set_profess_id_for_node(node_name, profess_id, soc_list)
             # the posted data is also saved internaly for other optimizations
-            self.set_config_json(node_name, profess_id, input_data)
-            if response.status_code == 200 or response.status_code == 201:
+            self.set_config_json(node_name, profess_id, input_data, soc_list)
+            if response.status_code == "Instance created" or response.status_code == 201:
                 return 0
             else:
                 logger.error("failed to post_data node: " + str(node_name) + " and input data: " + str(
@@ -146,7 +146,7 @@ class Profess:
         all_successful = True
         for node_element in node_element_list:
             for node_name in node_element:
-                if self.post_data((self.standard_data), node_name):
+                if self.post_data((self.standard_data), node_name, soc_list):
                     all_successful = False
         if all_successful:
             return 0
@@ -666,7 +666,7 @@ class Profess:
                                     storage_information = soc_list_for_node[node_name]
 
                                     for storage_key in self.storage_mapping:
-                                        if storage_key in storage_information:
+                                        if storage_key in storage_information["ESS"]:
                                             if storage_key in self.percentage_mapping:
                                                 percentage = 100
                                             else:
@@ -690,7 +690,7 @@ class Profess:
                                                 config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
                                                     storage_information["ESS"][storage_key] / percentage
                                     for generic_key in self.generic_mapping:
-                                        if generic_key in storage_information:
+                                        if generic_key in storage_information["ESS"]:
                                             if generic_key in self.percentage_mapping:
                                                 percentage = 100
                                             else:
@@ -714,7 +714,7 @@ class Profess:
                                                 config_data_of_node["generic"][self.generic_mapping[generic_key]] = \
                                                     storage_information[generic_key] / percentage
                                     for grid_key in self.grid_mapping:
-                                        if grid_key in storage_information:
+                                        if grid_key in storage_information["Grid"]:
                                             if grid_key in self.percentage_mapping:
                                                 percentage = 100
                                             else:
