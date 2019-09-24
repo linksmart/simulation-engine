@@ -107,8 +107,8 @@ def create_simulation(body):  # noqa: E501
                     # checking if there is a PV in the node of the ESS
                     bus_pv = get_PV_nodes(values["photovoltaics"])
                     bus_ess = get_ESS_nodes(values["storageUnits"])
-                    if cs_elements["bus1"] in bus_ess:
-                        if not cs_elements["bus1"] in bus_pv :
+                    if cs_elements["bus"] in bus_ess:
+                        if not cs_elements["bus"] in bus_pv :
                             message = "Error: no PV element defined for charging station element with id: " + str(
                                 cs_elements["id"])
                             return message
