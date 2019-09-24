@@ -348,7 +348,7 @@ class Profess:
                 if storage_opt_model is None:
                     storage_opt_model = storage_opt_model
                 time.sleep(5)
-                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "discrete",
+                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "ipopt", "discrete",
 
                                             self.get_profess_id(node_name))
                 if start_response.status_code is not 200 and start_response is not None:
@@ -711,20 +711,20 @@ class Profess:
                                                 # this means the key is mapped to meta data
                                                 config_data_of_node["ESS"]["meta"][
                                                     self.storage_mapping[storage_key]["meta"]] = \
-                                                    storage_information["ESS"][storage_key] / percentage
+                                                    storage_information[storage_key] / percentage
                                             if type(self.storage_mapping[storage_key]) == list:
                                                 # this means a value in the storageunit is mapped to multiple values in the ofw
                                                 for part in self.storage_mapping[storage_key]:
                                                     if "meta" in part:
                                                         config_data_of_node["ESS"]["meta"][part["meta"]] = \
-                                                            storage_information["ESS"][storage_key] / percentage
+                                                            storage_information[storage_key] / percentage
                                                     else:
                                                         config_data_of_node["ESS"][part] = \
-                                                            storage_information["ESS"][storage_key] / percentage
+                                                            storage_information[storage_key] / percentage
                                             if type(self.storage_mapping[storage_key]) == str:
                                                 # the key can be directly mapped
                                                 config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
-                                                    storage_information["ESS"][storage_key] / percentage
+                                                    storage_information[storage_key] / percentage
                                     for generic_key in self.generic_mapping:
                                         if generic_key in storage_information:
                                             if generic_key in self.percentage_mapping:
@@ -758,20 +758,20 @@ class Profess:
                                             if type(self.grid_mapping[grid_key]) == dict:
                                                 # this means the key is mapped to meta data
                                                 config_data_of_node["grid"][self.grid_mapping[grid_key]["meta"]] = \
-                                                    storage_information["Grid"][grid_key] / percentage
+                                                    storage_information[grid_key] / percentage
                                             if type(self.grid_mapping[grid_key]) == list:
                                                 # this means a value in the storageunit is mapped to multiple values in the ofw
                                                 for part in self.grid_mapping[grid_key]:
                                                     if "meta" in part:
                                                         config_data_of_node["grid"]["meta"][part["meta"]] = \
-                                                            storage_information["Grid"][grid_key] / percentage
+                                                            storage_information[grid_key] / percentage
                                                     else:
                                                         config_data_of_node["grid"][part] = \
-                                                            storage_information["Grid"][grid_key] / percentage
+                                                            storage_information[grid_key] / percentage
                                             if type(self.grid_mapping[grid_key]) == str:
                                                 # the key can be directly mapped
                                                 config_data_of_node["grid"][self.grid_mapping[grid_key]] = \
-                                                    storage_information["Grid"][grid_key] / percentage
+                                                    storage_information[grid_key] / percentage
                 if voltage_prediction is not None:
                     for voltage_profile in voltage_prediction:
                         profess_id = self.get_profess_id(node_name)
@@ -834,7 +834,8 @@ class Profess:
                 node_element_list[index] = {node_name: {}}
         self.dataList = node_element_list
 
-    def set_up_profess(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None, voltage_prediction=None):
+    def set_up_profess(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None,
+                       voltage_prediction=None):
         """
         sets all important information retrieved from the parameters and topology
         :param soc_list: syntax when a list: [{node_name1:{"SoC":value, "id": id_name},{node_name2:{...},...] value is
@@ -870,7 +871,7 @@ class Profess:
         if soc_list is not None:
 
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
-                              , ess_con=ess_con, soc_list=soc_list)
+                              , ess_con=ess_con, soc_list=soc_list, voltage_prediction=voltage_prediction)
 
     def translate_output(self, output_data):
         """

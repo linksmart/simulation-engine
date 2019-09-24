@@ -160,7 +160,7 @@ class JsonParser:
                     ##logger.debug("storages found")
 
                 if "chargingStations" in self.topology["radials"][radial_number].keys():
-                     for element in self.search(self.topology["radials"][radial_number]["chargingStations"], "bus", "", True):
+                     for element in self.get_all_elements("chargingStations"):
                          pattern = re.compile("[^.]*")  # regex to find professID
                          m = pattern.findall(element)
                          element = m[0]
