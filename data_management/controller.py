@@ -362,7 +362,8 @@ class gridController(threading.Thread):
                             SoC = float(self.sim.getSoCfromBattery(element_id))
                             ev_unit.set_SoC(SoC)
                             logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
-                            #self.sim.setActivePowertoBatery(element_id, -1 * charger_element.get_max_charging_power(), charger_element.get_max_charging_power())
+                            if not charger_element.get_bus_name() in node_names_for_profiles:
+                                self.sim.setActivePowertoBatery(element_id, -1 * charger_element.get_max_charging_power(), charger_element.get_max_charging_power())
 
                         else:
                             #EV not connected. Calculate EV SoC
