@@ -600,9 +600,9 @@ class OpenDSS:
             for key, value in self.loadshapes_for_loads.items():
                 load_id = key
                 bus_name = value["bus"]
-                logger.debug("bus name " + str(bus_name))
+                #logger.debug("bus name " + str(bus_name))
                 main_bus_name = bus_name.split('.', 1)[0]
-                logger.debug("main bus name "+str(main_bus_name))
+                #logger.debug("main bus name "+str(main_bus_name))
                 if main_bus_name in node_name_list:
                     #print("bus_name: " + str(bus_name) + ", main_bus_name: " + str(main_bus_name))
                     loadshape = value["loadshape"]
@@ -624,30 +624,35 @@ class OpenDSS:
         return [result]
 
 
-    def getProfessLoadschapesPV(self, start: int, size=24):
+    def getProfessLoadschapesPV(self, node_name_list, start: int, size=24):
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
-        logger.debug( "getProfessPVLoadschapes")
+        logger.debug( "getPVLoadschapes")
+        #logger.debug("node_name_list " + str(node_name_list))
         try:
             for key, value in self.loadshapes_for_pv.items():
                 pv_id = key
+                #logger.debug("key " + str(key))
                 bus_name = value["bus"]
                 main_bus_name = bus_name.split('.', 1)[0]
-                #print("bus_name: " + str(bus_name) + ", main_bus_name: " + str(main_bus_name))
-                loadshape = value["loadshape"]
-                #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
-                loadshape_portion=loadshape[int(start):int(start+size)]
-                #print("loadshape_portion: " + str(loadshape_portion))
-                bus_loadshape={bus_name:loadshape_portion}
-                #print("bus_loadshape: " + str(bus_loadshape))
+                #logger.debug("main bus name " + str(main_bus_name))
+                if main_bus_name in node_name_list:
+                    #print("bus_name: " + str(bus_name) + ", main_bus_name: " + str(main_bus_name))
+                    loadshape = value["loadshape"]
+                    #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
+                    loadshape_portion=loadshape[int(start):int(start+size)]
+                    #print("loadshape_portion: " + str(loadshape_portion))
+                    bus_loadshape={bus_name:loadshape_portion}
+                    #print("bus_loadshape: " + str(bus_loadshape))
 
-                if main_bus_name in result:
-                    # extend existing  element
-                    result[main_bus_name].update(bus_loadshape)
-                else:
-                    # add new element
-                    result[main_bus_name] = bus_loadshape
+                    if main_bus_name in result:
+                        # extend existing  element
+                        result[main_bus_name].update(bus_loadshape)
+                    else:
+                        # add new element
+                        result[main_bus_name] = bus_loadshape
+
         except Exception as e:
             logger.error(e)
         #print("resulting_loadshape_profess: " + str(result))
@@ -987,6 +992,8 @@ class OpenDSS:
         #!logger.debug("Setting up the loads")
         self.pvs=pvs
         try:
+            # ----------get_a_profile---------------#
+            pv_profile_data = profiles.pv_profile(city, country, sim_days)
             for element in self.pvs:
                 #for kskd in element.keys():
                     #logger.debug("key "+str(kskd))
@@ -994,20 +1001,15 @@ class OpenDSS:
                 bus_name = element["bus1"]
                 max_power= element["max_power_kW"]
                 logger.debug("max power "+str(max_power))
-                #self.pv_name=pv_name
-                #self.bus_name=bus_name
 
-                # ----------get_a_profile---------------#
-                pv_profile_data = profiles.pv_profile(city, country, sim_days, max_power)
-                #logger.debug("pv profile: "+str(pv_profile_data))
-                #print("load_profile_data: randint=" + str(randint_value))
 
+                pv_profile = [i * max_power for i in pv_profile_data]
                 #--------store_profile_for_line----------#
-                self.loadshapes_for_pv[pv_name] = {"bus":bus_name, "loadshape":pv_profile_data}
+                self.loadshapes_for_pv[pv_name] = {"bus":bus_name, "loadshape":pv_profile}
                 #loadshape_id=load_name + bus_name
                 loadshape_id=pv_name
 
-                self.setLoadshapePV(loadshape_id, sim_days * 24, 1, pv_profile_data)
+                self.setLoadshapePV(loadshape_id, sim_days * 24, 1, pv_profile)
             return 0
 
         except Exception as e:
@@ -1302,7 +1304,7 @@ class OpenDSS:
                         logger.debug("key not registered: "+str(key))
 
 
-                self.Chargers[id] = Charger(kw_rated, ev_object, kw_rated, type_application)
+                self.Chargers[id] = Charger(kw_rated, ev_object, kw_rated, type_application, bus1, charge_efficiency)
 
 
 

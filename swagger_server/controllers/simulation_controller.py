@@ -98,6 +98,23 @@ def create_simulation(body):  # noqa: E501
 
             logger.debug("Storage successfully checked")
 
+
+            if "chargingStations" in values.keys() and values["chargingStations"] is not None:
+                logger.debug("Checking Charging stations")
+
+                cs = values["chargingStations"]
+                for cs_elements in cs:
+                    # checking if there is a PV in the node of the ESS
+                    bus_pv = get_PV_nodes(values["photovoltaics"])
+                    bus_ess = get_ESS_nodes(values["storageUnits"])
+                    if cs_elements["bus1"] in bus_ess:
+                        if not cs_elements["bus1"] in bus_pv :
+                            message = "Error: no PV element defined for charging station element with id: " + str(
+                                cs_elements["id"])
+                            return message
+
+            logger.debug("Charging stations successfully checked")
+
             #logger.debug("data to store "+str(data_to_store))
 
             data["radials"][0]["storageUnits"] = data_to_store
@@ -140,6 +157,11 @@ def get_PV_nodes(list_pv):
         bus.append(pv_element["bus1"])
     return bus
 
+def get_ESS_nodes(list_ess):
+    bus=[]
+    for ess_element in list_ess:
+        bus.append(ess_element["bus1"])
+    return bus
 
 def get_simulation_result(id):  # noqa: E501
     """Get a simulation result

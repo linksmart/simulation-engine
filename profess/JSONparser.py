@@ -26,6 +26,7 @@ class JsonParser:
                     if element_name in element:
                         search_result=search_result+radial[element]
         return search_result
+
     def filter_search(self,search_key, search_value, element_list):
         """
         filters the element_list and returns only the elements where search_key and search_value fit
@@ -157,3 +158,43 @@ class JsonParser:
         if node_list != []:
             return node_list
         else: return 0
+
+    def get_node_name_list_charging_stations(self):
+        """
+
+        :return: a list of node_names where an ess is connected, otherwise 0 is returned
+        [node_name1, node_name2, ...]
+        """
+        charging_station_node_list = []
+        pv_node_list = []
+        node_list = []
+        if "radials" in self.topology.keys():
+            for radial_number in range(len(self.topology["radials"])):
+                # search for nodes with ESS
+                if "chargingStations" in self.topology["radials"][radial_number].keys():
+
+                    for charging_station_node in self.get_all_elements("chargingStations"):
+                        charging_station_node_name = charging_station_node["bus"]
+                        pattern = re.compile(
+                            "[^.]*")  # regex to shorten nodde_name.1.2.3 or node_name.1 etc to node_name
+                        charging_station_regex = pattern.findall(charging_station_node_name)
+                        node_name = charging_station_regex[0]
+                        charging_station_node_list.append(node_name)
+                    node_list = charging_station_node_list
+                    ##logger.debug("storages found")
+
+                # if "photovoltaics" in self.topology["radials"][radial_number].keys():
+                #     for element in self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True):
+                #         pattern = re.compile("[^.]*")  # regex to find professID
+                #         m = pattern.findall(element)
+                #         element = m[0]
+                #         pv_node_list.append(element)
+                #     node_list=pv_node_list
+                #     ##logger.debug("pvs found")
+                # if storage_node_list is not None and pv_node_list is not None:
+                #     node_list= storage_node_list + list(set(pv_node_list) - set(storage_node_list))
+
+        if node_list != []:
+            return node_list
+        else:
+            return 0

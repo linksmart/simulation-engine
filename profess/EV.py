@@ -88,11 +88,19 @@ class EV:
 
 
 class Charger:
-    def __init__(self, Max_Capacity, list_EV_connected, max_charging_power, type_application):
+    def __init__(self, Max_Capacity, list_EV_connected, max_charging_power, type_application, bus_name, charge_efficiency):
         self.Max_Capacity = Max_Capacity
         self.EV_connected = list_EV_connected
         self.max_charging_power = max_charging_power
         self.type_application = type_application
+        self.bus_name = bus_name
+        self.charge_efficiency = charge_efficiency
+
+    def get_bus_name(self):
+        return self.bus_name
+
+    def get_charging_efficiency(self):
+        return self.charge_efficiency
 
     def get_max_charging_power(self):
         return self.max_charging_power
