@@ -137,12 +137,12 @@ class Profess:
                 self.domain) + "inputs/dataset")
             return 1
 
-    def post_all_standard_data(self):
+    def post_all_standard_data(self, soc_list):
         """
         posts standard_data to the ofw for every relevant bus (nodes with ESS)
         :return: returns 0 when successful, 1 when not successful
         """
-        node_element_list = self.json_parser.get_node_element_list()
+        node_element_list = self.json_parser.get_node_element_list(soc_list)
         all_successful = True
         for node_element in node_element_list:
             for node_name in node_element:
@@ -212,7 +212,7 @@ class Profess:
                 self.domain) + "outputs/")
             return 1
 
-    def is_running(self):
+    def is_running(self, soc_list):
         """
         :return: Returns if a optimization on a node is still running, true if on a node runs an optimization,
         otherwise false
@@ -224,7 +224,7 @@ class Profess:
         running_flag = False
         node_name_list = self.json_parser.get_node_name_list()
         for node_name in node_name_list:
-            profess_id = self.get_profess_id(node_name)
+            profess_id = self.get_profess_id(node_name, soc_list)
             if profess_id != 0:
                 if profess_id in opt_status["status"]:
                     if opt_status["status"][profess_id]["status"] == "running":
@@ -241,19 +241,19 @@ class Profess:
         else:
             return False
 
-    def wait_and_get_output(self):
+    def wait_and_get_output(self, soc_list):
         """
         :return: returns a list with the translated ouputs of all nodes see (@translate_output)
         """
         logger.debug("wait for OFW output")
-        node_name_list = self.json_parser.get_node_name_list()
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
-            while self.is_running():
+            while self.is_running(soc_list):
                 pass
             output_list = []
 
             for node_name in node_name_list:
-                profess_id = self.get_profess_id(node_name)
+                profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
                     output_list.append({profess_id: self.get_output(profess_id)})
             logger.debug("OFW finished, all optimizations stopped")
@@ -297,7 +297,7 @@ class Profess:
             logger.error("Failed to start optimization, No connection to the OFW could be established at :" + str(
                 self.domain) + "optimization/start/")
 
-    def start_all(self):
+    def start_all(self, soc_list):
         """
         starts all optimizations on the relevant nodes (nodes with ESS)
         :param optimization_model: optional optimization_model, when no model is given the models in the ESS definition
@@ -305,12 +305,12 @@ class Profess:
         :return: returns 0 when successful, else 1
         """
         logger.debug("All optimizations are being started.")
-        node_name_list = self.json_parser.get_node_name_list()
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
             storage_opt_model=""
             for node_name in node_name_list:
                 # search for list with all elemens that are connected to bus: node_name
-                element_node = (next(item for item in self.json_parser.get_node_element_list() if node_name in item))
+                element_node = (next(item for item in self.json_parser.get_node_element_list(soc_list) if node_name in item))
                 for node_element in element_node[node_name]:
                     if "storageUnits" in node_element:
                         storage = node_element
@@ -319,16 +319,16 @@ class Profess:
                     logger.error("no opzimization model was given for "+str(node_name))
                     break
                 start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "discrete",
-                                            self.get_profess_id(node_name))
+                                            self.get_profess_id(node_name, soc_list))
                 if start_response.status_code is not 200 and start_response is not None:
-                    self.check_start_issue(start_response, node_name)
+                    self.check_start_issue(start_response, node_name, soc_list)
                     break
                     return 1
             return 0
         else:
             return 0
 
-    def check_start_issue(self, response, node_name):
+    def check_start_issue(self, response, node_name, soc_list):
         """
         parses the response a failed optimization start returns, and  logs why it might have failed
         :param response: ofw response of failed start
@@ -342,7 +342,7 @@ class Profess:
             missing_parameters = pattern.findall(str(json_response))
             for parameter in missing_parameters:
                 if "PV" in parameter:
-                    node_element_list = self.json_parser.get_node_element_list()
+                    node_element_list = self.json_parser.get_node_element_list(soc_list)
                     for bus_element in node_element_list:
                         if node_name in bus_element:
                             pv_flag = False
@@ -406,19 +406,19 @@ class Profess:
         else:
             return 1
 
-    def set_storage(self, node_name):
+    def set_storage(self, node_name, soc_list):
         """
         sets all storage related values of the local config of node_name
         :param node_name: name of the bus
         :return:
         """
         logger.debug("set_storage config data of " + str(node_name))
-        node_number = self.json_parser.get_node_name_list().index(node_name)
-        profess_id = self.get_profess_id(node_name)
+        node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
+        profess_id = self.get_profess_id(node_name, soc_list)
         if profess_id != 0:
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
             for radial_number in range(len(self.json_parser.topology["radials"])):
-                node_element_list = self.json_parser.get_node_element_list()[node_number][node_name]
+                node_element_list = self.json_parser.get_node_element_list(soc_list)[node_number][node_name]
 
                 self.iterate_mapping(self.storage_mapping, "ESS", "storageUnits", node_element_list,
                                      config_data_of_node)
@@ -470,25 +470,25 @@ class Profess:
                         config_data_of_node[name_in_ofw][mapping[mapping_key]] = \
                             node_element_list[element_index][name_in_topology][mapping_key] / percentage
 
-    def set_photovoltaics(self, node_name):
+    def set_photovoltaics(self, node_name, soc_list):
         """
         set all the photovoltaics related values of the local config of node_name
         :param node_name: the name of the bus
         :return:
         """
         logger.debug("set photovoltaics config data of " + str(node_name))
-        node_number = self.json_parser.get_node_name_list().index(node_name)
+        node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
         for profess_id in self.dataList[node_number][node_name]:
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
             for radial_number in range(len(self.json_parser.topology["radials"])):
-                node_element_list = self.json_parser.get_node_element_list()[node_number][node_name]
+                node_element_list = self.json_parser.get_node_element_list(soc_list)[node_number][node_name]
                 self.iterate_mapping(self.pv_mapping, "photovoltaic", "photovoltaics", node_element_list,
                                      config_data_of_node)
                 self.iterate_mapping(self.grid_mapping, "grid", "photovoltaics", node_element_list, config_data_of_node)
                 self.iterate_mapping(self.generic_mapping, "generic", "photovoltaics", node_element_list,
                                      config_data_of_node)
 
-    def set_config_json(self, node_name, profess_id, config_json):
+    def set_config_json(self, node_name, profess_id, config_json, soc_list):
         """
         sets the config data in profess of the node node_name
         :param node_name: name of the bus
@@ -501,10 +501,10 @@ class Profess:
         logger.debug(
             "set_config_json at " + str(node_name) + " ," + str(profess_id) + "  with config: " + str(config_json))
         if profess_id != 0:
-            node_number = self.json_parser.get_node_name_list().index(node_name)
+            node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
             self.dataList[node_number][node_name][profess_id] = copy.deepcopy(config_json)
 
-    def set_profess_id_for_node(self, node_name, new_profess_id):
+    def set_profess_id_for_node(self, node_name, new_profess_id, soc_list):
         """
         saves the profess_id of an optimization in the config of node_name
         :param node_name: name of the bus
@@ -513,7 +513,7 @@ class Profess:
         """
         logger.debug("set_profess_id_for_node " + str(node_name) + " ," + str(new_profess_id))
         if new_profess_id != 0:
-            node_number = self.json_parser.get_node_name_list().index(node_name)
+            node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
             self.dataList[node_number][node_name][new_profess_id] = {}
         else:
             logger.error(
@@ -535,7 +535,7 @@ class Profess:
         logger.debug("Setting_profiles ")
         logger.debug(str(pv_profiles))
         # logger.debug("load profile: "+str(load_profiles)+" ,pv_profiles: "+str(pv_profiles)+" ,price_profile: "+str(price_profiles)+" ,ess_con "+str(ess_con))
-        node_name_list = self.json_parser.get_node_name_list()
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
             for node_name in node_name_list:
                 node_number = node_name_list.index(node_name)
@@ -543,7 +543,7 @@ class Profess:
                     # setting load profiles
                     for load_profile_for_node in load_profiles:
                         if node_name in load_profile_for_node:
-                            profess_id = self.get_profess_id(node_name)
+                            profess_id = self.get_profess_id(node_name, soc_list)
                             if profess_id != 0:
                                 config_data_of_node = self.dataList[node_number][node_name][profess_id]
                                 phase = load_profile_for_node[node_name]
@@ -617,7 +617,7 @@ class Profess:
                 if pv_profiles is not None:
                     # setting pv_profiles
                     for pv_profiles_for_node in pv_profiles:
-                        profess_id = self.get_profess_id(node_name)
+                        profess_id = self.get_profess_id(node_name, soc_list)
                         if profess_id != 0:
                             config_data_of_node = self.dataList[node_number][node_name][profess_id]
                             if node_name in pv_profiles_for_node:
@@ -642,7 +642,7 @@ class Profess:
                 if ess_con is not None:
                     # setting gesscon profile
                     for ess_con_global in ess_con:
-                        profess_id = self.get_profess_id(node_name)
+                        profess_id = self.get_profess_id(node_name, soc_list)
                         if profess_id != 0:
                             config_data_of_node = self.dataList[node_number][node_name][profess_id]
                             if node_name in ess_con_global:
@@ -659,7 +659,7 @@ class Profess:
                     # sets new values for storage: soc, charging ,...
                     if type(soc_list) is list:
                         for soc_list_for_node in soc_list:
-                            profess_id = self.get_profess_id(node_name)
+                            profess_id = self.get_profess_id(node_name, soc_list)
                             if profess_id != 0:
                                 config_data_of_node = self.dataList[node_number][node_name][profess_id]
                                 if node_name in soc_list_for_node:
@@ -737,7 +737,7 @@ class Profess:
                                                 config_data_of_node["grid"][self.grid_mapping[grid_key]] = \
                                                     storage_information[grid_key] / percentage
 
-                profess_id = self.get_profess_id(node_name)
+                profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
                     config_data_of_node = self.dataList[node_number][node_name][profess_id]
                     if price_profiles is not None:
@@ -747,24 +747,24 @@ class Profess:
                     node_index = node_name_list.index(node_name)
                     self.update_config_json(profess_id, self.dataList[node_index][node_name][profess_id])
 
-    def get_profess_id(self, node_name):
+    def get_profess_id(self, node_name, soc_list):
         """
         :param node_name: bus name
         :return: profess_id which is the optimization id of the optimization on node_name
         """
-        node_number = self.json_parser.get_node_name_list().index(node_name)
+        node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
         profess_id = 0
         for element in self.dataList[node_number][node_name]:
             profess_id = element
         return profess_id
 
-    def get_node_name(self, profess_id):
+    def get_node_name(self, profess_id, soc_list):
         """
         :param profess_id:
         :return: bus name for profess_id
         """
         node_name = ""
-        name_list = self.json_parser.get_node_name_list()
+        name_list = self.json_parser.get_node_name_list(soc_list)
         for name in name_list:
             node_number = name_list.index(name)
             for element in self.dataList[node_number][name]:
@@ -774,7 +774,7 @@ class Profess:
             logger.error("there is no node which has the profess_id: " + profess_id)
         return node_name
 
-    def set_data_list(self):
+    def set_data_list(self, soc_list):
         """
         sets up data_list with a list of dictonaries to, with the relevant nodes(nodes with ESS):
         [{node_name1:{},{node_name2:{},...]
@@ -782,7 +782,7 @@ class Profess:
         :return:
         """
         # logger.debug("data for nodes is set")
-        node_element_list = self.json_parser.get_node_element_list()
+        node_element_list = self.json_parser.get_node_element_list(soc_list)
         logger.debug("node element list " + str(node_element_list))
         for index in range(len(node_element_list)):
             for node_name in (node_element_list[index]):
@@ -806,22 +806,22 @@ class Profess:
         :return:
         """
         logger.debug("set_up_profess started")
-        logger.debug("soc_list " + str(soc_list))
+        #logger.debug("soc_list " + str(soc_list))
         # logger.debug("load_profiles "+ str(load_profiles))
         # logger.debug("pv_profiles "+ str(pv_profiles))
         # logger.debug("price_profiles "+ str(price_profiles))
         # logger.debug("ess_con " + str(ess_con))
         if self.dataList == []:
             # this happends just for the first set_up
-            self.set_data_list()
-            self.post_all_standard_data()
-            node_name_list = self.json_parser.get_node_name_list()
+            self.set_data_list(soc_list)
+            self.post_all_standard_data(soc_list)
+            node_name_list = self.json_parser.get_node_name_list(soc_list)
             if node_name_list != 0:
                 for nodeName in node_name_list:
-                    self.set_storage(nodeName)
-                    self.set_photovoltaics(nodeName)
+                    self.set_storage(nodeName, soc_list)
+                    self.set_photovoltaics(nodeName, soc_list)
 
-                node_element_list = self.json_parser.get_node_element_list()
+                node_element_list = self.json_parser.get_node_element_list(soc_list)
         if soc_list is not None:
 
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
