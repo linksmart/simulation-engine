@@ -358,7 +358,7 @@ class gridController(threading.Thread):
                     for element in voltage_prediction:
                         voltage_prediction_output[element]=voltage_prediction[element][int(hours):int(hours + 24)]
                     logger.debug("the voltage prediction : "+ str(voltage_prediction_output))
-                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
+                    self.profess.set_up_profess(soc_list_new, professLoads, professPVs, None, None, voltage_prediction_output)
                     ###############################################
                     for element in soc_list_new:
                         logger.debug(" element name in soc "+str(element))
