@@ -196,7 +196,7 @@ def plot_node_in_every_test(path,node_name,mapping_name):
     average=calculate_voltage(path,node_name,mapping_name)
     for percentage in average:
         linecount=len(average[percentage])
-        plot_node(average[percentage],percentage)
+        #plot_node(average[percentage],percentage)
     node_number=node_name.split("_a")[1]
 
     profile_path="C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential/"
@@ -207,6 +207,7 @@ def plot_node_in_every_test(path,node_name,mapping_name):
     #TODO for multiple plotted shapes
     #p_pv_curt=plot_P_PV_curt(path,linecount,"Akku"+str(node_number),mapping_name)
     #plot_P_Grid(path,linecount,pv,load,pess,p_pv_curt)
+    plot_soc(path,linecount,"Akku"+str(node_number),mapping_name)
     #################################
     pv_difference=[]
     for element in range(linecount):
@@ -224,6 +225,27 @@ def plot_node_in_every_test(path,node_name,mapping_name):
     plt.legend()
     plt.savefig(node_name + ".png")
     plt.show()
+def plot_soc(path,linecount,target,mapping_name):
+    mapping_file = open(path+mapping_name+'.txt').read()
+    mapping=parse_mapping(mapping_file)
+    ##########
+    for result_id in mapping:
+        pess_file = open(path + result_id + "/" + result_id + "_soc_result").read()
+        pess_loadshapes = json.loads(pess_file)
+        print(pess_loadshapes)
+        flag_plotted=False
+        for batteryName in pess_loadshapes:
+            print("fitting batteryname " + str(batteryName))
+            loadshape = pess_loadshapes[batteryName]["SoC"]
+            print(loadshape)
+            if time != -1:
+                shape_to_plot = loadshape[:linecount]
+            else:
+                shape_to_plot = loadshape
+            plot_node(shape_to_plot, " SoC :" + str(batteryName))
+            if batteryName==target:
+                pass
+
 
 def calculate_voltage(path,node_name,mapping_name):
     mapping_file = open(path+mapping_name+'.txt').read()
@@ -284,7 +306,7 @@ def plot_pv_profile(path,time,mapping_name):
             # plt.plot(loadshape[15])
     return shape_to_plot
     ##############
-def plot_pess(path,time,target,mapping_name):
+def plot_pess(path,linecount,target,mapping_name):
     mapping_file = open(path+mapping_name+'.txt').read()
     mapping=parse_mapping(mapping_file)
     ##########
@@ -298,7 +320,7 @@ def plot_pess(path,time,target,mapping_name):
                 print("fitting batteryname " + str(batteryName))
                 loadshape = pess_loadshapes[batteryName]["P_ESS"]
                 if time != -1:
-                    shape_to_plot=loadshape[:time]
+                    shape_to_plot=loadshape[:linecount]
                 else:
                     shape_to_plot = loadshape
                 plot_node(shape_to_plot," P_ESS")
@@ -472,7 +494,7 @@ run_all(24)
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 path="C:/Users/klingenb/Documents/BAThesis/Results/TestStorages/self-consumption/"
 #plot_node_in_every_test(path,"node_a12","mapping_SC_1kw_P_Bigger_ESS")
-#plot_node_in_every_test("StorageTest/","node_a12","smallVoltageTest")
+#plot_node_in_every_test("StorageTest/","node_a12","SP_big_ESS_Curt_cbc")
 #plot_node_in_every_test("PVTest/","node_a12","mapping")
 #plot_differences("PVTest/","StorageTest/","node_a12","Only PV","Minimize costs 1kw max export","mapping","mappingBigESS1kwMC")
 

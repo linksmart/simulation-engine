@@ -100,6 +100,7 @@ class Profess:
         except:
             logger.error("Failed to post model, No connection to the OFW could be established at :" + str(
                 self.domain) + "models/")
+
             return 1
 
     def post_data(self, input_data, node_name):
@@ -326,7 +327,7 @@ class Profess:
             logger.error("Failed to start optimization, No connection to the OFW could be established at :" + str(
                 self.domain) + "optimization/start/")
 
-    def start_all(self, optimization_model=None):
+    def start_all(self):
         """
         starts all optimizations on the relevant nodes (nodes with ESS)
         :param optimization_model: optional optimization_model, when no model is given the models in the ESS definition
@@ -336,7 +337,7 @@ class Profess:
         logger.debug("All optimizations are being started.")
         node_name_list = self.json_parser.get_node_name_list()
         if node_name_list != 0:
-
+            storage_opt_model=""
             for node_name in node_name_list:
                 # search for list with all elemens that are connected to bus: node_name
                 element_node = (next(item for item in self.json_parser.get_node_element_list() if node_name in item))
@@ -344,14 +345,16 @@ class Profess:
                     if "storageUnits" in node_element:
                         storage = node_element
                         storage_opt_model = storage["storageUnits"]["optimization_model"]
-                if optimization_model is None:
-                    optimization_model = storage_opt_model
-                start_response = self.start(1, 24, 3600, optimization_model, 1, "cbc", "discrete",
+                if storage_opt_model is None:
+                    storage_opt_model = storage_opt_model
+                time.sleep(5)
+                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "discrete",
+
                                             self.get_profess_id(node_name))
                 if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response, node_name)
+                    break
                     return 1
-                time.sleep(5)
             return 0
         else:
             return 0
@@ -562,6 +565,7 @@ class Profess:
         :param pv_profiles: [{node_name:{node_name:[value1,value2,...]}}, ...]
         :param price_profiles: [value1, value2, value3, ....] is the price profile for the whole grid
         :param ess_con: [{node_name:{node_name.1.2.3:[value1,value2, ...]}, ...}
+        :param soc_list:
         """
         logger.debug("Setting_profiles ")
         logger.debug(str(pv_profiles))
@@ -707,20 +711,20 @@ class Profess:
                                                 # this means the key is mapped to meta data
                                                 config_data_of_node["ESS"]["meta"][
                                                     self.storage_mapping[storage_key]["meta"]] = \
-                                                    storage_information[storage_key] / percentage
+                                                    storage_information["ESS"][storage_key] / percentage
                                             if type(self.storage_mapping[storage_key]) == list:
                                                 # this means a value in the storageunit is mapped to multiple values in the ofw
                                                 for part in self.storage_mapping[storage_key]:
                                                     if "meta" in part:
                                                         config_data_of_node["ESS"]["meta"][part["meta"]] = \
-                                                            storage_information[storage_key] / percentage
+                                                            storage_information["ESS"][storage_key] / percentage
                                                     else:
                                                         config_data_of_node["ESS"][part] = \
-                                                            storage_information[storage_key] / percentage
+                                                            storage_information["ESS"][storage_key] / percentage
                                             if type(self.storage_mapping[storage_key]) == str:
                                                 # the key can be directly mapped
                                                 config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
-                                                    storage_information[storage_key] / percentage
+                                                    storage_information["ESS"][storage_key] / percentage
                                     for generic_key in self.generic_mapping:
                                         if generic_key in storage_information:
                                             if generic_key in self.percentage_mapping:
@@ -754,20 +758,20 @@ class Profess:
                                             if type(self.grid_mapping[grid_key]) == dict:
                                                 # this means the key is mapped to meta data
                                                 config_data_of_node["grid"][self.grid_mapping[grid_key]["meta"]] = \
-                                                    storage_information[grid_key] / percentage
+                                                    storage_information["Grid"][grid_key] / percentage
                                             if type(self.grid_mapping[grid_key]) == list:
                                                 # this means a value in the storageunit is mapped to multiple values in the ofw
                                                 for part in self.grid_mapping[grid_key]:
                                                     if "meta" in part:
                                                         config_data_of_node["grid"]["meta"][part["meta"]] = \
-                                                            storage_information[grid_key] / percentage
+                                                            storage_information["Grid"][grid_key] / percentage
                                                     else:
                                                         config_data_of_node["grid"][part] = \
-                                                            storage_information[grid_key] / percentage
+                                                            storage_information["Grid"][grid_key] / percentage
                                             if type(self.grid_mapping[grid_key]) == str:
                                                 # the key can be directly mapped
                                                 config_data_of_node["grid"][self.grid_mapping[grid_key]] = \
-                                                    storage_information[grid_key] / percentage
+                                                    storage_information["Grid"][grid_key] / percentage
                 if voltage_prediction is not None:
                     for voltage_profile in voltage_prediction:
                         profess_id = self.get_profess_id(node_name)
@@ -864,14 +868,9 @@ class Profess:
 
                 node_element_list = self.json_parser.get_node_element_list()
         if soc_list is not None:
-            if type(
-                    soc_list) is dict:  # if soc_list is a dict it is a new topology for the grid, otherwise the list are the updated soc values
-                self.json_parser.set_topology(soc_list)
-                self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
-                                  , ess_con=ess_con,voltage_prediction=voltage_prediction)
-            else:
-                self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
-                                  , ess_con=ess_con, soc_list=soc_list,voltage_prediction=voltage_prediction)
+
+            self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
+                              , ess_con=ess_con, soc_list=soc_list)
 
     def translate_output(self, output_data):
         """
@@ -902,35 +901,7 @@ class Profess:
                         if profess_id in config[node_name]:
                             index = output_list.index(output_for_node)
                             output_list[index] = {node_name: output_list[index]}
-        # TODO group phases together, i.e. translate phases into number
-        # for node in output_list:
-        #     for node_name in node:
-        #         print(node[node_name])
-        #         for profess_id in node[node_name]:
-        #             node[node_name][profess_id]["Grid"]=[]
-        #             for element in node[node_name][profess_id]:
-        #                 if str(element).startswith("P_Grid"):
-        #                     power_name="P"
-        #                 if str(element).startswith("Q_Grid"):
-        #                     power_name="Q"
-        #                 if str(element).endswith("Grid_R_Output"):
-        #                     print(node[node_name][profess_id]["Grid"])
-        #                     print((any(helper_dict["P"]) for helper_dict in node[node_name][profess_id]["Grid"]))
-        #                     if any(node[node_name][profess_id]["Grid"])==power_name:
-        #
-        #                         node[node_name][profess_id]["Grid"][power_name][node_name + ".1"]={node[node_name][profess_id][element]}
-        #                     else:
-        #                         node[node_name][profess_id]["Grid"].append({power_name:{node_name+".1":node[node_name][profess_id][element]}})
-        #                 if str(element).endswith("Grid_S_Output"):
-        #                     if any(node[node_name][profess_id]["Grid"])==power_name:
-        #                         node[node_name][profess_id]["Grid"][power_name][node_name + ".2"]={node[node_name][profess_id][element]}
-        #                     else:
-        #                         node[node_name][profess_id]["Grid"].append({power_name:{node_name+".2":node[node_name][profess_id][element]}})
-        #                 if str(element).endswith("Grid_T_Output"):
-        #                     if any(node[node_name][profess_id]["Grid"])==power_name:
-        #                         node[node_name][profess_id]["Grid"][power_name][node_name + ".3"]={node[node_name][profess_id][element]}
-        #                     else:
-        #                         node[node_name][profess_id]["Grid"].append({power_name:{node_name+".3":node[node_name][profess_id][element]}})
+
         sorted_output = copy.deepcopy(output_list)
 
         for output_for_node in sorted_output:

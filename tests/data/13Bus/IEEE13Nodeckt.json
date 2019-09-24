@@ -741,6 +741,13 @@
                     "c0": 0
                 }
             ],
+            "photovoltaics":[{
+			"bus1": "633",
+			"id": "PV_1",
+			"max_power_kW":15,
+			"phases":3,
+			"kV":4.16
+		    }],
                         "storageUnits": [
 						{
                   "id": "Akku1",
