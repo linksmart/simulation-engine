@@ -143,7 +143,7 @@ class JsonParser:
         [node_name1, node_name2, ...]
         """
         storage_node_list = []
-        pv_node_list = []
+        charging_ess_list = []
         node_list = []
         if "radials" in self.topology.keys():
             for radial_number in range(len(self.topology["radials"])):
@@ -159,16 +159,15 @@ class JsonParser:
                     node_list = storage_node_list
                     ##logger.debug("storages found")
 
-                # if "photovoltaics" in self.topology["radials"][radial_number].keys():
-                #     for element in self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True):
-                #         pattern = re.compile("[^.]*")  # regex to find professID
-                #         m = pattern.findall(element)
-                #         element = m[0]
-                #         pv_node_list.append(element)
-                #     node_list=pv_node_list
-                #     ##logger.debug("pvs found")
-                # if storage_node_list is not None and pv_node_list is not None:
-                #     node_list= storage_node_list + list(set(pv_node_list) - set(storage_node_list))
+                if "chargingStations" in self.topology["radials"][radial_number].keys():
+                     for element in self.search(self.topology["radials"][radial_number]["chargingStations"], "bus", "", True):
+                         pattern = re.compile("[^.]*")  # regex to find professID
+                         m = pattern.findall(element)
+                         element = m[0]
+                         charging_ess_list.append(element)
+
+                if storage_node_list is not None and charging_ess_list is not None:
+                    node_list= list(set(storage_node_list) - set(charging_ess_list))
 
         if node_list != []:
             return node_list

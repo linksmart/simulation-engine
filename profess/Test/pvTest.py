@@ -201,13 +201,13 @@ def plot_node_in_every_test(path,node_name,mapping_name):
 
     profile_path="C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential/"
     profile_name=str("profile_"+str(node_number)+".txt")
-    #load=plot_profile(profile_path,profile_name ,linecount)
-    #pv=plot_pv_profile(path,linecount,mapping_name)
-    #pess=plot_pess(path,linecount, "Akku"+str(node_number),mapping_name)
+    load=plot_profile(profile_path,profile_name ,linecount)
+    pv=plot_pv_profile(path,linecount,mapping_name)
+    pess=plot_pess(path,linecount, "Akku"+str(node_number),mapping_name)
     #TODO for multiple plotted shapes
-    #p_pv_curt=plot_P_PV_curt(path,linecount,"Akku"+str(node_number),mapping_name)
-    #plot_P_Grid(path,linecount,pv,load,pess,p_pv_curt)
-    plot_soc(path,linecount,"Akku"+str(node_number),mapping_name)
+    p_pv_curt=plot_P_PV_curt(path,linecount,"Akku"+str(node_number),mapping_name)
+    plot_P_Grid(path,linecount,pv,load,pess,p_pv_curt)
+    #plot_soc(path,linecount,"Akku"+str(node_number),mapping_name)
     #################################
     pv_difference=[]
     for element in range(linecount):
@@ -481,7 +481,7 @@ def voltage_prediction(path,mapping_name):
 #print(response)
 #voltage_prediction("PVTest/","mapping")
 
-run_all(24)
+#run_all(24)
 #calculate_pv_size("PVTest/cc589737d784/cc589737d784_pv_result","C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential")
 #print(array_of_ids)
 #helper()
@@ -494,7 +494,7 @@ run_all(24)
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 path="C:/Users/klingenb/Documents/BAThesis/Results/TestStorages/self-consumption/"
 #plot_node_in_every_test(path,"node_a12","mapping_SC_1kw_P_Bigger_ESS")
-#plot_node_in_every_test("StorageTest/","node_a12","SP_big_ESS_Curt_cbc")
+plot_node_in_every_test("StorageTest/","node_a12","SP_big_ESS_Curt_cbc_changed_SOC")
 #plot_node_in_every_test("PVTest/","node_a12","mapping")
 #plot_differences("PVTest/","StorageTest/","node_a12","Only PV","Minimize costs 1kw max export","mapping","mappingBigESS1kwMC")
 
