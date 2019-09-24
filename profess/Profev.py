@@ -162,12 +162,12 @@ class Profev:
                 self.domain) + "inputs/dataset")
             return 1
 
-    def post_all_standard_data(self):
+    def post_all_standard_data(self, soc_list):
         """
         posts standard_data to the ofw for every relevant bus (nodes with ESS)
         :return: returns 0 when successful, 1 when not successful
         """
-        node_element_list = self.json_parser.get_node_element_list()
+        node_element_list = self.json_parser.get_node_element_list(soc_list)
         all_successful = True
         for node_element in node_element_list:
             for node_name in node_element:
@@ -798,7 +798,7 @@ class Profev:
             logger.error("there is no node which has the profess_id: " + profess_id)
         return node_name
 
-    def set_data_list(self):
+    def set_data_list(self, soc_list):
         """
         sets up data_list with a list of dictonaries to, with the relevant nodes(nodes with ESS):
         [{node_name1:{},{node_name2:{},...]
@@ -806,14 +806,14 @@ class Profev:
         :return:
         """
         # logger.debug("data for nodes is set")
-        node_element_list = self.json_parser.get_node_element_list()
+        node_element_list = self.json_parser.get_node_element_list(soc_list)
         logger.debug("node element list " + str(node_element_list))
         for index in range(len(node_element_list)):
             for node_name in (node_element_list[index]):
                 node_element_list[index] = {node_name: {}}
         self.dataList = node_element_list
 
-    def set_up_profess(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
+    def set_up_profev(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
         """
         sets all important information retrieved from the parameters and topology
         :param soc_list: syntax when a list: [{node_name1:{"SoC":value, "id": id_name},{node_name2:{...},...] value is
@@ -829,23 +829,23 @@ class Profev:
         :param ess_con: [{node_name:{node_name.1.2.3:[value1,value2, ...]}, ...}
         :return:
         """
-        logger.debug("set_up_profess started")
-        logger.debug("soc_list " + str(soc_list))
+        logger.debug("set_up_profev started")
+        #logger.debug("soc_list " + str(soc_list))
         # logger.debug("load_profiles "+ str(load_profiles))
         # logger.debug("pv_profiles "+ str(pv_profiles))
         # logger.debug("price_profiles "+ str(price_profiles))
         # logger.debug("ess_con " + str(ess_con))
         if self.dataList == []:
             # this happends just for the first set_up
-            self.set_data_list()
-            self.post_all_standard_data()
-            node_name_list = self.json_parser.get_node_name_list()
+            self.set_data_list(soc_list)
+            self.post_all_standard_data(soc_list)
+            node_name_list = self.json_parser.get_node_name_list(soc_list)
             if node_name_list != 0:
                 for nodeName in node_name_list:
                     self.set_storage(nodeName)
                     self.set_photovoltaics(nodeName)
 
-                node_element_list = self.json_parser.get_node_element_list()
+                node_element_list = self.json_parser.get_node_element_list(soc_list)
         if soc_list is not None:
             if type(
                     soc_list) is dict:  # if soc_list is a dict it is a new topology for the grid, otherwise the list are the updated soc values

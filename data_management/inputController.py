@@ -232,6 +232,20 @@ class InputController:
             Storage_names.append(ess_element["id"])
         return Storage_names
 
+    def get_Storage_nodes(self, topology):
+        Storage_nodes = []
+        radial = topology["radials"]  # ["storageUnits"]
+        storages = []
+
+        for element in radial:
+            for key, value in element.items():
+                if key == "storageUnits":
+                    storages = value
+
+        for ess_element in storages:
+            Storage_nodes.append(ess_element["bus1"])
+        return Storage_nodes
+
     def get_soc_list(self,topology):
         radial=topology["radials"]#["storageUnits"]
         common=topology["common"]
@@ -296,29 +310,40 @@ class InputController:
                 if key == "photovoltaics":
                     photovoltaics=value
 
-        for key, charger_element in chargers.items():
-            soc_dict = {}
-            evs_connected = charger_element.get_EV_connected()
-            for ev_unit in evs_connected:
-                ev_unit.calculate_position(self.sim_hours + 24, 1)
-                soc_dict[charger_element.get_bus_name()] = {"EV":{"SoC": ev_unit.get_SoC(),
-                                                                    "T_SoC": 25,
-                                                                    "id": ev_unit.get_id(),
-                                                                    "Battery_Capacity": ev_unit.get_Battery_Capacity(),
-                                                                    "max_charging_power": charger_element.get_max_charging_power(),
-                                                                    "charge_efficiency": charger_element.get_charging_efficiency()},
-                                                            "Grid":{
-                                                                    "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
-                                                                    "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}
-                                                            }
+        ess_buses = []
+        for storage_element in storages:
+            ess_buses.append(storage_element["bus1"])
 
-                for pv_element in photovoltaics:
-                    if pv_element["bus1"] == charger_element.get_bus_name():
-                        soc_dict[charger_element.get_bus_name()]["PV"]={"pv_name": pv_element["id"]}
-                for ess_element in storages:
-                    if ess_element["bus1"] == charger_element.get_bus_name():
-                        soc_dict[charger_element.get_bus_name()]["ESS"] = {"ess_name": ess_element["id"]}
-            soc_list.append(soc_dict)
+        for key, charger_element in chargers.items():
+            if charger_element.get_bus_name() in ess_buses:
+                soc_dict = {}
+                evs_connected = charger_element.get_EV_connected()
+                for ev_unit in evs_connected:
+                    ev_unit.calculate_position(self.sim_hours + 24, 1)
+                    soc_dict[charger_element.get_bus_name()] = {"EV":{"SoC": ev_unit.get_SoC(),
+                                                                        "id": ev_unit.get_id(),
+                                                                        "Battery_Capacity": ev_unit.get_Battery_Capacity(),
+                                                                        "max_charging_power": charger_element.get_max_charging_power(),
+                                                                        "charge_efficiency": charger_element.get_charging_efficiency()},
+                                                                "Grid":{
+                                                                        "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
+                                                                        "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}
+                                                                }
+
+                    for pv_element in photovoltaics:
+                        if pv_element["bus1"] == charger_element.get_bus_name():
+                            soc_dict[charger_element.get_bus_name()]["PV"]={"pv_name": pv_element["id"]}
+                    for ess_element in storages:
+                        if ess_element["bus1"] == charger_element.get_bus_name():
+                            soc_dict[charger_element.get_bus_name()]["ESS"] = {"SoC":ess_element["soc"],
+                                                            "T_SoC":25,
+                                                            "id":ess_element["id"],
+                                                            "Battery_Capacity":ess_element["storage_capacity"],
+                                                            "max_charging_power":ess_element["max_charging_power"],
+                                                            "max_discharging_power":ess_element["max_discharging_power"],
+                                                            "charge_efficiency":ess_element["charge_efficiency"],
+                                                            "discharge_efficiency":ess_element["discharge_efficiency"]}
+                soc_list.append(soc_dict)
             #list_storages.append(ess_element)
         #logger.debug("list_storages "+str(list_storages))
         #logger.debug("soc_list_evs " + str(soc_list))
@@ -330,11 +355,9 @@ class InputController:
         new_soc_list=[]
         for element in soc_list:
             for key, value in element.items():
-                element_id=value["id"]
-                #logger.debug("ESS_id "+str(element_id))
-                #logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
+                element_id=value["ESS"]["id"]
                 SoC = float(self.sim.getSoCfromBattery(element_id))
-                value["SoC"]=SoC
+                value["ESS"]["SoC"]=SoC
                 new_soc_list.append(element)
         logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
@@ -345,12 +368,14 @@ class InputController:
         new_soc_list=[]
         for element in soc_list:
             for key, value in element.items():
-                element_id=value["id"]
-                #logger.debug("ESS_id "+str(element_id))
-                #logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
+                element_id = value["ESS"]["id"]
                 SoC = float(self.sim.getSoCfromBattery(element_id))
-                value["SoC"]=SoC
+                value["ESS"]["SoC"] = SoC
+                element_id = element_id = "ESS_" + value["EV"]["id"]
+                SoC = float(self.sim.getSoCfromBattery(element_id))
+                value["EV"]["SoC"] = SoC
                 new_soc_list.append(element)
+
         logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
 
@@ -365,19 +390,42 @@ class InputController:
                 flag_to_return = True
         return flag_to_return
 
-    def is_Storage_in_Topology(self, topology):
+    def get_list_nodes_storages_with_charging_station(self, radial, chargers):
+        for element in radial:
+            for key, value in element.items():
+                if key == "storageUnits":
+                    storages = value
+
+        list_nodes_storages_with_cs=[]
+        for key, charger_element in chargers.items():
+            for ess_element in storages:
+                if ess_element["bus1"] == charger_element.get_bus_name():
+                    list_nodes_storages_with_cs.append(ess_element["bus1"])
+        return list_nodes_storages_with_cs
+
+    def is_Storage_in_Topology_without_charging_station(self, topology, chargers=None):
         # topology = profess.json_parser.get_topology()
         # logger.debug("type topology " + str(type(self.topology)))
         radial = topology["radials"]
-        flag_to_return = False
         for values in radial:
-            #values = values.to_dict()
-            # logger.debug("values "+str(values))
-            # for key in values.keys():
-            # logger.debug("key "+str(key))
-            if "storageUnits" in values.keys():
-                flag_to_return = True
-        return flag_to_return
+            if not "storageUnits" in values.keys():
+                return False
+        if not chargers == None:
+            list_nodes_storages_with_cs=self.get_list_nodes_storages_with_charging_station(radial, chargers)
+
+            list_all_storage_nodes = self.get_Storage_nodes(topology)
+
+            if not len(list_nodes_storages_with_cs) == 0:
+                if list_nodes_storages_with_cs == list_all_storage_nodes:
+                    return False
+                else:
+                    return True
+            else:
+                return True
+        else:
+            return True
+
+
 
     def is_global_control_in_Storage(self, topology):
         radial = topology["radials"]
