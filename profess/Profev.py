@@ -514,13 +514,12 @@ class Profev:
         profess_id = self.get_profess_id(node_name, soc_list)
         if profess_id != 0:
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
-            for radial_number in range(len(self.json_parser.topology["radials"])):
-                node_element_list = self.json_parser.get_node_element_list(soc_list)[node_number][node_name]
-                self.iterate_mapping(self.pv_mapping, "photovoltaic", "photovoltaics", node_element_list,
-                                     config_data_of_node)
-                self.iterate_mapping(self.grid_mapping, "grid", "photovoltaics", node_element_list, config_data_of_node)
-                self.iterate_mapping(self.generic_mapping, "generic", "photovoltaics", node_element_list,
-                                     config_data_of_node)
+            node_element_list = self.json_parser.get_node_element_list(soc_list)[node_number][node_name]
+            self.iterate_mapping(self.pv_mapping, "photovoltaic", "photovoltaics", node_element_list,
+                                 config_data_of_node)
+            self.iterate_mapping(self.grid_mapping, "grid", "photovoltaics", node_element_list, config_data_of_node)
+            self.iterate_mapping(self.generic_mapping, "generic", "photovoltaics", node_element_list,
+                                 config_data_of_node)
 
     def set_config_json(self, node_name, profess_id, config_json, soc_list):
         """
