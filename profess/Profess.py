@@ -60,6 +60,7 @@ class Profess:
 
             },
             "grid": {
+                "mu_P":0.5,
                 "meta": {
 
                 }
@@ -265,21 +266,21 @@ class Profess:
             translated_output = self.translate_output(output_list)
             output_this_timestep={}
             for node_name in self.json_parser.get_node_name_list():
-                if node_name == "node_a12":
-                    output_this_timestep[node_name]={"input":{},"output":{}}
-                    node_number = self.json_parser.get_node_name_list().index(node_name)
-                    input_for_profess = self.dataList[node_number][node_name]
+                #if node_name == "node_a12":
+                output_this_timestep[node_name]={"input":{},"output":{}}
+                node_number = self.json_parser.get_node_name_list().index(node_name)
+                input_for_profess = self.dataList[node_number][node_name]
 
-                    output_this_timestep[node_name]["input"]=copy.deepcopy(input_for_profess)
-                    for parameter_output_list in output_list:
-                        for profess_id in parameter_output_list:
-                            logger.debug("profess output "+str(profess_id)+" , and: "+str(parameter_output_list))
-                            for element in output_this_timestep[node_name]["input"]:
-                                profess_id_for_node=element
+                output_this_timestep[node_name]["input"]=copy.deepcopy(input_for_profess)
+                for parameter_output_list in output_list:
+                    for profess_id in parameter_output_list:
+                        logger.debug("profess output "+str(profess_id)+" , and: "+str(parameter_output_list))
+                        for element in output_this_timestep[node_name]["input"]:
+                            profess_id_for_node=element
 
-                            logger.debug("profess id "+ str(profess_id_for_node))
-                            if profess_id==profess_id_for_node:
-                                output_this_timestep[node_name]["output"] = copy.deepcopy(parameter_output_list)
+                        logger.debug("profess id "+ str(profess_id_for_node))
+                        if profess_id==profess_id_for_node:
+                            output_this_timestep[node_name]["output"] = copy.deepcopy(parameter_output_list)
                 self.profess_output_list.append(output_this_timestep)
             fname = (str(self.id)) + "_profess_result"
             path = os.path.join("data", str(self.id), fname)
@@ -345,7 +346,7 @@ class Profess:
                         storage_opt_model = storage["storageUnits"]["optimization_model"]
                 if optimization_model is None:
                     optimization_model = storage_opt_model
-                start_response = self.start(1, 24, 3600, optimization_model, 1, "ipopt", "discrete",
+                start_response = self.start(1, 24, 3600, optimization_model, 1, "cbc", "discrete",
                                             self.get_profess_id(node_name))
                 if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response, node_name)

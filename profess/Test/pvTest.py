@@ -196,22 +196,22 @@ def plot_node_in_every_test(path,node_name,mapping_name):
     average=calculate_voltage(path,node_name,mapping_name)
     for percentage in average:
         linecount=len(average[percentage])
-        #plot_node(average[percentage],percentage)
+        plot_node(average[percentage],percentage)
     node_number=node_name.split("_a")[1]
 
     profile_path="C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential/"
     profile_name=str("profile_"+str(node_number)+".txt")
-    load=plot_profile(profile_path,profile_name ,linecount)
-    pv=plot_pv_profile(path,linecount,mapping_name)
-    pess=plot_pess(path,linecount, "Akku"+str(node_number),mapping_name)
+    #load=plot_profile(profile_path,profile_name ,linecount)
+    #pv=plot_pv_profile(path,linecount,mapping_name)
+    #pess=plot_pess(path,linecount, "Akku"+str(node_number),mapping_name)
     #TODO for multiple plotted shapes
-    p_pv_curt=plot_P_PV_curt(path,linecount,"Akku"+str(node_number),mapping_name)
-    plot_P_Grid(path,linecount,pv,load,pess,p_pv_curt)
+    #p_pv_curt=plot_P_PV_curt(path,linecount,"Akku"+str(node_number),mapping_name)
+    #plot_P_Grid(path,linecount,pv,load,pess,p_pv_curt)
     #################################
     pv_difference=[]
     for element in range(linecount):
 
-        pv_difference.append(pv[element] - p_pv_curt[element])
+        #pv_difference.append(pv[element] - p_pv_curt[element])
         pass
     print("difference between pv and curt "+str(pv_difference))
 
@@ -291,6 +291,7 @@ def plot_pess(path,time,target,mapping_name):
     for result_id in mapping:
         pess_file = open(path + result_id + "/" + result_id + "_soc_result").read()
         pess_loadshapes = json.loads(pess_file)
+        print(pess_loadshapes)
         flag_plotted=False
         for batteryName in pess_loadshapes:
             if batteryName==target:
@@ -445,18 +446,7 @@ def voltage_prediction(path,mapping_name):
         voltage_profile=calculate_voltage(path,node_name,mapping_name)
         output_json[node_name]=voltage_profile["0%"]
     output_file.write(str(output_json))
-def helper():
-    desired="node_a12"
-    output=[]
-    input_file = open("professresults.txt").read()#
-    input_yaml=yaml.load(input_file)
-    output_file = open("profess_result_a12.txt","w+")
-    for timestep in input_yaml:
-        for node_name in timestep:
-            #print(node_name)
-            print(timestep)
-            if node_name ==desired:
-                output.append(timestep[node_name])
+
 
 
 #print(get_relevant_nodes())
@@ -482,7 +472,7 @@ run_all(24)
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 path="C:/Users/klingenb/Documents/BAThesis/Results/TestStorages/self-consumption/"
 #plot_node_in_every_test(path,"node_a12","mapping_SC_1kw_P_Bigger_ESS")
-#plot_node_in_every_test("StorageTest/","node_a5","SP_big_ESS_Curt48hours")
+#plot_node_in_every_test("StorageTest/","node_a12","smallVoltageTest")
 #plot_node_in_every_test("PVTest/","node_a12","mapping")
 #plot_differences("PVTest/","StorageTest/","node_a12","Only PV","Minimize costs 1kw max export","mapping","mappingBigESS1kwMC")
 
