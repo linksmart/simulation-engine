@@ -863,9 +863,10 @@ class Profev:
 
 
         if soc_list is not None:
-
+            self.set_soc_ess(soc_list)
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list)
+
 
     def set_grid(self, node_name, soc_list):
         """
