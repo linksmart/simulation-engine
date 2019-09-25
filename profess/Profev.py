@@ -937,6 +937,8 @@ class Profev:
                 for nodeName in node_name_list:
                     self.set_storage(nodeName, soc_list)
                     self.set_photovoltaics(nodeName, soc_list)
+                    self.set_grid
+                    self.set_geeric
                     self.set_evs(nodeName, soc_list, chargers)
                     self.set_uncertainty(nodeName, soc_list, chargers)
 

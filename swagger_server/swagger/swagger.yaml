@@ -571,6 +571,12 @@ definitions:
       global_control:
         type: "boolean"
         default: false
+      voltage_sensitivity_factor_active_power:
+        type: "number"
+        description: "Unit: V/kW"
+      voltage_sensitivity_factor_reactive_power:
+        type: "number"
+        description: "Unit: V/kW"
   Photovoltaic:
     type: "object"
     required:
