@@ -441,7 +441,7 @@ class Profess:
         :param config_data_of_node: data for the ofw
         :return:
         """
-        logger.debug("iterate mapping " + str(name_in_ofw) + " ," + str(name_in_topology))
+        #logger.debug("iterate mapping " + str(name_in_ofw) + " ," + str(name_in_topology))
         element_index = 0
         for node_element in node_element_list:
             if name_in_topology in node_element:
@@ -454,7 +454,7 @@ class Profess:
                         percentage = 100
                     else:
                         percentage = 1
-                    logger.debug("mappingkey " + str(mapping_key) + " and type " + str(type(mapping_key)))
+                    #logger.debug("mappingkey " + str(mapping_key) + " and type " + str(type(mapping_key)))
                     if type(mapping[mapping_key]) == dict:
                         # this means the key is mapped to meta data
                         config_data_of_node[name_in_ofw]["meta"][mapping[mapping_key]["meta"]] = \
@@ -830,6 +830,7 @@ class Profess:
                     self.set_photovoltaics(nodeName, soc_list)
 
                 node_element_list = self.json_parser.get_node_element_list(soc_list)
+                logger.debug("node_ element list "+str(node_element_list))
         if soc_list is not None:
 
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
