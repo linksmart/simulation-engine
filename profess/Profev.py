@@ -353,8 +353,10 @@ class Profev:
                         storage_opt_model = storage["storageUnits"]["optimization_model"]
                         for charger_name, charger_element in chargers.items():
                             node = charger_element.get_bus_name()
+                            logger.debug("node name "+str(node_name)+" node "+str(node))
                             if node == node_name:
                                 type = charger_element.get_type_application()
+
                         if type == "residential" and storage_opt_model == "Maximize Self-Consumption":
                             storage_opt_model = "StochasticResidentialMaxPV"
                         if type == "residential" and storage_opt_model == "Maximize Self-Production":
@@ -365,13 +367,16 @@ class Profev:
                             storage_opt_model = "CarParkModel"
                         if type == "commercial" and storage_opt_model == "Maximize Self-Production":
                             storage_opt_model = "CarParkModelMinGrid"
-
+                logger.debug("optimization model: "+str(storage_opt_model))
                 if storage_opt_model == None:
                     logger.error("No optimization model given for storage element " + str(node_element["storageUnits"]["id"]))
                     break
 
                 start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "stochastic",
                                             self.get_profess_id(node_name, soc_list))
+                if start_response is None:
+                    break
+                    return 1
                 if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response, node_name, soc_list)
                     break

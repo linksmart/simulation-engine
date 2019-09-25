@@ -1286,7 +1286,7 @@ class OpenDSS:
                     elif key == "charging_efficiency":
                         charge_efficiency = value
                     elif key == "type_application":
-                        type_application = key
+                        type_application = value
                     #elif key == "discharge_efficiency":
                         #discharge_efficiency = value
                     elif key == "powerfactor":
@@ -1303,7 +1303,7 @@ class OpenDSS:
                     else:
                         logger.debug("key not registered: "+str(key))
 
-
+                logger.debug("type_application "+str(type_application))
                 self.Chargers[id] = Charger(id, kw_rated, ev_object, kw_rated, type_application, bus1, charge_efficiency)
 
 

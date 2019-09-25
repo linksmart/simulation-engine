@@ -129,7 +129,7 @@ def create_simulation(body):  # noqa: E501
             data["radials"][0]["storageUnits"] = data_to_store
             data["radials"][0]["chargingStations"] = data_to_store_cs
 
-        #logger.debug("data"+str(data))
+        logger.debug("data"+str(data))
         #logger.debug("data" + str(data["radials"][0]["storageUnits"]))
         ####generates an id an makes a directory with the id for the data and for the registry
         try:
