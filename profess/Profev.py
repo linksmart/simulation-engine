@@ -917,8 +917,9 @@ class Profev:
                                         percentage = 1
                                     if type(self.grid_mapping[grid_key]) == dict:
                                         # this means the key is mapped to meta data
-                                        config_data_of_node["grid"][self.grid_mapping[grid_key]["meta"]] = \
+                                        config_data_of_node["grid"]["meta"][self.grid_mapping[grid_key]["meta"]] = \
                                             storage_information["Grid"][grid_key] / percentage
+
                                     if type(self.grid_mapping[grid_key]) == list:
                                         # this means a value in the storageunit is mapped to multiple values in the ofw
                                         for part in self.grid_mapping[grid_key]:
