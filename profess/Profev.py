@@ -332,7 +332,7 @@ class Profev:
             logger.error("Failed to start optimization, No connection to the OFW could be established at :" + str(
                 self.domain) + "optimization/start/")
 
-    def start_all(self, soc_list):
+    def start_all(self, soc_list, chargers):
         """
         starts all optimizations on the relevant nodes (nodes with ESS)
         :param optimization_model: optional optimization_model, when no model is given the models in the ESS definition
@@ -342,18 +342,35 @@ class Profev:
         logger.debug("All optimizations are being started.")
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
-            storage_opt_model=""
+            storage_opt_model=None
             for node_name in node_name_list:
                 # search for list with all elemens that are connected to bus: node_name
                 element_node = (next(item for item in self.json_parser.get_node_element_list(soc_list) if node_name in item))
+
                 for node_element in element_node[node_name]:
                     if "storageUnits" in node_element:
                         storage = node_element
                         storage_opt_model = storage["storageUnits"]["optimization_model"]
-                if storage_opt_model is None:
-                    logger.error("no opzimization model was given for "+str(node_name))
+                        for charger_name, charger_element in chargers.items():
+                            node = charger_element.get_bus_name()
+                            if node == node_name:
+                                type = charger_element.get_type_application()
+                        if type == "residential" and storage_opt_model == "Maximize Self-Consumption":
+                            storage_opt_model = "StochasticResidentialMaxPV"
+                        if type == "residential" and storage_opt_model == "Maximize Self-Production":
+                            storage_opt_model = "StochasticResidentialMinGrid"
+                        if type == "residential" and storage_opt_model == "MinimizeCosts":
+                            storage_opt_model = "StochasticResidentialMinPBill"
+                        if type == "commercial" and storage_opt_model == "Maximize Self-Consumption":
+                            storage_opt_model = "CarParkModel"
+                        if type == "commercial" and storage_opt_model == "Maximize Self-Production":
+                            storage_opt_model = "CarParkModelMinGrid"
+
+                if storage_opt_model == None:
+                    logger.error("No optimization model given for storage element " + str(node_element["storageUnits"]["id"]))
                     break
-                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "discrete",
+
+                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "stochastic",
                                             self.get_profess_id(node_name, soc_list))
                 if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response, node_name, soc_list)
@@ -937,8 +954,8 @@ class Profev:
                 for nodeName in node_name_list:
                     self.set_storage(nodeName, soc_list)
                     self.set_photovoltaics(nodeName, soc_list)
-                    self.set_grid
-                    self.set_geeric
+                    #self.set_grid
+                    #self.set_geeric
                     self.set_evs(nodeName, soc_list, chargers)
                     self.set_uncertainty(nodeName, soc_list, chargers)
 

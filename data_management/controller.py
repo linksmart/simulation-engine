@@ -396,7 +396,7 @@ class gridController(threading.Thread):
                 else:
                     self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, None, None, chargers=chargers)
 
-                #status_profev = self.profev.start_all(soc_list_evs)
+                status_profev = self.profev.start_all(soc_list_evs, chargers)
 
             else:
                 logger.debug("No charging stations present in the simulation")
