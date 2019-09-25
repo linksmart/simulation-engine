@@ -397,6 +397,10 @@ class gridController(threading.Thread):
                     self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, None, None, chargers=chargers)
 
                 status_profev = self.profev.start_all(soc_list_evs, chargers)
+                if not status_profev:
+                    logger.debug("Optimization succeded")
+                else:
+                    logger.error("OFW instances could not be started")
 
             else:
                 logger.debug("No charging stations present in the simulation")

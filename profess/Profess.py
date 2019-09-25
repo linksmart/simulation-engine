@@ -413,6 +413,7 @@ class Profess:
         :return:
         """
         logger.debug("set_storage config data of " + str(node_name))
+        self.set_soc_ess(soc_list)
         node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
         profess_id = self.get_profess_id(node_name, soc_list)
         if profess_id != 0:
@@ -560,6 +561,7 @@ class Profess:
                             if profess_id != 0:
                                 config_data_of_node = self.dataList[node_number][node_name][profess_id]
                                 phase = load_profile_for_node[node_name]
+                                #flag for every phase, R=1, S=2, T=3
                                 r_flag = False
                                 s_flag = False
                                 t_flag = False
@@ -573,42 +575,8 @@ class Profess:
                                 if node_name + ".3" in phase:
                                     config_data_of_node["load"]["P_Load_T"] = phase[node_name + ".3"]
                                     t_flag = True
-                                length = 0
-                                if r_flag:
-                                    length = len(config_data_of_node["load"]["P_Load_R"])
-                                if s_flag:
-                                    length = len(config_data_of_node["load"]["P_Load_S"])
-                                if t_flag:
-                                    length = len(config_data_of_node["load"]["P_Load_T"])
-                                if not r_flag:
-                                    config_data_of_node["load"]["P_Load_R"] = [0] * length
-                                if not s_flag:
-                                    config_data_of_node["load"]["P_Load_S"] = [0] * length
-                                if not t_flag:
-                                    config_data_of_node["load"]["P_Load_T"] = [0] * length
-
-                                if ("P_Load_R" in config_data_of_node["load"]) and (
-                                        "P_Load_S" in config_data_of_node["load"]) and \
-                                        ("P_Load_T" in config_data_of_node["load"]):
-
-                                    three_phase = []
-                                    for value in range(len(config_data_of_node["load"]["P_Load_T"])):
-                                        three_phase_value = config_data_of_node["load"]["P_Load_R"][value] + \
-                                                            config_data_of_node["load"]["P_Load_S"][value] + \
-                                                            config_data_of_node["load"]["P_Load_T"][value]
-                                        three_phase.append(three_phase_value)
-                                    config_data_of_node["load"]["P_Load"] = three_phase
-                                else:
-                                    three_phase = [0] * length
-                                    for value in range(length):
-                                        three_phase_value = config_data_of_node["load"]["P_Load_R"][value] + \
-                                                            config_data_of_node["load"]["P_Load_S"][value] + \
-                                                            config_data_of_node["load"]["P_Load_T"][value]
-
-                                        three_phase.append(three_phase_value)
-                                    config_data_of_node["load"]["P_Load"] = three_phase
-
-                                if node_name + ".1.2.3" in phase or node_name == phase:
+                                #check if there is a profile for all three phases, if not add all phases to get P_load
+                                if node_name + ".1.2.3" in phase or node_name == phase: #a load profile for all phases can be given as node_name.1.2.3 or as node_name
                                     three_phase = []
                                     if node_name in phase:
                                         config_data_of_node["load"]["P_Load"] = phase[node_name]
@@ -618,11 +586,27 @@ class Profess:
                                         three_phase = phase[node_name + ".1.2.3"]
                                     single_phase = []
                                     for value in three_phase:
+                                        #when one profile is given, a symetrical load is assumed
                                         value = value / 3
                                         single_phase.append(value)
                                     config_data_of_node["load"]["P_Load_R"] = copy.deepcopy(single_phase)
                                     config_data_of_node["load"]["P_Load_S"] = copy.deepcopy(single_phase)
                                     config_data_of_node["load"]["P_Load_T"] = copy.deepcopy(single_phase)
+                                else:
+                                    # create loads for phases, with no profile
+                                    if not r_flag:
+                                        config_data_of_node["load"]["P_Load_R"] = [0] * 24
+                                    if not s_flag:
+                                        config_data_of_node["load"]["P_Load_S"] = [0] * 24
+                                    if not t_flag:
+                                        config_data_of_node["load"]["P_Load_T"] = [0] * 24
+                                    three_phase = []
+                                    for value in range(24):
+                                        three_phase_value = config_data_of_node["load"]["P_Load_R"][value] + \
+                                                            config_data_of_node["load"]["P_Load_S"][value] + \
+                                                            config_data_of_node["load"]["P_Load_T"][value]
+                                        three_phase.append(three_phase_value)
+                                    config_data_of_node["load"]["P_Load"] = three_phase
 
                                 logger.debug("load profile set for " + str(node_name))
                 else:
@@ -644,6 +628,7 @@ class Profess:
                                         three_phase = phase[node_name + ".1.2.3"]
                                     single_phase = []
                                     for value in three_phase:
+                                        #when one profile is given, a symetrical load is assumed
                                         value = value / 3
                                         single_phase.append(value)
                                     config_data_of_node["photovoltaic"]["P_PV_R"] = copy.deepcopy(single_phase)
@@ -668,94 +653,13 @@ class Profess:
                                 logger.debug("ess_con profile set")
                 else:
                     logger.debug("no ess_con profile was given")
-                if soc_list is not None:
-                    # sets new values for storage: soc, charging ,...
-                    if type(soc_list) is list:
-                        for soc_list_for_node in soc_list:
-                            profess_id = self.get_profess_id(node_name, soc_list)
-                            if profess_id != 0:
-                                config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                                if node_name in soc_list_for_node:
-                                    storage_information = soc_list_for_node[node_name]
 
-                                    for storage_key in self.storage_mapping:
-                                        if storage_key in storage_information["ESS"]:
-                                            if storage_key in self.percentage_mapping:
-                                                percentage = 100
-                                            else:
-                                                percentage = 1
-                                            if type(self.storage_mapping[storage_key]) == dict:
-                                                # this means the key is mapped to meta data
-                                                config_data_of_node["ESS"]["meta"][
-                                                    self.storage_mapping[storage_key]["meta"]] = \
-                                                    storage_information["ESS"][storage_key] / percentage
-                                            if type(self.storage_mapping[storage_key]) == list:
-                                                # this means a value in the storageunit is mapped to multiple values in the ofw
-                                                for part in self.storage_mapping[storage_key]:
-                                                    if "meta" in part:
-                                                        config_data_of_node["ESS"]["meta"][part["meta"]] = \
-                                                            storage_information["ESS"][storage_key] / percentage
-                                                    else:
-                                                        config_data_of_node["ESS"][part] = \
-                                                            storage_information["ESS"][storage_key] / percentage
-                                            if type(self.storage_mapping[storage_key]) == str:
-                                                # the key can be directly mapped
-                                                config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
-                                                    storage_information["ESS"][storage_key] / percentage
-                                    #T_SoC is the only information at the moment, and it is saved in ESS
-                                    for generic_key in self.generic_mapping:
-                                        if generic_key in storage_information["ESS"]:
-                                            if generic_key in self.percentage_mapping:
-                                                percentage = 100
-                                            else:
-                                                percentage = 1
-                                            if type(self.generic_mapping[generic_key]) == dict:
-                                                # this means the key is mapped to meta data
-                                                config_data_of_node["generic"][
-                                                    self.generic_mapping[generic_key]["meta"]] = \
-                                                    storage_information["ESS"][generic_key] / percentage
-                                            if type(self.generic_mapping[generic_key]) == list:
-                                                # this means a value in the storageunit is mapped to multiple values in the ofw
-                                                for part in self.generic_mapping[generic_key]:
-                                                    if "meta" in part:
-                                                        config_data_of_node["generic"]["meta"][part["meta"]] = \
-                                                            storage_information["ESS"][generic_key] / percentage
-                                                    else:
-                                                        config_data_of_node["generic"][part] = \
-                                                            storage_information["ESS"][generic_key] / percentage
-                                            if type(self.generic_mapping[generic_key]) == str:
-                                                # the key can be directly mapped
-                                                config_data_of_node["generic"][self.generic_mapping[generic_key]] = \
-                                                    storage_information["ESS"][generic_key] / percentage
-                                    for grid_key in self.grid_mapping:
-                                        if grid_key in storage_information["Grid"]:
-                                            if grid_key in self.percentage_mapping:
-                                                percentage = 100
-                                            else:
-                                                percentage = 1
-                                            if type(self.grid_mapping[grid_key]) == dict:
-                                                # this means the key is mapped to meta data
-                                                config_data_of_node["grid"][self.grid_mapping[grid_key]["meta"]] = \
-                                                    storage_information["Grid"][grid_key] / percentage
-                                            if type(self.grid_mapping[grid_key]) == list:
-                                                # this means a value in the storageunit is mapped to multiple values in the ofw
-                                                for part in self.grid_mapping[grid_key]:
-                                                    if "meta" in part:
-                                                        config_data_of_node["grid"]["meta"][part["meta"]] = \
-                                                            storage_information["Grid"][grid_key] / percentage
-                                                    else:
-                                                        config_data_of_node["grid"][part] = \
-                                                            storage_information["Grid"][grid_key] / percentage
-                                            if type(self.grid_mapping[grid_key]) == str:
-                                                # the key can be directly mapped
-                                                config_data_of_node["grid"][self.grid_mapping[grid_key]] = \
-                                                    storage_information["Grid"][grid_key] / percentage
 
                 profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
                     config_data_of_node = self.dataList[node_number][node_name][profess_id]
                     if price_profiles is not None:
-                        config_data_of_node["generic"]["Price_Forecast"] = price_profiles  # No reserved words for price
+                        config_data_of_node["generic"]["Price_Forecast"] = price_profiles
                         # logger.debug("price profile set")
                     # updates the profiles in the ofw
                     node_index = node_name_list.index(node_name)
@@ -834,14 +738,148 @@ class Profess:
                 for nodeName in node_name_list:
                     self.set_storage(nodeName, soc_list)
                     self.set_photovoltaics(nodeName, soc_list)
+                    self.set_generic(nodeName,soc_list)
+                    self.set_grid(nodeName,soc_list)
 
                 node_element_list = self.json_parser.get_node_element_list(soc_list)
                 logger.debug("node_ element list "+str(node_element_list))
         if soc_list is not None:
-
+            self.set_soc_ess(soc_list)
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list)
+    def set_grid(self, node_name, soc_list):
+        """
+        sets all grid related data
+        :param node_name: node name where the data is set
+        :param soc_list: soc_list where the grid data is
+        :return:
+        """
+        logger.debug("Setting grid ")
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
+        node_number = node_name_list.index(node_name)
+        if soc_list is not None:
+            # sets new values for storage: soc, charging ,...
+            if type(soc_list) is list:
+                for soc_list_for_node in soc_list:
+                    profess_id = self.get_profess_id(node_name, soc_list)
+                    if profess_id != 0:
+                        config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                        if node_name in soc_list_for_node:
+                            storage_information = soc_list_for_node[node_name]
+                            for grid_key in self.grid_mapping:
+                                if grid_key in storage_information["Grid"]:
+                                    if grid_key in self.percentage_mapping:
+                                        percentage = 100
+                                    else:
+                                        percentage = 1
+                                    if type(self.grid_mapping[grid_key]) == dict:
+                                        # this means the key is mapped to meta data
+                                        config_data_of_node["grid"][self.grid_mapping[grid_key]["meta"]] = \
+                                            storage_information["Grid"][grid_key] / percentage
+                                    if type(self.grid_mapping[grid_key]) == list:
+                                        # this means a value in the storageunit is mapped to multiple values in the ofw
+                                        for part in self.grid_mapping[grid_key]:
+                                            if "meta" in part:
+                                                config_data_of_node["grid"]["meta"][part["meta"]] = \
+                                                    storage_information["Grid"][grid_key] / percentage
+                                            else:
+                                                config_data_of_node["grid"][part] = \
+                                                    storage_information["Grid"][grid_key] / percentage
+                                    if type(self.grid_mapping[grid_key]) == str:
+                                        # the key can be directly mapped
+                                        config_data_of_node["grid"][self.grid_mapping[grid_key]] = \
+                                            storage_information["Grid"][grid_key] / percentage
 
+    def set_generic(self, node_name, soc_list):
+        """
+        sets all generic related data
+        :param node_name: node name where the data is set
+        :param soc_list: soc_list where the generic data is
+        :return:
+        """
+        logger.debug("Setting generic ")
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
+        node_number = node_name_list.index(node_name)
+        if soc_list is not None:
+            # sets new values for storage: soc, charging ,...
+            if type(soc_list) is list:
+                for soc_list_for_node in soc_list:
+                    profess_id = self.get_profess_id(node_name, soc_list)
+                    if profess_id != 0:
+                        config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                        if node_name in soc_list_for_node:
+                            storage_information = soc_list_for_node[node_name]
+                            for generic_key in self.generic_mapping:
+                                if generic_key in storage_information["ESS"]:
+                                    if generic_key in self.percentage_mapping:
+                                        percentage = 100
+                                    else:
+                                        percentage = 1
+                                    if type(self.generic_mapping[generic_key]) == dict:
+                                        # this means the key is mapped to meta data
+                                        config_data_of_node["generic"][
+                                            self.generic_mapping[generic_key]["meta"]] = \
+                                            storage_information["ESS"][generic_key] / percentage
+                                    if type(self.generic_mapping[generic_key]) == list:
+                                        # this means a value in the storageunit is mapped to multiple values in the ofw
+                                        for part in self.generic_mapping[generic_key]:
+                                            if "meta" in part:
+                                                config_data_of_node["generic"]["meta"][part["meta"]] = \
+                                                    storage_information["ESS"][generic_key] / percentage
+                                            else:
+                                                config_data_of_node["generic"][part] = \
+                                                    storage_information["ESS"][generic_key] / percentage
+                                    if type(self.generic_mapping[generic_key]) == str:
+                                        # the key can be directly mapped
+                                        config_data_of_node["generic"][self.generic_mapping[generic_key]] = \
+                                            storage_information["ESS"][generic_key] / percentage
+
+    def set_soc_ess(self, soc_list):
+        """
+        updates soc related values
+        :param soc_list: soc_list with all updates values
+        :return:
+        """
+        logger.debug("Setting updated ess soc_list values ")
+        # logger.debug("load profile: "+str(load_profiles)+" ,pv_profiles: "+str(pv_profiles)+" ,price_profile: "+str(price_profiles)+" ,ess_con "+str(ess_con))
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
+        if node_name_list != 0:
+            for node_name in node_name_list:
+                node_number = node_name_list.index(node_name)
+                if soc_list is not None:
+                    # sets new values for storage: soc, charging ,...
+                    if type(soc_list) is list:
+                        for soc_list_for_node in soc_list:
+                            profess_id = self.get_profess_id(node_name, soc_list)
+                            if profess_id != 0:
+                                config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                                if node_name in soc_list_for_node:
+                                    storage_information = soc_list_for_node[node_name]
+
+                                    for storage_key in self.storage_mapping:
+                                        if storage_key in storage_information["ESS"]:
+                                            if storage_key in self.percentage_mapping:
+                                                percentage = 100
+                                            else:
+                                                percentage = 1
+                                            if type(self.storage_mapping[storage_key]) == dict:
+                                                # this means the key is mapped to meta data
+                                                config_data_of_node["ESS"]["meta"][
+                                                    self.storage_mapping[storage_key]["meta"]] = \
+                                                    storage_information["ESS"][storage_key] / percentage
+                                            if type(self.storage_mapping[storage_key]) == list:
+                                                # this means a value in the storageunit is mapped to multiple values in the ofw
+                                                for part in self.storage_mapping[storage_key]:
+                                                    if "meta" in part:
+                                                        config_data_of_node["ESS"]["meta"][part["meta"]] = \
+                                                            storage_information["ESS"][storage_key] / percentage
+                                                    else:
+                                                        config_data_of_node["ESS"][part] = \
+                                                            storage_information["ESS"][storage_key] / percentage
+                                            if type(self.storage_mapping[storage_key]) == str:
+                                                # the key can be directly mapped
+                                                config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
+                                                    storage_information["ESS"][storage_key] / percentage
     def translate_output(self, output_data):
         """
         translates the ouptut data from whole time horizon to next hour, and also just returns wanted values
