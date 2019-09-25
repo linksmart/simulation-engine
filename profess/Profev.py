@@ -444,7 +444,6 @@ class Profev:
         if profess_id != 0:
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
 
-            #for radial_number in range(len(self.json_parser.topology["radials"])):
             node_element_list = self.json_parser.get_node_element_list(soc_list)[node_number][node_name]
 
             config_data_of_node = self.iterate_mapping(self.storage_mapping, "ESS", "storageUnits", node_element_list,
@@ -454,7 +453,6 @@ class Profev:
             config_data_of_node = self.iterate_mapping(self.grid_mapping, "grid", "storageUnits", node_element_list,
                                  config_data_of_node)
             self.dataList[node_number][node_name][profess_id] = config_data_of_node
-            logger.debug("dataList " + str(self.dataList[node_number][node_name][profess_id]))
 
     def iterate_mapping(self, mapping, name_in_ofw, name_in_topology, node_element_list, config_data_of_node):
         """
@@ -466,10 +464,7 @@ class Profev:
         :param config_data_of_node: data for the ofw
         :return:
         """
-        logger.debug("mapping "+str(mapping))
-        logger.debug("config_data_of_node " + str(config_data_of_node))
-        logger.debug("node_element_list "+str(node_element_list))
-        logger.debug("iterate mapping: name in ofw: " + str(name_in_ofw) + ", name in topology: " + str(name_in_topology))
+        logger.debug("we use mapping: "+str(mapping)+" iterate mapping: name in ofw: " + str(name_in_ofw) + ", name in topology: " + str(name_in_topology))
         element_index = 0
         for node_element in node_element_list:
             if name_in_topology in node_element:
@@ -482,7 +477,7 @@ class Profev:
                         percentage = 100
                     else:
                         percentage = 1
-                    logger.debug("mappingkey " + str(mapping_key) + " and type " + str(type(mapping_key)))
+                    logger.debug("mappingkey " + str(mapping_key) + " and is mapped to " + str(mapping[mapping_key]))
                     if isinstance(mapping[mapping_key],dict):
                         # this means the key is mapped to meta data
                         config_data_of_node[name_in_ofw]["meta"][mapping[mapping_key]["meta"]] = \
@@ -515,12 +510,12 @@ class Profev:
         if profess_id != 0:
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
             node_element_list = self.json_parser.get_node_element_list(soc_list)[node_number][node_name]
-            self.iterate_mapping(self.pv_mapping, "photovoltaic", "photovoltaics", node_element_list,
+            config_data_of_node = self.iterate_mapping(self.pv_mapping, "photovoltaic", "photovoltaics", node_element_list,
                                  config_data_of_node)
-            self.iterate_mapping(self.grid_mapping, "grid", "photovoltaics", node_element_list, config_data_of_node)
-            self.iterate_mapping(self.generic_mapping, "generic", "photovoltaics", node_element_list,
+            config_data_of_node = self.iterate_mapping(self.grid_mapping, "grid", "photovoltaics", node_element_list, config_data_of_node)
+            config_data_of_node = self.iterate_mapping(self.generic_mapping, "generic", "photovoltaics", node_element_list,
                                  config_data_of_node)
-
+            self.dataList[node_number][node_name][profess_id] = config_data_of_node
     def set_config_json(self, node_name, profess_id, config_json, soc_list):
         """
         sets the config data in profess of the node node_name
