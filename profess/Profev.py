@@ -45,6 +45,9 @@ class Profev:
                              "P_Grid_Max_Export_Power": {"meta": "P_Grid_Max_Export_Power"}}
         # at the moment all generic informations are at the storage
         self.generic_mapping = {"T_SoC": "T_SoC"}
+
+        self.ev_mapping = { "Battery_Capacity":"Battery_Capacity_kWh"}
+        self.cs_mapping = {"max_charging_power":"Max_Charging_Power_kW"}
         # a dict with standard values for the ofw
         self.standard_data = {"load": {
             "meta": {
@@ -68,7 +71,8 @@ class Profev:
             },
             "EV":{
                 "meta": {
-
+                    "Unit_Consumption_Assumption": 2.5,
+                    "Unit_Drop_Penalty": 1
                 }
             },
             "chargers":{
@@ -82,10 +86,14 @@ class Profev:
 
                 },
                 "ESS_States": {
-
+                    "Min": 20,
+                    "Max": 100,
+                    "Steps": 10
                 },
                 "VAC_States": {
-
+                    "Min": 0,
+                    "Max": 100,
+                    "Steps": 2.5
                 },
                 "meta": {
                     "monte_carlo_repetition": 1000
@@ -432,6 +440,29 @@ class Profev:
         else:
             return 1
 
+    def set_evs(self, node_name, soc_list):
+        logger.debug("#############################################################")
+        logger.debug("set_ev config data of " + str(node_name))
+
+        node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
+        logger.debug("node number "+str(node_number))
+        profess_id = self.get_profess_id(node_name, soc_list)
+        node_element_list_total = self.json_parser.get_node_element_list(soc_list)
+        if profess_id != 0:
+            logger.debug("data list " + str(self.dataList))
+            config_data_of_node = self.dataList[node_number][node_name][profess_id]
+            logger.debug("config data node "+str(config_data_of_node))
+
+            node_element_list = node_element_list_total[node_number][node_name]
+            logger.debug("node_element_list "+str(node_element_list))
+
+            config_data_of_node = self.iterate_mapping(self.ev_mapping, "EV", "chargingStations", node_element_list,
+                                                       config_data_of_node)
+            logger.debug("config data of node "+str(config_data_of_node))
+
+        logger.debug("#############################################################")
+
+
     def set_storage(self, node_name, soc_list):
         """
         sets all storage related values of the local config of node_name
@@ -441,10 +472,13 @@ class Profev:
         logger.debug("set_storage config data of " + str(node_name))
         node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
         profess_id = self.get_profess_id(node_name, soc_list)
+        node_element_list_total = self.json_parser.get_node_element_list(soc_list)
         if profess_id != 0:
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
 
-            node_element_list = self.json_parser.get_node_element_list(soc_list)[node_number][node_name]
+
+            #for radial_number in range(len(self.json_parser.topology["radials"])):
+            node_element_list = node_element_list_total[node_number][node_name]
 
             config_data_of_node = self.iterate_mapping(self.storage_mapping, "ESS", "storageUnits", node_element_list,
                                  config_data_of_node)
@@ -464,7 +498,7 @@ class Profev:
         :param config_data_of_node: data for the ofw
         :return:
         """
-        logger.debug("we use mapping: "+str(mapping)+" iterate mapping: name in ofw: " + str(name_in_ofw) + ", name in topology: " + str(name_in_topology))
+        #logger.debug("we use mapping: "+str(mapping)+" iterate mapping: name in ofw: " + str(name_in_ofw) + ", name in topology: " + str(name_in_topology))
         element_index = 0
         for node_element in node_element_list:
             if name_in_topology in node_element:
@@ -477,7 +511,9 @@ class Profev:
                         percentage = 100
                     else:
                         percentage = 1
-                    logger.debug("mappingkey " + str(mapping_key) + " and is mapped to " + str(mapping[mapping_key]))
+
+                    #logger.debug("mappingkey " + str(mapping_key) + " and is mapped to " + str(mapping[mapping_key]))
+
                     if isinstance(mapping[mapping_key],dict):
                         # this means the key is mapped to meta data
                         config_data_of_node[name_in_ofw]["meta"][mapping[mapping_key]["meta"]] = \
@@ -850,8 +886,10 @@ class Profev:
                 for nodeName in node_name_list:
                     self.set_storage(nodeName, soc_list)
                     self.set_photovoltaics(nodeName, soc_list)
+                    self.set_evs(nodeName, soc_list)
+                    #self.set_uncertainty(nodeName, soc_list)
 
-                node_element_list = self.json_parser.get_node_element_list(soc_list)
+            logger.debug("data list "+str(self.dataList))
         if soc_list is not None:
 
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
