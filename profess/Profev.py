@@ -48,6 +48,7 @@ class Profev:
 
         self.ev_mapping = { "Battery_Capacity":"Battery_Capacity_kWh"}
         self.cs_mapping = {"max_charging_power":"Max_Charging_Power_kW"}
+        self.uncertainty_mapping = ["Plugged_Time", "Unplugged_Time", "ESS_States", "VAC_States"]
         # a dict with standard values for the ofw
         self.standard_data = {"load": {
             "meta": {
@@ -71,8 +72,8 @@ class Profev:
             },
             "EV":{
                 "meta": {
-                    "Unit_Consumption_Assumption": 2.5,
-                    "Unit_Drop_Penalty": 1
+                    "Unit_Consumption_Assumption": 10,
+                    "Unit_Drop_Penalty": 2
                 }
             },
             "chargers":{
@@ -93,7 +94,7 @@ class Profev:
                 "VAC_States": {
                     "Min": 0,
                     "Max": 100,
-                    "Steps": 2.5
+                    "Steps": 10
                 },
                 "meta": {
                     "monte_carlo_repetition": 1000
@@ -440,28 +441,77 @@ class Profev:
         else:
             return 1
 
-    def set_evs(self, node_name, soc_list):
+    def set_evs(self, node_name, soc_list, chargers):
+        #logger.debug("#############################################################")
+        logger.debug("set_ev config data of " + str(node_name))
+
+        node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
+        #logger.debug("node number "+str(node_number))
+        profess_id = self.get_profess_id(node_name, soc_list)
+
+        if profess_id != 0:
+            config_data_of_node = self.dataList[node_number][node_name][profess_id]
+
+            for charger_id, charger_element in chargers.items():
+                if charger_element.get_bus_name() == node_name:
+                    config_data_of_node["chargers"][charger_element.get_id()]={
+                        "Max_Charging_Power_kW": charger_element.get_max_charging_power(),
+                        "Hosted_EV": charger_element.get_ev_plugged().get_id(),
+                        "SoC": charger_element.get_EV_connected(charger_element.get_ev_plugged()).get_SoC()
+                    }
+                    ev_connected = charger_element.get_EV_connected()
+                    for ev in ev_connected:
+                        config_data_of_node["EV"][ev.get_id()]={"Battery_Capacity_kWh": ev.get_Battery_Capacity()}
+
+            #logger.debug("config data of node " + str(config_data_of_node))
+            self.dataList[node_number][node_name][profess_id] = config_data_of_node
+            #logger.debug("data list " + str(self.dataList))
+
+        #logger.debug("#############################################################")
+
+    def set_uncertainty(self, node_name, soc_list, chargers):
         logger.debug("#############################################################")
         logger.debug("set_ev config data of " + str(node_name))
 
         node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
-        logger.debug("node number "+str(node_number))
+        #logger.debug("node number " + str(node_number))
         profess_id = self.get_profess_id(node_name, soc_list)
-        node_element_list_total = self.json_parser.get_node_element_list(soc_list)
+
         if profess_id != 0:
-            logger.debug("data list " + str(self.dataList))
+            #logger.debug("data list " + str(self.dataList))
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
-            logger.debug("config data node "+str(config_data_of_node))
 
-            node_element_list = node_element_list_total[node_number][node_name]
-            logger.debug("node_element_list "+str(node_element_list))
+            for charger_id, charger_element in chargers.items():
+                if charger_element.get_bus_name() == node_name:
+                    ev_connected = charger_element.get_EV_connected()
+                    for ev in ev_connected:
+                        config_data_of_node["uncertainty"]["Plugged_Time"] = {
+                            "mean": ev.get_plugged_values()[0],
+                            "std": ev.get_plugged_values()[1]
+                        }
 
-            config_data_of_node = self.iterate_mapping(self.ev_mapping, "EV", "chargingStations", node_element_list,
-                                                       config_data_of_node)
-            logger.debug("config data of node "+str(config_data_of_node))
+                        config_data_of_node["uncertainty"]["Unplugged_Time"] = {
+                            "mean": ev.get_unplugged_values()[0],
+                            "std": ev.get_unplugged_values()[1]
+                        }
+
+                        config_data_of_node["uncertainty"]["ESS_States"] = {
+                            "Min": 100 * float(config_data_of_node["ESS"]["meta"]["ESS_Min_SoC"]),
+                            "Max": 100 * float(config_data_of_node["ESS"]["meta"]["ESS_Max_SoC"]),
+                            "steps": 10
+                        }
+
+                        config_data_of_node["uncertainty"]["VAC_States"] = {
+                            "Min": 0,
+                            "Max": 100,
+                            "steps": 10
+                        }
+
+            #logger.debug("config data of node " + str(config_data_of_node))
+            #self.dataList[node_number][node_name][profess_id] = config_data_of_node
+            logger.debug("data list " + str(self.dataList))
 
         logger.debug("#############################################################")
-
 
     def set_storage(self, node_name, soc_list):
         """
@@ -811,6 +861,7 @@ class Profev:
                         # logger.debug("price profile set")
                     # updates the profiles in the ofw
                     node_index = node_name_list.index(node_name)
+
                     self.update_config_json(profess_id, self.dataList[node_index][node_name][profess_id])
 
     def get_profess_id(self, node_name, soc_list):
@@ -856,7 +907,7 @@ class Profev:
         self.dataList = node_element_list
         #logger.debug("dataList "+str(self.dataList))
 
-    def set_up_profev(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
+    def set_up_profev(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None, chargers=None):
         """
         sets all important information retrieved from the parameters and topology
         :param soc_list: syntax when a list: [{node_name1:{"SoC":value, "id": id_name},{node_name2:{...},...] value is
@@ -887,14 +938,16 @@ class Profev:
                 for nodeName in node_name_list:
                     self.set_storage(nodeName, soc_list)
                     self.set_photovoltaics(nodeName, soc_list)
-                    self.set_evs(nodeName, soc_list)
-                    #self.set_uncertainty(nodeName, soc_list)
+                    self.set_evs(nodeName, soc_list, chargers)
+                    self.set_uncertainty(nodeName, soc_list, chargers)
 
-            logger.debug("data list "+str(self.dataList))
+
         if soc_list is not None:
 
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list)
+
+
 
     def translate_output(self, output_data):
         """

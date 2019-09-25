@@ -351,11 +351,13 @@ class gridController(threading.Thread):
                 chargers = self.sim.get_chargers()
                 for key, charger_element in chargers.items():
                     evs_connected = charger_element.get_EV_connected()
+
                     for ev_unit in evs_connected:
                         position_profile = ev_unit.get_position_profile(hours, 1)
                         logger.debug("position profile: " + str(position_profile))
                         if position_profile[0] == 1:
                             #EV connected to the grid
+                            charger_element.set_ev_plugged(ev_unit)
                             name = "Line_"+ev_unit.get_id()
                             self.sim.set_switch(name, False)
                             element_id = "ESS_"+ev_unit.get_id()
@@ -388,11 +390,11 @@ class gridController(threading.Thread):
 
                 if flag_global_control and flag_is_price_profile_needed:
                     self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, price_profile,
-                                                profev_global_profile)
+                                                profev_global_profile, chargers=chargers)
                 elif not flag_global_control and flag_is_price_profile_needed:
-                    self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, price_profile)
+                    self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, price_profile, None, chargers=chargers)
                 else:
-                    self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs)
+                    self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, None, None, chargers=chargers)
 
                 #status_profev = self.profev.start_all(soc_list_evs)
 

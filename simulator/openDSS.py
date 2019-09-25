@@ -1304,7 +1304,7 @@ class OpenDSS:
                         logger.debug("key not registered: "+str(key))
 
 
-                self.Chargers[id] = Charger(kw_rated, ev_object, kw_rated, type_application, bus1, charge_efficiency)
+                self.Chargers[id] = Charger(id, kw_rated, ev_object, kw_rated, type_application, bus1, charge_efficiency)
 
 
 
