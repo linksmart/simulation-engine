@@ -242,7 +242,7 @@ class gridController(threading.Thread):
             ################  Storage control  ###################################################
             ######################################################################################
 
-            """if flag_is_storage:
+            if flag_is_storage:
 
                 node_names_for_profiles = self.profev.json_parser.get_node_name_list(soc_list)
                 logger.debug("node names " + str(node_names_for_profiles))
@@ -327,7 +327,7 @@ class gridController(threading.Thread):
 
 
             else:
-                logger.debug("No Storage Units present")"""
+                logger.debug("No Storage Units present")
 
             ######################################################################################
             ################  Charging station control  ###################################################
@@ -397,8 +397,11 @@ class gridController(threading.Thread):
                     self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, None, None, chargers=chargers)
 
                 status_profev = self.profev.start_all(soc_list_evs, chargers)
+                logger.debug("status profev "+str(status_profev))
                 if not status_profev:
                     logger.debug("Optimization succeded")
+                    profev_output = self.profev.wait_and_get_output(soc_list_evs)
+                    logger.debug("profev output "+str(profev_output))
                 else:
                     logger.error("OFW instances could not be started")
 

@@ -290,8 +290,11 @@ class Profev:
             for node_name in node_name_list:
                 profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
-                    output_list.append({profess_id: self.get_output(profess_id)})
+                    output= self.get_output(profess_id)
+                    logger.debug(output)
+                    output_list.append({profess_id: output})
             logger.debug("OFW finished, all optimizations stopped")
+
             translated_output = self.translate_output(output_list)
             return translated_output
         else:
@@ -520,13 +523,13 @@ class Profev:
                         config_data_of_node["uncertainty"]["ESS_States"] = {
                             "Min": 100 * float(config_data_of_node["ESS"]["meta"]["ESS_Min_SoC"]),
                             "Max": 100 * float(config_data_of_node["ESS"]["meta"]["ESS_Max_SoC"]),
-                            "steps": 10
+                            "Steps": 10
                         }
 
                         config_data_of_node["uncertainty"]["VAC_States"] = {
                             "Min": 0,
                             "Max": 100,
-                            "steps": 10
+                            "Steps": 10
                         }
 
             #logger.debug("config data of node " + str(config_data_of_node))
@@ -1034,7 +1037,7 @@ class Profev:
         if output_data == {}:
             logger.error("No results were returned by the OFW")
 
-        logger.debug("output of ofw is being translated to se ")
+        logger.debug("Parsing ofw outputs")
         # logger.debug(output_data)
         output_list = copy.deepcopy(output_data)
         # finding the lowest value of each variable and delete all not needed timesteps
