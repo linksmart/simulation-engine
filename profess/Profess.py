@@ -305,7 +305,7 @@ class Profess:
                         output_list.append({profess_id: output})
             logger.debug("OFW finished, all optimizations stopped")
 
-            translated_output = self.translate_output(output_list)
+            translated_output = self.translate_output(output_list, soc_list)
             output_this_timestep={}
             for node_name in self.json_parser.get_node_name_list(soc_list):
                 if node_name == "node_a12":

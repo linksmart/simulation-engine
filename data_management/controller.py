@@ -323,61 +323,7 @@ class gridController(threading.Thread):
                 if not status_profess:
                     profess_output=self.profess.wait_and_get_output(soc_list)
                     logger.debug("output profess " + str(profess_output))
-<<<<<<< HEAD
 
-                    # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
-                    # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
-
-                    profess_result=[]
-
-                    for element in profess_output:
-                        profess_result_intern = {}
-                        for key, value in element.items():
-                            node_name = key
-                            profess_result_intern[node_name]={}
-                            for element_soc in soc_list:
-                                for key_node in element_soc.keys():
-                                    if key_node == node_name:
-                                        profess_result_intern[node_name]["ess_name"] = element_soc[key_node]["ESS"]["id"]
-                                        profess_result_intern[node_name]["pv_name"] = element_soc[key_node]["PV"]["pv_name"]
-                                        profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["ESS"]["max_charging_power"]
-                                        profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["ESS"]["max_discharging_power"]
-                            for profess_id, results in value.items():
-                                for key_results, powers in results.items():
-                                    profess_result_intern[node_name][key_results] = powers
-                            #############################
-                            if node_name == node_name_for_logging:
-
-                                output_logger[i]["output"]=value
-                        profess_result.append(profess_result_intern)
-
-                    logger.debug("profess result: "+str(profess_result))
-
-                    pv_profile_profess_intern = []
-                    for element in profess_result:
-                        ess_name = None
-                        pv_name = None
-                        p_ess_output = None
-                        p_pv_output = None
-                        logger.debug("element: "+str(element))
-                        p_pv_output = None
-                        for key, value in element.items():
-                            ess_name = value["ess_name"]
-                            p_ess_output = value["P_ESS_Output"]
-                            pv_name = value["pv_name"]
-                            p_pv_output = value["P_PV_Output"]
-                            max_charging_power = value["max_charging_power"]
-                            max_discharging_power = value["max_discharging_power"]
-
-
-                        self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
-                        self.sim.setActivePowertoPV(pv_name, p_pv_output)
-                        #### Creating lists for storing values
-                        powers_pv_curtailed[PV_names.index(pv_name)].append(p_pv_output)
-                        soc_from_profess[ESS_names.index(ess_name)].append(self.sim.getSoCfromBattery(ess_name))
-                        ess_powers_from_profess[ESS_names.index(ess_name)].append(p_ess_output)
-
-=======
                     if not profess_output == []:
                         # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
                         # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
@@ -398,7 +344,10 @@ class gridController(threading.Thread):
                                 for profess_id, results in value.items():
                                     for key_results, powers in results.items():
                                         profess_result_intern[node_name][key_results] = powers
+                                #############################
+                                if node_name == node_name_for_logging:
 
+                                    output_logger[i]["output"]=value
                             profess_result.append(profess_result_intern)
                         logger.debug("profess result: "+str(profess_result))
 
@@ -422,7 +371,7 @@ class gridController(threading.Thread):
                             ess_powers_from_profess[ESS_names.index(ess_name)].append(p_ess_output)
                     else:
                         logger.error("OFW returned empty values")
->>>>>>> gustavo
+
                 else:
                     logger.error("OFW instances could not be started")
 
