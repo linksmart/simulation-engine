@@ -528,8 +528,9 @@ class InputController:
             country = self.get_country(common)
             logger.debug("country " + str(country))
             flag_is_price_profile_needed = self.is_price_profile_needed(topology)
+            flag_global_control = self.is_global_control_in_Storage(topology)
             logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
-            if flag_is_price_profile_needed:
+            if flag_is_price_profile_needed or flag_global_control:
                 self.price_profile = self.get_price_profile_from_server(city, country, time_in_days)
                 #logger.debug("length price profile "+str(len(self.price_profile)))
 
