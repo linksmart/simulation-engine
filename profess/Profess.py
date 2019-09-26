@@ -5,13 +5,14 @@ from profess.JSONparser import *
 import simplejson as json
 import time
 import logging
+from data_management.redisDB import RedisDB
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
 
 class Profess:
-    def __init__(self, domain, topology):
+    def __init__(self,id, domain, topology):
         """
 
         :param domain: domain where the ofw is reached
@@ -21,6 +22,8 @@ class Profess:
         self.dataList = []  # list where all config data of nodes are saved
         self.httpClass = Http_commands()
         self.json_parser = JsonParser(topology)
+        self.redisDB = RedisDB()
+        self.finish_status_key = "finish_status_" + id
         # mapping from topology to ofw input
         # syntax: topology_value : ofw_value for direct mapping
         # syntax: topology_value : [ofw_value1, ofw_value2] for mapping of one topology value to multiple ofw values
@@ -154,6 +157,20 @@ class Profess:
             logger.error("failed to post_all_standard_data ")
             return 1
 
+    def get_ofw_ids(self, soc_list):
+        id_list=[]
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
+        for node_name in node_name_list:
+            profess_id = self.get_profess_id(node_name, soc_list)
+            id_list.append(profess_id)
+        return id_list
+
+    def erase_all_ofw_instances(self, soc_list):
+        id_list = self.get_ofw_ids(soc_list)
+        for id in id_list:
+            response = self.httpClass.delete(self.domain + "inputs/dataset/"+str(id))
+            logger.debug("response "+str(response))
+
     def set_standard_data(self, standard_data):
         """
         function to change standard values
@@ -201,8 +218,14 @@ class Profess:
         """
         try:
             response = self.httpClass.get(self.domain + "outputs/" + profess_id)
+            logger.debug("response start "+str(response.json()))
             if response.status_code == 200:
-                return response.json()
+                if not response.json() == {}:
+                    return response.json()
+                else:
+                    logger.error("OFW returned an empty response")
+                    return 1
+
             else:
                 logger.error("failed to get output from professID: " + str(profess_id) + " response from ofw: " + str(
                     response.json()))
@@ -218,7 +241,7 @@ class Profess:
         otherwise false
         """
         # busy waiting
-        time.sleep(5)
+        time.sleep(2)
         opt_status = self.get_optimization_status()
         # logger.debug("optimization status: " + str(opt_status))
         running_flag = False
@@ -249,7 +272,11 @@ class Profess:
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
             while self.is_running(soc_list):
-                pass
+                logger.debug("finish status key"+str(self.redisDB.get(self.finish_status_key)))
+                if self.redisDB.get(self.finish_status_key) == "True":
+                    break
+                else:
+                    pass
             output_list = []
 
             for node_name in node_name_list:

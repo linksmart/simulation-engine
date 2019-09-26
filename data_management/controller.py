@@ -105,8 +105,8 @@ class gridController(threading.Thread):
             self.profess_url = "http://localhost:8080"
         self.domain = self.get_profess_url() + "/v1/"
         logger.debug("profess url: " + str(self.domain))
-        self.profess = Profess(self.domain, self.topology)
-        self.profev = Profev(self.domain, self.topology)
+        self.profess = Profess(self.id,self.domain, self.topology)
+        self.profev = Profev(self.id, self.domain, self.topology)
 
 
 
@@ -319,6 +319,9 @@ class gridController(threading.Thread):
                 else:
                     logger.error("OFW instances could not be started")
 
+
+                if hours == (self.sim_hours -1):
+                    self.profess.erase_all_ofw_instances(soc_list)
                 # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
 
                 #soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
@@ -333,7 +336,7 @@ class gridController(threading.Thread):
             ################  Charging station control  ###################################################
             ######################################################################################
 
-            if flag_is_charging_station:
+            """if flag_is_charging_station:
                 logger.debug("charging stations present in the simulation")
                 node_names_for_profiles = self.profev.json_parser.get_node_name_list(soc_list_evs)
                 logger.debug("node names "+str(node_names_for_profiles))
@@ -406,7 +409,8 @@ class gridController(threading.Thread):
                     logger.error("OFW instances could not be started")
 
             else:
-                logger.debug("No charging stations present in the simulation")
+                logger.debug("No charging stations present in the simulation")"""
+
 
 
             puVoltages, Currents, Losses = self.sim.solveCircuitSolution()

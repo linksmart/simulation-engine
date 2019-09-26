@@ -37,3 +37,12 @@ class Http_commands:
         logging.debug("get "+target)
         return requests.get(target)
 
+    def delete(self,target):
+        """
+
+        :param target: target domain
+        :return:
+        """
+        logging.debug("delete "+target)
+        return requests.delete(target)
+
