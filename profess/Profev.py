@@ -316,9 +316,9 @@ class Profev:
             for node_name in node_name_list:
                 profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
-                    output= self.get_output(profess_id)
-                    logger.debug(output)
-                    output_list.append({profess_id: output})
+                    output = self.get_output(profess_id)
+                    if not output == 1:
+                        output_list.append({profess_id: output})
             logger.debug("OFW finished, all optimizations stopped")
 
             translated_output = self.translate_output(output_list)

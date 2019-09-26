@@ -218,7 +218,7 @@ class Profess:
         """
         try:
             response = self.httpClass.get(self.domain + "outputs/" + profess_id)
-            #logger.debug("response start "+str(response.json()))
+            logger.debug("response start "+str(response.json()))
             if response.status_code == 200:
                 if not response.json() == {}:
                     return response.json()
@@ -250,7 +250,7 @@ class Profess:
             if profess_id != 0:
                 if profess_id in opt_status["status"]:
                     if opt_status["status"][profess_id]["status"] == "running":
-                        logger.debug("An optimization is still running: " + str(profess_id))
+                        #logger.debug("An optimization is still running: " + str(profess_id))
                         running_flag = True
                 else:
                     logger.error(
@@ -281,7 +281,9 @@ class Profess:
             for node_name in node_name_list:
                 profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
-                    output_list.append({profess_id: self.get_output(profess_id)})
+                    output = self.get_output(profess_id)
+                    if not output == 1:
+                        output_list.append({profess_id: output})
             logger.debug("OFW finished, all optimizations stopped")
             translated_output = self.translate_output(output_list)
             return translated_output

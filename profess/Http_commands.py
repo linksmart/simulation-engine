@@ -7,7 +7,7 @@ logger = logging.getLogger(__file__)
 
 class Http_commands:
     def __init__(self):
-        logging.debug("Http_commands created.")
+        logger.debug("Http_commands created.")
 
 
     def post(self,target, payLoad, type):
@@ -34,7 +34,7 @@ class Http_commands:
         :param target: target domain
         :return:
         """
-        logging.debug("get "+target)
+        #logger.debug("get "+target)
         return requests.get(target)
 
     def delete(self,target):
@@ -43,6 +43,6 @@ class Http_commands:
         :param target: target domain
         :return:
         """
-        logging.debug("delete "+target)
+        #logger.debug("delete "+target)
         return requests.delete(target)
 
