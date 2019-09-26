@@ -468,8 +468,22 @@ def voltage_prediction(path,mapping_name):
         voltage_profile=calculate_voltage(path,node_name,mapping_name)
         output_json[node_name]=voltage_profile["0%"]
     output_file.write(str(output_json))
+def calculate_sensitivity(path,mapping_nameA,mapping_nameB):
+    result_fileSingle = open(path+mapping_nameA+".txt").read()
+    single_json = yaml.load(result_fileSingle)
+    result_fileMultiple = open(path+mapping_nameB+".txt").read()
+    multiple_json = yaml.load(result_fileMultiple)
+    count=0
+    node_list= [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 14, 15, 17, 18, 19, 20]
+    voltage_list_curtailed={}
+    for node in node_list:
+        node_name="node_a"+str(node)
+        voltage_result=calculate_voltage(path,node_name,mapping_nameB)
+        index_node=node_list.index(node)
+        voltage_list_curtailed[node_name]=voltage_result[str(index_node*10)+"%"]
 
-
+def calculate_surplus(path,mapping):
+    pass
 
 #print(get_relevant_nodes())
 #print(get_overall_min_max(get_result_information(resultJson)))
