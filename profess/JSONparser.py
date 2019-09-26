@@ -25,6 +25,7 @@ class JsonParser:
                     if element_name in element:
                         search_result=search_result+radial[element]
         return search_result
+
     def filter_search(self,search_key, search_value, element_list):
         """
         filters the element_list and returns only the elements where search_key and search_value fit
@@ -72,7 +73,7 @@ class JsonParser:
         logger.debug("topology was changed")
         logger.debug("-------------------------------------------------------------------------------------------------")
 
-    def get_node_element_list(self):
+    def get_node_element_list(self, soc_list):
         """
         :return: a list with all nodes that have a ess and all connected devices(loads, pvs)
         syntax: [{node_name1:["storageUnits":{...}, "photovoltaics" :{ ....}, "loads":{ ...}]},{node_name2:[ ....]}]
@@ -83,7 +84,7 @@ class JsonParser:
         #logger.debug("topology "+str(self.topology))
         if "radials" in self.topology.keys():
             for radial_number in range(len(self.topology["radials"])):
-                node_list = self.get_node_name_list()
+                node_list = self.get_node_name_list(soc_list)
                 index = 0
                 if node_list!=0:
                     for node_name in node_list:
@@ -136,15 +137,22 @@ class JsonParser:
         ##logger.debug(node_element_list)
         return node_element_list
 
-    def get_node_name_list(self):
+    def get_node_name_list(self, soc_list):
         """
 
         :return: a list of node_names where an ess is connected, otherwise 0 is returned
         [node_name1, node_name2, ...]
         """
         storage_node_list = []
-        charging_ess_list = []
+
         node_list = []
+        for element in soc_list:
+            for node_name in element.keys():
+                node_list.append(node_name)
+
+        #logger.debug("node list "+str(node_list))
+        """pv_node_list = []
+        
         if "radials" in self.topology.keys():
             for radial_number in range(len(self.topology["radials"])):
                 # search for nodes with ESS
@@ -159,6 +167,7 @@ class JsonParser:
                     node_list = storage_node_list
                     ##logger.debug("storages found")
 
+<<<<<<< HEAD
                 if "chargingStations" in self.topology["radials"][radial_number].keys():
                      for element in self.get_all_elements("chargingStations"):
                          pattern = re.compile("[^.]*")  # regex to find professID
@@ -168,7 +177,20 @@ class JsonParser:
 
                 if storage_node_list is not None and charging_ess_list is not None:
                     node_list= list(set(storage_node_list) - set(charging_ess_list))
+=======
+                # if "photovoltaics" in self.topology["radials"][radial_number].keys():
+                #     for element in self.search(self.topology["radials"][radial_number]["photovoltaics"], "bus1", "", True):
+                #         pattern = re.compile("[^.]*")  # regex to find professID
+                #         m = pattern.findall(element)
+                #         element = m[0]
+                #         pv_node_list.append(element)
+                #     node_list=pv_node_list
+                #     ##logger.debug("pvs found")
+                # if storage_node_list is not None and pv_node_list is not None:
+                #     node_list= storage_node_list + list(set(pv_node_list) - set(storage_node_list))"""
+
 
         if node_list != []:
             return node_list
         else: return 0
+

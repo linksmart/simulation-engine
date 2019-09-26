@@ -223,7 +223,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 "charge_efficiency": 90,
 "discharge_efficiency": 90
@@ -240,7 +240,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -258,7 +258,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -276,7 +276,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -294,7 +294,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -312,7 +312,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -330,7 +330,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -348,7 +348,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -366,7 +366,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -384,7 +384,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -402,7 +402,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -420,7 +420,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -438,7 +438,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -456,7 +456,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -474,7 +474,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -492,7 +492,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,
@@ -510,7 +510,7 @@
 "max_charging_power": 3.5,
 "max_discharging_power":3.5,
 "storage_capacity": 5,
-"optimization_model": "voltage-stabilization",
+"optimization_model": "Maximize Self-Production",
 "powerfactor":1,
 
 "charge_efficiency": 90,

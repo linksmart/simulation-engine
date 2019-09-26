@@ -88,11 +88,24 @@ class EV:
 
 
 class Charger:
-    def __init__(self, Max_Capacity, list_EV_connected, max_charging_power, type_application):
+    def __init__(self, name, Max_Capacity, list_EV_connected, max_charging_power, type_application, bus_name, charge_efficiency):
+        self.name = name
         self.Max_Capacity = Max_Capacity
         self.EV_connected = list_EV_connected
         self.max_charging_power = max_charging_power
         self.type_application = type_application
+        self.bus_name = bus_name
+        self.charge_efficiency = charge_efficiency
+        self.ev_plugged = None
+
+    def get_id(self):
+        return self.name
+
+    def get_bus_name(self):
+        return self.bus_name
+
+    def get_charging_efficiency(self):
+        return self.charge_efficiency
 
     def get_max_charging_power(self):
         return self.max_charging_power
@@ -100,11 +113,23 @@ class Charger:
     def get_type_application(self):
         return self.type_application
 
+    def set_ev_plugged(self, ev_name):
+        self.ev_plugged = ev_name
+
+    def get_ev_plugged(self):
+        return self.ev_plugged
+
     def set_EV_connected(self, EV_connected):
         self.EV_connected.append(EV_connected)
 
-    def get_EV_connected(self):
-        return  self.EV_connected
+    def get_EV_connected(self, ev_object=None):
+        if ev_object==None:
+            return self.EV_connected
+        else:
+            logger.debug("ev_connected " + str(self.EV_connected))
+            index=self.EV_connected.index(ev_object)
+            logger.debug("index "+str(index))
+            return  self.EV_connected[index]
 
     def get_Max_Capacity(self):
         return self.Max_Capacity
