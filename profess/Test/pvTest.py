@@ -481,7 +481,7 @@ def voltage_prediction(path,mapping_name):
 #print(response)
 #voltage_prediction("PVTest/","mapping")
 
-run_all(24)
+run_all(48)
 #calculate_pv_size("PVTest/cc589737d784/cc589737d784_pv_result","C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential")
 #print(array_of_ids)
 #helper()

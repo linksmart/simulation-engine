@@ -60,7 +60,7 @@ class Profess:
 
             },
             "grid": {
-                "mu_P":0.5,
+                "voltage_sensitivity_P":0.5,
                 "meta": {
 
                 }
@@ -349,7 +349,7 @@ class Profess:
 
                     logger.error("no opzimization model was given for "+str(node_name))
                     break
-                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "discrete",
+                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "ipopt", "discrete",
                                             self.get_profess_id(node_name, soc_list))
 
                 if start_response.status_code is not 200 and start_response is not None:
@@ -691,6 +691,15 @@ class Profess:
                                 logger.debug("ess_con profile set")
                 else:
                     logger.debug("no ess_con profile was given")
+                if voltage_prediction is not None:
+                    for voltage_profile in voltage_prediction:
+                        profess_id = self.get_profess_id(node_name,soc_list)
+                        if profess_id != 0:
+                            config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                            if node_name == voltage_profile:
+                                phase = voltage_prediction[node_name]
+                                config_data_of_node["generic"]["voltage_prediction"] = phase
+                                logger.debug("voltage profile set")
 
                 profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
