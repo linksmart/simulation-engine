@@ -266,10 +266,10 @@ class Profess:
             logger.debug("OFW finished, all optimizations stopped")
             translated_output = self.translate_output(output_list)
             output_this_timestep={}
-            for node_name in self.json_parser.get_node_name_list():
+            for node_name in self.json_parser.get_node_name_list(soc_list):
                 #if node_name == "node_a12":
                 output_this_timestep[node_name]={"input":{},"output":{}}
-                node_number = self.json_parser.get_node_name_list().index(node_name)
+                node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
                 input_for_profess = self.dataList[node_number][node_name]
 
                 output_this_timestep[node_name]["input"]=copy.deepcopy(input_for_profess)
@@ -764,7 +764,7 @@ class Profess:
         logger.debug("set_up_profess started")
         #logger.debug("soc_list " + str(soc_list))
         # logger.debug("load_profiles "+ str(load_profiles))
-        # logger.debug("pv_profiles "+ str(pv_profiles))
+        logger.debug("pv_profiles "+ str(pv_profiles))
         # logger.debug("price_profiles "+ str(price_profiles))
         # logger.debug("ess_con " + str(ess_con))
         if self.dataList == []:

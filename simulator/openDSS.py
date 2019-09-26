@@ -993,11 +993,6 @@ class OpenDSS:
         self.pvs=pvs
         try:
 
-            # ----------get_a_profile---------------#
-            pv_profile_data = profiles.pv_profile(city, country, sim_days, None,
-                                                  timestamp=1530568800.0)  # timestamp of "2018.07.03 00:00:00"
-            # logger.debug("pv profile: "+str(pv_profile_data))
-            # print("load_profile_data: randint=" + str(randint_value))
             for element in self.pvs:
                 #for kskd in element.keys():
                     #logger.debug("key "+str(kskd))
@@ -1007,7 +1002,10 @@ class OpenDSS:
                 logger.debug("max power "+str(max_power))
 
 
-
+                # ----------get_a_profile---------------#
+                pv_profile_data = profiles.pv_profile(city, country, sim_days, max_power,1530568800.0) #timestamp of "2018.07.03 00:00:00"
+                #logger.debug("pv profile: "+str(pv_profile_data))
+                #print("load_profile_data: randint=" + str(randint_value))
 
 
                 pv_profile = [i * max_power for i in pv_profile_data]
@@ -1017,7 +1015,8 @@ class OpenDSS:
                 loadshape_id=pv_name
 
 
-                self.setLoadshapePV(loadshape_id, sim_days * 24, 1, pv_profile)
+                self.setLoadshapePV(loadshape_id, sim_days * 24, 1, pv_profile_data)
+
 
             return 0
 
