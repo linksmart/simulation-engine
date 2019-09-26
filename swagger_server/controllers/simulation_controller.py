@@ -98,19 +98,28 @@ def create_simulation(body):  # noqa: E501
 
             logger.debug("Storage successfully checked")
 
-
+            data_to_store_cs = []
             if "chargingStations" in values.keys() and values["chargingStations"] is not None:
                 logger.debug("Checking Charging stations")
 
                 cs = values["chargingStations"]
-                for cs_elements in cs:
+
+                for cs_element in cs:
+                    # checking if default values are given
+                    cs_element_change = cs_element
+                    if not "type_application" in cs_element.keys():
+                        cs_element_change["type_application"] = "residential"
+
+                    data_to_store_cs.append(cs_element_change)
+
+
                     # checking if there is a PV in the node of the ESS
                     bus_pv = get_PV_nodes(values["photovoltaics"])
                     bus_ess = get_ESS_nodes(values["storageUnits"])
-                    if cs_elements["bus"] in bus_ess:
-                        if not cs_elements["bus"] in bus_pv :
+                    if cs_element["bus"] in bus_ess:
+                        if not cs_element["bus"] in bus_pv :
                             message = "Error: no PV element defined for charging station element with id: " + str(
-                                cs_elements["id"])
+                                cs_element["id"])
                             return message
 
             logger.debug("Charging stations successfully checked")
@@ -118,8 +127,9 @@ def create_simulation(body):  # noqa: E501
             #logger.debug("data to store "+str(data_to_store))
 
             data["radials"][0]["storageUnits"] = data_to_store
+            data["radials"][0]["chargingStations"] = data_to_store_cs
 
-        #logger.debug("data"+str(data))
+        logger.debug("data"+str(data))
         #logger.debug("data" + str(data["radials"][0]["storageUnits"]))
         ####generates an id an makes a directory with the id for the data and for the registry
         try:

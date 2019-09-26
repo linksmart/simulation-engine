@@ -5,13 +5,14 @@ from profess.JSONparser import *
 import simplejson as json
 import time
 import logging
+from data_management.redisDB import RedisDB
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
 
 class Profev:
-    def __init__(self, domain, topology):
+    def __init__(self, id, domain, topology):
         """
 
         :param domain: domain where the ofw is reached
@@ -21,6 +22,8 @@ class Profev:
         self.dataList = []  # list where all config data of nodes are saved
         self.httpClass = Http_commands()
         self.json_parser = JsonParser(topology)
+        self.redisDB = RedisDB()
+        self.finish_status_key = "finish_status_" + id
         # mapping from topology to ofw input
         # syntax: topology_value : ofw_value for direct mapping
         # syntax: topology_value : [ofw_value1, ofw_value2] for mapping of one topology value to multiple ofw values
@@ -142,7 +145,7 @@ class Profev:
         :param node_name: name of bus
         :return: returns 0 when successful, 1 when not successful
         """
-        logger.debug("Profess: post data started " + str(node_name))
+        logger.debug("Profev: post data started " + str(node_name))
         response = ""
         try:
             response = self.httpClass.post(self.domain + "inputs/dataset", input_data, "json")
@@ -188,6 +191,21 @@ class Profev:
         else:
             logger.error("failed to post_all_standard_data ")
             return 1
+
+    def get_ofw_ids(self, soc_list):
+        id_list=[]
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
+        for node_name in node_name_list:
+            profess_id = self.get_profess_id(node_name, soc_list)
+            id_list.append(profess_id)
+        return id_list
+
+    def erase_all_ofw_instances(self, soc_list):
+        id_list = self.get_ofw_ids(soc_list)
+        for id in id_list:
+            response = self.httpClass.delete(self.domain + "inputs/dataset/"+str(id))
+            logger.debug("response "+str(response))
+
 
     def set_standard_data(self, standard_data):
         """
@@ -236,8 +254,13 @@ class Profev:
         """
         try:
             response = self.httpClass.get(self.domain + "outputs/" + profess_id)
+            #logger.debug("response start "+str(response.json()))
             if response.status_code == 200:
-                return response.json()
+                if not response.json() == {}:
+                    return response.json()
+                else:
+                    logger.error("OFW returned an empty response")
+                    return 1
             else:
                 logger.error("failed to get output from professID: " + str(profess_id) + " response from ofw: " + str(
                     response.json()))
@@ -253,7 +276,7 @@ class Profev:
         otherwise false
         """
         # busy waiting
-        time.sleep(5)
+        time.sleep(3)
         opt_status = self.get_optimization_status()
         # logger.debug("optimization status: " + str(opt_status))
         running_flag = False
@@ -284,14 +307,20 @@ class Profev:
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
             while self.is_running(soc_list):
-                pass
+                if self.redisDB.get(self.finish_status_key) == "True":
+                    break
+                else:
+                    pass
             output_list = []
 
             for node_name in node_name_list:
                 profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
-                    output_list.append({profess_id: self.get_output(profess_id)})
+                    output= self.get_output(profess_id)
+                    logger.debug(output)
+                    output_list.append({profess_id: output})
             logger.debug("OFW finished, all optimizations stopped")
+
             translated_output = self.translate_output(output_list)
             return translated_output
         else:
@@ -332,7 +361,7 @@ class Profev:
             logger.error("Failed to start optimization, No connection to the OFW could be established at :" + str(
                 self.domain) + "optimization/start/")
 
-    def start_all(self, soc_list):
+    def start_all(self, soc_list, chargers):
         """
         starts all optimizations on the relevant nodes (nodes with ESS)
         :param optimization_model: optional optimization_model, when no model is given the models in the ESS definition
@@ -342,19 +371,41 @@ class Profev:
         logger.debug("All optimizations are being started.")
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
-            storage_opt_model=""
+            storage_opt_model=None
             for node_name in node_name_list:
                 # search for list with all elemens that are connected to bus: node_name
                 element_node = (next(item for item in self.json_parser.get_node_element_list(soc_list) if node_name in item))
+
                 for node_element in element_node[node_name]:
                     if "storageUnits" in node_element:
                         storage = node_element
                         storage_opt_model = storage["storageUnits"]["optimization_model"]
-                if storage_opt_model is None:
-                    logger.error("no opzimization model was given for "+str(node_name))
+                        for charger_name, charger_element in chargers.items():
+                            node = charger_element.get_bus_name()
+                            logger.debug("node name "+str(node_name)+" node "+str(node))
+                            if node == node_name:
+                                type = charger_element.get_type_application()
+
+                        if type == "residential" and storage_opt_model == "Maximize Self-Consumption":
+                            storage_opt_model = "StochasticResidentialMaxPV"
+                        if type == "residential" and storage_opt_model == "Maximize Self-Production":
+                            storage_opt_model = "StochasticResidentialMinGrid"
+                        if type == "residential" and storage_opt_model == "MinimizeCosts":
+                            storage_opt_model = "StochasticResidentialMinPBill"
+                        if type == "commercial" and storage_opt_model == "Maximize Self-Consumption":
+                            storage_opt_model = "CarParkModel"
+                        if type == "commercial" and storage_opt_model == "Maximize Self-Production":
+                            storage_opt_model = "CarParkModelMinGrid"
+                logger.debug("optimization model: "+str(storage_opt_model))
+                if storage_opt_model == None:
+                    logger.error("No optimization model given for storage element " + str(node_element["storageUnits"]["id"]))
                     break
-                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "discrete",
+
+                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "stochastic",
                                             self.get_profess_id(node_name, soc_list))
+                if start_response is None:
+                    break
+                    return 1
                 if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response, node_name, soc_list)
                     break
@@ -498,13 +549,13 @@ class Profev:
                         config_data_of_node["uncertainty"]["ESS_States"] = {
                             "Min": 100 * float(config_data_of_node["ESS"]["meta"]["ESS_Min_SoC"]),
                             "Max": 100 * float(config_data_of_node["ESS"]["meta"]["ESS_Max_SoC"]),
-                            "steps": 10
+                            "Steps": 10
                         }
 
                         config_data_of_node["uncertainty"]["VAC_States"] = {
                             "Min": 0,
                             "Max": 100,
-                            "steps": 10
+                            "Steps": 10
                         }
 
             #logger.debug("config data of node " + str(config_data_of_node))
@@ -1012,7 +1063,7 @@ class Profev:
         if output_data == {}:
             logger.error("No results were returned by the OFW")
 
-        logger.debug("output of ofw is being translated to se ")
+        logger.debug("Parsing ofw outputs")
         # logger.debug(output_data)
         output_list = copy.deepcopy(output_data)
         # finding the lowest value of each variable and delete all not needed timesteps
