@@ -165,6 +165,14 @@ class Profess:
             id_list.append(profess_id)
         return id_list
 
+    def get_ofw_ids_and_node_name(self, soc_list):
+        id_list=[]
+        node_name_list = self.json_parser.get_node_name_list(soc_list)
+        for node_name in node_name_list:
+            profess_id = self.get_profess_id(node_name, soc_list)
+            id_list.append({profess_id: node_name})
+        return id_list
+
     def erase_all_ofw_instances(self, soc_list):
         id_list = self.get_ofw_ids(soc_list)
         for id in id_list:
@@ -285,7 +293,7 @@ class Profess:
                     if not output == 1:
                         output_list.append({profess_id: output})
             logger.debug("OFW finished, all optimizations stopped")
-            translated_output = self.translate_output(output_list)
+            translated_output = self.translate_output(output_list, soc_list)
             return translated_output
         else:
             return []
@@ -686,6 +694,7 @@ class Profess:
                 profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
                     config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                    logger.debug("price prifile profess " + str(price_profiles))
                     if price_profiles is not None:
                         config_data_of_node["generic"]["Price_Forecast"] = price_profiles
                         # logger.debug("price profile set")
@@ -735,6 +744,7 @@ class Profess:
                 node_element_list[index] = {node_name: {}}
         self.dataList = node_element_list
 
+
     def set_up_profess(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
         """
         sets all important information retrieved from the parameters and topology
@@ -752,6 +762,7 @@ class Profess:
         :return:
         """
         logger.debug("set_up_profess started")
+        #logger.debug("price prifile profess " + str(price_profiles))
         #logger.debug("soc_list " + str(soc_list))
         # logger.debug("load_profiles "+ str(load_profiles))
         # logger.debug("pv_profiles "+ str(pv_profiles))
@@ -769,12 +780,17 @@ class Profess:
                     self.set_generic(nodeName,soc_list)
                     self.set_grid(nodeName,soc_list)
 
-                node_element_list = self.json_parser.get_node_element_list(soc_list)
-                logger.debug("node_ element list "+str(node_element_list))
+                #node_element_list = self.json_parser.get_node_element_list(soc_list)
+                #logger.debug("node_ element list "+str(node_element_list))
+        #logger.debug("price prifile profess "+str(price_profiles))
         if soc_list is not None:
             self.set_soc_ess(soc_list)
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list)
+            #logger.debug("data list "+str(self.dataList))
+
+
+
     def set_grid(self, node_name, soc_list):
         """
         sets all grid related data
@@ -910,7 +926,7 @@ class Profess:
                                                 # the key can be directly mapped
                                                 config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
                                                     storage_information["ESS"][storage_key] / percentage
-    def translate_output(self, output_data):
+    def translate_output(self, output_data, soc_list):
         """
         translates the ouptut data from whole time horizon to next hour, and also just returns wanted values
         :param output_data: data which has to be translated
@@ -919,36 +935,32 @@ class Profess:
         if output_data == {}:
             logger.error("No results were returned by the OFW")
 
-        logger.debug("output of ofw is being translated to se ")
-        # logger.debug(output_data)
-        output_list = copy.deepcopy(output_data)
-        # finding the lowest value of each variable and delete all not needed timesteps
+        list_profess_id_and_node_name = self.get_ofw_ids_and_node_name(soc_list)
+        output_list = []
+        #logger.debug("output data " + str(output_data))
         for parameter_output_list in output_data:
-            for node_name in parameter_output_list:
-                for profess_id in parameter_output_list[node_name]:
-                    sorted_output = dict(sorted(parameter_output_list[node_name][profess_id].items()))
-                    index = output_data.index(parameter_output_list)
-                    output_list[index][node_name][profess_id] = parameter_output_list[node_name][profess_id][
-                        min(sorted_output)]
+            output_dictionary={}
+            #logger.debug("parameter list "+str(parameter_output_list))
+            for profess_id, ofw_outputs in parameter_output_list.items():
+                #logger.debug("profess id "+str(profess_id)+" ofw outputs "+str(ofw_outputs))
+                for element in list_profess_id_and_node_name:
+                    for id, node_name in element.items():
+                        if profess_id == id:
+                            output_dictionary[node_name]={}
+                            node_name_intern=node_name
+                output_dictionary[node_name_intern][profess_id] = {}
+                for key, results in ofw_outputs.items():
+                    list_timestep=[]
+                    for timestep in results.keys():
+                        list_timestep.append(float(timestep))
+                    min_timestep=min(list_timestep)
+                    #logger.debug("list timestep "+str(list_timestep))
+                    #logger.debug("min "+str(min_timestep))
+                    output_dictionary[node_name_intern][profess_id][key]=results[str(min_timestep)]
+                    #logger.debug("output_dictionary " + str(output_dictionary))
+                output_list.append(output_dictionary)
 
-        # sets the right format node_name:{profess_id:{data}}
-        for config in self.dataList:
-            for node_name in config:
-                for output_for_node in output_list:
-                    for profess_id in output_for_node:
-                        if profess_id in config[node_name]:
-                            index = output_list.index(output_for_node)
-                            output_list[index] = {node_name: output_list[index]}
+        #logger.debug("output list "+str(output_list))
 
-        sorted_output = copy.deepcopy(output_list)
 
-        for output_for_node in sorted_output:
-            for node_name in output_for_node:
-                for profess_id in output_for_node[node_name]:
-                    for values_output_for_node in output_for_node[node_name][profess_id]:
-                        # delete undisired parameters
-                        if not values_output_for_node in self.list_with_desired_output_parameters:
-                            index = sorted_output.index(output_for_node)
-                            output_list[index][node_name][profess_id].pop(values_output_for_node, None)
-        logger.debug("the translated output of the OFW: " + str(output_list))
         return output_list

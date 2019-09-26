@@ -256,17 +256,19 @@ class gridController(threading.Thread):
                         logger.debug("price profile present")
                         price_profile = price_profile_data[int(hours):int(hours+24)]
 
+
                 soc_list_new = self.input.set_new_soc(soc_list)
 
                 if flag_global_control:
                     logger.debug("global control present")
-                    #profess_global_profile = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
-                    profess_global_profile =[{'node_a6': {
+                    profess_global_profile = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
+                    """profess_global_profile =[{'node_a6': {
                         'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
-                                  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]
+                                  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]"""
                     logger.debug("GESSCon result "+str(profess_global_profile))
 
-                if flag_global_control and flag_is_price_profile_needed:
+                if flag_global_control:
+                    logger.debug("price profile " + str(price_profile))
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile, profess_global_profile)
                 elif not flag_global_control and flag_is_price_profile_needed:
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile)
@@ -351,11 +353,16 @@ class gridController(threading.Thread):
                 profevPVs = self.sim.getProfessLoadschapesPV(node_names_for_profiles, hours, 24)
                 #logger.debug("profev PVs "+str(profevPVs))
 
+                if flag_is_price_profile_needed or flag_global_control:
+                    if self.input.is_price_profile():
+                        logger.debug("price profile present")
+                        price_profile = price_profile_data[int(hours):int(hours + 24)]
 
-                if flag_is_price_profile_needed and self.input.is_price_profile():
-                    logger.debug("price profile present")
-                    price_profile = price_profile_data[int(hours):int(hours + 24)]
-
+                if flag_global_control:
+                    logger.debug("global control present")
+                    profev_global_profile = self.global_control.gesscon(profevLoads, profevPVs, price_profile,
+                                                                         soc_list_new)
+                    logger.debug("GESSCon result " + str(profev_global_profile))
 
                 chargers = self.sim.get_chargers()
                 for key, charger_element in chargers.items():
@@ -391,13 +398,9 @@ class gridController(threading.Thread):
 
                 soc_list_new = self.input.set_new_soc_evs(soc_list_evs)
 
-                if flag_global_control:
-                    logger.debug("global control present")
-                    profev_global_profile = self.global_control.gesscon(profevLoads, profevPVs, price_profile,
-                                                                         soc_list_new)
-                    logger.debug("GESSCon result " + str(profev_global_profile))
 
-                if flag_global_control and flag_is_price_profile_needed:
+
+                if flag_global_control:
                     self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, price_profile,
                                                 profev_global_profile, chargers=chargers)
                 elif not flag_global_control and flag_is_price_profile_needed:
