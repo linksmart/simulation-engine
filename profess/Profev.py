@@ -254,7 +254,7 @@ class Profev:
         """
         try:
             response = self.httpClass.get(self.domain + "outputs/" + profess_id)
-            logger.debug("response start "+str(response.json()))
+            #logger.debug("response start "+str(response.json()))
             if response.status_code == 200:
                 if not response.json() == {}:
                     return response.json()

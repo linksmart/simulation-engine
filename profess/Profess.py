@@ -218,14 +218,13 @@ class Profess:
         """
         try:
             response = self.httpClass.get(self.domain + "outputs/" + profess_id)
-            logger.debug("response start "+str(response.json()))
+            #logger.debug("response start "+str(response.json()))
             if response.status_code == 200:
                 if not response.json() == {}:
                     return response.json()
                 else:
                     logger.error("OFW returned an empty response")
                     return 1
-
             else:
                 logger.error("failed to get output from professID: " + str(profess_id) + " response from ofw: " + str(
                     response.json()))
@@ -241,7 +240,7 @@ class Profess:
         otherwise false
         """
         # busy waiting
-        time.sleep(2)
+        time.sleep(0.5)
         opt_status = self.get_optimization_status()
         # logger.debug("optimization status: " + str(opt_status))
         running_flag = False
