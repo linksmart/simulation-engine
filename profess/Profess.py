@@ -569,7 +569,7 @@ class Profess:
             logger.error(
                 "a wrong profess_id was set for node: " + str(node_name) + " , profess_id: " + str(new_profess_id))
 
-    def set_profiles(self, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None, soc_list=None):
+    def set_profiles(self, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None, soc_list=None, voltage_prediction=None):
         """
         sets the profiles for all configs of all relevant nodes(nodes with ESS)
 
@@ -689,6 +689,15 @@ class Profess:
                                 #logger.debug("ess_con profile set")
                 else:
                     logger.debug("no ess_con profile was given")
+                if voltage_prediction is not None:
+                    for voltage_profile in voltage_prediction:
+                        profess_id = self.get_profess_id(node_name,soc_list)
+                        if profess_id != 0:
+                            config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                            if node_name == voltage_profile:
+                                phase = voltage_prediction[node_name]
+                                config_data_of_node["generic"]["voltage_prediction"] = phase
+                                logger.debug("voltage profile set")
 
 
                 profess_id = self.get_profess_id(node_name, soc_list)
@@ -745,7 +754,7 @@ class Profess:
         self.dataList = node_element_list
 
 
-    def set_up_profess(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None):
+    def set_up_profess(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None,voltage_prediction=None):
         """
         sets all important information retrieved from the parameters and topology
         :param soc_list: syntax when a list: [{node_name1:{"SoC":value, "id": id_name},{node_name2:{...},...] value is
@@ -786,7 +795,7 @@ class Profess:
         if soc_list is not None:
             self.set_soc_ess(soc_list)
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
-                              , ess_con=ess_con, soc_list=soc_list)
+                              , ess_con=ess_con, soc_list=soc_list, voltage_prediction=voltage_prediction)
             #logger.debug("data list "+str(self.dataList))
 
 

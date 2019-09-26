@@ -1,0 +1,1490 @@
+[
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.34769891969431993,
+        "P_Grid_Output": 1.2714901661086049,
+        "P_PV_Output": 9.973218724636173e-09,
+        "SoC_ESS": 0.4
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.23162247168579658,
+        "P_Grid_Output": 1.3049516085614299,
+        "P_PV_Output": 9.085872764443056e-09,
+        "SoC_ESS": 0.307528
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.14697846553471225,
+        "P_Grid_Output": 1.3619303475472129,
+        "P_PV_Output": 9.145242779349712e-09,
+        "SoC_ESS": 0.238412
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 3.9665947646269786e-08,
+        "P_Grid_Output": 1.4070118483184397,
+        "P_PV_Output": 0.1236600091094945,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 4.8624472070232575e-08,
+        "P_Grid_Output": 1.2857668464601495,
+        "P_PV_Output": 0.2683800090255218,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 4.665771572808851e-08,
+        "P_Grid_Output": 0.37487888469217934,
+        "P_PV_Output": 1.2366900090246156,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.7000852711101553,
+        "P_Grid_Output": 4.582594056911787e-09,
+        "P_PV_Output": 2.419060595683822,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.3842521659102409,
+        "P_Grid_Output": 3.4744220154251713e-09,
+        "P_PV_Output": 2.2324424308492463,
+        "SoC_ESS": 0.307334
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.4929526358715413,
+        "P_Grid_Output": 2.664843211504438e-09,
+        "P_PV_Output": 2.245254918253944,
+        "SoC_ESS": 0.351643
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.40114424154720607,
+        "P_Grid_Output": 2.268873002971066e-09,
+        "P_PV_Output": 2.044623735476301,
+        "SoC_ESS": 0.419201
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.06357277976381613,
+        "P_Grid_Output": 2.1266302461957933e-09,
+        "P_PV_Output": 1.6663002421141928,
+        "SoC_ESS": 0.468241
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.3529085632860874,
+        "P_Grid_Output": 1.746508280065688e-09,
+        "P_PV_Output": 1.672710119842444,
+        "SoC_ESS": 0.45571199999999995
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.423720869224455,
+        "P_Grid_Output": 1.5905691036460342e-09,
+        "P_PV_Output": 1.495495622800791,
+        "SoC_ESS": 0.498667
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.5654251253959223,
+        "P_Grid_Output": 1.6214451102309064e-09,
+        "P_PV_Output": 1.5289201997375386,
+        "SoC_ESS": 0.554563
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.7639111329416303,
+        "P_Grid_Output": 1.970217329507365e-09,
+        "P_PV_Output": 1.6852229809678794,
+        "SoC_ESS": 0.635501
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -1.1579586802600585,
+        "P_Grid_Output": 3.163107945387684e-09,
+        "P_PV_Output": 2.0527962018888357,
+        "SoC_ESS": 0.7484050000000001
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.3124300488381274,
+        "P_Grid_Output": 0.12726884713638817,
+        "P_PV_Output": 1.2807000029620788,
+        "SoC_ESS": 0.9375140000000001
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.022662615175420116,
+        "P_Grid_Output": 1.228322032887147,
+        "P_PV_Output": 0.2742300089799485,
+        "SoC_ESS": 0.9702689999999999
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.1472453628807654,
+        "P_Grid_Output": 1.2393578052854264,
+        "P_PV_Output": 0.1382400089890314,
+        "SoC_ESS": 0.95273
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.2982799166619646,
+        "P_Grid_Output": 1.2524105459296453,
+        "P_PV_Output": 9.973215124917354e-09,
+        "SoC_ESS": 0.899786
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.32880808933732486,
+        "P_Grid_Output": 1.267801182602913,
+        "P_PV_Output": 9.973439077972033e-09,
+        "SoC_ESS": 0.815505
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.39451533855803833,
+        "P_Grid_Output": 1.2865800283330144,
+        "P_PV_Output": 9.10714639237375e-09,
+        "SoC_ESS": 0.7234529999999999
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.4190504640839216,
+        "P_Grid_Output": 1.3104999721591,
+        "P_PV_Output": 9.089514286758289e-09,
+        "SoC_ESS": 0.615846
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.4087320382221707,
+        "P_Grid_Output": 1.3343138792604012,
+        "P_PV_Output": 9.1049682036134e-09,
+        "SoC_ESS": 0.5082220000000001
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.2861135445202567,
+        "P_Grid_Output": 1.3666933692981773,
+        "P_PV_Output": 9.15652569954672e-09,
+        "SoC_ESS": 0.40057200000000004
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.2163956482505027,
+        "P_Grid_Output": 1.4120438539007354,
+        "P_PV_Output": 9.15195866198165e-09,
+        "SoC_ESS": 0.316139
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.1558542269727771,
+        "P_Grid_Output": 1.4761610296452212,
+        "P_PV_Output": 9.187166918416369e-09,
+        "SoC_ESS": 0.247213
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 4.6912565147897824e-08,
+        "P_Grid_Output": 1.5563717865515334,
+        "P_PV_Output": 0.08694000919495341,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 1.79156004772858e-08,
+        "P_Grid_Output": 1.1505488249417946,
+        "P_PV_Output": 0.5126400089109965,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 4.887273490753716e-08,
+        "P_Grid_Output": 1.1114970626231317,
+        "P_PV_Output": 0.607500008872735,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.7020280282111403,
+        "P_Grid_Output": 7.762498529249995e-08,
+        "P_PV_Output": 2.534966878072199,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.5390200398675978,
+        "P_Grid_Output": 0.12365794374600193,
+        "P_PV_Output": 1.2830400026979996,
+        "SoC_ESS": 0.307804
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.8757545332393963,
+        "P_Grid_Output": 2.3549260014024716e-08,
+        "P_PV_Output": 2.776161946326174,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.6952200285565608,
+        "P_Grid_Output": 0.05843054608113877,
+        "P_PV_Output": 1.066859989225162,
+        "SoC_ESS": 0.339044
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.7789160394783584,
+        "P_Grid_Output": 3.9554026732550445e-09,
+        "P_PV_Output": 2.561707197019329,
+        "SoC_ESS": 0.2
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.7078254530233371,
+        "P_Grid_Output": 2.984667396431904e-09,
+        "P_PV_Output": 2.376736186035024,
+        "SoC_ESS": 0.3179
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.8630834863068821,
+        "P_Grid_Output": 2.6522407860215726e-09,
+        "P_PV_Output": 2.257139301111455,
+        "SoC_ESS": 0.42268700000000003
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.5369678180671146,
+        "P_Grid_Output": 3.019972615017667e-09,
+        "P_PV_Output": 1.7439826247699182,
+        "SoC_ESS": 0.552976
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.8807770456050518,
+        "P_Grid_Output": 3.5186538610145166e-09,
+        "P_PV_Output": 1.9737451713960146,
+        "SoC_ESS": 0.628915
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -1.156065202006166,
+        "P_Grid_Output": 6.028497001092609e-09,
+        "P_PV_Output": 2.2684355709454067,
+        "SoC_ESS": 0.767814
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.213740048513217,
+        "P_Grid_Output": 0.20394831652483184,
+        "P_PV_Output": 1.272870006585223,
+        "SoC_ESS": 0.957252
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": -0.11277003421914517,
+        "P_Grid_Output": 1.1594450285687914,
+        "P_PV_Output": 0.5040900089193521,
+        "SoC_ESS": 0.977446
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.19782708555913653,
+        "P_Grid_Output": 1.2494139851137362,
+        "P_PV_Output": 0.13410000899716842,
+        "SoC_ESS": 0.978856
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.36607412672826506,
+        "P_Grid_Output": 1.2611632016941778,
+        "P_PV_Output": 9.091529979648161e-09,
+        "SoC_ESS": 0.918142
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.38230698469890834,
+        "P_Grid_Output": 1.2777620614021283,
+        "P_PV_Output": 9.097487910474676e-09,
+        "SoC_ESS": 0.818369
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.44536123996106214,
+        "P_Grid_Output": 1.2944139208679022,
+        "P_PV_Output": 9.10427230520775e-09,
+        "SoC_ESS": 0.718595
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.4398515663878077,
+        "P_Grid_Output": 1.316288713817066,
+        "P_PV_Output": 9.400292822730391e-09,
+        "SoC_ESS": 0.6032730000000001
+      }
+    }
+  },
+  {
+    "input": {
+      "soc": {
+        "ESS": {
+          "SoC": 48.7918,
+          "T_SoC": 25,
+          "id": "Akku12",
+          "Battery_Capacity": 5,
+          "max_charging_power": 3.5,
+          "max_discharging_power": 3.5,
+          "charge_efficiency": 90,
+          "discharge_efficiency": 90
+        },
+        "Grid": {
+          "Q_Grid_Max_Export_Power": 1,
+          "P_Grid_Max_Export_Power": 1
+        },
+        "PV": {
+          "pv_name": "PV_12"
+        }
+      }
+    },
+    "output": {
+      "bd9aaec18167": {
+        "P_ESS_Output": 0.39169254757633526,
+        "P_Grid_Output": 1.3436734002166408,
+        "P_PV_Output": 9.379373210674699e-09,
+        "SoC_ESS": 0.487918
+      }
+    }
+  }
+]
