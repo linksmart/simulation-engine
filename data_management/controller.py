@@ -206,10 +206,10 @@ class gridController(threading.Thread):
             logger.debug("soc_list_evs "+str(soc_list_evs))
 
         logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
-        if chargers:
-            flag_is_storage = self.input.is_Storage_in_Topology_without_charging_station(self.topology, chargers)
-        else:
-            flag_is_storage = self.input.is_Storage_in_Topology_without_charging_station(self.topology)
+        # if chargers:
+        #     flag_is_storage = self.input.is_Storage_in_Topology_without_charging_station(self.topology, chargers)
+        # else:
+        flag_is_storage = self.input.is_Storage_in_Topology_without_charging_station(self.topology)
         logger.debug("Storage flag: " + str(flag_is_storage))
         if flag_is_storage:
             soc_list = self.input.get_soc_list(self.topology)

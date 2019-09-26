@@ -225,7 +225,7 @@ class Profess:
         otherwise false
         """
         # busy waiting
-        time.sleep(5)
+        time.sleep(1)
         opt_status = self.get_optimization_status()
         # logger.debug("optimization status: " + str(opt_status))
         running_flag = False

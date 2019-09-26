@@ -494,7 +494,7 @@ run_all(24)
 #iterate_through_profiles("C:/Users/klingenb/PycharmProjects/simulation-engine/profiles/load_profiles/residential",96,20)
 path="C:/Users/klingenb/Documents/BAThesis/Results/TestStorages/self-consumption/"
 #plot_node_in_every_test(path,"node_a12","mapping_SC_1kw_P_Bigger_ESS")
-plot_node_in_every_test("StorageTest/","node_a12","SP_big_ESS_Curt_cbc_changed_SOC")
+#plot_node_in_every_test("StorageTest/","node_a12","SP_big_ESS_Curt_cbc_changed_SOC")
 #plot_node_in_every_test("PVTest/","node_a12","mapping")
 #plot_differences("PVTest/","StorageTest/","node_a12","Only PV","Minimize costs 1kw max export","mapping","mappingBigESS1kwMC")
 
