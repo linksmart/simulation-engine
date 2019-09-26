@@ -245,7 +245,7 @@ class gridController(threading.Thread):
             if flag_is_storage:
 
                 node_names_for_profiles = self.profev.json_parser.get_node_name_list(soc_list)
-                logger.debug("node names " + str(node_names_for_profiles))
+                #logger.debug("node names " + str(node_names_for_profiles))
                 professLoads = self.sim.getProfessLoadschapes(node_names_for_profiles, hours, 24)
                 #logger.debug("loads "+str(professLoads))
                 professPVs = self.sim.getProfessLoadschapesPV(node_names_for_profiles, hours, 24)
@@ -253,22 +253,22 @@ class gridController(threading.Thread):
 
                 if flag_is_price_profile_needed  or flag_global_control:
                     if self.input.is_price_profile():
-                        logger.debug("price profile present")
+                        #logger.debug("price profile present")
                         price_profile = price_profile_data[int(hours):int(hours+24)]
 
 
                 soc_list_new = self.input.set_new_soc(soc_list)
 
                 if flag_global_control:
-                    logger.debug("global control present")
+                    #logger.debug("global control present")
                     profess_global_profile = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
                     """profess_global_profile =[{'node_a6': {
                         'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
                                   0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]"""
-                    logger.debug("GESSCon result "+str(profess_global_profile))
+                    #logger.debug("GESSCon result "+str(profess_global_profile))
 
                 if flag_global_control:
-                    logger.debug("price profile " + str(price_profile))
+                    #logger.debug("price profile " + str(price_profile))
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile, profess_global_profile)
                 elif not flag_global_control and flag_is_price_profile_needed:
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile)
@@ -279,7 +279,7 @@ class gridController(threading.Thread):
 
                 if not status_profess:
                     profess_output=self.profess.wait_and_get_output(soc_list)
-                    logger.debug("output profess " + str(profess_output))
+                    #logger.debug("output profess " + str(profess_output))
                     if not profess_output == []:
                         # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
                         # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
@@ -302,7 +302,7 @@ class gridController(threading.Thread):
                                         profess_result_intern[node_name][key_results] = powers
 
                             profess_result.append(profess_result_intern)
-                        logger.debug("profess result: "+str(profess_result))
+                        #logger.debug("profess result: "+str(profess_result))
 
                         for element in profess_result:
                             ess_name = None

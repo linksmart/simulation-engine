@@ -86,8 +86,8 @@ class Profess:
         response = ""
         try:
             response = self.httpClass.put(self.domain + "models/" + model_name, model_data)
-            json_response = response.json()
-            logger.debug("postmodel started " + str(model_name) + " ,response of ofw: " + str(json_response))
+            #json_response = response.json()
+            #logger.debug("postmodel started " + str(model_name) + " ,response of ofw: " + str(json_response))
             if response.status_code == 200:
                 logger.debug("model post completed: " + str(model_name))
                 return 0
@@ -114,7 +114,7 @@ class Profess:
         response = ""
         try:
             response = self.httpClass.post(self.domain + "inputs/dataset", input_data, "json")
-            json_response = response.json()
+            #json_response = response.json()
             # regex to get profess_id
             pattern = re.compile("/inputs*[/]([^']*)")
             m = pattern.findall(str(response.headers))
@@ -122,8 +122,8 @@ class Profess:
                 profess_id = m[0]
             else:
                 logger.error("failed to post data to the ofw, no professID was returned " + str(node_name))
-            logger.debug("Response of OFW after post data: " + str(json_response) + ": " + str(
-                profess_id) + " , statusCode: " + str(response.json()))
+            #logger.debug("Response of OFW after post data: " + str(json_response) + ": " + str(
+                #profess_id) + " , statusCode: " + str(response.json()))
             # the professId is saved for futher referencing
             self.set_profess_id_for_node(node_name, profess_id, soc_list)
             # the posted data is also saved internaly for other optimizations
@@ -177,7 +177,7 @@ class Profess:
         id_list = self.get_ofw_ids(soc_list)
         for id in id_list:
             response = self.httpClass.delete(self.domain + "inputs/dataset/"+str(id))
-            logger.debug("response "+str(response))
+            #logger.debug("response "+str(response))
 
     def set_standard_data(self, standard_data):
         """
@@ -226,7 +226,7 @@ class Profess:
         """
         try:
             response = self.httpClass.get(self.domain + "outputs/" + profess_id)
-            logger.debug("response start "+str(response.json()))
+            #logger.debug("response start "+str(response.json()))
             if response.status_code == 200:
                 if not response.json() == {}:
                     return response.json()
@@ -321,9 +321,9 @@ class Profess:
                                                                                              "repetition": repition,
                                                                                              "solver": solver,
                                                                                              "optimization_type": optType})
-            json_response = response.json()
-            logger.debug(
-                str(json_response) + ": " + str(profess_id) + " , Status code of start: " + str(response.status_code))
+            #json_response = response.json()
+            #logger.debug(
+                #str(json_response) + ": " + str(profess_id) + " , Status code of start: " + str(response.status_code))
             if (str(response.status_code) == 200):
                 # code 200 is returned even when the optimization couldn't start because of missing data for the optimization
                 return 0
@@ -354,7 +354,7 @@ class Profess:
                 if storage_opt_model is None:
                     logger.error("no opzimization model was given for "+str(node_name))
                     break
-                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "cbc", "discrete",
+                start_response = self.start(1, 24, 3600, storage_opt_model, 1, "ipopt", "discrete",
                                             self.get_profess_id(node_name, soc_list))
                 if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response, node_name, soc_list)
@@ -412,8 +412,8 @@ class Profess:
         logger.debug("Stop optimization: " + str(profess_id))
         if profess_id != 0:
             response = self.httpClass.put(self.domain + "optimization/stop/" + profess_id)
-            json_response = response.json()
-            logger.debug(json_response + " :" + str(profess_id))
+            #json_response = response.json()
+            #logger.debug(json_response + " :" + str(profess_id))
             if response.status_code == 200:
                 return 0
             else:
@@ -433,8 +433,8 @@ class Profess:
         logger.debug("update_config_json has started at " + str(profess_id))
         if profess_id != 0:
             response = self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
-            json_response = response.json()
-            logger.debug("Response from OFW to update_config :" + str(json_response) + ": " + str(profess_id))
+            #json_response = response.json()
+            #logger.debug("Response from OFW to update_config :" + str(json_response) + ": " + str(profess_id))
             if response.status_code == 200:
                 return 0
             else:
@@ -583,7 +583,7 @@ class Profess:
         :param ess_con: [{node_name:{node_name.1.2.3:[value1,value2, ...]}, ...}
         """
         logger.debug("Setting_profiles ")
-        logger.debug(str(pv_profiles))
+        #logger.debug(str(pv_profiles))
         # logger.debug("load profile: "+str(load_profiles)+" ,pv_profiles: "+str(pv_profiles)+" ,price_profile: "+str(price_profiles)+" ,ess_con "+str(ess_con))
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
@@ -644,7 +644,7 @@ class Profess:
                                         three_phase.append(three_phase_value)
                                     config_data_of_node["load"]["P_Load"] = three_phase
 
-                                logger.debug("load profile set for " + str(node_name))
+                                #logger.debug("load profile set for " + str(node_name))
                 else:
                     logger.debug("no load profile was given")
                 if pv_profiles is not None:
@@ -670,7 +670,7 @@ class Profess:
                                     config_data_of_node["photovoltaic"]["P_PV_R"] = copy.deepcopy(single_phase)
                                     config_data_of_node["photovoltaic"]["P_PV_S"] = copy.deepcopy(single_phase)
                                     config_data_of_node["photovoltaic"]["P_PV_T"] = copy.deepcopy(single_phase)
-                                    logger.debug("pv profile set for " + str(node_name))
+                                    #logger.debug("pv profile set for " + str(node_name))
                 else:
                     logger.debug("no pv_profile was given")
                 if ess_con is not None:
@@ -686,7 +686,7 @@ class Profess:
                                     # logger.debug("ess_con profile set")
                                 if node_name in phase:
                                     config_data_of_node["global_control"]["ESS_Control"] = phase[node_name]
-                                logger.debug("ess_con profile set")
+                                #logger.debug("ess_con profile set")
                 else:
                     logger.debug("no ess_con profile was given")
 
@@ -694,7 +694,7 @@ class Profess:
                 profess_id = self.get_profess_id(node_name, soc_list)
                 if profess_id != 0:
                     config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                    logger.debug("price prifile profess " + str(price_profiles))
+                    #logger.debug("price prifile profess " + str(price_profiles))
                     if price_profiles is not None:
                         config_data_of_node["generic"]["Price_Forecast"] = price_profiles
                         # logger.debug("price profile set")

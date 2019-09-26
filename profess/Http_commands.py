@@ -1,13 +1,15 @@
 import requests
 import json
 import logging
-
-logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+#logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
 class Http_commands:
     def __init__(self):
         logger.debug("Http_commands created.")
+
 
 
     def post(self,target, payLoad, type):
@@ -28,6 +30,7 @@ class Http_commands:
         :return:
         """
         return requests.put(target, json=payLoad)
+
     def get(self,target):
         """
 

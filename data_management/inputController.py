@@ -359,7 +359,7 @@ class InputController:
                 SoC = float(self.sim.getSoCfromBattery(element_id))
                 value["ESS"]["SoC"]=SoC
                 new_soc_list.append(element)
-        logger.debug("new soc list: " + str(new_soc_list))
+        #logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
 
     def set_new_soc_evs(self, soc_list):
@@ -376,7 +376,7 @@ class InputController:
                 value["EV"]["SoC"] = SoC
                 new_soc_list.append(element)
 
-        logger.debug("new soc list: " + str(new_soc_list))
+        #logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
 
 
