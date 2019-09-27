@@ -2,26 +2,39 @@ version: '3'
 services:
   redis:
     image: redis:latest
+    container_name: "redis_S4G"
     command: redis-server
     ports:
       - "6379:6379"
-  ofw:
-    image: garagon/optimization:amddocker
-    command: ["python3", "-u", "ofw.py"]
-    ports:
-      - "8080:8080"
-  se:
-    build:
-      context: ""
-      dockerfile: Dockerfile
-    image: "simulation_engine"
-    ports:
-        - "9090:9090"
-    command: ["python3", "-u", "main.py"]
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "10"
-   # restart: "always"
+    restart: "always"
+  se:
+    build:
+      context: ""
+      dockerfile: Dockerfile
+    image: linksmart/simulation-engine
+    container_name: "se"
+    depends_on:
+      - redis
+    volumes:
+       - /storage4grid/dsf_se/results:/usr/src/app/data
+       #- ../simulation-engine/results:/usr/src/app/data
+       #- .:/usr/src/app
+        #- host_path:${CONTAINER_PATH}#this in combination with the code below does not work on windows
+        #- 'tests: /usr/src/app/tests'
+    #network_mode: "host"
+    ports:
+        - "9090:9090"
+    command: ["python3", "-u", "./gesscon/gessconConnector.py"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    # restart: "always"
+    entrypoint: ["python3", "-u", "main.py"]
 

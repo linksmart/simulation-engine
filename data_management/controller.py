@@ -99,7 +99,7 @@ class gridController(threading.Thread):
 
         for ess_element in storages:
             soc_dict = {}
-            #logger.debug("element intern "+str(ess_element))
+            logger.debug("element intern "+str(ess_element))
             soc_dict[ess_element["bus1"]]={"SoC":ess_element["soc"],
                                               "T_SoC":25,
                                               "id":ess_element["id"],
@@ -200,6 +200,12 @@ class gridController(threading.Thread):
         logger.debug("Transformers in the circuit")
         for i in range(len(transformer_names)):
             self.sim.create_monitor("monitor_transformer_"+str(i), "Transformer."+str(transformer_names[i]),1,1)
+
+        fname = (str(self.id)) + "_model.dss"
+        path = os.path.join("data", str(self.id), fname)
+        self.utils.store_data_raw(path, self.sim.getDssScript())
+        logger.debug(fname + " successfully stored")
+
 
         logger.debug("#####################################################################")
         logger.debug("Simulation of grid " + self.id + " started")
@@ -303,7 +309,7 @@ class gridController(threading.Thread):
             ################  Storage control  ###################################################
             ######################################################################################
 
-            if flag_is_storage:
+            """if flag_is_storage:
 
                 professLoads = self.sim.getProfessLoadschapes(hours, 24)
                 #logger.debug("loads "+str(professLoads))
@@ -426,7 +432,7 @@ class gridController(threading.Thread):
                             logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
 
             else:
-                logger.debug("No charging stations present in the simulation")
+                logger.debug("No charging stations present in the simulation")"""
 
 
             puVoltages, Currents, Losses = self.sim.solveCircuitSolution()

@@ -39,11 +39,17 @@ class OpenDSS:
         self.dummyPrice=[3] * 24
         logger.debug("Initialization of Opendss finished")
 
+    def addToDssScript(self, line):
+        self.dss_script = self.dss_script + line + "\n"
+
+    def getDssScript(self):
+        return self.dss_script
+
     def set_base_frequency(self, frequency):
         dss_string="Set DefaultBaseFrequency="+str(frequency)
         logger.debug(dss_string)
         dss.run_command(dss_string)
-        self.dss_script += (dss_string + "\n")
+        self.addToDssScript(dss_string)
 
     def setNewCircuit(self, name, common):
         self.common = common
@@ -80,7 +86,8 @@ class OpenDSS:
             )
             print(dss_string + "\n")
             dss.run_command(dss_string)
-            self.dss_script += (dss_string + "\n")
+            self.addToDssScript(dss_string)
+
         except Exception as e:
             logger.error(e)
 
@@ -120,7 +127,7 @@ class OpenDSS:
             dss_string=dss_string+" terminal="+str(terminal)
         logger.debug(dss_string)
         dss.run_command(dss_string)
-        self.dss_script += (dss_string + "\n")
+        self.addToDssScript(dss_string)
         #dss.Monitors.Name(name)
         #logger.debug("Name " + str(dss.Monitors.Name()))
         #dss.Monitors.Element(element_name)
@@ -229,7 +236,7 @@ class OpenDSS:
             dss_string="Storage."+str(battery_name)+".State = Charging"
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
-            self.dss_script += (dss_string + "\n")
+            self.addToDssScript(dss_string)
         else:
             """route_name="Storage."+str(battery_name)
             dss_string=route_name+".kWrated = "+str(power)
@@ -264,6 +271,7 @@ class OpenDSS:
         dss_string="Storage."+str(battery_name)+".%stored="+str(value)
         logger.debug("dss_string "+str(dss_string))
         #dss.run_command('? Storage.Akku1.%stored')
+        self.addToDssScript(dss_string)
         return dss.run_command(dss_string)
 
     def getSoCfromBattery(self, battery_name):
@@ -329,6 +337,8 @@ class OpenDSS:
     def solveCircuitSolution(self):
         logger.info("Start solveCircuitSolution")
         #logger.info("Start solveCircuitSolution " + str(dss.Loads.AllNames()))
+
+        #print("dss_script: " + self.dss_script)
 
         try:
             dss.Solution.Solve()
@@ -420,6 +430,7 @@ class OpenDSS:
 
         dss.run_command(dss_string)
         dss.run_command(" CalcVoltageBases");
+        self.addToDssScript(dss_string + "\n" + "CalcVoltageBases \n")
 
 
     def solutionConverged(self):
@@ -430,7 +441,9 @@ class OpenDSS:
 
     def setMode(self, mode):
         self.mode = mode
-        dss.run_command("Set mode="+self.mode)
+        dss_string = "Set mode="+self.mode
+        dss.run_command(dss_string)
+        self.addToDssScript(dss_string)
         #logger.debug("Solution mode "+str(dss.Solution.ModeID()))
 
     def getStepSize(self):
@@ -454,6 +467,7 @@ class OpenDSS:
 
     def setRegControls(self, regcontrols):
 
+        self.addToDssScript("\n !------------Setting RegControls ------------- \n")
         self.regcontrols = regcontrols
         try:
             for element in self.regcontrols:
@@ -482,7 +496,7 @@ class OpenDSS:
                     else:
                         break
 
-                cmd = "New regcontrol.{rc_id} transformer={tra} winding={winding} vreg={vreg} band={band}  ptratio={ptratio} ctprim={ctprim} R={R} X={X}".format(
+                dss_string = "New regcontrol.{rc_id} transformer={tra} winding={winding} vreg={vreg} band={band}  ptratio={ptratio} ctprim={ctprim} R={R} X={X}".format(
                 rc_id=Id,
                 tra=transformer_id,
                 winding=winding_id,
@@ -494,8 +508,9 @@ class OpenDSS:
                 X=line_drop_compensator_X_Volt)
 
                 #logger.info("run_command: " + cmd)
-                logger.debug(cmd + "\n")
-                dss.run_command(cmd)
+                logger.debug(dss_string + "\n")
+                dss.run_command(dss_string)
+                self.addToDssScript(dss_string)
             return 0
         except Exception as e:
             logger.error(e)
@@ -504,6 +519,7 @@ class OpenDSS:
     def setTransformers(self, transformers):
         #logger.debug("Setting up the transformers")
         #logger.debug("transformers: " + str(transformers))
+        self.addToDssScript( "\n ! ------------------ Setting transformers -----------------------   \n")
         self.transformers = transformers
         try:
             for element in self.transformers:
@@ -583,6 +599,7 @@ class OpenDSS:
                 #logger.info("dss_string: " + dss_string)
                 logger.debug(dss_string + "\n")
                 dss.run_command(dss_string)
+                self.addToDssScript(dss_string)
             return 0
 
 
@@ -658,6 +675,7 @@ class OpenDSS:
 
     def setLoads(self, loads):
         #!logger.debug("Setting up the loads")
+        self.addToDssScript("\n !------------Setting Loads ------------- \n")
         self.loads=loads
         try:
             for element in self.loads:
@@ -679,12 +697,12 @@ class OpenDSS:
                         #temp = value #json.loads("\""+str(value)+"\"")
                         #i = 0
                         #for k, v in temp.items():
-                            #if k == "phase_R": #if k=="phase_R" and v==True, then i=i+1
-                                #val = 1
-                            #elif k == "phase_S":
-                                #val = 2
-                            #elif k == "phase_T":
-                                #val = 3
+                        #if k == "phase_R": #if k=="phase_R" and v==True, then i=i+1
+                        #val = 1
+                        #elif k == "phase_S":
+                        #val = 2
+                        #elif k == "phase_T":
+                        #val = 3
                         num_phases=value #This is an alternative of the above TODO
                     elif key == "connection_type":
                         connection_type = value
@@ -715,16 +733,16 @@ class OpenDSS:
 
                 #dss_string = "New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW} kVar={voltage_kVar} pf={power_factor} power_profile_id={shape}".format(
                 dss_string="New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW}".format(
-                load_name=self.load_name,
-                bus_name=self.bus_name,
-                num_phases=self.num_phases,
-                conn=self.connection_type,
-                model=self.model,
-                voltage_kV=self.k_v,
-                voltage_kW=self.k_w,
-                #voltage_kVar=self.k_var,
-                #power_factor=self.power_factor
-                #shape=self.power_profile_id
+                    load_name=self.load_name,
+                    bus_name=self.bus_name,
+                    num_phases=self.num_phases,
+                    conn=self.connection_type,
+                    model=self.model,
+                    voltage_kV=self.k_v,
+                    voltage_kW=self.k_w,
+                    #voltage_kVar=self.k_var,
+                    #power_factor=self.power_factor
+                    #shape=self.power_profile_id
                 )
 
                 if not self.k_var == None:
@@ -736,6 +754,7 @@ class OpenDSS:
                 #logger.info("dss_string: " + dss_string)
                 logger.debug(dss_string + "\n")
                 dss.run_command(dss_string)
+                self.addToDssScript(dss_string)
 
 
             return 0
@@ -747,6 +766,7 @@ class OpenDSS:
     def setLineCodes(self, lines):
         #logger.debug("Setting up linecodes")
         #logger.debug("lines "+str(lines))
+        self.addToDssScript("\n !------------Setting linecodes ------------- \n")
         self.linecodes=lines
 
         try:
@@ -814,6 +834,7 @@ class OpenDSS:
                 #logger.info("dss_string: " + dss_string)
                 logger.debug(dss_string + "\n")
                 dss.run_command( dss_string)
+                self.addToDssScript(dss_string)
             return 0
 
         except Exception as e:
@@ -822,6 +843,7 @@ class OpenDSS:
 
     def setPowerLines(self, lines):
         #logger.debug("Setting up the powerlines")
+        self.addToDssScript("\n !------------Setting PowerLines ------------- \n")
         self.lines=lines
         try:
             for element in self.lines:
@@ -941,6 +963,7 @@ class OpenDSS:
             dss_string = dss_string + "switch=" + str(switch)
         logger.debug(dss_string + "\n")
         dss.run_command(dss_string)
+        self.addToDssScript(dss_string)
 
         return 0
 
@@ -982,12 +1005,15 @@ class OpenDSS:
         #!logger.info(dss_string)
         logger.debug(dss_string + "\n")
         dss.run_command(dss_string)
+        self.addToDssScript(dss_string)
 
 
 
     def setPVshapes(self, pvs, city, country, sim_days, profiles, profess):
 
         #!logger.debug("Setting up the loads")
+        self.addToDssScript("\n !------------Setting PVshapes ------------- \n")
+
         self.pvs=pvs
         try:
             for element in self.pvs:
@@ -1021,7 +1047,8 @@ class OpenDSS:
 
     def setLoadshapes(self, loads, sim_days, profiles, profess):
 
-        #!logger.debug("Setting up the loads")
+        #!logger.debug("Setting up the Loadshapes")
+        self.addToDssScript("\n !------------Setting Loadshapes ------------- \n")
         self.loads=loads
         try:
             for element in self.loads:
@@ -1093,6 +1120,7 @@ class OpenDSS:
             #dss_string="New Loadshape1 npts=24 interval=1 mult=(0 0 0 0 0 0 .1 .2 .3 .5 .8 .9 1.0 1.0 .99 .9 .7 .4 .1 0 0 0 0 0)"
             #print(dss_string + "\n")
             dss.run_command(dss_string)
+            self.addToDssScript(dss_string)
 
             dss_string = "? Loadshape." + str(id) + ".mult"
             #dss_string = "? Loadshape1.mult"
@@ -1119,6 +1147,7 @@ class OpenDSS:
             #dss_string="New Loadshape1 npts=24 interval=1 mult=(0 0 0 0 0 0 .1 .2 .3 .5 .8 .9 1.0 1.0 .99 .9 .7 .4 .1 0 0 0 0 0)"
             #print(dss_string + "\n")
             dss.run_command(dss_string)
+            self.addToDssScript(dss_string)
 
             dss_string = "? Loadshape.Shape_" + str(id) + ".mult"
             #dss_string = "? Loadshape1.mult"
@@ -1130,6 +1159,7 @@ class OpenDSS:
     def setTshapes(self, tshapes):
         #!logger.info("Setting up the TShapes")
         #!logger.debug("Tshape in OpenDSS: "+str(tshapes))
+        self.addToDssScript("\n !------------Setting TShapes ------------- \n")
         try:
             for element in tshapes:
                 id = None
@@ -1164,9 +1194,11 @@ class OpenDSS:
         #!logger.info(dss_string)
         logger.debug(dss_string + "\n")
         dss.run_command(dss_string)
+        self.addToDssScript(dss_string)
 
     def setPhotovoltaics(self, photovoltaics):
         #!logger.debug("Setting up the Photovoltaics")
+        self.addToDssScript("\n !------------Setting Photovoltaics ------------- \n")
         try:
             for element in photovoltaics:
                 id = None
@@ -1238,11 +1270,12 @@ class OpenDSS:
 
         logger.debug(dss_string + "\n")
         dss.run_command(dss_string)
+        self.addToDssScript(dss_string)
 
     def setChargingStations(self, charging_stations):
         import sys
         #logger.debug("charging stations "+str(charging_stations))
-
+        self.addToDssScript("\n !------------Setting charging_stations ------------- \n")
         try:
             for element in charging_stations:
                 id = None
@@ -1330,6 +1363,7 @@ class OpenDSS:
 
     def setStorages(self, storage):
         #logger.info("Setting up the Storages")
+        self.addToDssScript("\n !------------Setting Storages ------------- \n")
         try:
             for element in storage:
                 id = None
@@ -1415,10 +1449,12 @@ class OpenDSS:
 
         logger.debug(dss_string)
         dss.run_command(dss_string)
+        self.addToDssScript(dss_string)
         self.setSoCBattery(id, soc)
 
     def setCapacitors(self, capacitors):
         #!logger.info("Setting up the capacitors")
+        self.addToDssScript("\n !------------Setting capacitors ------------- \n")
         self.capacitors=capacitors
         try:
             for element in self.capacitors:
@@ -1453,6 +1489,7 @@ class OpenDSS:
                 #logger.info("dss_string: " + dss_string)
                 logger.debug(dss_string + "\n")
                 dss.run_command(dss_string)
+                self.addToDssScript(dss_string)
                 """logger.info(#See if the values are loaded to the command. This is good :)
                 " capacitor_name 1: "+str(self.capacitor_name) + 
                 " bus_name = "+str(self.bus_name)+
