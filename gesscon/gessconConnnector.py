@@ -3,121 +3,97 @@ import logging
 import json
 import numpy as np
 import time
-from data_management.utils import Utils
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 from gesscon.MQTTClient import MQTTClient
 
 class GESSCon():
-	def __init__(self):
-		self.soc_nodes = ""
-		self.soc_ids = ""
-		self.payload = []
-		self.utils = Utils()
-		
-	def get_ESS_data_format(self, storage):
-		"""
-		returns ESS data in the following format:
-		{'633': {'id':"name", 'SoC': 0.4, 'Battery_Capacity':70, 'max_charging_power':33, 'max_discharging_power':33}},
-		{'671': {'id':"name", 'SoC': 0.4, 'Battery_Capacity':70, 'max_charging_power':33, 'max_discharging_power':33}}]
-		"""
-		ess_data_list = []
-		storage = storage["storageUnits"]
-		for ess in storage:
-			ess_data = {}
-			data = {}
-			data['id'] = ess['id']
-			data['SoC'] = ess['soc']
-			data['Battery_Capacity'] = ess['kwh_rated']
-			data['max_charging_power'] = ess['pcmax']
-			data['max_discharging_power'] = ess['pdmax']
-			ess_data[ess['bus1']] = data
-			ess_data_list.append(ess_data)
-		logger.debug("ESS Data= %s", ess_data_list)
-		return ess_data_list
-		
-	def aggregate(self, data_list):
-		"""
-			Calculates the aggregate values of load and pv.
-			Args:
-				load/pv(list): load/pv profile per node
-			Returns:
-				list: aggregated profile(list of 24 values)
-			"""
-		aggregate_list = []
-		for data in data_list:
-			data_id = list(data.keys())
-			data_values = data[data_id[0]]
-			if (isinstance(data_values, dict)):
-				agg_list = []
-				for val in data_values:
-					agg_list.append(np.square(data_values[val]))
-				aggregate = [sum(x) for x in zip(*agg_list)]
-				aggregate_list.append(list(np.sqrt(aggregate)))
-		aggregate_list = [sum(x) for x in zip(*aggregate_list)]
-		logger.debug("Aggregated data = %s ", aggregate_list)
-		return aggregate_list
-	
-	# def aggregated_load(self, load_list):
-	# 	aggregate_list = []
-	# 	for load in load_list:
-	# 		load_ids = list(load.keys())
-	# 		load_values = load[load_ids[0]]
-	# 		if (isinstance(load_values, list)):
-	# 			agg_list = []
-	# 			aggregate = [0]*24
-	# 			for val in load_values:
-	# 				agg_list = (list(val.values())[0])
-	# 				aggregate = [x + y**2 for x, y in zip(aggregate, agg_list)]
-	# 			aggregate_list.append(list(np.sqrt(aggregate)))
-	# 	aggregate_list = [sum(x) for x in zip(*aggregate_list)]
-	# 	logger.info("Load data = %s ", aggregate_list)
-	# 	return aggregate_list
-	
-	def create_tele_config(self, Soc):
-		soc_values = []
-		len_soc = len(Soc)
-		b_max = []
-		pc_max = []
-		pd_max = []
-		soc_nodes = []
-		soc_ids = []
-		for s in (Soc):
-			# soc_value = {}
-			soc_node = list(s.keys())[0]
-			# soc_nodes.append(soc_node)
-			# soc_ids.append(s[soc_node]['id'])
-			# soc_value["SoC"] = s[soc_node]['SoC']
-			soc_values.append(s[soc_node]['SoC'])
-			b_max.append(s[soc_node]['Battery_Capacity'])
-			pc_max.append(s[soc_node]['max_charging_power'])
-			pd_max.append(s[soc_node]['max_discharging_power'])
-		self.soc_nodes = soc_nodes
-		self.soc_ids = soc_ids
-		tele = {"SOC": soc_values}
-		config = {
-			"ESS_number": len_soc,
-			"tariff": 0,
-			"grid_i": 1000,
-			"grid_o": 1000,
-			"ess_eff": [0.96] * len_soc,
-			"bmax": b_max,
-			"bmin": [0] * len_soc,
-			"pcmax": pc_max,
-			"pdmax": pd_max,
-			"cycle": [0] * len_soc,
-			"loss": 0
-		}
-		logger.debug("Soc = %s", soc_values)
-		return tele, config
-		
-	def gesscon(self, load, pv, price, Soc, date = "2018.10.01 00:00:00"):
-		"""
-        Calculates the aggregate values of load and pv, publishes the payload JSON as per the given date, subscribes to another topic and
+        def __init__(self):
+                self.payload  = {}
+
+        def get_ESS_data_format(self, storage):
+                """
+                returns ESS data in the following format:
+                {'633': {'id':"name", 'SoC': 0.4, 'Battery_Capacity':70, 'max_charging_power':33, 'max_discharging_power':33}},
+                {'671': {'id':"name", 'SoC': 0.4, 'Battery_Capacity':70, 'max_charging_power':33, 'max_discharging_power':33}}]
+                """
+                ess_data_list = []
+                storage = storage["storageUnits"]
+                for ess in storage:
+                        ess_data = {}
+                        data = {}
+                        data['id'] = ess['id']
+                        data['SoC'] = ess['soc']
+                        data['Battery_Capacity'] = ess['kwh_rated']
+                        data['max_charging_power'] = ess['pcmax']
+                        data['max_discharging_power'] = ess['pdmax']
+                        ess_data[ess['bus1']] = data
+                        ess_data_list.append(ess_data)
+                logger.debug("ESS Data= %s", ess_data_list)
+                return ess_data_list
+
+        def aggregate(self, data_list):
+                """
+                Calculates the aggregate values of load and pv.
+                Args:
+                        load/pv(list): load/pv profile per node
+                Returns:
+                        list: aggregated profile(list of 24 values)
+                """
+                aggregate_list = []
+                for data in data_list:
+                        data_id = list(data.keys())
+                        data_values = data[data_id[0]]
+                        if (isinstance(data_values, dict)):
+                                agg_list = []
+                                for val in data_values:
+                                        agg_list.append(np.square(data_values[val]))
+                                aggregate = [sum(x) for x in zip(*agg_list)]
+                                aggregate_list.append(list(np.sqrt(aggregate)))
+                aggregate_list = [sum(x) for x in zip(*aggregate_list)]
+                logger.debug("Aggregated data = %s ", aggregate_list)
+                return aggregate_list
+
+        def create_tele_config(self, Soc):
+                soc_values = []
+                len_soc = len(Soc)
+                b_max = []
+                pc_max = []
+                pd_max = []
+                soc_nodes = []
+                soc_ids = []
+                for s in (Soc):
+                        soc_node = list(s.keys())[0]
+                        soc_nodes.append(soc_node)
+                        soc_ids.append(s[soc_node]['id'])
+                        soc_values.append(s[soc_node]['SoC'])
+                        b_max.append(s[soc_node]['Battery_Capacity'])
+                        pc_max.append(s[soc_node]['max_charging_power'])
+                        pd_max.append(s[soc_node]['max_discharging_power'])
+                tele = {"SOC": soc_values}
+                config = {
+                        "ESS_number": len_soc,
+                        "tariff": 0,
+                        "grid_i": 1000,
+                        "grid_o": 1000,
+                        "ess_eff": [0.96] * len_soc,
+                        "bmax": b_max,
+                        "bmin": [0] * len_soc,
+                        "pcmax": pc_max,
+                        "pdmax": pd_max,
+                        "cycle": [0] * len_soc,
+                        "loss": 0
+                }
+                logger.debug("Soc = %s", soc_values)
+                return tele, config, soc_nodes, soc_ids
+
+        def gesscon(self, load, pv, price, Soc, date = "2018.10.01 00:00:00"):
+                """
+        Calculates the aggregate values of load and pv, publishes the payload JSON to GessconSimulationInput as per the given date, subscribes to GessconSimulationOutput and
         returns the result as per the format.
-        [{'633': {'id': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
-			{'671': {'id': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}] .
+        [{ node: { id: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
+                        { node: { id: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}] .
         Args:
             load(list): load profile per node
             pv(list): pv profile per node
@@ -128,185 +104,122 @@ class GESSCon():
         Returns:
             list: as described above
         """
-		aggregated_pv = self.aggregate(pv)
-		aggregated_load = self.aggregate(load)
-		tele, config = self.create_tele_config(Soc)
-		
-		#Creating JSON payload to be sent to GESSCon service
-		elprices = []
-		demand = []
-		pv_list = []
-		ev_list  =[]
-		#string to date
-		start_date = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
-		#timestamp from date to date format
-		start_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
-		for val in range(24):
-			date = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
-			elprices.append({"DateTime": date, "elprice": price[val]})
-			demand.append({"DateTime": date, "Loads": aggregated_load[val]})
-			pv_list.append({"DateTime": date, "pv": aggregated_pv[val]})
-			ev_list.append({"DateTime": date, "ev": 0.0})
-			if(val == 23):
-				continue
-			start_date = start_date + datetime.timedelta(hours = 1)
-		end_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
-		raw = {"elprices":elprices, "demand": demand, "pv": pv_list, "ev": ev_list}
-		
-		payload_var = {"site": "EDYNA-0018",
-		"time_start": start_date_format,
-		"time_stop": end_date_format,
-		"raw": raw,
-	    "tele": tele,
-	    "config": config }
-		payload = json.dumps(payload_var)
+                aggregated_pv = self.aggregate(pv)
+                aggregated_load = self.aggregate(load)
+                tele, config, soc_nodes, soc_ids = self.create_tele_config(Soc)
 
-		logger.info("Payload: %s", payload_var)
-		# result= self.on_msg_received(payload)
-		# return result
-		# MQTT
-		mqtt_send = MQTTClient("mosquito_S4G1", 1883, "gesscon_send")
-		# mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path="/etc/openvpn/s4g-ca.crt",
-        #          set_insecure=True, id=None)
-		# mqtt_receive = MQTTClient("10.8.0.50", 8883, "gesscon_receive", keepalive=60, username="fronius-fur",
-		#                        password="r>U@U7J8xZ+fu_vq", ca_cert_path="/etc/openvpn/s4g-ca.crt",
-		#                        set_insecure=True, id=None)
-		mqtt_receive = MQTTClient("mosquito_S4G1", 1883, "gesscon_receive")
-		mqtt_receive.subscribe_to_topics([("gesscon/data",2)], self.on_msg_received)
-		# logger.debug("successfully subscribed")
-		#
-		mqtt_send.publish("gesscon/data", payload, True)
-		time.sleep(5)
-		# mqtt_send.publish("GessconSimulationInput", "hello", True)
-		mqtt_send.MQTTExit()
-		mqtt_receive.MQTTExit()
-		return self.payload
-		
+                #Creating JSON payload to be sent to GESSCon service
+                elprices = []
+                demand = []
+                pv_list = []
+                ev_list  =[]
+                #string to date
+                start_date = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
+                #start_date = datetime.datetime.now()
+                #timestamp from date to date format
+                start_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
+                for val in range(24):
+                        date = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
+                        elprices.append({"DateTime": date, "elprice": price[val]})
+                        demand.append({"DateTime": date, "Loads": aggregated_load[val]})
+                        pv_list.append({"DateTime": date, "pv": aggregated_pv[val]})
+                        ev_list.append({"DateTime": date, "ev": 0.0})
+                        if(val == 23):
+                                continue
+                        start_date = start_date + datetime.timedelta(hours = 1)
+                end_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
+                raw = {"elprices":elprices, "demand": demand, "pv": pv_list, "ev": ev_list}
 
-	def on_msg_received(self, payload):
-		# Mock Output from GESSCon
-		output_list = []
-		print("hello")
-		self.payload = []
-		return(payload)
-		# path = self.utils.get_path("gesscon/gesscon_output.json")
-		# with open(path, "r") as file:
-		# 	dict_data = json.load(file)
-		# logger.debug(dict_data)
-		# dict_data = dict_data['data']
-		# for node_data, node, id in zip(dict_data, self.soc_nodes, self.soc_ids):
-		# 	id_output = {id: node_data}
-		# 	output_node = {node: id_output}
-		# 	output_list.append(output_node)
-		# logger.debug(output_list)
-		# return output_list
+                payload_var = {"site": "EDYNA-0018",
+                "time_start": start_date_format,
+                "time_stop": end_date_format,
+                "raw": raw,
+                "tele": tele,
+                "config": config }
+                payload = json.dumps(payload_var)
+                logger.info("Payload: %s", payload_var)
 
-#### Dummy data ####
-# price = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-#
-# storage = {"storageUnits": [
-# 	{
-# 		"id": "Akku1",
-# 		"bus1": "633",
-# 		"phases": 3,
-# 		"connection": "wye",
-# 		"soc": 0,
-# 		"dod": 0,
-# 		"kv": 0,
-# 		"kw_rated": 0,
-#
-# 		"pcmax": 1,
-# 		"pdmax": 2,
-# 		"kwh_rated": 1,
-# 		"kwh_stored": 0,
-# 		"charge_efficiency": 0,
-# 		"discharge_efficiency": 0,
-# 		"powerfactor": 0
-# 	},
-# 	{
-# 		"id": "Akku2",
-# 		"bus1": "671",
-# 		"phases": 3,
-# 		"connection": "wye",
-# 		"soc": 0,
-# 		"dod": 0,
-# 		"kv": 0,
-# 		"kw_rated": 0,
-#
-# 		"pcmax": 3,
-# 		"pdmax": 4,
-# 		"kwh_rated": 10,
-# 		"kwh_stored": 0,
-# 		"charge_efficiency": 0,
-# 		"discharge_efficiency": 0,
-# 		"powerfactor": 0
-# 	}
-# ]}
-#
-# pv = [{'633':
-# 	       {'633.1.2': [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,
-# 	                    0, 0, 0, 0]}},
-#       {'671': {'671.1.2.3': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#                              0, 0, 0, 0, 0, 0, 0, 4]}}]
-#
-# load = [{'633':
-# {'633.1': [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-# 0, 0, 0, 0],
-# '633.2': [3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-# 0, 0, 0],
-# '633.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-# 0, 0, 9]}},
-# {'671': {'671.1.2.3': [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-# 0, 0, 0, 0, 0, 0, 0, 0]}}]
+                #Dummy payload
+                #payload_dict = {'site': 'EDYNA-0018', 'time_start': '2018.10.01 00:00:00', 'time_stop': '2018.10.01 23:00:00', 'raw': {'elprices': [{'DateTime': '2018.10.01 00:00:00', 'elprice': 1.909825}, {'DateTime': '2018.10.01 01:00:00', 'elprice': 1.83985}, {'DateTime': '2018.10.01 02:00:00', 'elprice': 1.8422625}, {'DateTime': '2018.10.01 03:00:00', 'elprice': 1.7302375}, {'DateTime': '2018.10.01 04:00:00', 'elprice': 1.7302375}, {'DateTime': '2018.10.01 05:00:00', 'elprice': 1.897075}, {'DateTime': '2018.10.01 06:00:00', 'elprice': 2.02325}, {'DateTime': '2018.10.01 07:00:00', 'elprice': 2.286475}, {'DateTime': '2018.10.01 08:00:00', 'elprice': 2.286475}, {'DateTime': '2018.10.01 09:00:00', 'elprice': 2.2860125}, {'DateTime': '2018.10.01 10:00:00', 'elprice': 2.285825}, {'DateTime': '2018.10.01 11:00:00', 'elprice': 2.2866625}, {'DateTime': '2018.10.01 12:00:00', 'elprice': 2.285825}, {'DateTime': '2018.10.01 13:00:00', 'elprice': 2.2852625}, {'DateTime': '2018.10.01 14:00:00', 'elprice': 2.28415}, {'DateTime': '2018.10.01 15:00:00', 'elprice': 2.285175}, {'DateTime': '2018.10.01 16:00:00', 'elprice': 2.288525}, {'DateTime': '2018.10.01 17:00:00', 'elprice': 2.289825}, {'DateTime': '2018.10.01 18:00:00', 'elprice': 2.2875}, {'DateTime': '2018.10.01 19:00:00', 'elprice': 2.286575}, {'DateTime': '2018.10.01 20:00:00', 'elprice': 2.162075}, {'DateTime': '2018.10.01 21:00:00', 'elprice': 2.1362}, {'DateTime': '2018.10.01 22:00:00', 'elprice': 2.119275}, {'DateTime': '2018.10.01 23:00:00', 'elprice': 2.019425}], 'demand': [{'DateTime': '2018.10.01 00:00:00', 'Loads': 93.17882565165016}, {'DateTime': '2018.10.01 01:00:00', 'Loads': 84.278289960237}, {'DateTime': '2018.10.01 02:00:00', 'Loads': 87.69315014342973}, {'DateTime': '2018.10.01 03:00:00', 'Loads': 84.11310126025583}, {'DateTime': '2018.10.01 04:00:00', 'Loads': 83.07513727055695}, {'DateTime': '2018.10.01 05:00:00', 'Loads': 82.47538973027807}, {'DateTime': '2018.10.01 06:00:00', 'Loads': 82.06049242107031}, {'DateTime': '2018.10.01 07:00:00', 'Loads': 85.07323246720625}, {'DateTime': '2018.10.01 08:00:00', 'Loads': 82.06448948318241}, {'DateTime': '2018.10.01 09:00:00', 'Loads': 84.78650267237899}, {'DateTime': '2018.10.01 10:00:00', 'Loads': 77.61181224509842}, {'DateTime': '2018.10.01 11:00:00', 'Loads': 83.06486610715079}, {'DateTime': '2018.10.01 12:00:00', 'Loads': 80.2605922598988}, {'DateTime': '2018.10.01 13:00:00', 'Loads': 81.72022464908697}, {'DateTime': '2018.10.01 14:00:00', 'Loads': 79.99859701171478}, {'DateTime': '2018.10.01 15:00:00', 'Loads': 81.16386175664968}, {'DateTime': '2018.10.01 16:00:00', 'Loads': 80.23265233039963}, {'DateTime': '2018.10.01 17:00:00', 'Loads': 84.52996576814613}, {'DateTime': '2018.10.01 18:00:00', 'Loads': 81.89492669255614}, {'DateTime': '2018.10.01 19:00:00', 'Loads': 84.42044783973769}, {'DateTime': '2018.10.01 20:00:00', 'Loads': 80.00710094303832}, {'DateTime': '2018.10.01 21:00:00', 'Loads': 85.30223151449935}, {'DateTime': '2018.10.01 22:00:00', 'Loads': 90.63647225469765}, {'DateTime': '2018.10.01 23:00:00', 'Loads': 95.13026916858026}], 'pv': [{'DateTime': '2018.10.01 00:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 01:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 02:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 03:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 04:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 05:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 06:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 07:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 08:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 09:00:00', 'pv': 552.5472511706563}, {'DateTime': '2018.10.01 10:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 11:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 12:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 13:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 14:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 15:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 16:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 17:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 18:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 19:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 20:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 21:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 22:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 23:00:00', 'pv': 556.1998308518424}], 'ev': [{'DateTime': '2018.10.01 00:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 01:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 02:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 03:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 04:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 05:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 06:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 07:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 08:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 09:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 10:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 11:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 12:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 13:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 14:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 15:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 16:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 17:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 18:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 19:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 20:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 21:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 22:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 23:00:00', 'ev': 0.0}]}, 'tele': {'SOC': [0.1, 0.2, 0.3]}, 'config': {'ESS_number': 3, 'tariff': 0, 'grid_i': 1000, 'grid_o': 1000, 'ess_eff': [0.96, 0.96, 0.96], 'bmax': [60, 60, 60], 'bmin': [0, 0, 0], 'pcmax': [30, 30, 30], 'pdmax': [30, 30, 30], 'cycle': [0, 0, 0], 'loss': 0}}
+                #payload_json = json.dumps(payload_dict)
 
+                # MQTT
+                mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path="/etc/openvpn/s4g-ca.crt", set_insecure=True, id=None)
+                mqtt_receive = MQTTClient("10.8.0.50", 8883, "gesscon_receive", keepalive=60, username="fronius-fur",
+                                        password="r>U@U7J8xZ+fu_vq", ca_cert_path="/etc/openvpn/s4g-ca.crt",
+                                        set_insecure=True, id=None)
+                mqtt_receive.subscribe_to_topics([("GessconSimulationOutput",2)], self.on_msg_received)
+                logger.debug("successfully subscribed")
+                mqtt_send.publish("GessconSimulationInput", payload, False)
+                # Checks for output from GESSCon every second for atmost 15 seconds
+                t = 0
+                while t<= 15:
+                        if not self.payload:
+                                t = t + 1
+                                time.sleep(1)
+                        else:
+                                break
+                output_list = []
+                if "data" in self.payload.keys() and self.payload["data"] is not None:
+                        dict_data = self.payload['data']
+                        for node_data, node, id in zip(dict_data, soc_nodes, soc_ids):
+                                id_output = {id: node_data}
+                                output_node = {node: id_output}
+                                output_list.append(output_node)
+                mqtt_send.MQTTExit()
+                mqtt_receive.MQTTExit()
+                logger.debug("GESSCon Connector Output: %s", output_list)
+                return output_list
 
-
-#### Dummy data ####
-
-price = [1.909825, 1.83985, 1.8422625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.019425]
+        def on_msg_received(self, payload):
+                payload = json.loads(payload)
+                if "data" in payload.keys():
+                        self.payload = payload
+#Dummy Data
+"""price = [1.909825, 1.83985, 1.8422625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.019425]
 
 storage = {"storageUnits": [
-	{
-		"id": "Akku1",
-		"bus1": "633",
-		"phases": 3,
-		"connection": "wye",
-		"soc": 0.1,
-		"dod": 0,
-		"kv": 0,
-		"kw_rated": 0,
-		
-		"pcmax": 1,
-		"pdmax": 2,
-		"kwh_rated": 1,
-		"kwh_stored": 0,
-		"charge_efficiency": 0,
-		"discharge_efficiency": 0,
-		"powerfactor": 0
-	},
-	{
-		"id": "Akku2",
-		"bus1": "671",
-		"phases": 3,
-		"connection": "wye",
-		"soc": 0.2,
-		"dod": 0,
-		"kv": 0,
-		"kw_rated": 0,
-		
-		"pcmax": 3,
-		"pdmax": 4,
-		"kwh_rated": 10,
-		"kwh_stored": 0,
-		"charge_efficiency": 0,
-		"discharge_efficiency": 0,
-		"powerfactor": 0
-	}
+        {
+                "id": "Akku1",
+                "bus1": "633",
+                "phases": 3,
+                "connection": "wye",
+                "soc": 0.1,
+                "dod": 0,
+                "kv": 0,
+                "kw_rated": 0,
+
+                "pcmax": 1,
+                "pdmax": 2,
+                "kwh_rated": 1,
+                "kwh_stored": 0,
+                "charge_efficiency": 0,
+                "discharge_efficiency": 0,
+                "powerfactor": 0
+        },
+        {
+                "id": "Akku2",
+                "bus1": "671",
+                "phases": 3,
+                "connection": "wye",
+                "soc": 0.2,
+                "dod": 0,
+                "kv": 0,
+                "kw_rated": 0,
+
+                "pcmax": 3,
+                "pdmax": 4,
+                "kwh_rated": 10,
+                "kwh_stored": 0,
+                "charge_efficiency": 0,
+                "discharge_efficiency": 0,
+                "powerfactor": 0
+        }
 ]}
 
 pv = [{'633':
-	       {'633.1.2': [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,
-	                    0, 0, 0, 0]}},
+               {'633.1.2': [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,
+                            0, 0, 0, 0]}},
       {'671': {'671.1.2.3': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                              0, 0, 0, 0, 0, 0, 0, 4]}}]
 
@@ -320,6 +233,7 @@ load = [{'633':
 {'671': {'671.1.2.3': [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0]}}]
 
+
 g = GESSCon()
 Soc = g.get_ESS_data_format(storage)
-g.gesscon(load, pv, price, Soc)
+p = g.gesscon(load, pv, price, Soc)"""
