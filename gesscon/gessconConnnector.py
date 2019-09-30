@@ -88,7 +88,7 @@ class GESSCon():
                 logger.debug("Soc = %s", soc_values)
                 return tele, config, soc_nodes, soc_ids
 
-        def gesscon(self, load, pv, price, Soc, date = "2018.10.01 00:00:00"):
+        def gesscon(self, load, pv, price, Soc, timestamp = None):
                 """
         Calculates the aggregate values of load and pv, publishes the payload JSON to GessconSimulationInput as per the given date, subscribes to GessconSimulationOutput and
         returns the result as per the format.
@@ -99,7 +99,8 @@ class GESSCon():
             pv(list): pv profile per node
             price(list): price profile
             Soc: Batteries data
-            date: input date with the format %Y.%m.%d %H:%M:%S. 01/10/2018 by default.
+            timestamp: input date with timestamp. Takes current date by default.for e.g:
+                        timestamp = datetime.datetime.strptime("2018.10.04 00:00:00", '%Y.%m.%d %H:%M:%S').timestamp()
 
         Returns:
             list: as described above
@@ -114,8 +115,11 @@ class GESSCon():
                 pv_list = []
                 ev_list  =[]
                 #string to date
-                start_date = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
-                #start_date = datetime.datetime.now()
+                #start_date = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
+                if not timestamp:
+                        start_date = datetime.datetime.now()
+                else:
+                        start_date = datetime.datetime.fromtimestamp(timestamp)
                 #timestamp from date to date format
                 start_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
                 for val in range(24):
@@ -137,7 +141,7 @@ class GESSCon():
                 "tele": tele,
                 "config": config }
                 payload = json.dumps(payload_var)
-                logger.info("Payload: %s", payload_var)
+                logger.info("Payload: %s", payload)
 
                 #Dummy payload
                 #payload_dict = {'site': 'EDYNA-0018', 'time_start': '2018.10.01 00:00:00', 'time_stop': '2018.10.01 23:00:00', 'raw': {'elprices': [{'DateTime': '2018.10.01 00:00:00', 'elprice': 1.909825}, {'DateTime': '2018.10.01 01:00:00', 'elprice': 1.83985}, {'DateTime': '2018.10.01 02:00:00', 'elprice': 1.8422625}, {'DateTime': '2018.10.01 03:00:00', 'elprice': 1.7302375}, {'DateTime': '2018.10.01 04:00:00', 'elprice': 1.7302375}, {'DateTime': '2018.10.01 05:00:00', 'elprice': 1.897075}, {'DateTime': '2018.10.01 06:00:00', 'elprice': 2.02325}, {'DateTime': '2018.10.01 07:00:00', 'elprice': 2.286475}, {'DateTime': '2018.10.01 08:00:00', 'elprice': 2.286475}, {'DateTime': '2018.10.01 09:00:00', 'elprice': 2.2860125}, {'DateTime': '2018.10.01 10:00:00', 'elprice': 2.285825}, {'DateTime': '2018.10.01 11:00:00', 'elprice': 2.2866625}, {'DateTime': '2018.10.01 12:00:00', 'elprice': 2.285825}, {'DateTime': '2018.10.01 13:00:00', 'elprice': 2.2852625}, {'DateTime': '2018.10.01 14:00:00', 'elprice': 2.28415}, {'DateTime': '2018.10.01 15:00:00', 'elprice': 2.285175}, {'DateTime': '2018.10.01 16:00:00', 'elprice': 2.288525}, {'DateTime': '2018.10.01 17:00:00', 'elprice': 2.289825}, {'DateTime': '2018.10.01 18:00:00', 'elprice': 2.2875}, {'DateTime': '2018.10.01 19:00:00', 'elprice': 2.286575}, {'DateTime': '2018.10.01 20:00:00', 'elprice': 2.162075}, {'DateTime': '2018.10.01 21:00:00', 'elprice': 2.1362}, {'DateTime': '2018.10.01 22:00:00', 'elprice': 2.119275}, {'DateTime': '2018.10.01 23:00:00', 'elprice': 2.019425}], 'demand': [{'DateTime': '2018.10.01 00:00:00', 'Loads': 93.17882565165016}, {'DateTime': '2018.10.01 01:00:00', 'Loads': 84.278289960237}, {'DateTime': '2018.10.01 02:00:00', 'Loads': 87.69315014342973}, {'DateTime': '2018.10.01 03:00:00', 'Loads': 84.11310126025583}, {'DateTime': '2018.10.01 04:00:00', 'Loads': 83.07513727055695}, {'DateTime': '2018.10.01 05:00:00', 'Loads': 82.47538973027807}, {'DateTime': '2018.10.01 06:00:00', 'Loads': 82.06049242107031}, {'DateTime': '2018.10.01 07:00:00', 'Loads': 85.07323246720625}, {'DateTime': '2018.10.01 08:00:00', 'Loads': 82.06448948318241}, {'DateTime': '2018.10.01 09:00:00', 'Loads': 84.78650267237899}, {'DateTime': '2018.10.01 10:00:00', 'Loads': 77.61181224509842}, {'DateTime': '2018.10.01 11:00:00', 'Loads': 83.06486610715079}, {'DateTime': '2018.10.01 12:00:00', 'Loads': 80.2605922598988}, {'DateTime': '2018.10.01 13:00:00', 'Loads': 81.72022464908697}, {'DateTime': '2018.10.01 14:00:00', 'Loads': 79.99859701171478}, {'DateTime': '2018.10.01 15:00:00', 'Loads': 81.16386175664968}, {'DateTime': '2018.10.01 16:00:00', 'Loads': 80.23265233039963}, {'DateTime': '2018.10.01 17:00:00', 'Loads': 84.52996576814613}, {'DateTime': '2018.10.01 18:00:00', 'Loads': 81.89492669255614}, {'DateTime': '2018.10.01 19:00:00', 'Loads': 84.42044783973769}, {'DateTime': '2018.10.01 20:00:00', 'Loads': 80.00710094303832}, {'DateTime': '2018.10.01 21:00:00', 'Loads': 85.30223151449935}, {'DateTime': '2018.10.01 22:00:00', 'Loads': 90.63647225469765}, {'DateTime': '2018.10.01 23:00:00', 'Loads': 95.13026916858026}], 'pv': [{'DateTime': '2018.10.01 00:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 01:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 02:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 03:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 04:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 05:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 06:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 07:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 08:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 09:00:00', 'pv': 552.5472511706563}, {'DateTime': '2018.10.01 10:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 11:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 12:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 13:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 14:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 15:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 16:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 17:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 18:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 19:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 20:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 21:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 22:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 23:00:00', 'pv': 556.1998308518424}], 'ev': [{'DateTime': '2018.10.01 00:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 01:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 02:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 03:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 04:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 05:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 06:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 07:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 08:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 09:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 10:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 11:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 12:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 13:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 14:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 15:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 16:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 17:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 18:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 19:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 20:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 21:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 22:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 23:00:00', 'ev': 0.0}]}, 'tele': {'SOC': [0.1, 0.2, 0.3]}, 'config': {'ESS_number': 3, 'tariff': 0, 'grid_i': 1000, 'grid_o': 1000, 'ess_eff': [0.96, 0.96, 0.96], 'bmax': [60, 60, 60], 'bmin': [0, 0, 0], 'pcmax': [30, 30, 30], 'pdmax': [30, 30, 30], 'cycle': [0, 0, 0], 'loss': 0}}
@@ -151,7 +155,7 @@ class GESSCon():
                 mqtt_receive.subscribe_to_topics([("GessconSimulationOutput",2)], self.on_msg_received)
                 logger.debug("successfully subscribed")
                 mqtt_send.publish("GessconSimulationInput", payload, False)
-                # Checks for output from GESSCon every second for atmost 15 seconds
+                # Checks for output from GESSCon for atmost 15 seconds
                 t = 0
                 while t<= 15:
                         if not self.payload:
@@ -236,4 +240,5 @@ load = [{'633':
 
 g = GESSCon()
 Soc = g.get_ESS_data_format(storage)
-p = g.gesscon(load, pv, price, Soc)"""
+start_date = datetime.datetime.strptime("2018.10.04 00:00:00", '%Y.%m.%d %H:%M:%S')
+output = g.gesscon(load, pv, price, Soc, start_date.timestamp())"""
