@@ -4,7 +4,7 @@ language: minimal
 before_script:
     - export VERSION=${TRAVIS_BRANCH}  BUILDNUM=${TRAVIS_BUILD_NUMBER}
 script:
-  - if [ $TRAVIS_BRANCH == "master" ]; then docker-compose -f docker-compose.yml build ofw; fi
+  - if [ $TRAVIS_BRANCH == "master" ]; then docker-compose -f docker-compose.yml build se; fi
     #- docker-compose -f docker-compose.yml build
 
 before_deploy:

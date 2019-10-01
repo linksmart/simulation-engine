@@ -1,0 +1,42 @@
+server {
+    listen 8085;
+    server_name localhost;
+
+    #
+    # Wide-open CORS config for nginx
+    #
+    location / {
+	#include cors_support;
+        proxy_set_header   Host                 $host;
+        proxy_set_header   X-Real-IP            $remote_addr;
+        proxy_set_header   X-Forwarded-For      $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto    $scheme;
+        proxy_set_header Host $http_host;
+
+        proxy_pass http://gui:4200;
+    }
+
+
+    location /api {
+	#include cors_support;
+        proxy_set_header   Host                 $host;
+        proxy_set_header   X-Real-IP            $remote_addr;
+        proxy_set_header   X-Forwarded-For      $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto    $scheme;
+        proxy_set_header Host $http_host;
+
+        proxy_pass http://api:5000;
+    }
+
+    location /se {
+	#include cors_support;
+        proxy_set_header   Host                 $host;
+        proxy_set_header   X-Real-IP            $remote_addr;
+        proxy_set_header   X-Forwarded-For      $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto    $scheme;
+        proxy_set_header Host $http_host;
+
+        proxy_pass http://se:9090;
+    }
+
+}
