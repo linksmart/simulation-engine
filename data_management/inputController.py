@@ -181,9 +181,9 @@ class InputController:
         logger.debug("loadshapes charged")
         return message
 
-    def setLoadshapes(self, id, loads, sim_hours):
+    def setLoadshapes(self, id, loads, time_days):
         logger.debug("Charging the loadshapes into the simulator from profiles")
-        message = self.sim.setLoadshapes(loads, sim_hours, self.profiles, self.profess)
+        message = self.sim.setLoadshapes(loads, time_days, self.profiles, self.profess)
         logger.debug("loadshapes from profiles charged")
         return message
 

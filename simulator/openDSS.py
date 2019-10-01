@@ -1040,30 +1040,7 @@ class OpenDSS:
             return e
 
 
-    def setLoadshapes_off(self, loadshapes):
-        #!logger.debug("Setting up the Loadshapes")
-        #!logger.debug("Loadshape in OpenDSS: " + str(loadshapes))
-        try:
-            for element in loadshapes:
-                id = None
-                npts = None
-                interval = None
-                mult = None
-                for key, value in element.items():
-                    #logger.debug("Key: " + str(key) + " Value: " + str(value))
-                    if key == "id":
-                        id = value
-                    if key == "npts":
-                        npts = value
-                    if key == "interval":
-                        interval = value
-                    if key == "mult":
-                        mult = value
-                self.setLoadshape(id, npts, interval, mult)
-                #!dss.run_command('Solve')
-                #!logger.debug("Loadshape names: " + str(dss.LoadShape.AllNames()))
-        except Exception as e:
-            logger.error(e)
+
 
     def setLoadshape(self, id, npts, interval, mult):
         try:

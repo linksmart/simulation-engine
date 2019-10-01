@@ -288,8 +288,12 @@ class gridController(threading.Thread):
 
                 if flag_global_control:
                     #logger.debug("global control present")
-                    profess_global_profile = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
-                    logger.debug("global profile "+str(profess_global_profile))
+                    if hours % 23:
+                        profess_global_profile_global = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
+                        logger.debug("global profile "+str(profess_global_profile_global))
+                        profess_global_profile = profess_global_profile_global[int(hours):int(hours+24)]
+                    else:
+                        profess_global_profile = profess_global_profile_global[int(hours):int(hours+24)]
                     #profess_global_profile =[{'node_a6': {
                         #'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
                                   #0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]

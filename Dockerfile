@@ -24,6 +24,7 @@ COPY data_management /usr/src/app/data_management
 COPY profess /usr/src/app/profess
 COPY profiles /usr/src/app/profiles
 COPY gesscon /usr/src/app/gesscon
+#COPY "C:/Program Files/OpenVPN/config/s4g-ca.cert" /usr/src/app/openvpn/s4g-ca.cert
 
 
 
