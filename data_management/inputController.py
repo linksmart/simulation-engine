@@ -314,7 +314,7 @@ class InputController:
         for storage_element in storages:
             ess_buses.append(storage_element["bus1"])
 
-        for key, charger_element in chargers.items():
+        for charger_element in chargers:
             if charger_element.get_bus_name() in ess_buses:
                 soc_dict = {}
                 evs_connected = charger_element.get_EV_connected()
@@ -362,23 +362,76 @@ class InputController:
         #logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
 
-    def set_new_soc_evs(self, soc_list):
+    def get_powers_from_profev_output(self, profev_output, charger_element, ev_unit):
+
+        p_ev = None
+        p_ess =  None
+        p_pv = None
+        for element in profev_output:
+            for node_name, rest in element.items():
+                if charger_element.get_bus_name() == node_name:
+                    for profess_id, results in rest.items():
+                        for value_key, value in results.items():
+                            if ev_unit.get_id() in value_key:
+                                p_ev = value
+                            if "p_ess" == value_key:
+                                p_ess = value
+                            if "p_pv" == value_key:
+                                p_pv = value
+        return (p_ev, p_ess, p_pv)
+
+    def set_new_soc_evs(self, soc_list, chargers = None):
         #self.sim.getSoCfromBattery("Akku1")
 
-        new_soc_list=[]
-        for element in soc_list:
-            for key, value in element.items():
-                element_id = value["ESS"]["id"]
-                SoC = float(self.sim.getSoCfromBattery(element_id))
-                value["ESS"]["SoC"] = SoC
-                element_id = element_id = "ESS_" + value["EV"]["id"]
-                SoC = float(self.sim.getSoCfromBattery(element_id))
-                value["EV"]["SoC"] = SoC
-                new_soc_list.append(element)
 
+        if len(soc_list) > 0:
+            new_soc_list = []
+            for element in soc_list:
+                for node_name, value in element.items():
+                    element_id = value["ESS"]["id"]
+                    SoC = float(self.sim.getSoCfromBattery(element_id))
+                    value["ESS"]["SoC"] = SoC
+
+                    if not chargers == None:
+                        element_id = value["EV"]["id"]
+                        SoC = None
+                        for cs_id, charger in chargers.items():
+                            ev_connected = charger.get_EV_connected()
+                            for ev in ev_connected:
+                                #if charger.get_ev_plugged() == ev:
+                                if ev.get_id() == element_id:
+                                    SoC = ev.get_SoC()
+                        value["EV"]["SoC"] = SoC
+                    else:
+                        element_id = "ESS_" + value["EV"]["id"]
+                        SoC = float(self.sim.getSoCfromBattery(element_id))
+                        value["EV"]["SoC"] = SoC
+                    new_soc_list.append(element)
+        else:
+            new_soc_list = None
         #logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
 
+    def get_ESS_name_for_node(self, soc_list, node_name_input):
+
+        ess_name = None
+        max_charging_power = None
+        for element in soc_list:
+            for node_name, rest in element.items():
+                if node_name == node_name_input:
+                    ess_name = rest["ESS"]["id"]
+                    max_charging_power =rest["ESS"]["max_charging_power"]
+
+        return (ess_name, max_charging_power)
+
+    def get_PV_name_for_node(self, soc_list, node_name_input):
+        pv_name = None
+        for element in soc_list:
+            for node_name, rest in element.items():
+                if node_name == node_name_input:
+                    pv_name = rest["PV"]["pv_name"]
+
+        return pv_name
 
     def is_Charging_Station_in_Topology(self, topology):
         # topology = profess.json_parser.get_topology()
@@ -389,6 +442,37 @@ class InputController:
             if "chargingStations" in values.keys():
                 flag_to_return = True
         return flag_to_return
+
+    def get_nodes_Charging_Station_in_Topology(self, chargers):
+        # topology = profess.json_parser.get_topology()
+        # logger.debug("type topology " + str(type(self.topology)))
+
+        list_nodes_cs = []
+        for key, charger_element in chargers.items():
+            list_nodes_cs.append(charger_element.get_bus_name())
+        return list_nodes_cs
+
+    def get_list_nodes_charging_station_without_storage(self, topology, chargers):
+        radial = topology["radials"]
+
+        list_nodes_cs = self.get_nodes_Charging_Station_in_Topology(chargers)
+        #logger.debug("list_nodes_cs "+str(list_nodes_cs))
+        list_nodes_cs_with_storage = self.get_list_nodes_storages_with_charging_station(radial, chargers)
+        #logger.debug("list_nodes_cs_with_storage "+ str(list_nodes_cs_with_storage))
+
+        list_cs=[]
+        for cs_node in list_nodes_cs:
+            flag = False
+            #logger.debug("cs_node "+str(cs_node))
+            for node_without_storage in list_nodes_cs_with_storage:
+                #logger.debug("node_without_storage "+str(node_without_storage))
+                if cs_node == node_without_storage:
+                    #logger.debug("flag")
+                    flag = True
+            #logger.debug("flag "+str(flag))
+            if not flag:
+                list_cs.append(cs_node)
+        return list_cs
 
     def get_list_nodes_storages_with_charging_station(self, radial, chargers):
         for element in radial:

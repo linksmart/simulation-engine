@@ -71,6 +71,7 @@ class GESSCon():
                         b_max.append(s[soc_node]['ESS']['Battery_Capacity'])
                         pc_max.append(s[soc_node]['ESS']['max_charging_power'])
                         pd_max.append(s[soc_node]['ESS']['max_discharging_power'])
+
                 tele = {"SOC": soc_values}
                 config = {
                         "ESS_number": len_soc,
@@ -101,7 +102,6 @@ class GESSCon():
             Soc: Batteries data
             timestamp: input date with timestamp. Takes current date by default.for e.g:
                         timestamp = datetime.datetime.strptime("2018.10.04 00:00:00", '%Y.%m.%d %H:%M:%S').timestamp()
-
         Returns:
             list: as described above
         """
@@ -181,7 +181,6 @@ class GESSCon():
                         self.payload = payload
 #Dummy Data
 price = [1.909825, 1.83985, 1.8422625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.019425]
-
 storage = {"storageUnits": [
         {
                 "id": "Akku1",
@@ -192,7 +191,6 @@ storage = {"storageUnits": [
                 "dod": 0,
                 "kv": 0,
                 "kw_rated": 0,
-
                 "pcmax": 1,
                 "pdmax": 2,
                 "kwh_rated": 1,
@@ -210,7 +208,6 @@ storage = {"storageUnits": [
                 "dod": 0,
                 "kv": 0,
                 "kw_rated": 0,
-
                 "pcmax": 3,
                 "pdmax": 4,
                 "kwh_rated": 10,
@@ -220,13 +217,11 @@ storage = {"storageUnits": [
                 "powerfactor": 0
         }
 ]}
-
 pv = [{'633':
                {'633.1.2': [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,
                             0, 0, 0, 0]}},
       {'671': {'671.1.2.3': [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                              0, 0, 0, 0, 0, 0, 0, 4]}}]
-
 load = [{'633':
 {'633.1': [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0],

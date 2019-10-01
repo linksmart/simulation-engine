@@ -40,11 +40,15 @@ class EV:
         return self.Soc
 
     def set_SoC(self, value):
-        if value < 0 or value >100:
-            return 0
+        if value < 0:
+            self.Soc = 0
+            return 1
+        elif value > 100:
+            self.Soc = 100
+            return 1
         else:
             self.Soc = value
-            return 100
+            return 1
 
     def get_Battery_Capacity(self):
         return self.Battery_Capacity
@@ -53,20 +57,20 @@ class EV:
         #number_km = 5
         number_km = number_km_driven
         #consumption_for_x_km = (11.7 * number_km) / 100  # 11.7 kwh/100km consumption for VW Eup
-        consumption_for_x_km = self.consumption * number_km
+        consumption_for_x_km = (self.consumption / 100)* number_km
         # logger.debug("consumption for " +str(number_km)+" is "+str(consumption_for_x_km))
         #Capacity = 18.700  # kWh
         if P_ev == -1:
             # logger.debug("car " + str(car) + " power " + str(power))
-            value = 100*((self.Soc/100) - (consumption_for_x_km / self.Battery_Capacity))
-            logger.debug("value "+str(value))
+            value = 100*((self.Soc / 100) - (consumption_for_x_km / self.Battery_Capacity))
+            #logger.debug("value "+str(value))
             if value < 0:
                 return 0
             else:
                 return value
         else:
             value = 100*((self.Soc/100) + (P_ev / self.Battery_Capacity))
-            logger.debug("value " + str(value))
+            #logger.debug("value " + str(value))
             if value > 100:
                 return 100
             else:
@@ -113,8 +117,8 @@ class Charger:
     def get_type_application(self):
         return self.type_application
 
-    def set_ev_plugged(self, ev_name):
-        self.ev_plugged = ev_name
+    def set_ev_plugged(self, ev_object):
+        self.ev_plugged = ev_object
 
     def get_ev_plugged(self):
         return self.ev_plugged
@@ -126,9 +130,9 @@ class Charger:
         if ev_object==None:
             return self.EV_connected
         else:
-            logger.debug("ev_connected " + str(self.EV_connected))
+            #logger.debug("ev_connected " + str(self.EV_connected))
             index=self.EV_connected.index(ev_object)
-            logger.debug("index "+str(index))
+            #logger.debug("index "+str(index))
             return  self.EV_connected[index]
 
     def get_Max_Capacity(self):

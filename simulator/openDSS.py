@@ -165,7 +165,7 @@ class OpenDSS:
 
     def setActivePowertoPV(self, pv_name, power):
         self.set_active_element(pv_name)
-        logger.debug("pv power " + str(power))
+        #logger.debug("pv power " + str(power))
         if power >= 0:
             dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
             logger.debug("dss_string " + str(dss_string))
@@ -210,13 +210,6 @@ class OpenDSS:
                        dss.run_command('Storage.Akku1.State = charging')"""
         #logger.debug("power " + str(power))
         if power < 0:
-            """route_name = "Storage." + str(battery_name)
-            dss_string = route_name + ".kWrated = " + str(abs(power))
-            logger.debug("dss_string " + str(dss_string))
-            dss.run_command(dss_string)
-            dss_string = route_name + ".State = Charging"
-            logger.debug("dss_string " + str(dss_string))
-            dss.run_command(dss_string)"""
             percentage_charge=(abs(power)/max_power)*100
             dss_string = "Storage."+str(battery_name)+".%Charge="+str(int(percentage_charge))
             #dss_string = "Storage." + str(battery_name) + ".kW=" + str(power)
@@ -225,18 +218,16 @@ class OpenDSS:
             dss_string="Storage."+str(battery_name)+".State = Charging"
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
-        else:
-            """route_name="Storage."+str(battery_name)
-            dss_string=route_name+".kWrated = "+str(power)
-            logger.debug("dss_string "+str(dss_string))
-            dss.run_command(dss_string)
-            dss_string = route_name+".State = Discharging"
+        elif power == 0:
+            dss_string = "Storage." + str(battery_name) + ".State = Idling"
             logger.debug("dss_string " + str(dss_string))
-            dss.run_command(dss_string)"""
+            dss.run_command(dss_string)
+        else:
+
             percentage_charge = (power / max_power) * 100
             #dss_string = "Storage." + str(battery_name) + ".kW=" + str(power)
             dss_string = "Storage." + str(battery_name) + ".%Discharge=" + str(int(percentage_charge))
-            #logger.debug("dss_string " + str(dss_string))
+            logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
             dss_string = "Storage." + str(battery_name) + ".State = Discharging"
             logger.debug("dss_string " + str(dss_string))
@@ -591,7 +582,7 @@ class OpenDSS:
 
 
 
-    def getProfessLoadschapes(self, node_name_list, start: int, size=24):
+    def getProfessLoadschapes(self,  start: int, size=24):
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
@@ -624,11 +615,11 @@ class OpenDSS:
         return [result]
 
 
-    def getProfessLoadschapesPV(self, node_name_list, start: int, size=24):
+    def getProfessLoadschapesPV(self, start: int, size=24):
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
-        logger.debug( "getPVLoadschapes")
+        #logger.debug( "getPVLoadschapes")
         #logger.debug("node_name_list " + str(node_name_list))
         try:
             for key, value in self.loadshapes_for_pv.items():
@@ -1305,6 +1296,8 @@ class OpenDSS:
 
                 logger.debug("type_application "+str(type_application))
                 self.Chargers[id] = Charger(id, kw_rated, ev_object, kw_rated, type_application, bus1, charge_efficiency)
+                ev_unit = self.Chargers[id].get_EV_connected()[0]
+                self.Chargers[id].set_ev_plugged(ev_unit)
 
 
 
