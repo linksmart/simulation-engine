@@ -11,6 +11,7 @@ from gesscon.MQTTClient import MQTTClient
 class GESSCon():
         def __init__(self):
                 self.payload  = {}
+                self.payload_set = False
 
         def get_ESS_data_format(self, storage):
                 """
@@ -158,7 +159,7 @@ class GESSCon():
                 # Checks for output from GESSCon for atmost 15 seconds
                 t = 0
                 while t<= 15:
-                        if not self.payload:
+                        if not self.payload_set:
                                 t = t + 1
                                 time.sleep(1)
                         else:
@@ -178,9 +179,10 @@ class GESSCon():
         def on_msg_received(self, payload):
                 payload = json.loads(payload)
                 if "data" in payload.keys():
+                        self.payload_set = True
                         self.payload = payload
 #Dummy Data
-price = [1.909825, 1.83985, 1.8422625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.019425]
+"""price = [1.909825, 1.83985, 1.8422625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.019425]
 storage = {"storageUnits": [
         {
                 "id": "Akku1",
@@ -235,4 +237,4 @@ Soc = [{'node_a6': {'ESS': {'SoC': 40.0, 'T_SoC': 25, 'id': 'Akku2', 'Battery_Ca
 g = GESSCon()
 #Soc = g.get_ESS_data_format(storage)
 start_date = datetime.datetime.strptime("2018.10.04 00:00:00", '%Y.%m.%d %H:%M:%S')
-output = g.gesscon(load, pv, price, Soc, start_date.timestamp())
+output = g.gesscon(load, pv, price, Soc, start_date.timestamp()"""
