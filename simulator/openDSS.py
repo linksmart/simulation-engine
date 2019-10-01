@@ -1037,7 +1037,7 @@ class OpenDSS:
 
 
 
-    def setLoadshapes(self, loads, sim_days, profiles, profess):
+    def setLoadshapes(self, loads, powerprofiles, sim_days, profiles, profess):
 
         #!logger.debug("Setting up the loads")
         self.loads=loads
@@ -1049,14 +1049,15 @@ class OpenDSS:
                 self.load_name=load_name
                 self.bus_name=bus_name
                 
-                if 'powerProfiles' in element.keys() and element["powerProfiles"] is not None:
-                    powerprofiles = element['powerProfiles']
+                if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
+                    powerprofile_id = element['power_profile_id']
                     load_profile_data = []
                     for powerprofile in powerprofiles:
-                        items = powerprofile['items']
-                        if powerprofile['multiplier']:
-                            items = [item * powerprofile['multiplier'] for item in items]
-                        load_profile_data.extend(items)
+                        if(powerprofile_id == powerprofile['id']):
+                            items = powerprofile['items']
+                            if powerprofile['multiplier']:
+                                items = [item * powerprofile['multiplier'] for item in items]
+                            load_profile_data.extend(items)
                 else:
                     # ----------get_a_profile---------------#
                     randint_value=random.randrange(0, 475)

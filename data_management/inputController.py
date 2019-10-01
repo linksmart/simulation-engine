@@ -183,9 +183,9 @@ class InputController:
         logger.debug("loadshapes charged")
         return message
 
-    def setLoadshapes(self, id, loads, sim_days):
+    def setLoadshapes(self, id, loads, powerprofile, sim_days):
         logger.debug("Charging the loadshapes into the simulator from profiles")
-        message = self.sim.setLoadshapes(loads, sim_days, self.profiles, self.profess)
+        message = self.sim.setLoadshapes(loads, powerprofile, sim_days, self.profiles, self.profess)
         logger.debug("loadshapes from profiles charged")
         return message
 
@@ -360,9 +360,12 @@ class InputController:
                 logger.debug("! ---------------Setting Loads------------------------- \n")
                 # radial=radial.to_dict()
                 load = values["loads"]
+                powerprofile = []
+                if "powerProfile" in values.keys() and values["powerProfile"] is not None:
+                    powerprofile = values["powerProfile"]
                 # logger.debug("Loads" + str(load))
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                message = self.setLoadshapes(id, load, self.sim_days)
+                message = self.setLoadshapes(id, load, powerprofile, self.sim_days)
                 if not message == 0:
                     return message
                 logger.debug("! >>>  ---------------and the Loads afterwards ------------------------- \n")

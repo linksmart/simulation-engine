@@ -99,28 +99,21 @@ def create_simulation(body):  # noqa: E501
                         logger.error(message)
                         return message
             logger.debug("Power lines succesfully checked")
-            logger.debug("***Checking")
 
             if "powerProfile" in values.keys():
-                logger.debug("****Checking power profile IDs")
-                power_profiles = values["powerProfile"]
-                power_profile_ids = []
-                for power_profile in power_profiles:
-                    power_profile_ids.append(power_profile['id'])
-                    
-                load_profiles = values['loads']
+                logger.debug("Checking power profile IDs")
+                load_profiles = values["loads"]
+                load_profile_ids = []
                 for load_profile in load_profiles:
-                    if load_profile['power_profile_id'] not in power_profile_ids:
-                        message = "Power profile IDs do not match"
+                    load_profile_ids.append(load_profile['power_profile_id'])
+                    
+                power_profiles = values['powerProfile']
+                for power_profile in power_profiles:
+                    if power_profile['id'] not in load_profile_ids:
+                        message = "Power profile IDs in loads and powerProfile do not match"
                         logger.error(message)
                         return message
-    
-                logger.debug("Checking Power Profile ID")
-                logger.debug("power_profile_ids",str(power_profile_ids))
-
-            else:
-                logger.debug("blah blah")
-            logger.debug("***Power Profile ID successfully checked")
+            logger.debug("Power Profile IDs successfully checked")
 
             if "storageUnits" in values.keys() and values["storageUnits"] is not None:
                 logger.debug("Checking Storage")
