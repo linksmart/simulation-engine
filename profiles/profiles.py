@@ -15,13 +15,14 @@ class Profiles:
     def __init__(self):
         self.url = ""
 
-    def price_profile(self, city, country, days=365):
+    def price_profile(self, city, country, days=365, timestamp = None):
         """
         Returns the price profile for the given number of days for bolzano, Italy or fur, Denmark.
         Args:
             city(String): variable to enter a city.
             country(String): variable to enter a country.
             days(int): number of days.
+            timestamp(float) : timestamp of the start date
 
         Returns:
             list: length of list = number of days * 24
@@ -36,7 +37,11 @@ class Profiles:
             no_of_years = int(days / 365)
             extra_days = days % 365
             days = 365
-        start_date = datetime.datetime.now()+ datetime.timedelta(days = -365)
+        if not timestamp:
+            timestamp = datetime.datetime.now()
+        else:
+            timestamp = datetime.datetime.fromtimestamp(timestamp)
+        start_date = timestamp + datetime.timedelta(days = -365)
         end_date = (start_date + datetime.timedelta(days=days)).strftime("%Y-%m-%d")
         start_date = start_date.strftime("%Y-%m-%d")
 
@@ -80,18 +85,23 @@ class Profiles:
             logger.info("Price data = %s: ", price_list)
         return price_list
 
-    def pv_profile(self, city, country, days = 365, max_power_kw=1):
+    def pv_profile(self, city, country, days = 365, max_power_kw=1, timestamp = None):
         """
         Returns the pv profile for the given number of days
         Args:
             city(String): variable to enter a city.
             country(String): variable to enter a country.
             days(int): number of days.
+            timestamp(float) : timestamp of the start date
 
         Returns:
             list: Number of elements = number of days * 24
         """
-
+        if not timestamp:
+            timestamp = datetime.datetime.now()
+        else:
+            timestamp = datetime.datetime.fromtimestamp(timestamp)
+        date = timestamp.strftime("%m%d")
         if (not (city) or not (country)):
             logger.error(
                 "\nPlease provide both city and country name, currenty we support price calculation for Bolzano,Italy and Fur,Denmark")
@@ -131,14 +141,19 @@ class Profiles:
                     no_of_years = int(days / 365)
                     days = days % 365
                 data = []
+                data_rem = []
                 for i in range(0, len(rad)):
-                    pv_output = float(rad[i][1])
-                    data.append(pv_output)
+                    if(int(date) <= int(rad[i][0][4:8])):
+                        pv_output = float(rad[i][1])
+                        data.append(pv_output)
+                    else:
+                        data_rem.append(float(rad[i][1]))
+                data.extend(data_rem)
                 pv_list = []
                 for i in range(no_of_years):
                     pv_list.extend(data)
                 pv_list.extend(data[0:days * 24])
-                #logger.info("PV data = %s: ", pv_list)
+                logger.info("PV data = %s: ", pv_list)
                 pv_list_2=[]
                 for element in pv_list:
                     pv_list_2.append((element / 1000)*max_power_kw)

@@ -6,6 +6,8 @@ import sys
 
 from profess.JSONparser import *
 from profess.Profess import *
+from profess.Profev import *
+
 from simulator.openDSS import OpenDSS
 from data_management.redisDB import RedisDB
 from profiles.profiles import *
@@ -14,6 +16,7 @@ from gesscon.gessconConnnector import GESSCon
 from data_management.inputController import InputController
 from data_management.utils import Utils
 import threading
+import random
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -40,9 +43,9 @@ class gridController(threading.Thread):
         self.finish_status_key = "finish_status_" + self.id
         self.redisDB.set(self.stop_signal_key, "False")
         self.redisDB.set(self.finish_status_key, "False")
-        self.sim_days = duration
+        self.sim_hours = duration
         logger.debug("Starting input controller")
-        self.input = InputController(id, self.sim, self.sim_days)
+        self.input = InputController(id, self.sim, self.sim_hours)
         self.topology = self.input.get_topology()
         self.utils = Utils()
 
@@ -53,43 +56,6 @@ class gridController(threading.Thread):
     def get_profess_url(self):
         return self.profess_url
 
-    def get_soc_list(self,topology):
-        radial=topology["radials"]#["storageUnits"]
-        list_storages=[]
-        soc_list = []
-        soc_dict_intern = {"SoC":None}
-        for element in radial:
-
-            for key, value in element.items():
-                if key == "storageUnits":
-                    for element_intern in value:
-                        soc_dict = {}
-                        #logger.debug("element intern "+str(element_intern))
-                        soc_dict[element_intern["bus1"]]={"SoC":element_intern["soc"],
-                                                          "id":element_intern["id"],
-                                                          "Battery_Capacity":element_intern["storage_capacity"],
-                                                          "max_charging_power":element_intern["max_charging_power"],
-                                                          "max_discharging_power":element_intern["max_discharging_power"]}
-                        soc_list.append(soc_dict)
-                        list_storages.append(element_intern)
-        #logger.debug("list_storages "+str(list_storages))
-        logger.debug("soc_list " + str(soc_list))
-        return soc_list
-
-    def set_new_soc(self, soc_list):
-        #self.sim.getSoCfromBattery("Akku1")
-
-        new_soc_list=[]
-        for element in soc_list:
-            for key, value in element.items():
-                element_id=value["id"]
-                logger.debug("ESS_id "+str(element_id))
-                logger.debug("SoC 1 " + str(self.sim.getSoCfromBattery(element_id)))
-                SoC = float(self.sim.getSoCfromBattery(element_id))
-                value["SoC"]=SoC
-                new_soc_list.append(element)
-        logger.debug("new soc list: " + str(new_soc_list))
-        return new_soc_list
 
 
     def getId(self):
@@ -104,6 +70,7 @@ class gridController(threading.Thread):
     def Stop(self):
         try:
             self.sim.Stop()
+            self.redisDB.set(self.finish_status_key, "True")
         except Exception as e:
             self.logger.error("error stopping simulator " + str(e))
 
@@ -139,7 +106,10 @@ class gridController(threading.Thread):
             self.profess_url = "http://localhost:8080"
         self.domain = self.get_profess_url() + "/v1/"
         logger.debug("profess url: " + str(self.domain))
-        self.profess = Profess(self.domain, self.topology)
+        self.profess = Profess(self.id,self.domain, self.topology)
+        self.profev = Profev(self.id, self.domain, self.topology)
+
+
 
         # ----------PROFILES----------------#
         self.profiles = Profiles()
@@ -147,6 +117,9 @@ class gridController(threading.Thread):
         # profess.json_parser.set_topology(data)
 
         self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
+        logger.debug("!---------------Elements added to simulator------------------------ \n")
+
+
         transformer_names=self.sim.get_transformer_names()
         logger.debug("Transformer names: "+str(transformer_names))
         logger.debug("Transformers in the circuit")
@@ -177,7 +150,7 @@ class gridController(threading.Thread):
         logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
         logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
         logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-        numSteps=self.sim_days
+        numSteps=self.sim_hours
         #self.redisDB.set("sim_days_"+str(self.id),numSteps)
         #numSteps=3
         logger.debug("Number of steps: "+str(numSteps))
@@ -195,20 +168,81 @@ class gridController(threading.Thread):
         currents = [[] for i in range(len_nodeNamesCurrents)]
         losses = [[] for i in range(len_elementNames)]
         total_losses = []
-        powers = [[] for i in range(len(nodeNames))]
 
-        soc_list = self.get_soc_list(self.topology)
-        charging = True
+
+        PV_names= self.input.get_PV_names(self.topology)
+        logger.debug("PV_names "+str(PV_names))
+        powers_pv_curtailed = [[] for i in range(len(PV_names))]
+
+        ESS_names = self.input.get_Storage_names(self.topology)
+        logger.debug("ESS_names " + str(ESS_names))
+        soc_from_profess = [[] for i in range(len(ESS_names))]
+        ess_powers_from_profess = [[] for i in range(len(ESS_names))]
+
+
+
         logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
-        flag_is_storage = self.input.is_Storage_in_Topology(self.topology)
-        if flag_is_storage:
-            flag_global_control = self.input.is_global_control_in_Storage(self.topology)
         flag_is_charging_station = self.input.is_Charging_Station_in_Topology(self.topology)
-        price_profile_data=self.input.get_price_profile()
+        logger.debug("Charging station flag "+str(flag_is_charging_station))
+        charger_residential_list = []
+        charger_commercial_list = []
+        charger_list_without_control = []
+        soc_list_evs_residential = None
+        soc_list_evs_commercial = None
+        if flag_is_charging_station:
+            chargers = self.sim.get_chargers()
+
+            list_node_charging_station_without_storage= self.input.get_list_nodes_charging_station_without_storage(self.topology, chargers)
+            logger.debug("list_node_charging_station_without_storage "+str(list_node_charging_station_without_storage))
+
+            #logger.debug("type chargers " + str(type(chargers)))
+            for key, charger_element in chargers.items():
+                logger.debug("charger_element.get_bus_name() "+str(charger_element.get_bus_name()))
+
+                if charger_element.get_type_application() == "residential" and not charger_element.get_bus_name() in list_node_charging_station_without_storage:
+                    charger_residential_list.append(charger_element)
+                elif charger_element.get_type_application() == "commercial" and not charger_element.get_bus_name() in list_node_charging_station_without_storage:
+                    charger_commercial_list.append(charger_element)
+                else:
+                    charger_list_without_control.append(charger_element)
+
+                evs_connected = charger_element.get_EV_connected()
+
+                for ev_unit in evs_connected:
+                    ev_unit.calculate_position(self.sim_hours+24, 1)
+                    logger.debug("position profile for "+str(ev_unit.get_id())+": "+str(ev_unit.get_position_profile()))
+
+            logger.debug("residential list "+str(charger_residential_list))
+            logger.debug("commercial list "+str(charger_commercial_list))
+            logger.debug("charger without control list " + str(charger_list_without_control))
+
+            if not charger_residential_list == []:
+                soc_list_evs_residential = self.input.get_soc_list_evs(self.topology, charger_residential_list)
+                logger.debug("soc_list_evs residential" + str(soc_list_evs_residential))
+
+            if not charger_commercial_list == []:
+                soc_list_evs_commercial = self.input.get_soc_list_evs(self.topology, charger_commercial_list)
+                logger.debug("soc_list_evs commercial"+str(soc_list_evs_commercial))
 
 
-        logger.debug("flag is storage "+str(flag_is_storage))
-        logger.debug("flag is global control "+str(flag_global_control))
+        logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
+        if flag_is_charging_station:
+            flag_is_storage = self.input.is_Storage_in_Topology_without_charging_station(self.topology, chargers)
+        else:
+            flag_is_storage = self.input.is_Storage_in_Topology_without_charging_station(self.topology)
+        logger.debug("Storage flag: " + str(flag_is_storage))
+        if flag_is_storage:
+            soc_list = self.input.get_soc_list(self.topology)
+            flag_global_control = self.input.is_global_control_in_Storage(self.topology)
+            logger.debug("Global control flag: " + str(flag_global_control))
+
+        logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
+
+        flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
+        logger.debug("Flag price profile needed: "+str(flag_is_price_profile_needed))
+        if flag_is_price_profile_needed or flag_global_control:
+            price_profile_data=self.input.get_price_profile()
+            logger.debug("length price profile " + str(len(price_profile_data)))
 
 
 
@@ -226,78 +260,113 @@ class gridController(threading.Thread):
             #terminal=self.sim.get_monitor_terminals("mon_transformer")
             #logger.debug("Number of terminals in monitor "+str(terminal))
 
+            ######################################################################################
+            ################  Storage control  ###################################################
+            ######################################################################################
 
             """if flag_is_storage:
 
-                professLoads = self.sim.getProfessLoadschapes(hours, 24)
+                node_names_for_profiles = self.profev.json_parser.get_node_name_list(soc_list)
+                #logger.debug("node names " + str(node_names_for_profiles))
+                professLoads = self.sim.getProfessLoadschapes( hours, 24)
                 #logger.debug("loads "+str(professLoads))
                 professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
                 #logger.debug("PVs "+str(professPVs))
 
+<<<<<<< HEAD
                 if self.input.is_price_profile():
                     logger.debug("price profile present")
                     #price_profile = price_profile_data[int(hours):int(hours+24)]
+=======
+                if flag_is_price_profile_needed  or flag_global_control:
+                    if self.input.is_price_profile():
+                        #logger.debug("price profile present")
+                        price_profile = price_profile_data[int(hours):int(hours+24)]
+                        logger.debug("price profile " + str(price_profile))
 
-                soc_list_new = self.set_new_soc(soc_list)
+>>>>>>> gustavo
+
+                soc_list_new = self.input.set_new_soc(soc_list)
 
                 if flag_global_control:
-                    logger.debug("global control present")
+                    #logger.debug("global control present")
                     profess_global_profile = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
-                    logger.debug("GESSCon result "+str(profess_global_profile))
+                    logger.debug("global profile "+str(profess_global_profile))
+                    #profess_global_profile =[{'node_a6': {
+                        #'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
+                                  #0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]
+                    #logger.debug("GESSCon result "+str(profess_global_profile))
 
-                if flag_global_control and self.input.is_price_profile():
+                if flag_global_control:
+                    #logger.debug("price profile " + str(price_profile))
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile, profess_global_profile)
-                elif not flag_global_control and self.input.is_price_profile():
+                elif not flag_global_control and flag_is_price_profile_needed:
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs, price_profile)
                 else:
                     self.profess.set_up_profess(soc_list_new, professLoads, professPVs)
 
-                status_profess=self.profess.start_all()
+                status_profess=self.profess.start_all(soc_list)
 
                 if not status_profess:
-                    profess_output=self.profess.wait_and_get_output()
-                    logger.debug("output profess " + str(profess_output))
+                    profess_output=self.profess.wait_and_get_output(soc_list)
+                    #logger.debug("output profess " + str(profess_output))
+                    if not profess_output == []:
+                        # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
+                        # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
 
-                    # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
-                    # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
+                        profess_result=[]
+                        for element in profess_output:
+                            profess_result_intern = {}
+                            for key, value in element.items():
+                                node_name = key
+                                profess_result_intern[node_name]={}
+                                for element_soc in soc_list:
+                                    for key_node in element_soc.keys():
+                                        if key_node == node_name:
+                                            profess_result_intern[node_name]["ess_name"] = element_soc[key_node]["ESS"]["id"]
+                                            profess_result_intern[node_name]["pv_name"] = element_soc[key_node]["PV"]["pv_name"]
+                                            profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["ESS"]["max_charging_power"]
+                                            profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["ESS"]["max_discharging_power"]
+                                for profess_id, results in value.items():
+                                    for key_results, powers in results.items():
+                                        profess_result_intern[node_name][key_results] = powers
 
-                    profess_result=[]
-                    for element in profess_output:
-                        profess_result_intern = {}
-                        for key, value in element.items():
-                            node_name = key
-                            profess_result_intern[node_name]={}
-                            for element_soc in soc_list:
-                                for key_node in element_soc.keys():
-                                    if key_node == node_name:
-                                        profess_result_intern[node_name]["id"] = element_soc[key_node]["id"]
-                                        profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["max_charging_power"]
-                                        profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["max_discharging_power"]
-                            for profess_id, results in value.items():
-                                for key_results, powers in results.items():
-                                    profess_result_intern[node_name][key_results] = powers
+                            profess_result.append(profess_result_intern)
+                        #logger.debug("profess result: "+str(profess_result))
 
-                        profess_result.append(profess_result_intern)
-                    logger.debug("profess result: "+str(profess_result))
-
-                    for element in profess_result:
-                        ess_name = None
-                        p_ess_output = None
-                        for key, value in element.items():
-                            ess_name = value["id"]
-                            p_ess_output = value["P_ESS_Output"]
-                            max_charging_power = value["max_charging_power"]
-                            max_discharging_power = value["max_discharging_power"]
-                        self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
+                        for element in profess_result:
+                            ess_name = None
+                            pv_name = None
+                            p_ess_output = None
+                            p_pv_output = None
+                            for key, value in element.items():
+                                ess_name = value["ess_name"]
+                                p_ess_output = value["P_ESS_Output"]
+                                pv_name = value["pv_name"]
+                                p_pv_output = value["P_PV_Output"]
+                                max_charging_power = value["max_charging_power"]
+                                max_discharging_power = value["max_discharging_power"]
+                            self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
+                            self.sim.setActivePowertoPV(pv_name, p_pv_output)
+                            #### Creating lists for storing values
+                            powers_pv_curtailed[PV_names.index(pv_name)].append(p_pv_output)
+                            soc_from_profess[ESS_names.index(ess_name)].append(self.sim.getSoCfromBattery(ess_name))
+                            ess_powers_from_profess[ESS_names.index(ess_name)].append(p_ess_output)
+                    else:
+                        logger.error("OFW returned empty values")
                 else:
                     logger.error("OFW instances could not be started")
 
+
+                if hours == (self.sim_hours -1):
+                    self.profess.erase_all_ofw_instances(soc_list)
                 # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
 
                 #soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
 
                 #self.redisDB.set(self.finish_status_key, "True")
 
+<<<<<<< HEAD
                 logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
                 logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
                 logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
@@ -344,20 +413,246 @@ class gridController(threading.Thread):
                 self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
                 print(self.profess.dataList)
                 print("--------------------end profess results----------------------------")
+=======
+
+>>>>>>> gustavo
             else:
-                logger.debug("No Storage Units present")
+                logger.debug("No Storage Units present")"""
+
+            ######################################################################################
+            ################  Charging station control  ###################################################
+            ######################################################################################
 
             if flag_is_charging_station:
                 logger.debug("charging stations present in the simulation")
-                #check if is residential or commercial
+                #node_names_for_profiles = self.profev.json_parser.get_node_name_list(soc_list_evs)
+                #logger.debug("node names "+str(node_names_for_profiles))
+                profevLoads = self.sim.getProfessLoadschapes(hours, 24)
+                #logger.debug("profev loads "+str(profevLoads))
+                profevPVs = self.sim.getProfessLoadschapesPV(hours, 24)
+                #logger.debug("profev PVs "+str(profevPVs))
 
-                #check if ev is present per charging station and receive a mapping list
-                #flag_is_EV = self.input.is_EV(charging_station)
+                for key, charger_element in chargers.items():
+                    evs_connected = charger_element.get_EV_connected()
 
-                #send it to profev
+                    for ev_unit in evs_connected:
+                        position_profile = ev_unit.get_position_profile(hours, 1)
+                        logger.debug("position profile: " + str(position_profile))
+                        if position_profile[0] == 1:
+                            # EV connected to the grid
+                            charger_element.set_ev_plugged(ev_unit)
 
+                            name = "Line_" + ev_unit.get_id()
+                            self.sim.set_switch(name, False)
+
+                            element_id = "ESS_" + ev_unit.get_id()
+                            SoC = float(self.sim.getSoCfromBattery(element_id))
+                            ev_unit.set_SoC(SoC)
+                            logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
+
+                        else:
+                            charger_element.set_ev_plugged(None)
+
+                            name = "Line_" + ev_unit.get_id()
+                            self.sim.set_switch(name, True)
+
+                            logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
+                            number_km_driven = int(random.uniform(0, 6))
+                            logger.debug("km driven " + str(number_km_driven))
+                            SoC = ev_unit.calculate_S0C_next_timestep(-1, number_km_driven)
+                            ev_unit.set_SoC(SoC)
+                            logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
+                            element_id = "ESS_" + ev_unit.get_id()
+                            self.sim.setSoCBattery(element_id, SoC)
+
+                if not charger_commercial_list == []:
+
+                    soc_list_new = self.input.set_new_soc_evs(soc_list_evs_commercial, chargers)
+                    logger.debug("soc_list_new "+str(soc_list_new))
+
+                    if not soc_list_new == None:
+
+                        if flag_is_price_profile_needed or flag_global_control:
+                            if self.input.is_price_profile():
+                                logger.debug("price profile present")
+                                price_profile = price_profile_data[int(hours):int(hours + 24)]
+
+                        if flag_global_control:
+                            logger.debug("global control present")
+                            profev_global_profile = self.global_control.gesscon(profevLoads, profevPVs, price_profile,
+                                                                                 soc_list_new)
+                            logger.debug("GESSCon result " + str(profev_global_profile))
+
+                        if flag_global_control:
+                            self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, price_profile,
+                                                        profev_global_profile, chargers=chargers, commercial = True)
+                        elif not flag_global_control and flag_is_price_profile_needed:
+                            self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, price_profile, None, chargers=chargers, commercial = True)
+                        else:
+                            self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, None, None, chargers=chargers, commercial = True)
+
+
+                        status_profev = self.profev.start_all(soc_list_evs_commercial, chargers)
+                        #logger.debug("status profev "+str(status_profev))
+
+                        if not status_profev:
+                            logger.debug("Optimization succeded")
+                            profev_output = self.profev.wait_and_get_output(soc_list_evs_commercial)
+                            logger.debug("profev output "+str(profev_output))
+                            chargers = self.sim.get_chargers()
+                            for key, charger_element in chargers.items():
+                                evs_connected = charger_element.get_EV_connected()
+
+                                for ev_unit in evs_connected:
+                                    
+                                    p_ev, p_ess, p_pv = self.input.get_powers_from_profev_output(profev_output, charger_element, ev_unit)
+
+                                    logger.debug("p_ev "+str(p_ev) +" p_ess: "+str(p_ess)+ " p_pv: "+str(p_pv))
+                                    if not p_ev == None:
+                                        element_id = "ESS_" + ev_unit.get_id()
+                                        self.sim.setActivePowertoBatery(element_id,
+                                                                        -1 * p_ev,
+                                                                        charger_element.get_max_charging_power())
+                                    else:
+                                        logger.error("Problems for finding EV name of node "+str(charger_element.get_bus_name()))
+
+                                    ess_name, max_charging_power = self.input.get_ESS_name_for_node(soc_list_evs_commercial, charger_element.get_bus_name())
+                                    if not ess_name == None and not max_charging_power == None:
+                                        self.sim.setActivePowertoBatery(ess_name, p_ess, max_charging_power)
+                                    else:
+                                        logger.error("Problems for finding storage name of node "+str(charger_element.get_bus_name()))
+
+
+                                    pv_name = self.input.get_PV_name_for_node(soc_list_evs_commercial, charger_element.get_bus_name())
+                                    if not pv_name == None:
+                                        self.sim.setActivePowertoPV(pv_name, p_pv)
+                                    else:
+                                        logger.error("Problems for finding PV name of node "+str(charger_element.get_bus_name()))
+
+
+
+                        else:
+                            logger.error("OFW instances could not be started")
+
+
+                if not charger_residential_list == []:
+
+                    soc_list_new = self.input.set_new_soc_evs(soc_list_evs_residential, chargers)
+                    logger.debug("soc_list_new_residential " + str(soc_list_new))
+
+                    if not soc_list_new == None:
+
+                        if flag_is_price_profile_needed or flag_global_control:
+                            if self.input.is_price_profile():
+                                logger.debug("price profile present")
+                                price_profile = price_profile_data[int(hours):int(hours + 24)]
+
+                        if flag_global_control:
+                            logger.debug("global control present")
+                            profev_global_profile = self.global_control.gesscon(profevLoads, profevPVs, price_profile,
+                                                                                soc_list_new)
+                            logger.debug("GESSCon result " + str(profev_global_profile))
+
+                        if flag_global_control:
+                            self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, price_profile,
+                                                      profev_global_profile, chargers=chargers)
+                        elif not flag_global_control and flag_is_price_profile_needed:
+                            self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, price_profile, None,
+                                                      chargers=chargers)
+                        else:
+                            self.profev.set_up_profev(soc_list_new, profevLoads, profevPVs, None, None,
+                                                      chargers=chargers)
+
+                        status_profev = self.profev.start_all(soc_list_evs_residential, chargers)
+                        #logger.debug("status profev " + str(status_profev))
+
+                        if not status_profev:
+                            logger.debug("Optimization succeded")
+                            profev_output = self.profev.wait_and_get_output(soc_list_evs_residential)
+                            logger.debug("profev output " + str(profev_output))
+                            chargers = self.sim.get_chargers()
+                            for key, charger_element in chargers.items():
+                                evs_connected = charger_element.get_EV_connected()
+
+                                for ev_unit in evs_connected:
+
+                                    p_ev, p_ess, p_pv = self.input.get_powers_from_profev_output(profev_output,
+                                                                                                 charger_element,
+                                                                                                 ev_unit)
+
+                                    logger.debug("p_ev " + str(p_ev) + " p_ess: " + str(p_ess) + " p_pv: " + str(p_pv))
+                                    if not p_ev == None:
+                                        element_id = "ESS_" + ev_unit.get_id()
+                                        self.sim.setActivePowertoBatery(element_id,
+                                                                        -1 * p_ev,
+                                                                        charger_element.get_max_charging_power())
+                                    else:
+                                        logger.error("Problems for finding EV name of node " + str(
+                                            charger_element.get_bus_name()))
+
+                                    ess_name, max_charging_power = self.input.get_ESS_name_for_node(
+                                        soc_list_evs_commercial, charger_element.get_bus_name())
+                                    if not ess_name == None and not max_charging_power == None:
+                                        self.sim.setActivePowertoBatery(ess_name, p_ess, max_charging_power)
+                                    else:
+                                        logger.error("Problems for finding storage name of node " + str(
+                                            charger_element.get_bus_name()))
+
+                                    pv_name = self.input.get_PV_name_for_node(soc_list_evs_commercial,
+                                                                              charger_element.get_bus_name())
+                                    if not pv_name == None:
+                                        self.sim.setActivePowertoPV(pv_name, p_pv)
+                                    else:
+                                        logger.error("Problems for finding PV name of node " + str(
+                                            charger_element.get_bus_name()))
+
+                        else:
+                            logger.error("OFW instances could not be started")
+
+
+                if not charger_list_without_control == []:
+
+                    chargers = self.sim.get_chargers()
+                    for key, charger_element in chargers.items():
+                        evs_connected = charger_element.get_EV_connected()
+
+                        for ev_unit in evs_connected:
+                            position_profile = ev_unit.get_position_profile(hours, 1)
+                            logger.debug("position profile: " + str(position_profile))
+                            if position_profile[0] == 1:
+                                #EV connected to the grid
+                                charger_element.set_ev_plugged(ev_unit)
+                                name = "Line_"+ev_unit.get_id()
+                                self.sim.set_switch(name, False)
+                                element_id = "ESS_"+ev_unit.get_id()
+                                SoC = float(self.sim.getSoCfromBattery(element_id))
+                                ev_unit.set_SoC(SoC)
+                                logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
+
+                                self.sim.setActivePowertoBatery(element_id, -1 * charger_element.get_max_charging_power(), charger_element.get_max_charging_power())
+
+                            else:
+                                #EV not connected. Calculate EV SoC
+                                name = "Line_" + ev_unit.get_id()
+                                self.sim.set_switch(name, True)
+                                logger.debug(str(ev_unit.get_id())+" SoC: "+str(ev_unit.get_SoC()))
+                                number_km_driven = int(random.uniform(0,6))
+                                logger.debug("km driven "+str(number_km_driven))
+                                SoC = ev_unit.calculate_S0C_next_timestep(-1, number_km_driven)
+                                ev_unit.set_SoC(SoC)
+                                element_id = "ESS_" + ev_unit.get_id()
+                                self.sim.setSoCBattery(element_id, SoC)
+                                #logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
+
+                if hours == (self.sim_hours - 1):
+                    if not soc_list_evs_commercial == None:
+                        self.profev.erase_all_ofw_instances(soc_list_evs_commercial)
+                    if not soc_list_evs_residential == None:
+                        self.profev.erase_all_ofw_instances(soc_list_evs_commercial)
             else:
-                logger.debug("No charging stations present in the simulation")"""
+                logger.debug("No charging stations present in the simulation")
+                """
+
 
 
             puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
@@ -388,6 +683,7 @@ class gridController(threading.Thread):
         raw_data_currents={}
         raw_data_losses={}
         raw_data_power={}
+
 
         ############################### Losses ###################################
 
@@ -454,6 +750,17 @@ class gridController(threading.Thread):
 
         raw_data = {"voltages": raw_data_voltages, "currents": raw_data_currents, "losses": raw_data_losses, "powers": raw_data_power}
 
+        raw_data_pv_curtailment = {}
+        for i in range(len(PV_names)):
+            raw_data_pv_curtailment[PV_names[i]] = powers_pv_curtailed[i]
+
+        raw_ess_power = {}
+        raw_ess_soc = {}
+        for i in range(len(ESS_names)):
+            raw_ess_soc[PV_names[i]]= soc_from_profess[i]
+            raw_ess_power[PV_names[i]]= ess_powers_from_profess[i]
+
+        raw_data_control = {"pv_curtailment": raw_data_pv_curtailment, "ESS_SoC": raw_ess_soc, "ESS_power": raw_ess_power}
 
 
         result=data
@@ -469,6 +776,9 @@ class gridController(threading.Thread):
         fname_row = (str(self.id)) + "_result_raw.json"
         path = os.path.join("data", str(self.id), fname_row)
         self.utils.store_data_raw(path, raw_data)
+        fname_row = (str(self.id)) + "_pv_curtailed_raw.json"
+        path = os.path.join("data", str(self.id), fname_row)
+        self.utils.store_data_raw(path, raw_data_control)
         logger.debug("Raw data successfully stored")
         self.redisDB.set(self.finish_status_key, "True")
 
@@ -485,7 +795,7 @@ class gridController(threading.Thread):
         #return (self.nodeNames, self.allBusMagPu)
         #self.finish_status = True
         #return "OK"
-        """#ToDo test with snap and daily
+        #ToDo test with snap and daily
         self.sim.setMode("daily")
         self.sim.setStepSize("minutes")
         self.sim.setNumberSimulations(1)
@@ -521,4 +831,50 @@ class gridController(threading.Thread):
         # return (nodeNames, allBusMagPu)
         # filename = str(id)+"_results.txt"
         # !TODO: Create filename with id so serve multiple simultaneous simulations#DONE
-        # json_data = json.dumps(allBusMagPu)"""
+        # json_data = json.dumps(allBusMagPu)
+
+                    logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
+                    logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
+                    logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
+                    logger.debug("kW " + str(self.sim.getkWfromBattery("Akku1")))
+                    logger.debug("Min_SoC " + str(self.sim.getMinSoCfromBattery("Akku1")))
+                    logger.debug("bus " + str(self.sim.getBusfromBattery("Akku1")))
+                    logger.debug("ESS state "+str(self.sim.getStatefromBattery("Akku1")))
+                    max_charging_power_value=float(self.sim.getkWratedfromBattery("Akku1"))
+
+                    SoC = float(self.sim.getSoCfromBattery("Akku1"))
+                    logger.debug("SoC_value Akku1: " + str(SoC))
+                    if i>0:
+
+                        if charging is True:
+
+                            if SoC >= 100:
+                                charging = False
+                                logger.debug("Entered to discharging")
+                                self.sim.setActivePowertoBatery("Akku1",0.5,max_charging_power_value)
+                            else:
+                                logger.debug("Entered to charging")
+                                self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
+                        else:
+
+                            if SoC <= 20:
+                                charging = True
+                                logger.debug("Entered to charging")
+                                self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
+                            else:
+                                logger.debug("Entered to discharging")
+                                self.sim.setActivePowertoBatery("Akku1",0.5, max_charging_power_value)
+                    logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))"""
+
+    # logger.debug("######################Ending profess##################################")
+
+    # profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
+    """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
+    self.profess.start_all()
+    print("--------------------start profess results----------------------------")
+    print(self.profess.dataList)
+    print(self.profess.wait_and_get_output())
+    soc_list = [{"633": {"SoC": 5}}, {"671": {"SoC": 4}}, {"634": {"SoC": 20}}]
+    self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
+    print(self.profess.dataList)
+    print("--------------------end profess results----------------------------")"""

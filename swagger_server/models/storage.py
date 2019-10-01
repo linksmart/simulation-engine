@@ -15,7 +15,7 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, min_soc: float=None, max_soc: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None, global_control: bool=False):  # noqa: E501
+    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, min_soc: float=None, max_soc: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None, global_control: bool=False, voltage_sensitivity_factor_active_power: float=None, voltage_sensitivity_factor_reactive_power: float=None):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501
@@ -54,6 +54,10 @@ class Storage(Model):
         :type optimization_model: str
         :param global_control: The global_control of this Storage.  # noqa: E501
         :type global_control: bool
+        :param voltage_sensitivity_factor_active_power: The voltage_sensitivity_factor_active_power of this Storage.  # noqa: E501
+        :type voltage_sensitivity_factor_active_power: float
+        :param voltage_sensitivity_factor_reactive_power: The voltage_sensitivity_factor_reactive_power of this Storage.  # noqa: E501
+        :type voltage_sensitivity_factor_reactive_power: float
         """
         self.swagger_types = {
             'id': str,
@@ -73,7 +77,9 @@ class Storage(Model):
             'discharge_efficiency': float,
             'powerfactor': float,
             'optimization_model': str,
-            'global_control': bool
+            'global_control': bool,
+            'voltage_sensitivity_factor_active_power': float,
+            'voltage_sensitivity_factor_reactive_power': float
         }
 
         self.attribute_map = {
@@ -94,7 +100,9 @@ class Storage(Model):
             'discharge_efficiency': 'discharge_efficiency',
             'powerfactor': 'powerfactor',
             'optimization_model': 'optimization_model',
-            'global_control': 'global_control'
+            'global_control': 'global_control',
+            'voltage_sensitivity_factor_active_power': 'voltage_sensitivity_factor_active_power',
+            'voltage_sensitivity_factor_reactive_power': 'voltage_sensitivity_factor_reactive_power'
         }
 
         self._id = id
@@ -115,6 +123,8 @@ class Storage(Model):
         self._powerfactor = powerfactor
         self._optimization_model = optimization_model
         self._global_control = global_control
+        self._voltage_sensitivity_factor_active_power = voltage_sensitivity_factor_active_power
+        self._voltage_sensitivity_factor_reactive_power = voltage_sensitivity_factor_reactive_power
 
     @classmethod
     def from_dict(cls, dikt) -> 'Storage':
@@ -540,3 +550,49 @@ class Storage(Model):
         """
 
         self._global_control = global_control
+
+    @property
+    def voltage_sensitivity_factor_active_power(self) -> float:
+        """Gets the voltage_sensitivity_factor_active_power of this Storage.
+
+        Unit: V/kW  # noqa: E501
+
+        :return: The voltage_sensitivity_factor_active_power of this Storage.
+        :rtype: float
+        """
+        return self._voltage_sensitivity_factor_active_power
+
+    @voltage_sensitivity_factor_active_power.setter
+    def voltage_sensitivity_factor_active_power(self, voltage_sensitivity_factor_active_power: float):
+        """Sets the voltage_sensitivity_factor_active_power of this Storage.
+
+        Unit: V/kW  # noqa: E501
+
+        :param voltage_sensitivity_factor_active_power: The voltage_sensitivity_factor_active_power of this Storage.
+        :type voltage_sensitivity_factor_active_power: float
+        """
+
+        self._voltage_sensitivity_factor_active_power = voltage_sensitivity_factor_active_power
+
+    @property
+    def voltage_sensitivity_factor_reactive_power(self) -> float:
+        """Gets the voltage_sensitivity_factor_reactive_power of this Storage.
+
+        Unit: V/kW  # noqa: E501
+
+        :return: The voltage_sensitivity_factor_reactive_power of this Storage.
+        :rtype: float
+        """
+        return self._voltage_sensitivity_factor_reactive_power
+
+    @voltage_sensitivity_factor_reactive_power.setter
+    def voltage_sensitivity_factor_reactive_power(self, voltage_sensitivity_factor_reactive_power: float):
+        """Sets the voltage_sensitivity_factor_reactive_power of this Storage.
+
+        Unit: V/kW  # noqa: E501
+
+        :param voltage_sensitivity_factor_reactive_power: The voltage_sensitivity_factor_reactive_power of this Storage.
+        :type voltage_sensitivity_factor_reactive_power: float
+        """
+
+        self._voltage_sensitivity_factor_reactive_power = voltage_sensitivity_factor_reactive_power
