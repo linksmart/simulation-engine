@@ -198,13 +198,11 @@ class gridController(threading.Thread):
         transformer_names=self.sim.get_transformer_names()
         logger.debug("Transformer names: "+str(transformer_names))
         logger.debug("Transformers in the circuit")
+        self.sim.addToDssScript("\n !--------------- Setting Monitors ------------------------ \n")
         for i in range(len(transformer_names)):
             self.sim.create_monitor("monitor_transformer_"+str(i), "Transformer."+str(transformer_names[i]),1,1)
 
-        fname = (str(self.id)) + "_model.dss"
-        path = os.path.join("data", str(self.id), fname)
-        self.utils.store_data_raw(path, self.sim.getDssScript())
-        logger.debug(fname + " successfully stored")
+
 
 
         logger.debug("#####################################################################")
@@ -290,6 +288,13 @@ class gridController(threading.Thread):
             logger.debug("length price profile " + str(len(price_profile_data)))
 
         #sys.exit(0)
+
+        self.sim.addToDssScript("\ncalcv \nSolve Number=1 \nShow Voltages LN Nodes \n")
+        # Storing the model in a .dss file
+        fname = (str(self.id)) + "_model.dss"
+        path = os.path.join("data", str(self.id), fname)
+        self.utils.store_data_raw(path, self.sim.getDssScript())
+        logger.debug(fname + " successfully stored")
 
         for i in range(numSteps):
             #time.sleep(0.1)

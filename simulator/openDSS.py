@@ -429,8 +429,8 @@ class OpenDSS:
         print(dss_string + "\n")
 
         dss.run_command(dss_string)
-        dss.run_command(" CalcVoltageBases");
-        self.addToDssScript(dss_string + "\n" + "CalcVoltageBases \n")
+        dss.run_command("CalcVoltageBases");
+        self.addToDssScript("\n" +dss_string + "\n" + "CalcVoltageBases \n")
 
 
     def solutionConverged(self):
@@ -453,8 +453,11 @@ class OpenDSS:
         self.time_step=time_step
         if "minutes" in self.time_step:
             dss.Solution.StepSizeMin(1)
+            self.addToDssScript("Set stepsize=1m")
         if "hours" in self.time_step:
             dss.Solution.StepSizeHr(1)
+            self.addToDssScript("Set stepsize=1h")
+
         #logger.debug("Simulation step_size " + str(dss.Solution.StepSize()))
 
     def getNumberSimulations(self):
@@ -926,7 +929,7 @@ class OpenDSS:
             if not c0 == None:
                 my_str.append("c0={c0} ")
         else:
-            if not self._linecode == None and self._r1 == None:
+            if not linecode == None and r1 == None:
                 my_str.append("linecode={linecode} ")
             else:
                 # raise Exception("r1 and linecode cannot be entered at the same time")
@@ -970,6 +973,7 @@ class OpenDSS:
     def setXYCurves(self, xycurves):
         #!logger.info("Setting up the XYCurves")
         #!logger.debug("XY Curve in OpenDSS: " + str(xycurves))
+        self.addToDssScript("\n!------------Setting up the XYCurves ------------- \n")
         try:
             for element in xycurves:
                 id = None
@@ -1443,7 +1447,7 @@ class OpenDSS:
         )
 
 
-        dss_string = dss_string + " TimeChargeTrigger=-1 "
+        dss_string = dss_string + " ChargeTrigger=-1 "
         if not kw_rated == None:
             dss_string = dss_string + " kWrated="+str(kw_rated)
 

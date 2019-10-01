@@ -7,7 +7,14 @@
         "bus1": "SourceBus",
         "angle": 30,
         "MVAsc3": 20000,
-        "MVAsc1": 21000
+        "MVAsc1": 21000,
+        "base_frequency": 60,
+		"VoltageBases": [115, 4.16, 0.48],
+		"url_storage_controller": "http://192.168.99.100:8080",
+		"city": "Fur",
+		"country": "Denmark",
+		"max_real_power_in_kW_to_grid" : 1000,
+    	"max_reactive_power_in_kVar_to_grid":1200
     },
     "radials": [
         {
@@ -739,10 +746,19 @@
                     "c0": 0
                 }
             ],
-                        "storageUnits": [
+			"photovoltaics":[
+				{
+					"bus1": "671",
+					"id": "PV_1",
+					"max_power_kW":4,
+					"phases":3,
+					"kV":0.23
+				}
+			],
+            "storageUnits": [
                 {
                   "id": "Akku1",
-                  "bus1": "633",
+                  "bus1": "671",
                   "phases": 3,
                   "connection": "wye",
                   "soc": 100,
@@ -751,8 +767,12 @@
                   "kw_rated": 75,
                   "kwh_rated": 150,
                   "kwh_stored": 150,
-                  "charge_efficiency": 95,
+                  "max_charging_power": 75,
+                  "max_discharging_power":75,
+                  "storage_capacity": 150,
+				  "charge_efficiency": 95,
                   "discharge_efficiency": 95,
+                  "optimization_model": "Maximize Self-Consumption",
                   "powerfactor": 1
                 }
             ]
