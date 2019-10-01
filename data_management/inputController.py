@@ -380,13 +380,13 @@ class InputController:
                                 p_pv = value
         return (p_ev, p_ess, p_pv)
 
-    def set_new_soc_evs(self, soc_list, chargers = None):
+    def set_new_soc_evs(self, soc_list_commercial=None, soc_list_residential=None, chargers = None):
         #self.sim.getSoCfromBattery("Akku1")
 
+        new_soc_list = []
+        if not soc_list_commercial == None:
 
-        if len(soc_list) > 0:
-            new_soc_list = []
-            for element in soc_list:
+            for element in soc_list_commercial:
                 for node_name, value in element.items():
                     element_id = value["ESS"]["id"]
                     SoC = float(self.sim.getSoCfromBattery(element_id))
@@ -406,8 +406,35 @@ class InputController:
                         element_id = "ESS_" + value["EV"]["id"]
                         SoC = float(self.sim.getSoCfromBattery(element_id))
                         value["EV"]["SoC"] = SoC
+                    value["EV"]["commercial"] = True
                     new_soc_list.append(element)
-        else:
+
+        if not soc_list_residential == None:
+
+            for element in soc_list_residential:
+                for node_name, value in element.items():
+                    element_id = value["ESS"]["id"]
+                    SoC = float(self.sim.getSoCfromBattery(element_id))
+                    value["ESS"]["SoC"] = SoC
+
+                    if not chargers == None:
+                        element_id = value["EV"]["id"]
+                        SoC = None
+                        for cs_id, charger in chargers.items():
+                            ev_connected = charger.get_EV_connected()
+                            for ev in ev_connected:
+                                # if charger.get_ev_plugged() == ev:
+                                if ev.get_id() == element_id:
+                                    SoC = ev.get_SoC()
+                        value["EV"]["SoC"] = SoC
+                    else:
+                        element_id = "ESS_" + value["EV"]["id"]
+                        SoC = float(self.sim.getSoCfromBattery(element_id))
+                        value["EV"]["SoC"] = SoC
+                    value["EV"]["commercial"] = False
+                    new_soc_list.append(element)
+
+        if soc_list_commercial == None and soc_list_residential == None:
             new_soc_list = None
         #logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
@@ -496,8 +523,11 @@ class InputController:
                 return False
         if not chargers == None:
             list_nodes_storages_with_cs=self.get_list_nodes_storages_with_charging_station(radial, chargers)
-
+            list_nodes_storages_with_cs = list(dict.fromkeys(list_nodes_storages_with_cs))
+            logger.debug("list_nodes_storages_with_cs "+str(list_nodes_storages_with_cs))
             list_all_storage_nodes = self.get_Storage_nodes(topology)
+            list_all_storage_nodes = list(dict.fromkeys(list_all_storage_nodes))
+            logger.debug("list_all_storage_nodes "+str(list_all_storage_nodes))
 
             if not len(list_nodes_storages_with_cs) == 0:
                 if list_nodes_storages_with_cs == list_all_storage_nodes:

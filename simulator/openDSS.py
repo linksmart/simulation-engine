@@ -897,7 +897,7 @@ class OpenDSS:
             if not c0 == None:
                 my_str.append("c0={c0} ")
         else:
-            if not self._linecode == None and self._r1 == None:
+            if not linecode == None and r1 == None:
                 my_str.append("linecode={linecode} ")
             else:
                 # raise Exception("r1 and linecode cannot be entered at the same time")

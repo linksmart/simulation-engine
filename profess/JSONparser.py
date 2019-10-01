@@ -165,5 +165,5 @@ class JsonParser:
 
         if node_list != []:
             return node_list
-        else: return 0
+        else: return None
 
