@@ -270,7 +270,7 @@ class gridController(threading.Thread):
 
                 node_names_for_profiles = self.profev.json_parser.get_node_name_list(soc_list)
                 #logger.debug("node names " + str(node_names_for_profiles))
-                professLoads = self.sim.getProfessLoadschapes( hours, 24)
+                professLoads = self.sim.getProfessLoadschapes(hours, 24)
                 #logger.debug("loads "+str(professLoads))
                 professPVs = self.sim.getProfessLoadschapesPV(hours, 24)
                 #logger.debug("PVs "+str(professPVs))
@@ -288,7 +288,7 @@ class gridController(threading.Thread):
 
                 if flag_global_control:
                     #logger.debug("global control present")
-                    if hours % 23:
+                    if not hours % 23:
                         profess_global_profile_global = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
                         logger.debug("global profile "+str(profess_global_profile_global))
                         profess_global_profile = profess_global_profile_global[int(hours):int(hours+24)]
@@ -431,10 +431,15 @@ class gridController(threading.Thread):
                             price_profile = price_profile_data[int(hours):int(hours + 24)]
 
                     if flag_global_control:
-                        logger.debug("global control present")
-                        profev_global_profile = self.global_control.gesscon(profevLoads, profevPVs, price_profile,
-                                                                             soc_list_new)
-                        logger.debug("GESSCon result " + str(profev_global_profile))
+                        # logger.debug("global control present")
+                        if not hours % 23:
+                            profev_global_profile_global = self.global_control.gesscon(profevLoads, profevPVs,
+                                                                                        price_profile, soc_list_new)
+                            logger.debug("global profile " + str(profess_global_profile_global))
+                            profev_global_profile = profev_global_profile_global[int(hours):int(hours + 24)]
+                        else:
+                            profev_global_profile = profev_global_profile_global[int(hours):int(hours + 24)]
+
 
 
                     if flag_global_control:
