@@ -149,11 +149,11 @@ class GESSCon():
                 #payload_json = json.dumps(payload_dict)
 
                 # MQTT
-                ca_cert_path = "/etc/openvpn/s4g-ca.crt"
-                #ca_cert_path = "C://Program Files/OpenVPN/config"
-                mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path, set_insecure=True, id=None)
+                #ca_cert_path_input = "/etc/openvpn/s4g-ca.crt"
+                ca_cert_path_input = "/usr/src/app/openvpn/s4g-ca.crt"
+                mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path_input, set_insecure=True, id=None)
                 mqtt_receive = MQTTClient("10.8.0.50", 8883, "gesscon_receive", keepalive=60, username="fronius-fur",
-                                        password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path,
+                                        password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path_input,
                                         set_insecure=True, id=None)
                 mqtt_receive.subscribe_to_topics([("GessconSimulationOutput",2)], self.on_msg_received)
                 logger.debug("successfully subscribed")
