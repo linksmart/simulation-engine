@@ -66,11 +66,11 @@ class GESSCon():
                 for s in (Soc):
                         soc_node = list(s.keys())[0]
                         soc_nodes.append(soc_node)
-                        soc_ids.append(s[soc_node]['id'])
-                        soc_values.append(s[soc_node]['SoC'])
-                        b_max.append(s[soc_node]['Battery_Capacity'])
-                        pc_max.append(s[soc_node]['max_charging_power'])
-                        pd_max.append(s[soc_node]['max_discharging_power'])
+                        soc_ids.append(s[soc_node]['ESS']['id'])
+                        soc_values.append(s[soc_node]['ESS']['SoC'])
+                        b_max.append(s[soc_node]['ESS']['Battery_Capacity'])
+                        pc_max.append(s[soc_node]['ESS']['max_charging_power'])
+                        pd_max.append(s[soc_node]['ESS']['max_discharging_power'])
                 tele = {"SOC": soc_values}
                 config = {
                         "ESS_number": len_soc,
@@ -180,7 +180,7 @@ class GESSCon():
                 if "data" in payload.keys():
                         self.payload = payload
 #Dummy Data
-"""price = [1.909825, 1.83985, 1.8422625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.019425]
+price = [1.909825, 1.83985, 1.8422625, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.019425]
 
 storage = {"storageUnits": [
         {
@@ -236,9 +236,8 @@ load = [{'633':
 0, 0, 9]}},
 {'671': {'671.1.2.3': [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0]}}]
-
-
+Soc = [{'node_a6': {'ESS': {'SoC': 40.0, 'T_SoC': 25, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5, 'charge_efficiency': 90, 'discharge_efficiency': 90}, 'Grid': {'Q_Grid_Max_Export_Power': 6, 'P_Grid_Max_Export_Power': 6}, 'PV': {'pv_name': 'PV_2'}}}]
 g = GESSCon()
-Soc = g.get_ESS_data_format(storage)
+#Soc = g.get_ESS_data_format(storage)
 start_date = datetime.datetime.strptime("2018.10.04 00:00:00", '%Y.%m.%d %H:%M:%S')
-output = g.gesscon(load, pv, price, Soc, start_date.timestamp())"""
+output = g.gesscon(load, pv, price, Soc, start_date.timestamp())
