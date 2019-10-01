@@ -113,7 +113,23 @@ def create_simulation(body):  # noqa: E501
                         message = "Power profile IDs in loads and powerProfile do not match"
                         logger.error(message)
                         return message
-            logger.debug("Power Profile IDs successfully checked")
+                logger.debug("Power Profile IDs successfully checked")
+                logger.debug("Checking for Interval values")
+                for power_profile in power_profiles:
+                    count_items = len(power_profile['items'])
+                    if power_profile['interval']:
+                        if count_items*power_profile['interval'] >= 24:
+                            continue
+                    elif power_profile['m_interval']:
+                        if count_items * power_profile['m_interval'] >= 24*60:
+                            continue
+                    elif power_profile['s_interval']:
+                        if count_items * power_profile['s_interval'] >= 24*3600:
+                            continue
+                    else:
+                        message = "Error: The number of items in powerProfile should be according to the interval given"
+                        return message
+                logger.debug("Interval values successfully checked")
 
             if "storageUnits" in values.keys() and values["storageUnits"] is not None:
                 logger.debug("Checking Storage")

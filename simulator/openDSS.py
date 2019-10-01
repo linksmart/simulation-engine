@@ -1055,8 +1055,15 @@ class OpenDSS:
                     for powerprofile in powerprofiles:
                         if(powerprofile_id == powerprofile['id']):
                             items = powerprofile['items']
-                            if powerprofile['multiplier']:
-                                items = [item * powerprofile['multiplier'] for item in items]
+                            mult = 1
+                            if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
+                                mult = powerprofile['multiplier']
+                            if powerprofile['interval']:
+                                items = [item * mult for item in items]
+                            elif powerprofile['m_interval']:
+                                items = [item * mult for item in items[::60]]
+                            elif powerprofile['s_interval']:
+                                items = [item * mult for item in items[::3600]]
                             load_profile_data.extend(items)
                 else:
                     # ----------get_a_profile---------------#

@@ -15,7 +15,7 @@ class Load(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus: str=None, phases: int=None, connection_type: str=None, model: int=None, k_v: float=None, k_w: float=None, k_var: float=None):  # noqa: E501
+    def __init__(self, id: str=None, bus: str=None, phases: int=None, connection_type: str=None, model: int=None, k_v: float=None, k_w: float=None, k_var: float=None, power_profile_id: str=None):  # noqa: E501
         """Load - a model defined in Swagger
 
         :param id: The id of this Load.  # noqa: E501
@@ -34,6 +34,8 @@ class Load(Model):
         :type k_w: float
         :param k_var: The k_var of this Load.  # noqa: E501
         :type k_var: float
+        :param power_profile_id: The power_profile_id of this Load.  # noqa: E501
+        :type power_profile_id: str
         """
         self.swagger_types = {
             'id': str,
@@ -43,7 +45,8 @@ class Load(Model):
             'model': int,
             'k_v': float,
             'k_w': float,
-            'k_var': float
+            'k_var': float,
+            'power_profile_id': str
         }
 
         self.attribute_map = {
@@ -54,7 +57,8 @@ class Load(Model):
             'model': 'model',
             'k_v': 'kV',
             'k_w': 'kW',
-            'k_var': 'kVar'
+            'k_var': 'kVar',
+            'power_profile_id': 'power_profile_id'
         }
 
         self._id = id
@@ -65,6 +69,7 @@ class Load(Model):
         self._k_v = k_v
         self._k_w = k_w
         self._k_var = k_var
+        self._power_profile_id = power_profile_id
 
     @classmethod
     def from_dict(cls, dikt) -> 'Load':
@@ -262,3 +267,24 @@ class Load(Model):
         """
 
         self._k_var = k_var
+
+    @property
+    def power_profile_id(self) -> str:
+        """Gets the power_profile_id of this Load.
+
+
+        :return: The power_profile_id of this Load.
+        :rtype: str
+        """
+        return self._power_profile_id
+
+    @power_profile_id.setter
+    def power_profile_id(self, power_profile_id: str):
+        """Sets the power_profile_id of this Load.
+
+
+        :param power_profile_id: The power_profile_id of this Load.
+        :type power_profile_id: str
+        """
+
+        self._power_profile_id = power_profile_id

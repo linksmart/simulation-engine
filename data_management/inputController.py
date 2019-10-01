@@ -137,7 +137,7 @@ class InputController:
         self.object = object
         for element in powerprofile:
             items = element['items']
-            if element['multiplier']:
+            if 'multiplier' in element.keys() and element['multiplier'] is not None:
                 items = [item * element['multiplier'] for item in items]
             npts = len(items)
             message = self.sim.setLoadshape(element['id'], npts, element['interval'], items)
