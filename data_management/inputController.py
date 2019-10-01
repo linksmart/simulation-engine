@@ -6,6 +6,7 @@ Created on Jul 16 14:13 2018
 import json
 
 import os
+import math
 
 import datetime
 import logging
@@ -17,7 +18,7 @@ logger = logging.getLogger(__file__)
 
 class InputController:
 
-    def __init__(self, id, sim_instance, sim_days):
+    def __init__(self, id, sim_instance, sim_hours):
         self.stop_request = False
         self.id = id
         self.sim= sim_instance
@@ -25,7 +26,7 @@ class InputController:
         self.country = None
         self.profiles = None
         self.profess = None
-        self.sim_days = sim_days
+        self.sim_hours = sim_hours
         self.voltage_bases = None
         self.base_frequency = 60
         self.price_profile = None
@@ -150,9 +151,19 @@ class InputController:
             logger.error(error)
             return error
 
-    def get_price_profile_from_server(self, city, country, sim_days):
-        price_profile_data= self.profiles.price_profile(city,country,sim_days)
+    def get_price_profile_from_server(self, city, country, sim_hours):
+        price_profile_data= self.profiles.price_profile(city, country, sim_hours)
         return price_profile_data
+
+    def is_price_profile_needed(self,topology):
+        radial = topology["radials"]
+        flag_to_return = False
+        for values in radial:
+            if "storageUnits" in values.keys():
+                for ess_element in values["storageUnits"]:
+                    if ess_element["optimization_model"] == "MinimizeCosts":
+                        return True
+        return flag_to_return
 
     def is_price_profile(self):
         self.price_profile
@@ -170,9 +181,9 @@ class InputController:
         logger.debug("loadshapes charged")
         return message
 
-    def setLoadshapes(self, id, loads, sim_days):
+    def setLoadshapes(self, id, loads, sim_hours):
         logger.debug("Charging the loadshapes into the simulator from profiles")
-        message = self.sim.setLoadshapes(loads, sim_days, self.profiles, self.profess)
+        message = self.sim.setLoadshapes(loads, sim_hours, self.profiles, self.profess)
         logger.debug("loadshapes from profiles charged")
         return message
 
@@ -188,12 +199,186 @@ class InputController:
         logger.debug("ESS charged")
         return message
 
-    def setChargingPoints(self, id, object):
-        logger.debug("Charging the charging points into the simulator")
-        self.object = object
-        message = self.sim.setChargingPoints(self.object)
-        logger.debug("Charging points charged")
+    def setChargingStations(self, id, object):
+        logger.debug("Charging the charging stations into the simulator")
+        message = self.sim.setChargingStations(object)
+        logger.debug("Charging stations charged")
         return message
+
+    def get_PV_names(self, topology):
+        PV_names = []
+        radial = topology["radials"]  # ["storageUnits"]
+        photovoltaics = []
+        for element in radial:
+            for key, value in element.items():
+                if key == "photovoltaics":
+                    photovoltaics = value
+
+        for pv_element in photovoltaics:
+            PV_names.append(pv_element["id"])
+        return PV_names
+
+    def get_Storage_names(self, topology):
+        Storage_names = []
+        radial = topology["radials"]  # ["storageUnits"]
+        storages = []
+
+        for element in radial:
+            for key, value in element.items():
+                if key == "storageUnits":
+                    storages = value
+
+        for ess_element in storages:
+            Storage_names.append(ess_element["id"])
+        return Storage_names
+
+    def get_Storage_nodes(self, topology):
+        Storage_nodes = []
+        radial = topology["radials"]  # ["storageUnits"]
+        storages = []
+
+        for element in radial:
+            for key, value in element.items():
+                if key == "storageUnits":
+                    storages = value
+
+        for ess_element in storages:
+            Storage_nodes.append(ess_element["bus1"])
+        return Storage_nodes
+
+    def get_soc_list(self,topology):
+        radial=topology["radials"]#["storageUnits"]
+        common=topology["common"]
+        list_storages=[]
+        soc_list = []
+        soc_dict_intern = {"SoC":None}
+        charging_station = []
+        photovoltaics = []
+        storages = []
+        for element in radial:
+            for key, value in element.items():
+                if key == "chargingStations":
+                    charging_station = value
+                if key == "storageUnits":
+                    storages = value
+                if key == "photovoltaics":
+                    photovoltaics = value
+
+        charging_station_buses =[]
+        for cs in charging_station:
+            charging_station_buses.append(cs["bus"])
+
+        for ess_element in storages:
+            if not ess_element["bus1"] in charging_station_buses:
+                soc_dict = {}
+                #logger.debug("element intern "+str(ess_element))
+                soc_dict[ess_element["bus1"]]={"ESS":{"SoC":ess_element["soc"],
+                                                        "T_SoC":25,
+                                                        "id":ess_element["id"],
+                                                        "Battery_Capacity":ess_element["storage_capacity"],
+                                                        "max_charging_power":ess_element["max_charging_power"],
+                                                        "max_discharging_power":ess_element["max_discharging_power"],
+                                                        "charge_efficiency":ess_element["charge_efficiency"],
+                                                        "discharge_efficiency":ess_element["discharge_efficiency"]},
+                                                "Grid":{
+                                                        "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
+                                                        "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}}
+                for pv_element in photovoltaics:
+                    if pv_element["bus1"] == ess_element["bus1"]:
+                        soc_dict[ess_element["bus1"]]["PV"]={"pv_name": pv_element["id"]}
+                soc_list.append(soc_dict)
+                #list_storages.append(ess_element)
+        #logger.debug("list_storages "+str(list_storages))
+        logger.debug("soc_list " + str(soc_list))
+        return soc_list
+
+    def get_soc_list_evs(self,topology, chargers):
+        radial=topology["radials"]#["storageUnits"]
+        common=topology["common"]
+        list_storages=[]
+        soc_list = []
+        soc_dict_intern = {"SoC":None}
+        charging_station=[]
+        photovoltaics=[]
+        storages = []
+        for element in radial:
+            for key, value in element.items():
+                if key == "chargingStations":
+                    charging_station=value
+                if key == "storageUnits":
+                    storages=value
+                if key == "photovoltaics":
+                    photovoltaics=value
+
+        ess_buses = []
+        for storage_element in storages:
+            ess_buses.append(storage_element["bus1"])
+
+        for key, charger_element in chargers.items():
+            if charger_element.get_bus_name() in ess_buses:
+                soc_dict = {}
+                evs_connected = charger_element.get_EV_connected()
+                for ev_unit in evs_connected:
+                    ev_unit.calculate_position(self.sim_hours + 24, 1)
+                    soc_dict[charger_element.get_bus_name()] = {"EV":{"SoC": ev_unit.get_SoC(),
+                                                                        "id": ev_unit.get_id(),
+                                                                        "Battery_Capacity": ev_unit.get_Battery_Capacity(),
+                                                                        "max_charging_power": charger_element.get_max_charging_power(),
+                                                                        "charge_efficiency": charger_element.get_charging_efficiency()},
+                                                                "Grid":{
+                                                                        "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
+                                                                        "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}
+                                                                }
+
+                    for pv_element in photovoltaics:
+                        if pv_element["bus1"] == charger_element.get_bus_name():
+                            soc_dict[charger_element.get_bus_name()]["PV"]={"pv_name": pv_element["id"]}
+                    for ess_element in storages:
+                        if ess_element["bus1"] == charger_element.get_bus_name():
+                            soc_dict[charger_element.get_bus_name()]["ESS"] = {"SoC":ess_element["soc"],
+                                                            "T_SoC":25,
+                                                            "id":ess_element["id"],
+                                                            "Battery_Capacity":ess_element["storage_capacity"],
+                                                            "max_charging_power":ess_element["max_charging_power"],
+                                                            "max_discharging_power":ess_element["max_discharging_power"],
+                                                            "charge_efficiency":ess_element["charge_efficiency"],
+                                                            "discharge_efficiency":ess_element["discharge_efficiency"]}
+                soc_list.append(soc_dict)
+            #list_storages.append(ess_element)
+        #logger.debug("list_storages "+str(list_storages))
+        #logger.debug("soc_list_evs " + str(soc_list))
+        return soc_list
+
+    def set_new_soc(self, soc_list):
+        #self.sim.getSoCfromBattery("Akku1")
+
+        new_soc_list=[]
+        for element in soc_list:
+            for key, value in element.items():
+                element_id=value["ESS"]["id"]
+                SoC = float(self.sim.getSoCfromBattery(element_id))
+                value["ESS"]["SoC"]=SoC
+                new_soc_list.append(element)
+        #logger.debug("new soc list: " + str(new_soc_list))
+        return new_soc_list
+
+    def set_new_soc_evs(self, soc_list):
+        #self.sim.getSoCfromBattery("Akku1")
+
+        new_soc_list=[]
+        for element in soc_list:
+            for key, value in element.items():
+                element_id = value["ESS"]["id"]
+                SoC = float(self.sim.getSoCfromBattery(element_id))
+                value["ESS"]["SoC"] = SoC
+                element_id = element_id = "ESS_" + value["EV"]["id"]
+                SoC = float(self.sim.getSoCfromBattery(element_id))
+                value["EV"]["SoC"] = SoC
+                new_soc_list.append(element)
+
+        #logger.debug("new soc list: " + str(new_soc_list))
+        return new_soc_list
+
 
     def is_Charging_Station_in_Topology(self, topology):
         # topology = profess.json_parser.get_topology()
@@ -205,19 +390,42 @@ class InputController:
                 flag_to_return = True
         return flag_to_return
 
-    def is_Storage_in_Topology(self, topology):
+    def get_list_nodes_storages_with_charging_station(self, radial, chargers):
+        for element in radial:
+            for key, value in element.items():
+                if key == "storageUnits":
+                    storages = value
+
+        list_nodes_storages_with_cs=[]
+        for key, charger_element in chargers.items():
+            for ess_element in storages:
+                if ess_element["bus1"] == charger_element.get_bus_name():
+                    list_nodes_storages_with_cs.append(ess_element["bus1"])
+        return list_nodes_storages_with_cs
+
+    def is_Storage_in_Topology_without_charging_station(self, topology, chargers=None):
         # topology = profess.json_parser.get_topology()
         # logger.debug("type topology " + str(type(self.topology)))
         radial = topology["radials"]
-        flag_to_return = False
         for values in radial:
-            #values = values.to_dict()
-            # logger.debug("values "+str(values))
-            # for key in values.keys():
-            # logger.debug("key "+str(key))
-            if "storageUnits" in values.keys():
-                flag_to_return = True
-        return flag_to_return
+            if not "storageUnits" in values.keys():
+                return False
+        if not chargers == None:
+            list_nodes_storages_with_cs=self.get_list_nodes_storages_with_charging_station(radial, chargers)
+
+            list_all_storage_nodes = self.get_Storage_nodes(topology)
+
+            if not len(list_nodes_storages_with_cs) == 0:
+                if list_nodes_storages_with_cs == list_all_storage_nodes:
+                    return False
+                else:
+                    return True
+            else:
+                return True
+        else:
+            return True
+
+
 
     def is_global_control_in_Storage(self, topology):
         radial = topology["radials"]
@@ -226,7 +434,8 @@ class InputController:
         flag_to_return = False
         for values in storages_elements:
             if "global_control" in values.keys():
-                flag_to_return = True
+                if values["global_control"]:
+                    flag_to_return = True
         return flag_to_return
 
     def is_city(self, common):
@@ -250,7 +459,7 @@ class InputController:
             return 1
 
     def get_sim_days(self):
-        return self.sim_days
+        return self.sim_hours
 
 
     def setup_elements_in_simulator(self, topology, profiles, profess):
@@ -305,12 +514,18 @@ class InputController:
         self.profess = profess
         common = topology["common"]
         radial = topology["radials"]
+        time_in_days = math.ceil(self.sim_hours / 24) + 1
         if self.is_city(common):
             city = self.get_city(common)
             logger.debug("city " + str(city))
             country = self.get_country(common)
             logger.debug("country " + str(country))
-            self.price_profile = self.get_price_profile_from_server(city,country,self.sim_days)
+            flag_is_price_profile_needed = self.is_price_profile_needed(topology)
+            flag_global_control = self.is_global_control_in_Storage(topology)
+            logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
+            if flag_is_price_profile_needed or flag_global_control:
+                self.price_profile = self.get_price_profile_from_server(city, country, time_in_days)
+                #logger.debug("length price profile "+str(len(self.price_profile)))
 
         for values in radial:
             #logger.debug("values of the radial: "+str(values))
@@ -349,7 +564,7 @@ class InputController:
                 load = values["loads"]
                 # logger.debug("Loads" + str(load))
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                message = self.setLoadshapes(id, load, self.sim_days)
+                message = self.setLoadshapes(id, load, time_in_days)
                 if not message == 0:
                     return message
                 logger.debug("! >>>  ---------------and the Loads afterwards ------------------------- \n")
@@ -371,9 +586,6 @@ class InputController:
                 logger.debug("!---------------Setting Powerlines------------------------- \n")
 
                 powerLines = values["powerLines"]
-                # linecodes = values["linecode"]
-                # factory.gridController.setPowerLines(id, powerLines, linecodes) #TODO: Where does linecodes come from?
-                # logger.debug("Powerlines" + str(powerLines))
                 message = self.setPowerLines(id, powerLines)
                 logger.debug(str(message))
                 if not message == 0:
@@ -393,18 +605,7 @@ class InputController:
                 if not message == 0:
                     return message
 
-            """if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
-                photovoltaics = values["photovoltaics"]
-                #xycurves = radial["xycurves"]
-                #loadshapes = radial["loadshapes"]
-                #tshapes = radial["tshapes"]
-                factory.gridController.setPhotovoltaic(id, photovoltaics)"""  # TODO: fix and remove comment
 
-            """
-            and "xycurves" in radial.values.keys()s() and radial["xycurves"] is not None 
-                            and "loadshapes" in radial.values.keys()s() and radial["loadshapes"] is not None 
-                            and "tshapes" in radial.values.keys()s() and radial["tshapes"] is not None: 
-            """
             if "storageUnits" in values.keys() and values["storageUnits"] is not None:
                 # logger.debug("---------------Setting Storage-------------------------")
                 logger.debug("! ---------------Setting Storage------------------------- \n")
@@ -418,15 +619,11 @@ class InputController:
                 if not message == 0:
                     return message
 
-            """if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
-                # radial=radial.to_dict()
-                chargingPoints = values["chargingPoints"]
-                gridController.setChargingPoints(id, chargingPoints)
-            """
-            if "chargingPoints" in values.keys() and values["chargingPoints"] is not None:
-                # logger.debug("---------------Setting chargingPoints-------------------------")
-                chargingPoints = values["chargingPoints"]
-                message = self.setChargingPoints(id, chargingPoints)
+
+            if "chargingStations" in values.keys() and values["chargingStations"] is not None:
+                logger.debug("---------------Setting charging stations-------------------------")
+                chargingStations = values["chargingStations"]
+                message = self.setChargingStations(id, chargingStations)
                 if not message == 0:
                     return message
 
@@ -438,10 +635,8 @@ class InputController:
             """
 
             if "loadshapes" in values.keys() and values["loadshapes"] is not None:
-                #                logger.debug("---------------Setting loadshapes-------------------------")
                 logger.debug("! ---------------Setting loadshapes------------------------- \n")
                 loadshapes = values["loadshapes"]
-                #                logger.debug("Load Shapes: " + str(loadshapes))
 
                 message = self.setLoadShape(id, loadshapes)
                 if not message == 0:
@@ -456,14 +651,10 @@ class InputController:
             if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
                 logger.debug("! ---------------Setting Photovoltaic------------------------- \n")
                 photovoltaics = values["photovoltaics"]
-                # xycurves = radial["xycurves"]
-                # loadshapes = radial["loadshapes"]
-                # tshapes = radial["tshapes"]
-
 
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(id, photovoltaics, city, country, self.sim_days)
+                    message = self.setPVshapes(id, photovoltaics, city, country, time_in_days)
                     if not message == 0:
                         return message
                     logger.debug("! >>>  ---------------and the PVs afterwards ------------------------- \n")
@@ -477,13 +668,9 @@ class InputController:
                     return error
                 logger.debug("! >>>  ---------------PVs finished ------------------------- \n")
 
-        ######Disables circuits untilo the run simulation is started
-        # factory.gridController.disableCircuit(id)
-
-        # result = factory.gridController.run(profess)
 
         return id
-        # return " Result: " + str(result)
+
 
 
 

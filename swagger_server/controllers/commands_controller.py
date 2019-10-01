@@ -176,13 +176,13 @@ class CommandController:
             status = self.get(id).is_running()
             flag = self.redisDB.get("run:" + id)
             logger.debug("Control run_status: "+str(flag))
-            logger.debug("status " + str(status))
+            #logger.debug("status " + str(status))
             if status == "True" or (flag is not None and flag == "stop"):
                 logger.debug("Control run_status: "+str(flag))
                 self.redisDB.set("run:" + id, "stopping")
                 self.abort(id)
                 break
-            time.sleep(1)
+            time.sleep(2)
 
 variable = CommandController()
 
