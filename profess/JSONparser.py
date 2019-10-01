@@ -132,6 +132,8 @@ class JsonParser:
         for element in soc_list:
             for node_name in element.keys():
                 node_list.append(node_name)
+        if not node_list == []:
+            node_list = list(dict.fromkeys(node_list))
 
         #logger.debug("node list "+str(node_list))
         """pv_node_list = []

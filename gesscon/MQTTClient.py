@@ -6,6 +6,7 @@ import time
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 
+
 class MQTTClient:
 
     def __init__(self, host, mqttPort, client_id, keepalive=60, username=None, password=None, ca_cert_path=None,
@@ -24,12 +25,12 @@ class MQTTClient:
         self.messages = ""
         self.client = mqtt.Client(client_id, clean_session=False)
         if username is not None and password is not None:
-            self.logger.debug("u "+username+" p "+password)
+            self.logger.debug("u " + username + " p " + password)
             self.client.username_pw_set(username, password)
         if ca_cert_path is not None and len(ca_cert_path) > 0:
             self.logger.debug("ca " + ca_cert_path)
             self.client.tls_set(ca_certs=ca_cert_path)
-            self.logger.debug("insec "+str(set_insecure))
+            self.logger.debug("insec " + str(set_insecure))
             if not isinstance(set_insecure, bool):
                 set_insecure = bool(set_insecure)
             self.client.tls_insecure_set(set_insecure)
@@ -39,23 +40,22 @@ class MQTTClient:
         self.client.on_subscribe = self.on_subscribe
         self.client.on_disconnect = self.on_disconnect
 
-        self.logger.info("Trying to connect to the MQTT broker "+str(self.host)+" "+str(self.port))
+        self.logger.info("Trying to connect to the MQTT broker " + str(self.host) + " " + str(self.port))
         try:
             self.client.connect(self.host, self.port, self.keepalive)
         except Exception as e:
             self.connected = False
-            msg = "Invalid MQTT host "+str(self.host)+" "+str(self.port)
-            self.logger.error("Error connecting client "+str(self.host)+" "+str(self.port) + " " + str(e))
+            msg = "Invalid MQTT host " + str(self.host) + " " + str(self.port)
+            self.logger.error("Error connecting client " + str(self.host) + " " + str(self.port) + " " + str(e))
             raise InvalidMQTTHostException(msg)
 
-        #self.client.loop_forever()
+        # self.client.loop_forever()
         self.client.loop_start()
 
         # Blocking call that processes network traffic, dispatches callbacks and
         # handles reconnecting.
         # Other loop*() functions are available that give a threaded interface and a
         # manual interface.
-
 
     def on_connect(self, client, userdata, flags, rc):
         self.logger.info("Connected with result code " + str(rc))
@@ -64,21 +64,20 @@ class MQTTClient:
             client.connected_Flag = True
             self.logger.info("Connected to the broker")
         else:
-            self.logger.error("Error connecting to broker "+str(rc))
+            self.logger.error("Error connecting to broker " + str(rc))
 
     def on_disconnect(self, *args):
         self.logger.error("Disconnected to broker")
         self.logger.info(str(args))
-	    
-    def on_message(self,client, userdata, message):
+
+    def on_message(self, client, userdata, message):
         # print("Message received")
         self.callback_function(message.payload.decode())
-
 
     def sendResults(self, topic, data, qos):
         try:
             if self.connected:
-                self.logger.debug("Sending results to this topic: "+topic)
+                self.logger.debug("Sending results to this topic: " + topic)
                 self.publish(topic, data, qos=qos)
                 self.logger.debug("Results published")
         except Exception as e:
@@ -89,10 +88,10 @@ class MQTTClient:
             mid = self.client.publish(topic, message, qos)[1]
             if (waitForAck):
                 while mid not in self.receivedMessages:
-                    self.logger.debug("waiting for pub ack for topic "+str(topic))
+                    self.logger.debug("waiting for pub ack for topic " + str(topic))
                     time.sleep(0.25)
 
-    def on_publish(self,client, userdata, mid):
+    def on_publish(self, client, userdata, mid):
         self.receivedMessages.append(mid)
 
     def MQTTExit(self):
@@ -121,7 +120,9 @@ class MQTTClient:
                 self.logger.info("Subscribing to topics with qos: " + str(topics_qos))
                 result, mid = self.client.subscribe(topics_qos)
                 if result == 0:
-                    self.logger.debug("Subscribed to topics: "+ str(topics_qos) + " result = " + str(result) + " , mid = " + str(mid))
+                    self.logger.debug(
+                        "Subscribed to topics: " + str(topics_qos) + " result = " + str(result) + " , mid = " + str(
+                            mid))
                     self.callback_function = callback_function
                     return mid
                 else:
@@ -144,9 +145,9 @@ class MQTTClient:
                 if mid in self.topic_sub_ack:
                     return True
                 else:
-                    self.logger.info("topic sub ack len = "+str(len(self.topic_sub_ack)))
+                    self.logger.info("topic sub ack len = " + str(len(self.topic_sub_ack)))
                 time.sleep(1)
-                count+=1
+                count += 1
             self.topic_sub_ack.remove(mid)
         return False
 
