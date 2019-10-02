@@ -68,7 +68,7 @@ class GESSCon():
                         soc_node = list(s.keys())[0]
                         soc_nodes.append(soc_node)
                         soc_ids.append(s[soc_node]['ESS']['id'])
-                        soc_values.append(s[soc_node]['ESS']['SoC'])
+                        soc_values.append(s[soc_node]['ESS']['SoC']/100)
                         b_max.append(s[soc_node]['ESS']['Battery_Capacity'])
                         pc_max.append(s[soc_node]['ESS']['max_charging_power'])
                         pd_max.append(s[soc_node]['ESS']['max_discharging_power'])
@@ -151,7 +151,7 @@ class GESSCon():
                 #payload_json = json.dumps(payload_dict)
 
                 # MQTT
-                #ca_cert_path_input = "/etc/openvpn/s4g-ca.crt"
+                ca_cert_path_input = "/etc/openvpn/s4g-ca.crt"
                 ca_cert_path_input = "/usr/src/app/openvpn/s4g-ca.crt"
                 mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path_input, set_insecure=True, id=None)
                 mqtt_receive = MQTTClient("10.8.0.50", 8883, "gesscon_receive", keepalive=60, username="fronius-fur",
@@ -172,7 +172,9 @@ class GESSCon():
                 if "data" in self.payload.keys() and self.payload["data"] is not None:
                         dict_data = self.payload['data']
                         for node_data, node, id in zip(dict_data, soc_nodes, soc_ids):
-                                id_output = {id: node_data}
+                                node_data_double = node_data.copy()
+                                node_data_double.extend(node_data)
+                                id_output = {id: node_data_double}
                                 output_node = {node: id_output}
                                 output_list.append(output_node)
                 mqtt_send.MQTTExit()
@@ -193,7 +195,7 @@ storage = {"storageUnits": [
                 "bus1": "633",
                 "phases": 3,
                 "connection": "wye",
-                "soc": 0.1,
+                "soc": 40,
                 "dod": 0,
                 "kv": 0,
                 "kw_rated": 0,
@@ -210,7 +212,7 @@ storage = {"storageUnits": [
                 "bus1": "671",
                 "phases": 3,
                 "connection": "wye",
-                "soc": 0.2,
+                "soc": 20,
                 "dod": 0,
                 "kv": 0,
                 "kw_rated": 0,
@@ -237,8 +239,8 @@ load = [{'633':
 0, 0, 9]}},
 {'671': {'671.1.2.3': [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0]}}]
-Soc = [{'node_a6': {'ESS': {'SoC': 40.0, 'T_SoC': 25, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5, 'charge_efficiency': 90, 'discharge_efficiency': 90}, 'Grid': {'Q_Grid_Max_Export_Power': 6, 'P_Grid_Max_Export_Power': 6}, 'PV': {'pv_name': 'PV_2'}}}]
+Soc = [{'node_a6': {'ESS': {'SoC': 50.0, 'T_SoC': 25, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5, 'charge_efficiency': 90, 'discharge_efficiency': 90}, 'Grid': {'Q_Grid_Max_Export_Power': 6, 'P_Grid_Max_Export_Power': 6}, 'PV': {'pv_name': 'PV_2'}}}]
 g = GESSCon()
 #Soc = g.get_ESS_data_format(storage)
 start_date = datetime.datetime.strptime("2018.10.04 10:12:03", '%Y.%m.%d %H:%M:%S')
-output = g.gesscon(load, pv, price, Soc, start_date.timestamp())"""
+output = g.gesscon(load, pv, price, Soc)"""
