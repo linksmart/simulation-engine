@@ -18,7 +18,7 @@ services:
     build:
       context: ""
       dockerfile: Dockerfile
-    image: linksmart/simulation-engine
+    image: garagon/simulation-engine
     container_name: "se"
     depends_on:
       - redis

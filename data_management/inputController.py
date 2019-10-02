@@ -151,6 +151,21 @@ class InputController:
             logger.error(error)
             return error
 
+    # profess_global_profile =[{'node_a6': {
+    # 'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
+    # 0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]
+    def get_profile(self, data, start, number_of_points):
+        data_list=[]
+
+        for element in data:
+            data_dict = {}
+            for node_name, value in element.items():
+                data_dict[node_name]={}
+                for battery_name, profile in value.items():
+                    data_dict[node_name][battery_name] = profile[int(start):int(start+number_of_points)]
+            data_list.append(data_dict)
+        return data_list
+
     def get_price_profile_from_server(self, city, country, sim_hours):
         price_profile_data= self.profiles.price_profile(city, country, sim_hours)
         return price_profile_data

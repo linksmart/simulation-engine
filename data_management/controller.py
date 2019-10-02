@@ -236,6 +236,7 @@ class gridController(threading.Thread):
             soc_list = self.input.get_soc_list(self.topology)
 
         flag_global_control = self.input.is_global_control_in_Storage(self.topology)
+        profess_global_profile_total=[]
         logger.debug("Global control flag: " + str(flag_global_control))
 
         logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
@@ -288,12 +289,26 @@ class gridController(threading.Thread):
 
                 if flag_global_control:
                     #logger.debug("global control present")
-                    if not hours % 23:
-                        profess_global_profile_global = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
-                        logger.debug("global profile "+str(profess_global_profile_global))
-                        profess_global_profile = profess_global_profile_global[int(hours):int(hours+24)]
+                    logger.debug("hours "+str(hours)+" not hours % 23 "+str(not (hours % 23)))
+
+                    if not (hours % 23):
+                        #profess_global_profile_total = self.global_control.gesscon(professLoads, professPVs, price_profile, soc_list_new)
+                        #logger.debug("global profile "+str(profess_global_profile_total))
+                        profess_global_profile_total = [{'node_a6': {
+                            'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
+                                  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                      0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
+                                  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]
+
+                    if not profess_global_profile_total == []:
+                        profess_global_profile = self.input.get_profile(profess_global_profile_total, hours, 24)
+                        logger.debug("profess_global_profile "+str(profess_global_profile))
+
                     else:
-                        profess_global_profile = profess_global_profile_global[int(hours):int(hours+24)]
+                        logger.error("GESSCon didn't answer to the request")
+
+
+                        #profess_global_profile = profess_global_profile_global[int(hours):int(hours+24)]
                     #profess_global_profile =[{'node_a6': {
                         #'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
                                   #0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]
@@ -430,15 +445,15 @@ class gridController(threading.Thread):
                             logger.debug("price profile present")
                             price_profile = price_profile_data[int(hours):int(hours + 24)]
 
-                    if flag_global_control:
-                        # logger.debug("global control present")
-                        if not hours % 23:
-                            profev_global_profile_global = self.global_control.gesscon(profevLoads, profevPVs,
-                                                                                        price_profile, soc_list_new)
-                            logger.debug("global profile " + str(profess_global_profile_global))
-                            profev_global_profile = profev_global_profile_global[int(hours):int(hours + 24)]
-                        else:
-                            profev_global_profile = profev_global_profile_global[int(hours):int(hours + 24)]
+                    if not (hours % 23):
+                        profev_global_profile_total = self.global_control.gesscon(profevLoads, profevPVs,
+                                                                                   price_profile, soc_list_new)
+                        logger.debug("global profile " + str(profev_global_profile_total))
+
+                    if not profev_global_profile_total == []:
+                        profev_global_profile = self.input.get_profile(profev_global_profile_total, hours, 24)
+                    else:
+                        logger.error("GESSCon didn't answer to the request")
 
 
 

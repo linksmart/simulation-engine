@@ -388,10 +388,11 @@ class Profev:
             node_name_list = self.json_parser.get_node_name_list(soc_list)
 
         if not node_name_list == None:
-            storage_opt_model=None
+            storage_opt_model = None
             for node_name in node_name_list:
                 # search for list with all elemens that are connected to bus: node_name
-                element_node = (next(item for item in self.json_parser.get_node_element_list(soc_list) if node_name in item))
+                element_node = (
+                    next(item for item in self.json_parser.get_node_element_list(soc_list) if node_name in item))
                 solver = "cbc"
                 for node_element in element_node[node_name]:
                     if "storageUnits" in node_element:
@@ -399,14 +400,16 @@ class Profev:
                         storage_opt_model = storage["storageUnits"]["optimization_model"]
                         global_control = storage["storageUnits"]["global_control"]
 
-                        type=None
-                        for charger_name, charger_element in chargers.items():
-                            node = charger_element.get_bus_name()
-                            #logger.debug("node name "+str(node_name)+" node "+str(node))
-                            if node == node_name:
-                                type = charger_element.get_type_application()
+                        type = None
+                        if not chargers == None:
+                            for charger_name, charger_element in chargers.items():
+                                node = charger_element.get_bus_name()
+                                # logger.debug("node name "+str(node_name)+" node "+str(node))
+                                if node == node_name:
+                                    type = charger_element.get_type_application()
 
                         if not type == None:
+                            type_optimization = "stochastic"
                             if type == "residential" and storage_opt_model == "Maximize Self-Consumption":
                                 storage_opt_model = "StochasticResidentialMaxPV"
                                 solver = "cbc"
@@ -428,6 +431,7 @@ class Profev:
                                 solver = "ipopt"
                                 single_ev = False
                         else:
+                            type_optimization = "discrete"
                             if storage_opt_model == "Maximize Self-Consumption" and not global_control:
                                 solver = "cbc"
                                 single_ev = False
@@ -450,15 +454,15 @@ class Profev:
                                 solver = "cbc"
                                 single_ev = False
 
-
-                logger.debug("optimization model: "+str(storage_opt_model) + " single_ev "+str(single_ev))
+                logger.debug("optimization model: " + str(storage_opt_model) + " single_ev " + str(single_ev))
                 if storage_opt_model == None:
-                    logger.error("No optimization model given for storage element " + str(node_element["storageUnits"]["id"]))
+                    logger.error(
+                        "No optimization model given for storage element " + str(node_element["storageUnits"]["id"]))
                     break
 
-                time.sleep(0.2)
-                start_response = self.start(1, 24, 3600, storage_opt_model, 1, solver, "stochastic",
+                start_response = self.start(1, 24, 3600, storage_opt_model, 1, solver, type_optimization,
                                             self.get_profess_id(node_name, soc_list), single_ev)
+
                 if start_response is None:
                     break
                     return 1

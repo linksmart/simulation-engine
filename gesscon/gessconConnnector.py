@@ -160,7 +160,7 @@ class GESSCon():
                 mqtt_send.publish("GessconSimulationInput", payload, False)
                 # Checks for output from GESSCon for atmost 15 seconds
                 t = 0
-                while t<= 15:
+                while t<= 60:
                         if not self.payload_set:
                                 t = t + 1
                                 time.sleep(1)
