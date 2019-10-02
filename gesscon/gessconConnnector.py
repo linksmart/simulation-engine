@@ -118,9 +118,11 @@ class GESSCon():
                 #string to date
                 #start_date = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
                 if not timestamp:
-                        start_date = datetime.datetime.now()
+                        start_date = datetime.datetime.now().strftime("%Y.%m.%d 00:00:00")
                 else:
-                        start_date = datetime.datetime.fromtimestamp(timestamp)
+                        start_date = datetime.datetime.fromtimestamp(timestamp).strftime("%Y.%m.%d 00:00:00")
+                # timestamp from date to date format
+                start_date = datetime.datetime.strptime(start_date, '%Y.%m.%d %H:%M:%S')
                 #timestamp from date to date format
                 start_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
                 for val in range(24):
@@ -238,5 +240,5 @@ load = [{'633':
 Soc = [{'node_a6': {'ESS': {'SoC': 40.0, 'T_SoC': 25, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5, 'charge_efficiency': 90, 'discharge_efficiency': 90}, 'Grid': {'Q_Grid_Max_Export_Power': 6, 'P_Grid_Max_Export_Power': 6}, 'PV': {'pv_name': 'PV_2'}}}]
 g = GESSCon()
 #Soc = g.get_ESS_data_format(storage)
-start_date = datetime.datetime.strptime("2018.10.04 00:00:00", '%Y.%m.%d %H:%M:%S')
-output = g.gesscon(load, pv, price, Soc, start_date.timestamp()"""
+start_date = datetime.datetime.strptime("2018.10.04 10:12:03", '%Y.%m.%d %H:%M:%S')
+output = g.gesscon(load, pv, price, Soc, start_date.timestamp())"""
