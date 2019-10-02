@@ -375,7 +375,7 @@ class Profev:
             logger.error("Failed to start optimization, No connection to the OFW could be established at :" + str(
                 self.domain) + "optimization/start/")
 
-    def start_all(self, soc_list=None, chargers=None):
+    def start_all(self, soc_list=None, chargers=None, soc_list_total=None):
         """
         starts all optimizations on the relevant nodes (nodes with ESS)
         :param optimization_model: optional optimization_model, when no model is given the models in the ESS definition
@@ -459,9 +459,9 @@ class Profev:
                     logger.error(
                         "No optimization model given for storage element " + str(node_element["storageUnits"]["id"]))
                     break
-
+                profess_id = self.get_profess_id(node_name, soc_list)
                 start_response = self.start(1, 24, 3600, storage_opt_model, 1, solver, type_optimization,
-                                            self.get_profess_id(node_name, soc_list), single_ev)
+                                            profess_id, single_ev)
 
                 if start_response is None:
                     break
@@ -978,15 +978,20 @@ class Profev:
 
                     self.update_config_json(profess_id, self.dataList[node_index][node_name][profess_id])
 
-    def get_profess_id(self, node_name, soc_list):
+    def get_profess_id(self, node_name_input, soc_list):
         """
         :param node_name: bus name
         :return: profess_id which is the optimization id of the optimization on node_name
         """
-        node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
+        #node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
         profess_id = 0
-        for element in self.dataList[node_number][node_name]:
-            profess_id = element
+        for element in self.dataList:
+            for node_name, value in element.items():
+                for id, rest in value.items():
+                    if node_name_input == node_name:
+                        profess_id = id
+        #for element in self.dataList[node_number][node_name]:
+            #profess_id = element
         return profess_id
 
     def get_node_name(self, profess_id, soc_list):

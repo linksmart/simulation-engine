@@ -130,6 +130,7 @@ class JsonParser:
         storage_node_list = []
         node_list = []
         for element in soc_list:
+            #logger.debug("element "+str(element))
             for node_name in element.keys():
                 node_list.append(node_name)
         if not node_list == []:

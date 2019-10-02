@@ -450,7 +450,7 @@ class InputController:
                     new_soc_list.append(element)
 
         if soc_list_commercial == None and soc_list_residential == None:
-            new_soc_list = None
+            new_soc_list = []
         #logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
 
@@ -479,10 +479,12 @@ class InputController:
         # topology = profess.json_parser.get_topology()
         # logger.debug("type topology " + str(type(self.topology)))
         radial = topology["radials"]
+
         flag_to_return = False
         for values in radial:
-            if "chargingStations" in values.keys():
-                flag_to_return = True
+            for key, data in values.items():
+                if key == "chargingStations" and len(data) >0:
+                    flag_to_return = True
         return flag_to_return
 
     def get_nodes_Charging_Station_in_Topology(self, chargers):
@@ -536,6 +538,10 @@ class InputController:
         for values in radial:
             if not "storageUnits" in values.keys():
                 return False
+            for key, data in values.items():
+                if key == "storageUnits" and len(data) == 0:
+                    return False
+
         if not chargers == None:
             list_nodes_storages_with_cs=self.get_list_nodes_storages_with_charging_station(radial, chargers)
             list_nodes_storages_with_cs = list(dict.fromkeys(list_nodes_storages_with_cs))

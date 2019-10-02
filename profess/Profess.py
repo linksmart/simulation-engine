@@ -817,7 +817,7 @@ class Profess:
         """
         # logger.debug("data for nodes is set")
         node_element_list = self.json_parser.get_node_element_list(soc_list)
-        logger.debug("node element list " + str(node_element_list))
+        #logger.debug("node element list " + str(node_element_list))
         for index in range(len(node_element_list)):
             for node_name in (node_element_list[index]):
                 node_element_list[index] = {node_name: {}}
