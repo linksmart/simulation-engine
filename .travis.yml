@@ -12,11 +12,11 @@ before_deploy:
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 deploy:
   - provider: script
-    script: docker push linksmart/simulation-engine:latest
+    script: docker push garagon/simulation-engine:latest
     on:
       branch: master
   - provider: script
-    script: docker tag linksmart/simulation-engine linksmart/simulation-engine:${TRAVIS_TAG} &&
-      docker push linksmart/simulation-engine:${TRAVIS_TAG}
+    script: docker tag garagon/simulation-engine garagon/simulation-engine:${TRAVIS_TAG} &&
+      docker push garagon/simulation-engine:${TRAVIS_TAG}
     on:
       tags: true
