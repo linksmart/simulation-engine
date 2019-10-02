@@ -9,6 +9,7 @@ Created on Fri Mar 16 15:05:36 2018
 import logging
 import math
 import random
+import re
 import opendssdirect as dss
 from data_management.redisDB import RedisDB
 
@@ -1012,6 +1013,9 @@ class OpenDSS:
 
         #!logger.debug("Setting up the loads")
         self.loads=loads
+        interval = 1
+        npts = 0
+        mult = []
         try:
             for element in self.loads:
                 load_name = element["id"]
@@ -1021,47 +1025,61 @@ class OpenDSS:
                 self.bus_name=bus_name
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
                     powerprofile_id = element['power_profile_id']
-                    load_profile_data = []
-                    for powerprofile in powerprofiles:
-                        if(powerprofile_id == powerprofile['id']):
-                            items = powerprofile['items']
-                            mult = 1
-                            if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
-                                mult = powerprofile['multiplier']
-                            if powerprofile['interval']:
-                                items = [item * mult for item in items]
-                            elif powerprofile['m_interval']:
-                                items = [item * mult for item in items[::60]]
-                            elif powerprofile['s_interval']:
-                                items = [item * mult for item in items[::3600]]
-                            load_profile_data.extend(items)
+                    
+                    if bool(re.search("profile_\d", powerprofile_id)):
+                        int_value = int(powerprofile_id[8:])
+                        load_profile_data = profiles.load_profile(type="residential", randint=int_value,
+                                                                  days=sim_days)
+                        logger.debug("load profile data " + str(load_profile_data))
+                        npts = len(load_profile_data)
+                        mult = load_profile_data
+                        # interval = 2
+                    else:
+                        load_profile_data = []
+                        for powerprofile in powerprofiles:
+                            if(powerprofile_id == powerprofile['id']):
+                                items = powerprofile['items']
+                                interval = powerprofile['interval']
+                                multiplier = 1
+                                if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
+                                    multiplier = powerprofile['multiplier']
+                                if powerprofile['interval']:
+                                    items = [item * multiplier for item in items]
+                                elif powerprofile['m_interval']:
+                                    items = [item * multiplier for item in items[::60]]
+                                elif powerprofile['s_interval']:
+                                    items = [item * multiplier for item in items[::3600]]
+                                load_profile_data.extend(items)
+                        npts = len(load_profile_data)
+                        mult = load_profile_data
                 else:
                     # ----------get_a_profile---------------#
                     randint_value=random.randrange(0, 475)
                     logger.debug("load_profile_data: randint=" + str(randint_value))
                     load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
                     logger.debug("load profile data "+str(load_profile_data))
-    
+                    npts = len(load_profile_data)
+                    mult = load_profile_data
                     #--------store_profile_for_line----------#
-                    self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}
-                    #loadshape_id=load_name + bus_name
-                    loadshape_id=load_name
-    
-                    self.setLoadshape(loadshape_id, sim_days*24, 1, load_profile_data)
-
-                # ----------get_a_profile---------------#
-                randint_value=random.randrange(1, 475)
-                logger.debug("load_profile_data: randint=" + str(randint_value))
-                load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
-                #logger.debug("load profile data "+str(load_profile_data))
-
-                #--------store_profile_for_line----------#
-                loadshape_id = "Lsp_" + str(randint_value)
-                self.loadshapes_for_loads[load_name] = {"name": loadshape_id, "bus":bus_name, "loadshape":load_profile_data}
+                self.loadshapes_for_loads[load_name] = {"bus":bus_name, "loadshape":load_profile_data}
                 #loadshape_id=load_name + bus_name
+                loadshape_id=load_name
+    
+                self.setLoadshape(loadshape_id, npts, interval, mult)
+
+                # # ----------get_a_profile---------------#
+                # randint_value=random.randrange(1, 475)
+                # logger.debug("load_profile_data: randint=" + str(randint_value))
+                # load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
+                # #logger.debug("load profile data "+str(load_profile_data))
+                #
+                # #--------store_profile_for_line----------#
+                # loadshape_id = "Lsp_" + str(randint_value)
+                # self.loadshapes_for_loads[load_name] = {"name": loadshape_id, "bus":bus_name, "loadshape":load_profile_data}
+                # #loadshape_id=load_name + bus_name
 
 
-                self.setLoadshape(loadshape_id, sim_days*24, 1, load_profile_data)
+                # self.setLoadshape(loadshape_id, sim_days*24, 1, load_profile_data)
             return 0
         except Exception as e:
             logger.error(e)

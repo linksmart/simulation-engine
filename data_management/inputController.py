@@ -197,11 +197,12 @@ class InputController:
     def setLoadshapes(self, id, loads, powerprofile, sim_days):
         logger.debug("Charging the loadshapes into the simulator from profiles")
         message = self.sim.setLoadshapes(loads, powerprofile, sim_days, self.profiles, self.profess)
-    def setLoadshapes(self, id, loads, sim_hours):
-        logger.debug("Charging the loadshapes into the simulator from profiles")
-        message = self.sim.setLoadshapes(loads, sim_hours, self.profiles, self.profess)
-        logger.debug("loadshapes from profiles charged")
-        return message
+        
+    # def setLoadshapes(self, id, loads, sim_hours):
+    #     logger.debug("Charging the loadshapes into the simulator from profiles")
+    #     message = self.sim.setLoadshapes(loads, sim_hours, self.profiles, self.profess)
+    #     logger.debug("loadshapes from profiles charged")
+    #     return message
 
     def setLoadshape(self, list_loadshapes):
         logger.debug("Charging a loadshape into the simulator")
@@ -668,8 +669,8 @@ class InputController:
                     powerprofile = values["powerProfile"]
                 # logger.debug("Loads" + str(load))
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                #message = self.setLoadshapes(id, load, powerprofile, self.sim_days)
-                message = self.setLoadshapes(id, load, time_in_days)
+                message = self.setLoadshapes(id, load, powerprofile, time_in_days)
+                # message = self.setLoadshapes(id, load, time_in_days)
                 if not message == 0:
                     return message
                 logger.debug("! >>>  ---------------and the Loads afterwards ------------------------- \n")

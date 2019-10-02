@@ -72,7 +72,8 @@ def create_simulation(body):  # noqa: E501
                 load_profiles = values["loads"]
                 load_profile_ids = []
                 for load_profile in load_profiles:
-                    load_profile_ids.append(load_profile['power_profile_id'])
+                    if "power_profile_id" in load_profile.keys() and load_profile['power_profile_id'] is not None:
+                        load_profile_ids.append(load_profile['power_profile_id'])
                     
                 power_profiles = values['powerProfile']
                 for power_profile in power_profiles:
