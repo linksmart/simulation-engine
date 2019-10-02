@@ -168,13 +168,15 @@ class GESSCon():
                 if "data" in self.payload.keys() and self.payload["data"] is not None:
                         dict_data = self.payload['data']
                         for node_data, node, id in zip(dict_data, soc_nodes, soc_ids):
-                                node_data_double = node_data
+                                node_data_double = node_data.copy()
                                 node_data_double.extend(node_data)
                                 id_output = {id: node_data_double}
                                 output_node = {node: id_output}
                                 output_list.append(output_node)
                 mqtt_send.MQTTExit()
                 mqtt_receive.MQTTExit()
+                if not output_list:
+                        logger.error("Check if GESSCon is running")
                 logger.debug("GESSCon Connector Output: %s", output_list)
                 return output_list
 
