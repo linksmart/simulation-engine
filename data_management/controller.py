@@ -197,6 +197,7 @@ class gridController(threading.Thread):
             list_node_charging_station_without_storage= self.input.get_list_nodes_charging_station_without_storage(self.topology, chargers)
             logger.debug("list_node_charging_station_without_storage "+str(list_node_charging_station_without_storage))
 
+            EV_names = []
             #logger.debug("type chargers " + str(type(chargers)))
             for key, charger_element in chargers.items():
                 logger.debug("charger_element.get_bus_name() "+str(charger_element.get_bus_name()))
@@ -212,7 +213,13 @@ class gridController(threading.Thread):
 
                 for ev_unit in evs_connected:
                     ev_unit.calculate_position(self.sim_hours+24, 1)
+                    EV_names.append("ESS_"+ev_unit.get_id())
                     logger.debug("position profile for "+str(ev_unit.get_id())+": "+str(ev_unit.get_position_profile()))
+
+
+            logger.debug("EV_names " + str(EV_names))
+            soc_from_EV = [[] for i in range(len(EV_names))]
+            ev_powers = [[] for i in range(len(EV_names))]
 
             logger.debug("residential list "+str(charger_residential_list))
             logger.debug("commercial list "+str(charger_commercial_list))
@@ -332,24 +339,7 @@ class gridController(threading.Thread):
                         # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
                         # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
 
-                        profess_result=[]
-                        for element in profess_output:
-                            profess_result_intern = {}
-                            for key, value in element.items():
-                                node_name = key
-                                profess_result_intern[node_name]={}
-                                for element_soc in soc_list:
-                                    for key_node in element_soc.keys():
-                                        if key_node == node_name:
-                                            profess_result_intern[node_name]["ess_name"] = element_soc[key_node]["ESS"]["id"]
-                                            profess_result_intern[node_name]["pv_name"] = element_soc[key_node]["PV"]["pv_name"]
-                                            profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["ESS"]["max_charging_power"]
-                                            profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["ESS"]["max_discharging_power"]
-                                for profess_id, results in value.items():
-                                    for key_results, powers in results.items():
-                                        profess_result_intern[node_name][key_results] = powers
-
-                            profess_result.append(profess_result_intern)
+                        profess_result = self.input.get_powers_from_profess_output(profess_output, soc_list_new_storages)
                         #logger.debug("profess result: "+str(profess_result))
 
                         for element in profess_result:
@@ -464,12 +454,16 @@ class gridController(threading.Thread):
                                         self.sim.setActivePowertoBatery(element_id,
                                                                         -1 * p_ev,
                                                                         charger_element.get_max_charging_power())
+                                        soc_from_EV[EV_names.index(element_id)].append(self.sim.getSoCfromBattery(element_id))
+                                        ev_powers[EV_names.index(element_id)].append(p_ev)
                                     else:
                                         logger.error("Problems for finding EV name of node "+str(charger_element.get_bus_name()))
 
                                     ess_name, max_charging_power = self.input.get_ESS_name_for_node(soc_list_new_evs, charger_element.get_bus_name())
                                     if not ess_name == None and not max_charging_power == None:
                                         self.sim.setActivePowertoBatery(ess_name, p_ess, max_charging_power)
+                                        soc_from_profess[ESS_names.index(ess_name)].append(self.sim.getSoCfromBattery(ess_name))
+                                        ess_powers_from_profess[ESS_names.index(ess_name)].append(p_ess)
                                     else:
                                         logger.error("Problems for finding storage name of node "+str(charger_element.get_bus_name()))
 
@@ -477,8 +471,10 @@ class gridController(threading.Thread):
                                     pv_name = self.input.get_PV_name_for_node(soc_list_new_evs, charger_element.get_bus_name())
                                     if not pv_name == None:
                                         self.sim.setActivePowertoPV(pv_name, p_pv)
+                                        powers_pv_curtailed[PV_names.index(pv_name)].append(p_pv)
                                     else:
                                         logger.error("Problems for finding PV name of node "+str(charger_element.get_bus_name()))
+
 
                         else:
                             logger.error("OFW instances could not be started")
@@ -501,10 +497,10 @@ class gridController(threading.Thread):
                             if not status_profev:
                                 logger.debug("Optimization succeded")
                                 profev_output_partial = self.profev.wait_and_get_output(instance)
-                                logger.debug("profev output partial " + str(profev_output_partial))
+                                #logger.debug("profev output partial " + str(profev_output_partial))
                                 if len(profev_output_partial)>0:
                                     profev_output.append(profev_output_partial[0])
-                        logger.debug("profev output " + str(profev_output))
+                        #logger.debug("profev output " + str(profev_output))
 
                         if len(profev_output) > 0:
                             chargers = self.sim.get_chargers()
@@ -523,6 +519,9 @@ class gridController(threading.Thread):
                                         self.sim.setActivePowertoBatery(element_id,
                                                                         -1 * p_ev,
                                                                         charger_element.get_max_charging_power())
+                                        soc_from_EV[EV_names.index(element_id)].append(
+                                            self.sim.getSoCfromBattery(element_id))
+                                        ev_powers[EV_names.index(element_id)].append(p_ev)
                                     else:
                                         logger.error("Problems for finding EV name of node " + str(
                                             charger_element.get_bus_name()))
@@ -531,6 +530,8 @@ class gridController(threading.Thread):
                                                                                                     charger_element.get_bus_name())
                                     if not ess_name == None and not max_charging_power == None:
                                         self.sim.setActivePowertoBatery(ess_name, p_ess, max_charging_power)
+                                        soc_from_profess[ESS_names.index(ess_name)].append(self.sim.getSoCfromBattery(ess_name))
+                                        ess_powers_from_profess[ESS_names.index(ess_name)].append(p_ess)
                                     else:
                                         logger.error("Problems for finding storage name of node " + str(
                                             charger_element.get_bus_name()))
@@ -539,6 +540,7 @@ class gridController(threading.Thread):
                                                                               charger_element.get_bus_name())
                                     if not pv_name == None:
                                         self.sim.setActivePowertoPV(pv_name, p_pv)
+                                        powers_pv_curtailed[PV_names.index(pv_name)].append(p_pv)
                                     else:
                                         logger.error("Problems for finding PV name of node " + str(
                                             charger_element.get_bus_name()))
@@ -692,10 +694,17 @@ class gridController(threading.Thread):
         raw_ess_power = {}
         raw_ess_soc = {}
         for i in range(len(ESS_names)):
-            raw_ess_soc[PV_names[i]]= soc_from_profess[i]
-            raw_ess_power[PV_names[i]]= ess_powers_from_profess[i]
+            raw_ess_soc[ESS_names[i]]= soc_from_profess[i]
+            raw_ess_power[ESS_names[i]]= ess_powers_from_profess[i]
 
-        raw_data_control = {"pv_curtailment": raw_data_pv_curtailment, "ESS_SoC": raw_ess_soc, "ESS_power": raw_ess_power}
+        raw_ev_power = {}
+        raw_ev_soc = {}
+        for i in range(len(EV_names)):
+            raw_ev_soc[EV_names[i]] = soc_from_EV[i]
+            raw_ev_power[EV_names[i]] = ev_powers[i]
+
+        raw_data_control = {"pv_curtailment": raw_data_pv_curtailment, "ESS_SoC": raw_ess_soc, "ESS_power": raw_ess_power,
+                            "EV_SoC": raw_ev_soc, "EV_power": raw_ev_power}
 
 
         result=data

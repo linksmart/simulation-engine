@@ -377,6 +377,29 @@ class InputController:
         #logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
 
+    def get_powers_from_profess_output(self, profess_output, soc_list):
+        profess_result = []
+        for element in profess_output:
+            profess_result_intern = {}
+            for key, value in element.items():
+                node_name = key
+                profess_result_intern[node_name] = {}
+                for element_soc in soc_list:
+                    for key_node in element_soc.keys():
+                        if key_node == node_name:
+                            profess_result_intern[node_name]["ess_name"] = element_soc[key_node]["ESS"]["id"]
+                            profess_result_intern[node_name]["pv_name"] = element_soc[key_node]["PV"]["pv_name"]
+                            profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["ESS"][
+                                "max_charging_power"]
+                            profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["ESS"][
+                                "max_discharging_power"]
+                for profess_id, results in value.items():
+                    for key_results, powers in results.items():
+                        profess_result_intern[node_name][key_results] = powers
+
+            profess_result.append(profess_result_intern)
+        return profess_result
+
     def get_powers_from_profev_output(self, profev_output, charger_element, ev_unit):
 
         p_ev = None
