@@ -358,6 +358,7 @@ class Profess:
                     if "storageUnits" in node_element:
                         storage = node_element
                         storage_opt_model = storage["storageUnits"]["optimization_model"]
+                        #logger.debug("storage element "+str(storage["storageUnits"]))
                         global_control = storage["storageUnits"]["global_control"]
 
                         type = None
@@ -781,15 +782,17 @@ class Profess:
                     node_index = node_name_list.index(node_name)
                     self.update_config_json(profess_id, self.dataList[node_index][node_name][profess_id])
 
-    def get_profess_id(self, node_name, soc_list):
+    def get_profess_id(self, node_name_input, soc_list):
         """
         :param node_name: bus name
         :return: profess_id which is the optimization id of the optimization on node_name
         """
-        node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
         profess_id = 0
-        for element in self.dataList[node_number][node_name]:
-            profess_id = element
+        for element in self.dataList:
+            for node_name, value in element.items():
+                for id, rest in value.items():
+                    if node_name_input == node_name:
+                        profess_id = id
         return profess_id
 
     def get_node_name(self, profess_id, soc_list):
@@ -864,7 +867,7 @@ class Profess:
         #logger.debug("price prifile profess "+str(price_profiles))
         if soc_list is not None:
             self.set_soc_ess(soc_list)
-            logger.debug("Data list "+str(self.dataList))
+            #logger.debug("Data list "+str(self.dataList))
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list, voltage_prediction=voltage_prediction)
             #logger.debug("data list "+str(self.dataList))

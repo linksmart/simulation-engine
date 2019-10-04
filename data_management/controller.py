@@ -86,7 +86,7 @@ class gridController(threading.Thread):
     def run(self):#self, id, duration):
         #self.id = id
         #self.duration = duration
-
+        start_time = time.time()
         common = self.topology["common"]
         radial = self.topology["radials"]
 
@@ -191,13 +191,14 @@ class gridController(threading.Thread):
         soc_list_evs_commercial = None
         soc_list_new_evs = []
         soc_list_new_storages = []
+        EV_names = []
         if flag_is_charging_station:
             chargers = self.sim.get_chargers()
 
             list_node_charging_station_without_storage= self.input.get_list_nodes_charging_station_without_storage(self.topology, chargers)
             logger.debug("list_node_charging_station_without_storage "+str(list_node_charging_station_without_storage))
 
-            EV_names = []
+
             #logger.debug("type chargers " + str(type(chargers)))
             for key, charger_element in chargers.items():
                 logger.debug("charger_element.get_bus_name() "+str(charger_element.get_bus_name()))
@@ -268,6 +269,8 @@ class gridController(threading.Thread):
 
             self.redisDB.set("timestep_"+str(self.id), i)
 
+            if self.redisDB.get(self.finish_status_key) == "True":
+                break
 
             #terminal=self.sim.get_monitor_terminals("mon_transformer")
             #logger.debug("Number of terminals in monitor "+str(terminal))
@@ -289,18 +292,18 @@ class gridController(threading.Thread):
                 if flag_is_charging_station:
                     soc_list_new_evs = self.input.set_new_soc_evs(soc_list_evs_commercial, soc_list_evs_residential,
                                                               chargers)
-                    logger.debug("soc_list_new_evs " + str(soc_list_new_evs))
+                    #logger.debug("soc_list_new_evs " + str(soc_list_new_evs))
 
                 if flag_is_storage:
                     soc_list_new_storages = self.input.set_new_soc(soc_list)
-                    logger.debug("soc_list_new_storages " + str(soc_list_new_storages))
+                    #logger.debug("soc_list_new_storages " + str(soc_list_new_storages))
 
                 #soc_list_new_total = soc_list_new_evs + soc_list_new_storages
                 #logger.debug("soc_list_new_total: " + str(soc_list_new_total))
 
                 if flag_global_control:
                     soc_list_new_total = soc_list_new_evs + soc_list_new_storages
-                    logger.debug("soc_list_new_total: "+str(soc_list_new_total))
+                    #logger.debug("soc_list_new_total: "+str(soc_list_new_total))
 
                     if not ((hours+1) % 24):
                         global_profile_total = self.global_control.gesscon(load_profiles, pv_profiles, price_profile, soc_list_new_total)
@@ -490,7 +493,7 @@ class gridController(threading.Thread):
                                 for node, data in element.items():
                                     if node == node_name:
                                         instance.append(element)
-                            logger.debug("instance "+str(instance))
+                            #logger.debug("instance "+str(instance))
 
                             status_profev = self.profev.start_all(instance, chargers)
 
@@ -724,101 +727,16 @@ class gridController(threading.Thread):
         path = os.path.join("data", str(self.id), fname_row)
         self.utils.store_data_raw(path, raw_data_control)
         logger.debug("Raw data successfully stored")
+
+        end_time = time.time()
+        total_time = end_time - start_time
+        total_time_min = total_time / 60
+        logger.debug("-------------------------------------------------------------------------------------")
+        logger.info("Total simulation time: "+str(int(total_time))+" s or "+str("{0:.2f}".format(total_time_min))+" min" )
+        logger.debug("-------------------------------------------------------------------------------------")
         self.redisDB.set(self.finish_status_key, "True")
 
         logger.debug("#####################################################################################")
         logger.debug("##########################   Simulation End   #######################################")
         logger.debug("#####################################################################################")
 
-
-
-
-        #return id
-    
-    #def results(self):   
-        #return (self.nodeNames, self.allBusMagPu)
-        #self.finish_status = True
-        #return "OK"
-        """#ToDo test with snap and daily
-        self.sim.setMode("daily")
-        self.sim.setStepSize("minutes")
-        self.sim.setNumberSimulations(1)
-        self.sim.setStartingHour(0)
-        self.sim.setVoltageBases(0.4,16)
-
-        #for i in range(numSteps):
-            #self.sim.solveCircuitSolution()
-            #setStorageControl()
-            #If
-            #DSSSolution.Converged
-            #Then
-            #V = DSSCircuit.AllBusVmagPu
-
-        df = self.sim.utils.lines_to_dataframe()
-               data = df[['Bus1', 'Bus2']].to_dict(orient="index")
-               for name in data:
-                   self.sim.Circuit.SetActiveBus(f"{name}")
-                   if phase in self.sim.Bus.Nodes():
-                       index = self.sim.Bus.Nodes().index(phase)
-                       re, im = self.sim.Bus.PuVoltage()[index:index+2]
-                       V = abs(complex(re,im))
-               logger.info("Voltage: " + str(V))"""
-        # logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
-        """logger.info("Node Names: "+ str(nodeNames))
-        logger.info("All Bus MagPus: " + str(allBusMagPu))
-        # !TODO: return node names, voltage and current in json
-        # data = {"NodeNames": nodeNames, "Voltage": allBusMagPu}
-        # return json.dumps(data)
-        logger.info("YCurrent: " + str(yCurrent))
-        logger.info("losses: " + str(losses))
-        # return ("Nodes: " + str(nodeNames), "\nVoltages " + str(allBusMagPu))
-        # return (nodeNames, allBusMagPu)
-        # filename = str(id)+"_results.txt"
-        # !TODO: Create filename with id so serve multiple simultaneous simulations#DONE
-        # json_data = json.dumps(allBusMagPu)"""
-
-    """logger.debug("kWhRated " + str(self.sim.getCapacityfromBattery("Akku1")))
-                    logger.debug("kWRated " + str(self.sim.getkWratedfromBattery("Akku1")))
-                    logger.debug("kWStored " + str(self.sim.getkWhStoredfromBattery("Akku1")))
-                    logger.debug("kW " + str(self.sim.getkWfromBattery("Akku1")))
-                    logger.debug("Min_SoC " + str(self.sim.getMinSoCfromBattery("Akku1")))
-                    logger.debug("bus " + str(self.sim.getBusfromBattery("Akku1")))
-                    logger.debug("ESS state "+str(self.sim.getStatefromBattery("Akku1")))
-                    max_charging_power_value=float(self.sim.getkWratedfromBattery("Akku1"))
-
-                    SoC = float(self.sim.getSoCfromBattery("Akku1"))
-                    logger.debug("SoC_value Akku1: " + str(SoC))
-                    if i>0:
-
-                        if charging is True:
-
-                            if SoC >= 100:
-                                charging = False
-                                logger.debug("Entered to discharging")
-                                self.sim.setActivePowertoBatery("Akku1",0.5,max_charging_power_value)
-                            else:
-                                logger.debug("Entered to charging")
-                                self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
-                        else:
-
-                            if SoC <= 20:
-                                charging = True
-                                logger.debug("Entered to charging")
-                                self.sim.setActivePowertoBatery("Akku1", -0.5, max_charging_power_value)
-                            else:
-                                logger.debug("Entered to discharging")
-                                self.sim.setActivePowertoBatery("Akku1",0.5, max_charging_power_value)
-                    logger.debug("ESS state " + str(self.sim.getStatefromBattery("Akku1")))"""
-
-    # logger.debug("######################Ending profess##################################")
-
-    # profess.set_up_profess_for_existing_topology(professLoads, professPVs, dummyPrice, dummyGESSCON)
-    """self.profess.set_up_profess_for_existing_topology( professLoads, self.dummyPV, self.dummyPrice, self.dummyGESSCON)
-    self.profess.start_all()
-    print("--------------------start profess results----------------------------")
-    print(self.profess.dataList)
-    print(self.profess.wait_and_get_output())
-    soc_list = [{"633": {"SoC": 5}}, {"671": {"SoC": 4}}, {"634": {"SoC": 20}}]
-    self.profess.update(professLoads, self.dummyPV, self.dummyPrice, soc_list, self.dummyGESSCON)
-    print(self.profess.dataList)
-    print("--------------------end profess results----------------------------")"""

@@ -1076,7 +1076,7 @@ class Profev:
 
             self.set_vac_evs(node_name_list, soc_list, chargers)
             self.set_soc_ess(soc_list)
-            logger.debug("data list " + str(self.dataList))
+            #logger.debug("data list " + str(self.dataList))
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list)
 
