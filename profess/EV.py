@@ -84,7 +84,7 @@ class EV:
             return self.position_profile
 
     def set_position_profile(self, data):
-        logger.debug("postion profile data "+str(data))
+        #logger.debug("postion profile data "+str(data))
         self.position_profile = data
 
     def calculate_position(self, horizon, repetition):
