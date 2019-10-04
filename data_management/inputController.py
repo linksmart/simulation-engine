@@ -334,7 +334,7 @@ class InputController:
                 soc_dict = {}
                 evs_connected = charger_element.get_EV_connected()
                 for ev_unit in evs_connected:
-                    ev_unit.calculate_position(self.sim_hours + 24, 1)
+                    #ev_unit.calculate_position(self.sim_hours + 24, 1)
                     soc_dict[charger_element.get_bus_name()] = {"EV":{"SoC": ev_unit.get_SoC(),
                                                                         "id": ev_unit.get_id(),
                                                                         "Battery_Capacity": ev_unit.get_Battery_Capacity(),
@@ -416,6 +416,8 @@ class InputController:
                                 p_ess = value
                             if "p_pv" == value_key:
                                 p_pv = value
+        if p_ev == None:
+            p_ev = 0
         return (p_ev, p_ess, p_pv)
 
     def set_new_soc_evs(self, soc_list_commercial=None, soc_list_residential=None, chargers = None):

@@ -213,7 +213,7 @@ class gridController(threading.Thread):
                 evs_connected = charger_element.get_EV_connected()
 
                 for ev_unit in evs_connected:
-                    ev_unit.calculate_position(self.sim_hours+24, 1)
+                    ev_unit.calculate_position(self.sim_hours, 1)
                     EV_names.append("ESS_"+ev_unit.get_id())
                     logger.debug("position profile for "+str(ev_unit.get_id())+": "+str(ev_unit.get_position_profile()))
 
@@ -395,7 +395,11 @@ class gridController(threading.Thread):
 
                     for ev_unit in evs_connected:
                         position_profile = ev_unit.get_position_profile(hours, 1)
+                        logger.debug("-------------------------------------------")
                         logger.debug("position profile: " + str(position_profile))
+                        #logger.debug("position profile for " + str(ev_unit.get_id()) + ": " + str(
+                            #ev_unit.get_position_profile()))
+                        logger.debug("-------------------------------------------")
                         if position_profile[0] == 1:
                             # EV connected to the grid
                             charger_element.set_ev_plugged(ev_unit)
