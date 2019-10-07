@@ -275,11 +275,11 @@ class gridController(threading.Thread):
 				if flag_is_charging_station:
 					soc_list_new_evs = self.input.set_new_soc_evs(soc_list_evs_commercial, soc_list_evs_residential,
 					                                              chargers)
-					# logger.debug("soc_list_new_evs " + str(soc_list_new_evs))
+				# logger.debug("soc_list_new_evs " + str(soc_list_new_evs))
 				
 				if flag_is_storage:
 					soc_list_new_storages = self.input.set_new_soc(soc_list)
-					# logger.debug("soc_list_new_storages " + str(soc_list_new_storages))
+				# logger.debug("soc_list_new_storages " + str(soc_list_new_storages))
 				
 				# soc_list_new_total = soc_list_new_evs + soc_list_new_storages
 				# logger.debug("soc_list_new_total: " + str(soc_list_new_total))
@@ -293,15 +293,15 @@ class gridController(threading.Thread):
 						                                                   soc_list_new_total)
 						# logger.debug("global profile "+str(profess_global_profile_total))
 						"""profess_global_profile_total = [{'node_a6': {
-                            'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
-                                  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                      0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
-                                  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]"""
+							'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
+								  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+									  0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
+								  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]"""
 					
 					if not global_profile_total == []:
 						logger.debug("Global profile received")
 						global_profile = self.input.get_profile(global_profile_total, hours, 24)
-						# logger.debug("profess_global_profile "+str(profess_global_profile))
+					# logger.debug("profess_global_profile "+str(profess_global_profile))
 					
 					else:
 						logger.error("GESSCon didn't answer to the request")
@@ -359,11 +359,11 @@ class gridController(threading.Thread):
 				
 				if hours == (self.sim_hours - 1):
 					self.profess.erase_all_ofw_instances(soc_list_new_storages)
-				# output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
-				
-				# soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
-				
-				# self.redisDB.set(self.finish_status_key, "True")
+			# output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
+			
+			# soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
+			
+			# self.redisDB.set(self.finish_status_key, "True")
 			
 			
 			else:
@@ -585,7 +585,7 @@ class gridController(threading.Thread):
 								ev_unit.set_SoC(SoC)
 								element_id = "ESS_" + ev_unit.get_id()
 								self.sim.setSoCBattery(element_id, SoC)
-								# logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
+							# logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
 				
 				if hours == (self.sim_hours - 1):
 					if not soc_list_evs_commercial == None:
