@@ -175,7 +175,7 @@ class Profiles:
             list: Number of elements = number of days * 24
         """
         if(randint > 475 or randint < 0):
-            logger.debug("Please provide randint values between 0-50")
+            logger.debug("Please provide randint values between 0-475")
             return
 
         if(type == "residential"):

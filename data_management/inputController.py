@@ -141,8 +141,14 @@ class InputController:
             if 'multiplier' in element.keys() and element['multiplier'] is not None:
                 items = [item * element['multiplier'] for item in items]
             npts = len(items)
-            message = self.sim.setLoadshape(element['id'], npts, element['interval'], items)
-        # message = self.sim.setPowerProfiles(powerprofile)
+            interval = 1
+            if "interval" in element.keys() and element['interval'] is not None:
+                interval = element['interval']
+            elif "m_interval" in element.keys() and element['m_interval'] is not None:
+                interval = element['m_interval']
+            elif "s_interval" in element.keys() and element['s_interval'] is not None:
+                interval = element['s_interval']
+            message = self.sim.setLoadshape(element['id'], npts, interval, items)
         logger.debug("Powerprofile set")
         return message
 
@@ -658,7 +664,17 @@ class InputController:
                 message = self.setLineCodes(id, linecode)
                 if not message == 0:
                     return message
-
+                
+                
+            if "powerProfile" in values.keys() and values["powerProfile"] is not None:
+                logger.debug("!---------------Setting powerProfile------------------------- \n")
+                powerProfile = values["powerProfile"]
+                message = self.setPowerProfile(id, powerProfile)
+                logger.debug(str(message))
+                if not message == 0:
+                    return message
+                
+                
             if "loads" in values.keys() and values["loads"] is not None:
                 # logger.debug("---------------Setting Loads-------------------------")
                 logger.debug("! ---------------Setting Loads------------------------- \n")
@@ -667,7 +683,6 @@ class InputController:
                 powerprofile = []
                 if "powerProfile" in values.keys() and values["powerProfile"] is not None:
                     powerprofile = values["powerProfile"]
-                # logger.debug("Loads" + str(load))
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
                 message = self.setLoadshapes(id, load, powerprofile, time_in_days)
                 # message = self.setLoadshapes(id, load, time_in_days)
@@ -697,13 +712,6 @@ class InputController:
                 if not message == 0:
                     return message
                 
-            if "powerProfile" in values.keys() and values["powerProfile"] is not None:
-                logger.debug("!---------------Setting powerProfile------------------------- \n")
-                powerProfile = values["powerProfile"]
-                message = self.setPowerProfile(id, powerProfile)
-                logger.debug(str(message))
-                if not message == 0:
-                    return message
 
             if "xycurves" in values.keys() and values["xycurves"] is not None:
                 xycurves = values["xycurves"]  # TORemove
@@ -740,13 +748,6 @@ class InputController:
                 factory.gridController.setVoltageRegulator(id, voltage_regulator)
             """
 
-            if "loadshapes" in values.keys() and values["loadshapes"] is not None:
-                logger.debug("! ---------------Setting loadshapes------------------------- \n")
-                loadshapes = values["loadshapes"]
-
-                message = self.setLoadShape(id, loadshapes)
-                if not message == 0:
-                    return message
             if "tshapes" in values.keys() and values["tshapes"] is not None:
                 logger.debug("---------------Setting tshapes-------------------------")
                 tshapes = values["tshapes"]

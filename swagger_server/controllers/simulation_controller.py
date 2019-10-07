@@ -74,15 +74,22 @@ def create_simulation(body):  # noqa: E501
                 for load_profile in load_profiles:
                     if "power_profile_id" in load_profile.keys() and load_profile['power_profile_id'] is not None:
                         load_profile_ids.append(load_profile['power_profile_id'])
-                    
+
+                power_profile_ids = []
                 power_profiles = values['powerProfile']
                 for power_profile in power_profiles:
-                    if power_profile['id'] not in load_profile_ids:
-                        message = "Power profile IDs in loads and powerProfile do not match"
-                        logger.error(message)
-                        return message
+                    if "id" in power_profile.keys() and power_profile['id'] is not None:
+                        power_profile_ids.append(power_profile['id'])
+                
+                for load_profile_id in  load_profile_ids:
+                    if not bool(re.search("profile_\d", load_profile_id)):
+                        if load_profile_id not in power_profile_ids:
+                            message = "Error: No Power profile found for this ID: " + str(load_profile_id)
+                            logger.error(message)
+                            return message
+               
                 logger.debug("Power Profile IDs successfully checked")
-                logger.debug("Checking for Interval values")
+                logger.debug("Checking Interval values")
                 for power_profile in power_profiles:
                     count_items = len(power_profile['items'])
                     if power_profile['interval']:
@@ -94,9 +101,8 @@ def create_simulation(body):  # noqa: E501
                     elif power_profile['s_interval']:
                         if count_items * power_profile['s_interval'] >= 24*3600:
                             continue
-                    else:
-                        message = "Error: The number of items in powerProfile should be according to the interval given"
-                        return message
+                    message = "Error: The number of items in powerProfile should be according to the interval given"
+                    return message
                 logger.debug("Interval values successfully checked")
 
             data_to_store=[]
