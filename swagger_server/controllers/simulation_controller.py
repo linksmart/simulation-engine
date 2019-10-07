@@ -120,6 +120,8 @@ def create_simulation(body):  # noqa: E501
                         storage_eleement_change["charge_efficiency"] = 90
                     if not "discharge_efficiency" in storage_elements.keys():
                         storage_eleement_change["discharge_efficiency"] = 90
+                    if not "global_control" in storage_elements.keys():
+                        storage_eleement_change["global_control"] = False
 
                     data_to_store.append(storage_eleement_change)
 

@@ -53,7 +53,7 @@ class GESSCon():
                                 aggregate = [sum(x) for x in zip(*agg_list)]
                                 aggregate_list.append(list(np.sqrt(aggregate)))
                 aggregate_list = [sum(x) for x in zip(*aggregate_list)]
-                logger.debug("Aggregated data = %s ", aggregate_list)
+                #logger.debug("Aggregated data = %s ", aggregate_list)
                 return aggregate_list
 
         def create_tele_config(self, Soc):
@@ -68,7 +68,7 @@ class GESSCon():
                         soc_node = list(s.keys())[0]
                         soc_nodes.append(soc_node)
                         soc_ids.append(s[soc_node]['ESS']['id'])
-                        soc_values.append(s[soc_node]['ESS']['SoC'])
+                        soc_values.append(s[soc_node]['ESS']['SoC']/100)
                         b_max.append(s[soc_node]['ESS']['Battery_Capacity'])
                         pc_max.append(s[soc_node]['ESS']['max_charging_power'])
                         pd_max.append(s[soc_node]['ESS']['max_discharging_power'])
@@ -118,9 +118,11 @@ class GESSCon():
                 #string to date
                 #start_date = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
                 if not timestamp:
-                        start_date = datetime.datetime.now()
+                        start_date = datetime.datetime.now().strftime("%Y.%m.%d 00:00:00")
                 else:
-                        start_date = datetime.datetime.fromtimestamp(timestamp)
+                        start_date = datetime.datetime.fromtimestamp(timestamp).strftime("%Y.%m.%d 00:00:00")
+                # timestamp from date to date format
+                start_date = datetime.datetime.strptime(start_date, '%Y.%m.%d %H:%M:%S')
                 #timestamp from date to date format
                 start_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
                 for val in range(24):
@@ -142,23 +144,27 @@ class GESSCon():
                 "tele": tele,
                 "config": config }
                 payload = json.dumps(payload_var)
-                logger.info("Payload: %s", payload)
+                #logger.info("Payload: %s", payload)
 
                 #Dummy payload
                 #payload_dict = {'site': 'EDYNA-0018', 'time_start': '2018.10.01 00:00:00', 'time_stop': '2018.10.01 23:00:00', 'raw': {'elprices': [{'DateTime': '2018.10.01 00:00:00', 'elprice': 1.909825}, {'DateTime': '2018.10.01 01:00:00', 'elprice': 1.83985}, {'DateTime': '2018.10.01 02:00:00', 'elprice': 1.8422625}, {'DateTime': '2018.10.01 03:00:00', 'elprice': 1.7302375}, {'DateTime': '2018.10.01 04:00:00', 'elprice': 1.7302375}, {'DateTime': '2018.10.01 05:00:00', 'elprice': 1.897075}, {'DateTime': '2018.10.01 06:00:00', 'elprice': 2.02325}, {'DateTime': '2018.10.01 07:00:00', 'elprice': 2.286475}, {'DateTime': '2018.10.01 08:00:00', 'elprice': 2.286475}, {'DateTime': '2018.10.01 09:00:00', 'elprice': 2.2860125}, {'DateTime': '2018.10.01 10:00:00', 'elprice': 2.285825}, {'DateTime': '2018.10.01 11:00:00', 'elprice': 2.2866625}, {'DateTime': '2018.10.01 12:00:00', 'elprice': 2.285825}, {'DateTime': '2018.10.01 13:00:00', 'elprice': 2.2852625}, {'DateTime': '2018.10.01 14:00:00', 'elprice': 2.28415}, {'DateTime': '2018.10.01 15:00:00', 'elprice': 2.285175}, {'DateTime': '2018.10.01 16:00:00', 'elprice': 2.288525}, {'DateTime': '2018.10.01 17:00:00', 'elprice': 2.289825}, {'DateTime': '2018.10.01 18:00:00', 'elprice': 2.2875}, {'DateTime': '2018.10.01 19:00:00', 'elprice': 2.286575}, {'DateTime': '2018.10.01 20:00:00', 'elprice': 2.162075}, {'DateTime': '2018.10.01 21:00:00', 'elprice': 2.1362}, {'DateTime': '2018.10.01 22:00:00', 'elprice': 2.119275}, {'DateTime': '2018.10.01 23:00:00', 'elprice': 2.019425}], 'demand': [{'DateTime': '2018.10.01 00:00:00', 'Loads': 93.17882565165016}, {'DateTime': '2018.10.01 01:00:00', 'Loads': 84.278289960237}, {'DateTime': '2018.10.01 02:00:00', 'Loads': 87.69315014342973}, {'DateTime': '2018.10.01 03:00:00', 'Loads': 84.11310126025583}, {'DateTime': '2018.10.01 04:00:00', 'Loads': 83.07513727055695}, {'DateTime': '2018.10.01 05:00:00', 'Loads': 82.47538973027807}, {'DateTime': '2018.10.01 06:00:00', 'Loads': 82.06049242107031}, {'DateTime': '2018.10.01 07:00:00', 'Loads': 85.07323246720625}, {'DateTime': '2018.10.01 08:00:00', 'Loads': 82.06448948318241}, {'DateTime': '2018.10.01 09:00:00', 'Loads': 84.78650267237899}, {'DateTime': '2018.10.01 10:00:00', 'Loads': 77.61181224509842}, {'DateTime': '2018.10.01 11:00:00', 'Loads': 83.06486610715079}, {'DateTime': '2018.10.01 12:00:00', 'Loads': 80.2605922598988}, {'DateTime': '2018.10.01 13:00:00', 'Loads': 81.72022464908697}, {'DateTime': '2018.10.01 14:00:00', 'Loads': 79.99859701171478}, {'DateTime': '2018.10.01 15:00:00', 'Loads': 81.16386175664968}, {'DateTime': '2018.10.01 16:00:00', 'Loads': 80.23265233039963}, {'DateTime': '2018.10.01 17:00:00', 'Loads': 84.52996576814613}, {'DateTime': '2018.10.01 18:00:00', 'Loads': 81.89492669255614}, {'DateTime': '2018.10.01 19:00:00', 'Loads': 84.42044783973769}, {'DateTime': '2018.10.01 20:00:00', 'Loads': 80.00710094303832}, {'DateTime': '2018.10.01 21:00:00', 'Loads': 85.30223151449935}, {'DateTime': '2018.10.01 22:00:00', 'Loads': 90.63647225469765}, {'DateTime': '2018.10.01 23:00:00', 'Loads': 95.13026916858026}], 'pv': [{'DateTime': '2018.10.01 00:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 01:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 02:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 03:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 04:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 05:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 06:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 07:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 08:00:00', 'pv': 0.0}, {'DateTime': '2018.10.01 09:00:00', 'pv': 552.5472511706563}, {'DateTime': '2018.10.01 10:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 11:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 12:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 13:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 14:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 15:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 16:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 17:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 18:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 19:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 20:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 21:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 22:00:00', 'pv': 556.1998308518424}, {'DateTime': '2018.10.01 23:00:00', 'pv': 556.1998308518424}], 'ev': [{'DateTime': '2018.10.01 00:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 01:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 02:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 03:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 04:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 05:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 06:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 07:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 08:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 09:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 10:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 11:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 12:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 13:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 14:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 15:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 16:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 17:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 18:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 19:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 20:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 21:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 22:00:00', 'ev': 0.0}, {'DateTime': '2018.10.01 23:00:00', 'ev': 0.0}]}, 'tele': {'SOC': [0.1, 0.2, 0.3]}, 'config': {'ESS_number': 3, 'tariff': 0, 'grid_i': 1000, 'grid_o': 1000, 'ess_eff': [0.96, 0.96, 0.96], 'bmax': [60, 60, 60], 'bmin': [0, 0, 0], 'pcmax': [30, 30, 30], 'pdmax': [30, 30, 30], 'cycle': [0, 0, 0], 'loss': 0}}
                 #payload_json = json.dumps(payload_dict)
 
                 # MQTT
-                mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path="/etc/openvpn/s4g-ca.crt", set_insecure=True, id=None)
+                ca_cert_path_input = "/etc/openvpn/s4g-ca.crt"
+                ca_cert_path_input = "/usr/src/app/openvpn/s4g-ca.crt"
+                mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path_input, set_insecure=True, id=None)
                 mqtt_receive = MQTTClient("10.8.0.50", 8883, "gesscon_receive", keepalive=60, username="fronius-fur",
-                                        password="r>U@U7J8xZ+fu_vq", ca_cert_path="/etc/openvpn/s4g-ca.crt",
+                                        password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path_input,
                                         set_insecure=True, id=None)
                 mqtt_receive.subscribe_to_topics([("GessconSimulationOutput",2)], self.on_msg_received)
                 logger.debug("successfully subscribed")
                 mqtt_send.publish("GessconSimulationInput", payload, False)
                 # Checks for output from GESSCon for atmost 15 seconds
                 t = 0
-                while t<= 15:
+                while t<= 60:
+                        logger.debug("Waiting for GESSCon response")
+
                         if not self.payload_set:
                                 t = t + 1
                                 time.sleep(1)
@@ -168,12 +174,14 @@ class GESSCon():
                 if "data" in self.payload.keys() and self.payload["data"] is not None:
                         dict_data = self.payload['data']
                         for node_data, node, id in zip(dict_data, soc_nodes, soc_ids):
-                                id_output = {id: node_data}
+                                node_data_double = node_data.copy()
+                                node_data_double.extend(node_data)
+                                id_output = {id: node_data_double}
                                 output_node = {node: id_output}
                                 output_list.append(output_node)
                 mqtt_send.MQTTExit()
                 mqtt_receive.MQTTExit()
-                logger.debug("GESSCon Connector Output: %s", output_list)
+                #logger.debug("GESSCon Connector Output: %s", output_list)
                 return output_list
 
         def on_msg_received(self, payload):
@@ -189,7 +197,7 @@ storage = {"storageUnits": [
                 "bus1": "633",
                 "phases": 3,
                 "connection": "wye",
-                "soc": 0.1,
+                "soc": 40,
                 "dod": 0,
                 "kv": 0,
                 "kw_rated": 0,
@@ -206,7 +214,7 @@ storage = {"storageUnits": [
                 "bus1": "671",
                 "phases": 3,
                 "connection": "wye",
-                "soc": 0.2,
+                "soc": 20,
                 "dod": 0,
                 "kv": 0,
                 "kw_rated": 0,
@@ -233,8 +241,8 @@ load = [{'633':
 0, 0, 9]}},
 {'671': {'671.1.2.3': [1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0]}}]
-Soc = [{'node_a6': {'ESS': {'SoC': 40.0, 'T_SoC': 25, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5, 'charge_efficiency': 90, 'discharge_efficiency': 90}, 'Grid': {'Q_Grid_Max_Export_Power': 6, 'P_Grid_Max_Export_Power': 6}, 'PV': {'pv_name': 'PV_2'}}}]
+Soc = [{'node_a6': {'ESS': {'SoC': 50.0, 'T_SoC': 25, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5, 'charge_efficiency': 90, 'discharge_efficiency': 90}, 'Grid': {'Q_Grid_Max_Export_Power': 6, 'P_Grid_Max_Export_Power': 6}, 'PV': {'pv_name': 'PV_2'}}}]
 g = GESSCon()
 #Soc = g.get_ESS_data_format(storage)
-start_date = datetime.datetime.strptime("2018.10.04 00:00:00", '%Y.%m.%d %H:%M:%S')
-output = g.gesscon(load, pv, price, Soc, start_date.timestamp()"""
+start_date = datetime.datetime.strptime("2018.10.04 10:12:03", '%Y.%m.%d %H:%M:%S')
+output = g.gesscon(load, pv, price, Soc)"""

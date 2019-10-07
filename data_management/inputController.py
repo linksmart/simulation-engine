@@ -170,6 +170,21 @@ class InputController:
             logger.error(error)
             return error
 
+    # profess_global_profile =[{'node_a6': {
+    # 'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
+    # 0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]
+    def get_profile(self, data, start, number_of_points):
+        data_list=[]
+
+        for element in data:
+            data_dict = {}
+            for node_name, value in element.items():
+                data_dict[node_name]={}
+                for battery_name, profile in value.items():
+                    data_dict[node_name][battery_name] = profile[int(start):int(start+number_of_points)]
+            data_list.append(data_dict)
+        return data_list
+
     def get_price_profile_from_server(self, city, country, sim_hours):
         price_profile_data= self.profiles.price_profile(city, country, sim_hours)
         return price_profile_data
@@ -203,12 +218,8 @@ class InputController:
     def setLoadshapes(self, id, loads, powerprofile, sim_days):
         logger.debug("Charging the loadshapes into the simulator from profiles")
         message = self.sim.setLoadshapes(loads, powerprofile, sim_days, self.profiles, self.profess)
-        
-    # def setLoadshapes(self, id, loads, sim_hours):
-    #     logger.debug("Charging the loadshapes into the simulator from profiles")
-    #     message = self.sim.setLoadshapes(loads, sim_hours, self.profiles, self.profess)
-    #     logger.debug("loadshapes from profiles charged")
-    #     return message
+        logger.debug("loadshapes from profiles charged")
+        return message
 
     def setLoadshape(self, list_loadshapes):
         logger.debug("Charging a loadshape into the simulator")
@@ -342,7 +353,7 @@ class InputController:
                 soc_dict = {}
                 evs_connected = charger_element.get_EV_connected()
                 for ev_unit in evs_connected:
-                    ev_unit.calculate_position(self.sim_hours + 24, 1)
+                    #ev_unit.calculate_position(self.sim_hours + 24, 1)
                     soc_dict[charger_element.get_bus_name()] = {"EV":{"SoC": ev_unit.get_SoC(),
                                                                         "id": ev_unit.get_id(),
                                                                         "Battery_Capacity": ev_unit.get_Battery_Capacity(),
@@ -385,6 +396,29 @@ class InputController:
         #logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
 
+    def get_powers_from_profess_output(self, profess_output, soc_list):
+        profess_result = []
+        for element in profess_output:
+            profess_result_intern = {}
+            for key, value in element.items():
+                node_name = key
+                profess_result_intern[node_name] = {}
+                for element_soc in soc_list:
+                    for key_node in element_soc.keys():
+                        if key_node == node_name:
+                            profess_result_intern[node_name]["ess_name"] = element_soc[key_node]["ESS"]["id"]
+                            profess_result_intern[node_name]["pv_name"] = element_soc[key_node]["PV"]["pv_name"]
+                            profess_result_intern[node_name]["max_charging_power"] = element_soc[key_node]["ESS"][
+                                "max_charging_power"]
+                            profess_result_intern[node_name]["max_discharging_power"] = element_soc[key_node]["ESS"][
+                                "max_discharging_power"]
+                for profess_id, results in value.items():
+                    for key_results, powers in results.items():
+                        profess_result_intern[node_name][key_results] = powers
+
+            profess_result.append(profess_result_intern)
+        return profess_result
+
     def get_powers_from_profev_output(self, profev_output, charger_element, ev_unit):
 
         p_ev = None
@@ -401,15 +435,17 @@ class InputController:
                                 p_ess = value
                             if "p_pv" == value_key:
                                 p_pv = value
+        if p_ev == None:
+            p_ev = 0
         return (p_ev, p_ess, p_pv)
 
-    def set_new_soc_evs(self, soc_list, chargers = None):
+    def set_new_soc_evs(self, soc_list_commercial=None, soc_list_residential=None, chargers = None):
         #self.sim.getSoCfromBattery("Akku1")
 
+        new_soc_list = []
+        if not soc_list_commercial == None:
 
-        if len(soc_list) > 0:
-            new_soc_list = []
-            for element in soc_list:
+            for element in soc_list_commercial:
                 for node_name, value in element.items():
                     element_id = value["ESS"]["id"]
                     SoC = float(self.sim.getSoCfromBattery(element_id))
@@ -429,9 +465,36 @@ class InputController:
                         element_id = "ESS_" + value["EV"]["id"]
                         SoC = float(self.sim.getSoCfromBattery(element_id))
                         value["EV"]["SoC"] = SoC
+                    value["EV"]["commercial"] = True
                     new_soc_list.append(element)
-        else:
-            new_soc_list = None
+
+        if not soc_list_residential == None:
+
+            for element in soc_list_residential:
+                for node_name, value in element.items():
+                    element_id = value["ESS"]["id"]
+                    SoC = float(self.sim.getSoCfromBattery(element_id))
+                    value["ESS"]["SoC"] = SoC
+
+                    if not chargers == None:
+                        element_id = value["EV"]["id"]
+                        SoC = None
+                        for cs_id, charger in chargers.items():
+                            ev_connected = charger.get_EV_connected()
+                            for ev in ev_connected:
+                                # if charger.get_ev_plugged() == ev:
+                                if ev.get_id() == element_id:
+                                    SoC = ev.get_SoC()
+                        value["EV"]["SoC"] = SoC
+                    else:
+                        element_id = "ESS_" + value["EV"]["id"]
+                        SoC = float(self.sim.getSoCfromBattery(element_id))
+                        value["EV"]["SoC"] = SoC
+                    value["EV"]["commercial"] = False
+                    new_soc_list.append(element)
+
+        if soc_list_commercial == None and soc_list_residential == None:
+            new_soc_list = []
         #logger.debug("new soc list: " + str(new_soc_list))
         return new_soc_list
 
@@ -460,10 +523,12 @@ class InputController:
         # topology = profess.json_parser.get_topology()
         # logger.debug("type topology " + str(type(self.topology)))
         radial = topology["radials"]
+
         flag_to_return = False
         for values in radial:
-            if "chargingStations" in values.keys():
-                flag_to_return = True
+            for key, data in values.items():
+                if key == "chargingStations" and len(data) >0:
+                    flag_to_return = True
         return flag_to_return
 
     def get_nodes_Charging_Station_in_Topology(self, chargers):
@@ -517,10 +582,17 @@ class InputController:
         for values in radial:
             if not "storageUnits" in values.keys():
                 return False
+            for key, data in values.items():
+                if key == "storageUnits" and len(data) == 0:
+                    return False
+
         if not chargers == None:
             list_nodes_storages_with_cs=self.get_list_nodes_storages_with_charging_station(radial, chargers)
-
+            list_nodes_storages_with_cs = list(dict.fromkeys(list_nodes_storages_with_cs))
+            logger.debug("list_nodes_storages_with_cs "+str(list_nodes_storages_with_cs))
             list_all_storage_nodes = self.get_Storage_nodes(topology)
+            list_all_storage_nodes = list(dict.fromkeys(list_all_storage_nodes))
+            logger.debug("list_all_storage_nodes "+str(list_all_storage_nodes))
 
             if not len(list_nodes_storages_with_cs) == 0:
                 if list_nodes_storages_with_cs == list_all_storage_nodes:

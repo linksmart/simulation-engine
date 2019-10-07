@@ -338,7 +338,7 @@ class Profev:
         else:
             return []
 
-    def start(self, freq, horizon, dt, model, repition, solver, optType, profess_id):
+    def start(self, freq, horizon, dt, model, repition, solver, optType, profess_id, single_ev=False):
         """
         starts an optimization of profess_id on the ofw
         for first 6 params see Linksmart OFW API Doc
@@ -354,13 +354,15 @@ class Profev:
         """
         logger.debug("start " + str(profess_id))
         try:
+
             response = self.httpClass.put(self.domain + "optimization/start/" + profess_id, {"control_frequency": freq,
                                                                                              "horizon_in_steps": horizon,
                                                                                              "dT_in_seconds": dt,
                                                                                              "model_name": model,
                                                                                              "repetition": repition,
                                                                                              "solver": solver,
-                                                                                             "optimization_type": optType})
+                                                                                             "optimization_type": optType,
+                                                                                             "single_ev":single_ev})
             json_response = response.json()
             logger.debug(
                 str(json_response) + ": " + str(profess_id) + " , Status code of start: " + str(response.status_code))
@@ -373,7 +375,7 @@ class Profev:
             logger.error("Failed to start optimization, No connection to the OFW could be established at :" + str(
                 self.domain) + "optimization/start/")
 
-    def start_all(self, soc_list, chargers):
+    def start_all(self, soc_list=None, chargers=None, soc_list_total=None):
         """
         starts all optimizations on the relevant nodes (nodes with ESS)
         :param optimization_model: optional optimization_model, when no model is given the models in the ESS definition
@@ -381,47 +383,86 @@ class Profev:
         :return: returns 0 when successful, else 1
         """
         logger.debug("All optimizations are being started.")
-        node_name_list = self.json_parser.get_node_name_list(soc_list)
-        logger.debug("node name list "+str(node_name_list))
 
-        if node_name_list != 0:
-            storage_opt_model=None
+        if not soc_list == None:
+            node_name_list = self.json_parser.get_node_name_list(soc_list)
+
+        if not node_name_list == None:
+            storage_opt_model = None
             for node_name in node_name_list:
                 # search for list with all elemens that are connected to bus: node_name
-                element_node = (next(item for item in self.json_parser.get_node_element_list(soc_list) if node_name in item))
+                element_node = (
+                    next(item for item in self.json_parser.get_node_element_list(soc_list) if node_name in item))
                 solver = "cbc"
                 for node_element in element_node[node_name]:
                     if "storageUnits" in node_element:
                         storage = node_element
                         storage_opt_model = storage["storageUnits"]["optimization_model"]
-                        for charger_name, charger_element in chargers.items():
-                            node = charger_element.get_bus_name()
-                            #logger.debug("node name "+str(node_name)+" node "+str(node))
-                            if node == node_name:
-                                type = charger_element.get_type_application()
+                        global_control = storage["storageUnits"]["global_control"]
 
-                        if type == "residential" and storage_opt_model == "Maximize Self-Consumption":
-                            storage_opt_model = "StochasticResidentialMaxPV"
-                            solver = "cbc"
-                        if type == "residential" and storage_opt_model == "Maximize Self-Production":
-                            storage_opt_model = "StochasticResidentialMinGrid"
-                            solver = "ipopt"
-                        if type == "residential" and storage_opt_model == "MinimizeCosts":
-                            storage_opt_model = "StochasticResidentialMinPBill"
-                            solver = "cbc"
-                        if type == "commercial" and storage_opt_model == "Maximize Self-Consumption":
-                            storage_opt_model = "CarParkModel"
-                            solver = "cbc"
-                        if type == "commercial" and storage_opt_model == "Maximize Self-Production":
-                            storage_opt_model = "CarParkModelMinGrid"
-                            solver = "ipopt"
-                logger.debug("optimization model: "+str(storage_opt_model))
+                        type = None
+                        if not chargers == None:
+                            for charger_name, charger_element in chargers.items():
+                                node = charger_element.get_bus_name()
+                                # logger.debug("node name "+str(node_name)+" node "+str(node))
+                                if node == node_name:
+                                    type = charger_element.get_type_application()
+
+                        if not type == None:
+                            type_optimization = "stochastic"
+                            if type == "residential" and storage_opt_model == "Maximize Self-Consumption":
+                                storage_opt_model = "StochasticResidentialMaxPV"
+                                solver = "cbc"
+                                single_ev = True
+                            if type == "residential" and storage_opt_model == "Maximize Self-Production":
+                                storage_opt_model = "StochasticResidentialMinGrid"
+                                solver = "ipopt"
+                                single_ev = True
+                            if type == "residential" and storage_opt_model == "MinimizeCosts":
+                                storage_opt_model = "StochasticResidentialMinPBill"
+                                solver = "cbc"
+                                single_ev = True
+                            if type == "commercial" and storage_opt_model == "Maximize Self-Consumption":
+                                storage_opt_model = "CarParkModel"
+                                solver = "cbc"
+                                single_ev = False
+                            if type == "commercial" and storage_opt_model == "Maximize Self-Production":
+                                storage_opt_model = "CarParkModelMinGrid"
+                                solver = "ipopt"
+                                single_ev = False
+                        else:
+                            type_optimization = "discrete"
+                            if storage_opt_model == "Maximize Self-Consumption" and not global_control:
+                                solver = "cbc"
+                                single_ev = False
+                            if storage_opt_model == "Maximize Self-Production" and not global_control:
+                                solver = "ipopt"
+                                single_ev = False
+                            if storage_opt_model == "MinimizeCosts" and not global_control:
+                                solver = "cbc"
+                                single_ev = False
+                            if storage_opt_model == "Maximize Self-Consumption" and global_control:
+                                storage_opt_model = "Maximize Self-Consumption with global control"
+                                solver = "cbc"
+                                single_ev = False
+                            if storage_opt_model == "Maximize Self-Production" and global_control:
+                                storage_opt_model = "Maximize Self-Production with global control"
+                                solver = "ipopt"
+                                single_ev = False
+                            if storage_opt_model == "MinimizeCosts" and global_control:
+                                storage_opt_model = "MinimizeCosts with global control"
+                                solver = "cbc"
+                                single_ev = False
+
+                logger.debug("optimization model: " + str(storage_opt_model) + " single_ev " + str(single_ev))
                 if storage_opt_model == None:
-                    logger.error("No optimization model given for storage element " + str(node_element["storageUnits"]["id"]))
+                    logger.error(
+                        "No optimization model given for storage element " + str(node_element["storageUnits"]["id"]))
                     break
+                profess_id = self.get_profess_id(node_name, soc_list)
+                start_response = self.start(1, 24, 3600, storage_opt_model, 1, solver, type_optimization,
+                                            profess_id, single_ev)
 
-                start_response = self.start(1, 24, 3600, storage_opt_model, 1, solver, "stochastic",
-                                            self.get_profess_id(node_name, soc_list))
                 if start_response is None:
                     break
                     return 1
@@ -534,14 +575,23 @@ class Profev:
             for node_name in node_name_list:
                 node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
                 # logger.debug("node number "+str(node_number))
-                profess_id = self.get_profess_id(node_name, soc_list)
+                #logger.debug("node name "+str(node_name))
+                commercial = None
+                for element in soc_list:
+                    for node_name_in_soc, value in element.items():
+                        #logger.debug("node_name_in_soc "+str(node_name_in_soc))
+                        if node_name == node_name_in_soc:
+                            commercial = value["EV"]["commercial"]
 
-                vac = self.get_SoC_aggregated(chargers)
-                logger.debug("vac "+str(vac))
-                if profess_id != 0:
+                if commercial:
+                    profess_id = self.get_profess_id(node_name, soc_list)
 
-                    config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                    config_data_of_node["EV"]["meta"]["VAC_SoC_Value_override"] = vac
+                    vac = self.get_SoC_aggregated(chargers)
+                    logger.debug("vac for node "+str(node_name)+" is: "+str(vac))
+                    if profess_id != 0:
+
+                        config_data_of_node = self.dataList[node_number][node_name][profess_id]
+                        config_data_of_node["EV"]["meta"]["VAC_SoC_Value_override"] = vac
 
     def set_soc_ev(self, node_name_list, soc_list, chargers):
         if node_name_list != 0:
@@ -928,15 +978,20 @@ class Profev:
 
                     self.update_config_json(profess_id, self.dataList[node_index][node_name][profess_id])
 
-    def get_profess_id(self, node_name, soc_list):
+    def get_profess_id(self, node_name_input, soc_list):
         """
         :param node_name: bus name
         :return: profess_id which is the optimization id of the optimization on node_name
         """
-        node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
+        #node_number = self.json_parser.get_node_name_list(soc_list).index(node_name)
         profess_id = 0
-        for element in self.dataList[node_number][node_name]:
-            profess_id = element
+        for element in self.dataList:
+            for node_name, value in element.items():
+                for id, rest in value.items():
+                    if node_name_input == node_name:
+                        profess_id = id
+        #for element in self.dataList[node_number][node_name]:
+            #profess_id = element
         return profess_id
 
     def get_node_name(self, profess_id, soc_list):
@@ -975,7 +1030,7 @@ class Profev:
         logger.debug("dataList "+str(self.dataList))
         #logger.debug("##############")
 
-    def set_up_profev(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None, chargers=None, commercial= False):
+    def set_up_profev(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None, chargers=None):
         """
         sets all important information retrieved from the parameters and topology
         :param soc_list: syntax when a list: [{node_name1:{"SoC":value, "id": id_name},{node_name2:{...},...] value is
@@ -1018,10 +1073,10 @@ class Profev:
             node_name_list = self.json_parser.get_node_name_list(soc_list)
             node_name_list = list(dict.fromkeys(node_name_list))
             self.set_soc_ev(node_name_list, soc_list, chargers)
-            if commercial:
-                self.set_vac_evs(node_name_list, soc_list, chargers)
+
+            self.set_vac_evs(node_name_list, soc_list, chargers)
             self.set_soc_ess(soc_list)
-            logger.debug("data list " + str(self.dataList))
+            #logger.debug("data list " + str(self.dataList))
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list)
 
