@@ -192,6 +192,7 @@ class gridController(threading.Thread):
         soc_list_new_evs = []
         soc_list_new_storages = []
         EV_names = []
+        EV_position = []
         if flag_is_charging_station:
             chargers = self.sim.get_chargers()
 
@@ -215,12 +216,14 @@ class gridController(threading.Thread):
                 for ev_unit in evs_connected:
                     ev_unit.calculate_position(self.sim_hours, 1)
                     EV_names.append("ESS_"+ev_unit.get_id())
+                    EV_position.append({ev_unit.get_id():ev_unit.get_position_profile()})
                     logger.debug("position profile for "+str(ev_unit.get_id())+": "+str(ev_unit.get_position_profile()))
 
 
             logger.debug("EV_names " + str(EV_names))
             soc_from_EV = [[] for i in range(len(EV_names))]
             ev_powers = [[] for i in range(len(EV_names))]
+
 
             logger.debug("residential list "+str(charger_residential_list))
             logger.debug("commercial list "+str(charger_commercial_list))
@@ -339,6 +342,7 @@ class gridController(threading.Thread):
                     profess_output=self.profess.wait_and_get_output(soc_list_new_storages)
                     #logger.debug("output profess " + str(profess_output))
                     if not profess_output == []:
+                        logger.debug("Optimization succeded")
                         # output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
                         # soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
 
@@ -358,6 +362,8 @@ class gridController(threading.Thread):
                                 p_pv_output = value["P_PV_Output"]
                                 max_charging_power = value["max_charging_power"]
                                 max_discharging_power = value["max_discharging_power"]
+
+                            logger.debug("p_ess: " + str(p_ess_output) + " p_pv: " + str(p_pv_output))
                             self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
                             self.sim.setActivePowertoPV(pv_name, p_pv_output)
                             #### Creating lists for storing values
@@ -711,7 +717,7 @@ class gridController(threading.Thread):
             raw_ev_power[EV_names[i]] = ev_powers[i]
 
         raw_data_control = {"pv_curtailment": raw_data_pv_curtailment, "ESS_SoC": raw_ess_soc, "ESS_power": raw_ess_power,
-                            "EV_SoC": raw_ev_soc, "EV_power": raw_ev_power}
+                            "EV_SoC": raw_ev_soc, "EV_power": raw_ev_power, "EV_position": EV_position}
 
 
         result=data
