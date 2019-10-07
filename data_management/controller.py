@@ -115,7 +115,7 @@ class gridController(threading.Thread):
         self.profiles = Profiles()
         self.global_control = GESSCon()
         # profess.json_parser.set_topology(data)
-
+        price_profile = None
         self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
         logger.debug("!---------------Elements added to simulator------------------------ \n")
 
@@ -249,7 +249,7 @@ class gridController(threading.Thread):
             soc_list = self.input.get_soc_list(self.topology)
 
         flag_global_control = self.input.is_global_control_in_Storage(self.topology)
-        profess_global_profile_total=[]
+        global_profile_total = []
         logger.debug("Global control flag: " + str(flag_global_control))
 
         logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
