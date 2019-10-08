@@ -359,13 +359,7 @@ class gridController(threading.Thread):
 				
 				if hours == (self.sim_hours - 1):
 					self.profess.erase_all_ofw_instances(soc_list_new_storages)
-			# output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
-			
-			# soc list: [{'node_a15': {'SoC': 60.0, 'id': 'Akku1', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}, {'node_a6': {'SoC': 40.0, 'id': 'Akku2', 'Battery_Capacity': 3, 'max_charging_power': 1.5, 'max_discharging_power': 1.5}}]
-			
-			# self.redisDB.set(self.finish_status_key, "True")
-			
-			
+
 			else:
 				logger.debug("No Storage Units present")
 			
@@ -424,10 +418,10 @@ class gridController(threading.Thread):
 					else:
 						self.profev.set_up_profev(soc_list_new_evs, load_profiles, pv_profiles, None, None,
 						                          chargers=chargers)
-					parallel = False
+					parallel = True
 					if parallel:
 						logger.debug("Starting parallel")
-						
+
 						status_profev = self.profev.start_all(soc_list_new_evs, chargers)
 						
 						if not status_profev:

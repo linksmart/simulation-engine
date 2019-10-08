@@ -38,6 +38,7 @@ def create_simulation(body):  # noqa: E501
     """
     if connexion.request.is_json:
         logger.debug("Post grid request")
+        body = Grid.from_dict(connexion.request.get_json())  # noqa: E501
         data = connexion.request.get_json()
         #temp = json.loads(json.dumps(data))
         #logger.debug("Data: " + str(temp)) #shows the raw data sent from client
@@ -67,7 +68,7 @@ def create_simulation(body):  # noqa: E501
                         return message
             logger.debug("Power lines succesfully checked")
 
-            if "powerProfile" in values.keys():
+            if "powerProfile" in values.keys() and values["powerProfile"] is not None:
                 logger.debug("Checking power profile IDs")
                 load_profiles = values["loads"]
                 load_profile_ids = []
@@ -80,14 +81,14 @@ def create_simulation(body):  # noqa: E501
                 for power_profile in power_profiles:
                     if "id" in power_profile.keys() and power_profile['id'] is not None:
                         power_profile_ids.append(power_profile['id'])
-                
+
                 for load_profile_id in  load_profile_ids:
                     if not bool(re.search("profile_\d", load_profile_id)):
                         if load_profile_id not in power_profile_ids:
                             message = "Error: No Power profile found for this ID: " + str(load_profile_id)
                             logger.error(message)
                             return message
-               
+
                 logger.debug("Power Profile IDs successfully checked")
                 logger.debug("Checking Interval values")
                 for power_profile in power_profiles:
