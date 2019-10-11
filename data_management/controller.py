@@ -49,7 +49,7 @@ class gridController(threading.Thread):
 		self.topology = self.input.get_topology()
 		self.utils = Utils()
 		
-		self.stopRequest = threading.Event()
+		self.stopRequest = None#threading.Event()
 		logger.debug("Simulation controller initiated")
 	
 	def get_profess_url(self):
@@ -59,11 +59,12 @@ class gridController(threading.Thread):
 		return self.id
 	
 	def join(self, timeout=None):
-		self.stopRequest.set()
+		#self.stopRequest.set()
 		super(gridController, self).join(timeout)
 	
 	def Stop(self):
 		try:
+			logger.debug("Stop signal received. Stopping the simulation")
 			self.sim.Stop()
 			self.redisDB.set(self.finish_status_key, "True")
 		except Exception as e:
@@ -71,7 +72,10 @@ class gridController(threading.Thread):
 		
 		self.redisDB.set(self.stop_signal_key, "True")
 		if self.isAlive():
-			self.join(1)
+			try:
+				self.join(1)
+			except Exception as e:
+				logger.error(e)
 	
 	def get_finish_status(self):
 		return self.redisDB.get(self.finish_status_key)
@@ -251,9 +255,10 @@ class gridController(threading.Thread):
 			logger.info("#####################################################################")
 			
 			self.redisDB.set("timestep_" + str(self.id), i)
-			
+			logger.debug("status key "+str(self.redisDB.get(self.finish_status_key)))
 			if self.redisDB.get(self.finish_status_key) == "True":
-				break
+				logger.debug("Setting finish_status_key as True")
+				self.Stop()
 			
 			# terminal=self.sim.get_monitor_terminals("mon_transformer")
 			# logger.debug("Number of terminals in monitor "+str(terminal))
@@ -261,52 +266,59 @@ class gridController(threading.Thread):
 			######################################################################################
 			################  Storage control  ###################################################
 			######################################################################################
-			if flag_is_storage or flag_is_charging_station:
-				load_profiles = self.sim.getProfessLoadschapes(hours, 24)
-				# logger.debug("loads "+str(professLoads))
-				pv_profiles = self.sim.getProfessLoadschapesPV(hours, 24)
-				# logger.debug("PVs "+str(professPVs))
-				if flag_is_price_profile_needed or flag_global_control:
-					if self.input.is_price_profile():
-						# logger.debug("price profile present")
-						price_profile = price_profile_data[int(hours):int(hours + 24)]
-						logger.debug("price profile present")
-				
-				if flag_is_charging_station:
-					soc_list_new_evs = self.input.set_new_soc_evs(soc_list_evs_commercial, soc_list_evs_residential,
-					                                              chargers)
-				# logger.debug("soc_list_new_evs " + str(soc_list_new_evs))
-				
-				if flag_is_storage:
-					soc_list_new_storages = self.input.set_new_soc(soc_list)
-				# logger.debug("soc_list_new_storages " + str(soc_list_new_storages))
-				
-				# soc_list_new_total = soc_list_new_evs + soc_list_new_storages
-				# logger.debug("soc_list_new_total: " + str(soc_list_new_total))
-				
-				if flag_global_control:
-					soc_list_new_total = soc_list_new_evs + soc_list_new_storages
-					# logger.debug("soc_list_new_total: "+str(soc_list_new_total))
-					
-					if not ((hours + 1) % 24):
-						global_profile_total = self.global_control.gesscon(load_profiles, pv_profiles, price_profile,
-						                                                   soc_list_new_total)
-						# logger.debug("global profile "+str(profess_global_profile_total))
-						"""profess_global_profile_total = [{'node_a6': {
-							'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
-								  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-									  0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
-								  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]"""
-					
-					if not global_profile_total == []:
-						logger.debug("Global profile received")
-						global_profile = self.input.get_profile(global_profile_total, hours, 24)
-					# logger.debug("profess_global_profile "+str(profess_global_profile))
-					
-					else:
-						logger.error("GESSCon didn't answer to the request")
-			
+			try:
+				if flag_is_storage or flag_is_charging_station:
+					load_profiles = self.sim.getProfessLoadschapes(hours, 24)
+					# logger.debug("loads "+str(professLoads))
+					pv_profiles = self.sim.getProfessLoadschapesPV(hours, 24)
+					# logger.debug("PVs "+str(professPVs))
+					if flag_is_price_profile_needed or flag_global_control:
+						if self.input.is_price_profile():
+							# logger.debug("price profile present")
+							price_profile = price_profile_data[int(hours):int(hours + 24)]
+							logger.debug("price profile present")
+
+					if flag_is_charging_station:
+						soc_list_new_evs = self.input.set_new_soc_evs(soc_list_evs_commercial, soc_list_evs_residential,
+																	  chargers)
+					# logger.debug("soc_list_new_evs " + str(soc_list_new_evs))
+
+					if flag_is_storage:
+						soc_list_new_storages = self.input.set_new_soc(soc_list)
+					# logger.debug("soc_list_new_storages " + str(soc_list_new_storages))
+
+					# soc_list_new_total = soc_list_new_evs + soc_list_new_storages
+					# logger.debug("soc_list_new_total: " + str(soc_list_new_total))
+
+					if flag_global_control:
+						soc_list_new_total = soc_list_new_evs + soc_list_new_storages
+						# logger.debug("soc_list_new_total: "+str(soc_list_new_total))
+
+						if not ((hours + 1) % 24):
+							global_profile_total = self.global_control.gesscon(load_profiles, pv_profiles, price_profile,
+																			   soc_list_new_total)
+							# logger.debug("global profile "+str(profess_global_profile_total))
+							"""profess_global_profile_total = [{'node_a6': {
+								'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
+									  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+										  0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
+									  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]"""
+
+						if not global_profile_total == []:
+							logger.debug("Global profile received")
+							global_profile = self.input.get_profile(global_profile_total, hours, 24)
+						# logger.debug("profess_global_profile "+str(profess_global_profile))
+
+						else:
+							logger.error("GESSCon didn't answer to the request")
+			except Exception as e:
+				logger.error(e)
+
+			logger.debug("status key " + str(self.redisDB.get(self.finish_status_key)))
 			if flag_is_storage:
+				logger.debug("-------------------------------------------")
+				logger.debug("storages present in the simulation")
+				logger.debug("-------------------------------------------")
 				
 				if flag_global_control:
 					# logger.debug("price profile " + str(price_profile))
@@ -321,7 +333,7 @@ class gridController(threading.Thread):
 				
 				if not status_profess:
 					profess_output = self.profess.wait_and_get_output(soc_list_new_storages)
-					# logger.debug("output profess " + str(profess_output))
+					logger.debug("output profess " + str(profess_output))
 					if not profess_output == []:
 						logger.debug("Optimization succeded")
 						# output syntax from profess[{node_name: {profess_id: {'P_ESS_Output': value, ...}}, {node_name2: {...}]
@@ -329,7 +341,7 @@ class gridController(threading.Thread):
 						
 						profess_result = self.input.get_powers_from_profess_output(profess_output,
 						                                                           soc_list_new_storages)
-						# logger.debug("profess result: "+str(profess_result))
+						#logger.debug("profess result: "+str(profess_result))
 						
 						for element in profess_result:
 							ess_name = None
@@ -354,8 +366,10 @@ class gridController(threading.Thread):
 							ess_powers_from_profess[ESS_names.index(ess_name)].append(p_ess_output)
 					else:
 						logger.error("OFW returned empty values")
+						self.Stop()
 				else:
 					logger.error("OFW instances could not be started")
+					self.Stop()
 				
 				if hours == (self.sim_hours - 1):
 					self.profess.erase_all_ofw_instances(soc_list_new_storages)
@@ -366,9 +380,11 @@ class gridController(threading.Thread):
 			######################################################################################
 			################  Charging station control  ###################################################
 			######################################################################################
-			
+
 			if flag_is_charging_station:
+				logger.debug("-------------------------------------------")
 				logger.debug("charging stations present in the simulation")
+				logger.debug("-------------------------------------------")
 				
 				for key, charger_element in chargers.items():
 					evs_connected = charger_element.get_EV_connected()
@@ -407,7 +423,7 @@ class gridController(threading.Thread):
 							element_id = "ESS_" + ev_unit.get_id()
 							self.sim.setSoCBattery(element_id, SoC)
 				
-				if not soc_list_new_evs == None:
+				if not soc_list_new_evs == []:
 					
 					if flag_global_control:
 						self.profev.set_up_profev(soc_list_new_evs, load_profiles, pv_profiles, price_profile,
@@ -428,6 +444,10 @@ class gridController(threading.Thread):
 							logger.debug("Optimization succeded")
 							profev_output = self.profev.wait_and_get_output(soc_list_new_evs)
 							logger.debug("profev output " + str(profev_output))
+							if profev_output == []:
+								logger.error("OFW instances sent and empty response")
+								self.Stop()
+
 							chargers = self.sim.get_chargers()
 							for key, charger_element in chargers.items():
 								evs_connected = charger_element.get_EV_connected()
@@ -474,6 +494,7 @@ class gridController(threading.Thread):
 						
 						else:
 							logger.error("OFW instances could not be started")
+							self.Stop()
 					
 					else:
 						logger.debug("Starting serial")
@@ -498,7 +519,7 @@ class gridController(threading.Thread):
 									profev_output.append(profev_output_partial[0])
 						# logger.debug("profev output " + str(profev_output))
 						
-						if len(profev_output) > 0:
+						if not profev_output == []:
 							chargers = self.sim.get_chargers()
 							for key, charger_element in chargers.items():
 								evs_connected = charger_element.get_EV_connected()
@@ -544,6 +565,7 @@ class gridController(threading.Thread):
 						
 						else:
 							logger.error("OFW instances sent and empty response")
+							self.Stop()
 				
 				if not charger_list_without_control == []:
 					
@@ -580,7 +602,8 @@ class gridController(threading.Thread):
 								element_id = "ESS_" + ev_unit.get_id()
 								self.sim.setSoCBattery(element_id, SoC)
 							# logger.debug(str(ev_unit.get_id()) + " SoC: " + str(ev_unit.get_SoC()))
-				
+
+
 				if hours == (self.sim_hours - 1):
 					if not soc_list_evs_commercial == None:
 						self.profev.erase_all_ofw_instances(soc_list_evs_commercial)
@@ -588,7 +611,8 @@ class gridController(threading.Thread):
 						self.profev.erase_all_ofw_instances(soc_list_evs_residential)
 			else:
 				logger.debug("No charging stations present in the simulation")
-			
+
+
 			puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
 			tot_losses = self.sim.get_total_losses()
 			
@@ -603,6 +627,7 @@ class gridController(threading.Thread):
 				currents[i].append(complex(Currents[i], Currents[int(i + (len_nodeNamesCurrents))]))
 			
 			total_losses.append(complex(tot_losses[0], tot_losses[1]))
+			logger.debug("Finish timestep "+str(hours))
 		
 		# logger.debug("volt finish "+str(voltages))
 		logger.debug("#####################################################################################")
@@ -724,8 +749,9 @@ class gridController(threading.Thread):
 		logger.info("Total simulation time: " + str(int(total_time)) + " s or " + str(
 			"{0:.2f}".format(total_time_min)) + " min")
 		logger.debug("-------------------------------------------------------------------------------------")
-		self.redisDB.set(self.finish_status_key, "True")
+		self.Stop()
 		
 		logger.debug("#####################################################################################")
 		logger.debug("##########################   Simulation End   #######################################")
 		logger.debug("#####################################################################################")
+
