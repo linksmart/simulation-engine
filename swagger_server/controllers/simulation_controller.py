@@ -223,7 +223,7 @@ def get_simulation_result(id):  # noqa: E501
     """
 
     try:
-        fname = str(id) + "_result"
+        fname = str(id) + "_input_grid"
         logger.debug("File name = " + str(fname))
         path = os.path.join("data", str(id), fname)
         result = utils.get_stored_data(path)
@@ -262,7 +262,7 @@ def mod_dict(data, k, v):
         elif type(data[key]) is dict:
             mod_dict(data[key], k, v)
             
-def update_simulation():  # noqa: E501 ##TODO: work in progress
+def update_simulation(id):  # noqa: E501 ##TODO: work in progress
     """Send new data to an existing simulation
 
      # noqa: E501
@@ -277,9 +277,10 @@ def update_simulation():  # noqa: E501 ##TODO: work in progress
     """if connexion.request.is_json:
         body = Grid.from_dict(connexion.request.get_json())  # noqa: E501
         logger.debug(body)"""
-    fileid = connexion.request.args.get('id')
-    key = connexion.request.args.get('key')
-    value = connexion.request.args.get('value')
+    # fileid = connexion.request.args.get('id')
+    fileid = id
+    key = connexion.request.get_json().get('key')
+    value = connexion.request.get_json().get('value')
     try:
         dir_data = os.path.join("data", str(fileid))
 
@@ -290,15 +291,19 @@ def update_simulation():  # noqa: E501 ##TODO: work in progress
         logger.debug("File name = " + str(fname))
         path = os.path.join("data", str(fileid), fname)
 
-        f = open(path, 'a') #open(str(id)+"_results.txt")
+        # f = open(path, 'a') #open(str(id)+"_results.txt")
+        with open(path, 'r') as f:
+            content = f.read()
         #logger.debug("GET file "+str(f))
-        content = f.read()
+        # content = f.read()
         #logger.info(content)
         data = json.loads(content)
-        f.close()
+        # f.close()
         #utils.store_data(path, data)
 
         mod_dict(data, key, value)
+        with open(path, 'w') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
     except:
         logger.debug("Error updating")
     return 'Simulation ' + fileid + ' updated!'
