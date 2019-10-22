@@ -1018,6 +1018,7 @@ class OpenDSS:
                 
                 self.load_name = load_name
                 self.bus_name = bus_name
+                logger.debug("element "+str(element))
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
                     powerprofile_id = element['power_profile_id']
                     

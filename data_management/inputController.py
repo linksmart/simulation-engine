@@ -755,6 +755,7 @@ class InputController:
                 powerprofile = []
                 if "powerProfile" in values.keys() and values["powerProfile"] is not None:
                     powerprofile = values["powerProfile"]
+                logger.debug("power profile "+str(powerprofile))
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
                 message = self.setLoadshapes(id, load, powerprofile, time_in_days)
                 # message = self.setLoadshapes(id, load, time_in_days)
