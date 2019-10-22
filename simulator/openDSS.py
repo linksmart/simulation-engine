@@ -1053,9 +1053,9 @@ class OpenDSS:
                 else:
                     # ----------get_a_profile---------------#
                     randint_value = random.randrange(0, 475)
-                    logger.debug("load_profile_data: randint=" + str(randint_value))
+                    #logger.debug("load_profile_data: randint=" + str(randint_value))
                     load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
-                    logger.debug("load profile data " + str(load_profile_data))
+                    #logger.debug("load profile data " + str(load_profile_data))
                     npts = len(load_profile_data)
                     mult = load_profile_data
                 # --------store_profile_for_line----------#
