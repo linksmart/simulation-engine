@@ -348,6 +348,29 @@ def get_simulation_result(id):  # noqa: E501
         result = e
     return result
 
+def get_simulation_result_raw(id, result_type, node_name = None):  # noqa: E501
+    """Get a simulation result
+
+     # noqa: E501
+
+    :param id: ID of the simulation
+    :type id: str
+
+    :rtype: Simulation result - array of nodes, and corresponding voltage
+    """
+
+    try:
+        fname = str(id) + "_input_grid"
+        logger.debug("File name = " + str(fname))
+        path = os.path.join("data", str(id), fname)
+        result = utils.get_stored_data(path)
+
+    except Exception as e:
+        logger.error(e)
+        result = e
+    return result
+from swagger_server.models.electric_vehicle import ElectricVehicle
+
 def delete_simulation(id):  # noqa: E501
     """Delete a simulation and its data
 
