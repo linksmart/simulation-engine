@@ -269,7 +269,7 @@ class gridController(threading.Thread):
 			try:
 				if flag_is_storage or flag_is_charging_station:
 					load_profiles = self.sim.getProfessLoadschapes(hours, 24)
-					# logger.debug("loads "+str(professLoads))
+					#logger.debug("loads "+str(load_profiles))
 					pv_profiles = self.sim.getProfessLoadschapesPV(hours, 24)
 					# logger.debug("PVs "+str(professPVs))
 					if flag_is_price_profile_needed or flag_global_control:

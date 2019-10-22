@@ -39,7 +39,7 @@ class JsonParser:
         for element in element_list:
             for element_key in element:
                 if element_key == search_key and element[element_key] == search_value:
-                    print(element)
+                    #print(element)
                     filter_result.append(element)
 
         return filter_result
@@ -69,19 +69,27 @@ class JsonParser:
         if "radials" in self.topology.keys():
             for radial_number in range(len(self.topology["radials"])):
                 node_list = self.get_node_name_list(soc_list)
+                #logger.debug("node list "+str(node_list))
                 index = 0
                 if node_list!=0:
                     for node_name in node_list:
+                        #logger.debug("node name "+str(node_name))
                         #adds ess to the output list
                         if "storageUnits" in self.topology["radials"][radial_number]:
                             for essunits in self.topology["radials"][radial_number]["storageUnits"]:
+                                #logger.debug("ess units"+str(essunits))
                                 pattern = re.compile("[^.]*")
                                 m = pattern.findall(essunits["bus1"])
                                 essunitsBus= m[0]
+                                #logger.debug("essunitsbus "+str(essunitsBus))
+                                node_name_original = node_name
+                                if "." in node_name:
+                                    node_name = node_name.split(".")[0]
+                                #logger.debug("node name " + str(node_name))
                                 if essunitsBus == node_name:
                                     ess_index = self.topology["radials"][radial_number]["storageUnits"].index(essunits)
                                     node_element_list.append(
-                                        {node_name: [
+                                        {node_name_original: [
                                             {"storageUnits": self.topology["radials"][radial_number]["storageUnits"][
                                                 ess_index]}]})
                         #adds pv to ouput list
@@ -90,32 +98,39 @@ class JsonParser:
                                 pattern = re.compile("[^.]*")
                                 m = pattern.findall(pvunits["bus1"])
                                 pvunitsBus= m[0]
+                                #logger.debug("pvunitsBus "+str(pvunitsBus))
+                                #logger.debug("node name " + str(node_name))
                                 if pvunitsBus == node_name:
                                     alreadyInList=False
                                     for item in node_element_list:
-                                        if node_name in item.keys():
+                                        #logger.debug("item "+str(item))
+                                        if node_name_original in item.keys():
                                             alreadyInList = True
                                             listIndex= node_element_list.index(item)
                                     pv_index = self.topology["radials"][radial_number]["photovoltaics"].index(pvunits)
+                                    #logger.debug("alreadyInList "+str(alreadyInList))
                                     if alreadyInList:
-                                        node_element_list[listIndex][node_name].append({"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
+                                        node_element_list[listIndex][node_name_original].append({"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
                                                     pv_index]})
                                     else:
                                         node_element_list.append(
-                                            {node_name: [
+                                            {node_name_original: [
                                                 {"photovoltaics": self.topology["radials"][radial_number]["photovoltaics"][
                                                     pv_index]}]})
+
+
                         # adds loads to output list
-                        if node_element_list[index][node_name] is not None:
+                        if node_element_list[index][node_name_original] is not None:
                             #it depends on the topology
                             load_elements_list=self.get_all_elements("loads")
-                            node_element_list[index][node_name].append(
+                            node_element_list[index][node_name_original].append(
                                 {"loads": (
-                                    self.filter_search("bus",node_name,load_elements_list)+
-                                    self.filter_search("id",node_name,load_elements_list))})
+                                    self.filter_search("bus",node_name_original,load_elements_list)+
+                                    self.filter_search("id",node_name_original,load_elements_list))})
                         else:
-                            logger.debug("no load was added for "+ str(node_name)+ " in get_node_elements")
+                            logger.debug("no load was added for "+ str(node_name_original)+ " in get_node_elements")
                         index = index + 1
+                        #logger.debug("node element list " + str(node_element_list))
         else: logger.debug("no radials where found")
 
         ##logger.debug(node_element_list)

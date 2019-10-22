@@ -185,7 +185,7 @@ def create_simulation(body):  # noqa: E501
 
                         # checking if there is ESS with charging station. If one present then PV should be present
                         if is_ESS(radial):
-                            logger.debug("cs_bus "+str([cs_element["bus"]]))
+                            #logger.debug("cs_bus "+str([cs_element["bus"]]))
                             cs_bus = cs_element["bus"]
                             if "." in cs_bus:
                                 if [cs_bus.split(".")[0]] in bus_ess:
@@ -220,7 +220,7 @@ def create_simulation(body):  # noqa: E501
             data["radials"][0]["storageUnits"] = data_to_store
             data["radials"][0]["chargingStations"] = data_to_store_cs
 
-        logger.debug("data"+str(data))
+        #logger.debug("data"+str(data))
         #logger.debug("data" + str(data["radials"][0]["storageUnits"]))
         ####generates an id an makes a directory with the id for the data and for the registry
         try:
@@ -278,16 +278,33 @@ def get_charging_station_nodes(list_cs):
 def order_nodes_in_lists(list_nodes):
     bus_to_send = []
     substring_list = [".1", ".2", ".3"]
+
     for bus_name_2 in list_nodes:
         if "." in bus_name_2:
             name_root = bus_name_2.split(".")[0]
             bus_name_list = [idx for idx in list_nodes if idx.split(".")[0] == name_root]
             flag = True
+
             for substring in substring_list:
                 flag_temp = False
                 for element in bus_name_list:
-                    if substring in element:
+                    #logger.debug("len substring " + str(len(element.split("."))))
+                    if len(element.split(".")) == 2:
+                        if substring in element:
+                            flag_temp = True
+                    elif len(element.split(".")) == 3:
                         flag_temp = True
+                        first_phase = "."+element.split(".")[1]
+                        second_phase = "."+element.split(".")[2]
+                        bus_name_list=[name_root+first_phase, name_root+second_phase]
+
+                    elif len(element.split(".")) == 4:
+                        flag_temp = True
+                        logger.debug("len == 4")
+
+                if len(bus_name_list) > 1:
+                    bus_name_list.sort()
+
                 flag = flag and flag_temp
             if flag:
                 bus_to_send.append([name_root])

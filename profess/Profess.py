@@ -666,34 +666,41 @@ class Profess:
                 if load_profiles is not None:
                     # setting load profiles
                     for load_profile_for_node in load_profiles:
-                        if node_name in load_profile_for_node:
+                    #ToDo copy PV in load
+                        node_name_base = node_name
+                        if "." in node_name_base:
+                            node_name_base = node_name.split(".")[0]
+                        if node_name_base in load_profile_for_node:
                             profess_id = self.get_profess_id(node_name, soc_list)
                             if profess_id != 0:
                                 config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                                phase = load_profile_for_node[node_name]
+                                #logger.debug("config data "+str(config_data_of_node))
+                                phase = load_profile_for_node[node_name_base]
+                                #logger.debug("phase "+str(phase))
                                 #flag for every phase, R=1, S=2, T=3
                                 r_flag = False
                                 s_flag = False
                                 t_flag = False
                                 # checks which phases are used
-                                if node_name + ".1" in phase:
-                                    config_data_of_node["load"]["P_Load_R"] = phase[node_name + ".1"]
+                                if node_name_base + ".1" in phase:
+                                    config_data_of_node["load"]["P_Load_R"] = phase[node_name_base + ".1"]
                                     r_flag = True
-                                if node_name + ".2" in phase:
-                                    config_data_of_node["load"]["P_Load_S"] = phase[node_name + ".2"]
+                                if node_name_base + ".2" in phase:
+                                    config_data_of_node["load"]["P_Load_S"] = phase[node_name_base + ".2"]
                                     s_flag = True
-                                if node_name + ".3" in phase:
-                                    config_data_of_node["load"]["P_Load_T"] = phase[node_name + ".3"]
+                                if node_name_base + ".3" in phase:
+                                    config_data_of_node["load"]["P_Load_T"] = phase[node_name_base + ".3"]
                                     t_flag = True
                                 #check if there is a profile for all three phases, if not add all phases to get P_load
-                                if node_name + ".1.2.3" in phase or node_name == phase: #a load profile for all phases can be given as node_name.1.2.3 or as node_name
+                                if node_name_base + ".1.2.3" in phase or node_name_base == phase: #a load profile for all phases can be given as node_name.1.2.3 or as node_name
                                     three_phase = []
-                                    if node_name in phase:
-                                        config_data_of_node["load"]["P_Load"] = phase[node_name]
-                                        three_phase = phase[node_name]
+                                    #logger.debug("I entered here")
+                                    if node_name_base in phase:
+                                        config_data_of_node["load"]["P_Load"] = phase[node_name_base]
+                                        three_phase = phase[node_name_base]
                                     if node_name + ".1.2.3" in phase:
-                                        config_data_of_node["load"]["P_Load"] = phase[node_name + ".1.2.3"]
-                                        three_phase = phase[node_name + ".1.2.3"]
+                                        config_data_of_node["load"]["P_Load"] = phase[node_name_base + ".1.2.3"]
+                                        three_phase = phase[node_name_base + ".1.2.3"]
                                     single_phase = []
                                     for value in three_phase:
                                         #when one profile is given, a symetrical load is assumed
@@ -721,30 +728,101 @@ class Profess:
                                 #logger.debug("load profile set for " + str(node_name))
                 else:
                     logger.debug("no load profile was given")
+                #logger.debug("pv profiles "+str(pv_profiles))
                 if pv_profiles is not None:
                     # setting pv_profiles
                     for pv_profiles_for_node in pv_profiles:
                         profess_id = self.get_profess_id(node_name, soc_list)
                         if profess_id != 0:
                             config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                            if node_name in pv_profiles_for_node:
-                                phase = pv_profiles_for_node[node_name]
-                                if node_name + ".1.2.3" or node_name in phase:
-                                    if node_name in phase:
-                                        config_data_of_node["photovoltaic"]["P_PV"] = phase[node_name]
-                                        three_phase = phase[node_name]
-                                    if node_name + ".1.2.3" in phase:
-                                        config_data_of_node["photovoltaic"]["P_PV"] = phase[node_name + ".1.2.3"]
-                                        three_phase = phase[node_name + ".1.2.3"]
-                                    single_phase = []
-                                    for value in three_phase:
-                                        #when one profile is given, a symetrical load is assumed
-                                        value = value / 3
-                                        single_phase.append(value)
-                                    config_data_of_node["photovoltaic"]["P_PV_R"] = copy.deepcopy(single_phase)
-                                    config_data_of_node["photovoltaic"]["P_PV_S"] = copy.deepcopy(single_phase)
-                                    config_data_of_node["photovoltaic"]["P_PV_T"] = copy.deepcopy(single_phase)
-                                    #logger.debug("pv profile set for " + str(node_name))
+                            node_name_base = node_name
+                            if "." in node_name_base:
+                                node_name_base = node_name.split(".")[0]
+
+                            if node_name_base in pv_profiles_for_node:
+                                phase = pv_profiles_for_node[node_name_base]
+                                #logger.debug("phase pv "+str(phase))
+
+                                #if node_name_base + ".1.2.3" or node_name_base in phase:
+                                    #logger.debug("node_name_base or 123 in phase")
+                                for node_name_complete in phase.keys():
+
+                                    len_node_name_complete = 1
+                                    if "." in node_name_complete:
+                                        len_node_name_complete = len(node_name_complete.split("."))
+
+                                    if (node_name_base == node_name_complete) or len_node_name_complete > 2:
+                                        config_data_of_node["photovoltaic"]["P_PV"] = phase[node_name_complete]
+                                        three_phase = phase[node_name_complete]
+                                        single_phase = []
+
+                                        if len_node_name_complete != 3:
+                                            for value in three_phase:
+                                                # when one profile is given, a symetrical load is assumed
+                                                value = value / 3
+                                                single_phase.append(value)
+                                            config_data_of_node["photovoltaic"][
+                                                "P_PV_R"] = single_phase
+                                            config_data_of_node["photovoltaic"][
+                                                "P_PV_S"] = single_phase
+                                            config_data_of_node["photovoltaic"][
+                                                "P_PV_T"] = single_phase
+                                        elif len_node_name_complete == 3:
+                                            logger.debug("three phase "+str(three_phase))
+
+                                            for value in three_phase:
+                                                # when one profile is given, a symetrical load is assumed
+                                                value = value / 2
+                                                single_phase.append(value)
+                                            if ".1" in node_name_complete:
+                                                config_data_of_node["photovoltaic"][
+                                                    "P_PV_R"] = single_phase
+                                            else:
+                                                config_data_of_node["photovoltaic"]["P_PV_R"] = [0] * 24
+                                            if ".2" in node_name_complete:
+                                                config_data_of_node["photovoltaic"][
+                                                    "P_PV_S"] = single_phase
+                                            else:
+                                                config_data_of_node["photovoltaic"]["P_PV_S"] = [0] * 24
+                                            if ".3" in node_name_complete:
+                                                config_data_of_node["photovoltaic"][
+                                                    "P_PV_T"] = single_phase
+                                            else:
+                                                config_data_of_node["photovoltaic"]["P_PV_T"] = [0] * 24
+
+                                    elif node_name_base in node_name_complete:
+
+                                        r_flag = False
+                                        s_flag = False
+                                        t_flag = False
+                                        # checks which phases are used
+                                        if node_name_base + ".1" == node_name_complete:
+                                            config_data_of_node["photovoltaic"]["P_PV_R"] = phase[node_name_complete]
+                                            r_flag = True
+                                        if node_name_base + ".2" == node_name_complete:
+                                            config_data_of_node["photovoltaic"]["P_PV_S"] = phase[node_name_complete]
+                                            s_flag = True
+                                        if node_name_base + ".3" == node_name_complete:
+                                            config_data_of_node["photovoltaic"]["P_PV_T"] = phase[node_name_complete]
+                                            t_flag = True
+
+                                        if not r_flag:
+                                            config_data_of_node["photovoltaic"]["P_PV_R"] = [0] * 24
+                                        if not s_flag:
+                                            config_data_of_node["photovoltaic"]["P_PV_S"] = [0] * 24
+                                        if not t_flag:
+                                            config_data_of_node["photovoltaic"]["P_PV_T"] = [0] * 24
+                                        three_phase = []
+                                        for value in range(24):
+                                            three_phase_value = config_data_of_node["photovoltaic"]["P_PV_R"][value] + \
+                                                                config_data_of_node["photovoltaic"]["P_PV_S"][value] + \
+                                                                config_data_of_node["photovoltaic"]["P_PV_T"][value]
+                                            three_phase.append(three_phase_value)
+                                        config_data_of_node["photovoltaic"]["P_PV"] = three_phase
+                                    else:
+                                        logger.debug("No node_name in phase")
+
+
                 else:
                     logger.debug("no pv_profile was given")
                 if ess_con is not None:
@@ -846,7 +924,7 @@ class Profess:
         logger.debug("set_up_profess started")
         #logger.debug("price prifile profess " + str(price_profiles))
         #logger.debug("soc_list " + str(soc_list))
-        # logger.debug("load_profiles "+ str(load_profiles))
+        #logger.debug("load_profiles "+ str(load_profiles))
         # logger.debug("pv_profiles "+ str(pv_profiles))
         # logger.debug("price_profiles "+ str(price_profiles))
         # logger.debug("ess_con " + str(ess_con))
@@ -867,7 +945,7 @@ class Profess:
         #logger.debug("price prifile profess "+str(price_profiles))
         if soc_list is not None:
             self.set_soc_ess(soc_list)
-            #logger.debug("Data list "+str(self.dataList))
+
             self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list, voltage_prediction=voltage_prediction)
             #logger.debug("data list "+str(self.dataList))

@@ -102,6 +102,9 @@ class Charger:
         self.EV_connected = list_EV_connected
         self.max_charging_power = max_charging_power
         self.type_application = type_application
+        if "." in bus_name:
+            if len(bus_name.split(".")) == 4:
+                bus_name = bus_name.split(".")[0]
         self.bus_name = bus_name
         self.charge_efficiency = charge_efficiency
         self.ev_plugged = None

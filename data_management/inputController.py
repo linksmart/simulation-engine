@@ -365,10 +365,18 @@ class InputController:
                                                                 }
 
                     for pv_element in photovoltaics:
-                        if pv_element["bus1"] == charger_element.get_bus_name():
+                        bus_pv = pv_element["bus1"]
+                        if "." in bus_pv:
+                            if len(bus_pv.split(".")) == 4:
+                                bus_pv = bus_pv.split(".")[0]
+                        if bus_pv == charger_element.get_bus_name():
                             soc_dict[charger_element.get_bus_name()]["PV"]={"pv_name": pv_element["id"]}
                     for ess_element in storages:
-                        if ess_element["bus1"] == charger_element.get_bus_name():
+                        bus_ess = ess_element["bus1"]
+                        if "." in bus_ess:
+                            if len(bus_ess.split(".")) == 4:
+                                bus_ess = bus_ess.split(".")[0]
+                        if bus_ess == charger_element.get_bus_name():
                             soc_dict[charger_element.get_bus_name()]["ESS"] = {"SoC":ess_element["soc"],
                                                             "T_SoC":25,
                                                             "id":ess_element["id"],

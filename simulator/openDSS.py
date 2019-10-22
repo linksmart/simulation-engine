@@ -1028,7 +1028,7 @@ class OpenDSS:
                         if not load_profile_data:
                             logger.error("No load profile data found for %s", (load_name))
                             continue
-                        logger.debug("load profile data " + str(load_profile_data))
+                        #logger.debug("load profile data " + str(load_profile_data))
                         npts = len(load_profile_data)
                         mult = load_profile_data
                     else:
