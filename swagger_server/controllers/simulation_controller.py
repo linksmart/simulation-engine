@@ -66,7 +66,7 @@ def create_simulation(body):  # noqa: E501
                             message = "r1 and linecode cannot be entered at the same time in power line with id: " + str(
                                 power_lines_elements["id"])
                             logger.error(message)
-                            return message
+                            return message, 406
             logger.debug("Power lines succesfully checked")
 
             if "powerProfile" in values.keys():
@@ -89,7 +89,7 @@ def create_simulation(body):  # noqa: E501
                             if load_profile_id not in power_profile_ids:
                                 message = "Error: No Power profile found for this ID: " + str(load_profile_id)
                                 logger.error(message)
-                                return message
+                                return message, 406
 
                     logger.debug("Power Profile IDs successfully checked")
                     logger.debug("Checking Interval values")
@@ -105,7 +105,7 @@ def create_simulation(body):  # noqa: E501
                             if count_items * power_profile['s_interval'] >= 24*3600:
                                 continue
                         message = "Error: The number of items in powerProfile should be according to the interval given"
-                        return message
+                        return message, 406
                     logger.debug("Interval values successfully checked")
 
             data_to_store=[]
@@ -128,11 +128,11 @@ def create_simulation(body):  # noqa: E501
                         if not element in bus_pv:
                             message = "Error: no PV element or wrong bus definition of PV element for storage element with bus: " + str(
                                 element)
-                            return message
+                            return message, 406
                         if not element in bus_load:
                             message = "Error: no Load element or wrong bus definition of Load element for storage element with bus: " + str(
                                 element)
-                            return message
+                            return message, 406
 
 
                     for storage_elements in storage:
@@ -151,7 +151,7 @@ def create_simulation(body):  # noqa: E501
                         if not storage_elements["optimization_model"] in models_list:
                             message = "Solely the following optimization models for storage control are possible: " + str(
                                 models_list)
-                            return message
+                            return message, 406
 
                         """if "." in storage_elements["bus1"]:
                             message = "Error: storage element with id: " + str(
@@ -192,17 +192,17 @@ def create_simulation(body):  # noqa: E501
                                     if not [cs_bus] in bus_ess:
                                         message = "Error: wrong bus definition for charging station element with bus: " + str(
                                             cs_bus)
-                                        return message
+                                        return message, 406
                                     else:
                                         if not [cs_element["bus"]] in bus_pv:
                                             message = "Error: no aggreement in bus definition for PV element, Storage element and charging station element with bus: " + str(
                                                 cs_bus)
-                                            return message
+                                            return message, 406
                             elif [cs_bus] in bus_ess:
                                 if not [cs_element["bus"]] in bus_pv :
                                     message = "Error: no aggreement in bus definition for PV element, Storage element and charging station element with bus: " + str(
                                         cs_bus)
-                                    return message
+                                    return message, 406
 
 
                     bus_cs = get_charging_station_nodes(data_to_store_cs)
