@@ -245,6 +245,9 @@ class gridController(threading.Thread):
 		if flag_is_price_profile_needed or flag_global_control:
 			price_profile_data = self.input.get_price_profile()
 			logger.debug("length price profile " + str(len(price_profile_data)))
+			if price_profile_data == None or price_profile_data == []:
+				self.Stop()
+			
 		
 		for i in range(numSteps):
 			# time.sleep(0.1)
