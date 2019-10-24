@@ -1,9 +1,11 @@
 import connexion
 import six
-import logging, time
+import logging
+import time
 #from flask import json
 import pickle
-import json, os
+import json
+import os
 import threading
 import data_management.redisDB
 
@@ -19,12 +21,12 @@ from data_management.utils import Utils
 from data_management.ModelException import InvalidModelException, MissingKeysException
 from swagger_server.controllers.threadFactory import ThreadFactory
 
-from  more_itertools import unique_everseen
+from more_itertools import unique_everseen
 
 
-logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(
+    format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
-
 
 
 class CommandController:
@@ -35,26 +37,25 @@ class CommandController:
         if CommandController._instance is None:
             with CommandController._lock:
                 if CommandController._instance is None:
-                    CommandController._instance = super(CommandController, cls).__new__(cls)
+                    CommandController._instance = super(
+                        CommandController, cls).__new__(cls)
         return CommandController._instance
 
     def __init__(self):
         self.factory = {}
-        self.redisDB=RedisDB()
+        self.redisDB = RedisDB()
         self.statusThread = {}
         self.running = {}
-        self.utils=Utils()
+        self.utils = Utils()
 
     def set_isRunning(self, id, bool):
         self.running[id] = bool
-
-
 
     def set(self, id, object):
         logger.debug("Object in set: "+str(object))
         try:
             self.factory[id] = object
-            #fname="factory_"+str(id)
+            # fname="factory_"+str(id)
             #path = os.path.join("data", fname)
             #self.utils.store_data(path, object)
         except Exception as e:
@@ -64,7 +65,7 @@ class CommandController:
         return self.factory[id]
         #fname= "factory_"+str(id)
         #path = os.path.join("data", fname)
-        #return self.utils.get_stored_data(path)
+        # return self.utils.get_stored_data(path)
 
     def isRunningExists(self):
         logger.debug("IsRunning exists: " + str(len(self.running)))
@@ -98,7 +99,7 @@ class CommandController:
         #self.redisDB.get("factory: " + id)
         #logger.debug("This is the factory for command controller: "+str(self.factory))
         #self.set(self.id, self.redisDB.get("factory: " + id))
-        #gridController.setParameters(id,)
+        # gridController.setParameters(id,)
         #logger.debug("Thread set")
         #
         try:
@@ -121,7 +122,8 @@ class CommandController:
             if msg == 0:
                 self.set_isRunning(id, True)
                 logger.debug("Flag isRunning set to True")
-                self.statusThread[id] = threading.Thread(target=self.run_status, args=(id,))
+                self.statusThread[id] = threading.Thread(
+                    target=self.run_status, args=(id,))
                 logger.debug("Status of the Thread started")
                 self.statusThread[id].start()
                 meta_data = {"id": id,
@@ -138,7 +140,7 @@ class CommandController:
                 logger.error("Command controller start could not be finished")
                 return 1
             #self.redisDB.set("run:" + self.id, "stop")
-            #return buildAnswer(listNames, listValues, json_object.threshold_high, json_object.threshold_medium,
+            # return buildAnswer(listNames, listValues, json_object.threshold_high, json_object.threshold_medium,
             #                  json_object.threshold_low)
 
         except Exception as e:
@@ -150,13 +152,13 @@ class CommandController:
 
         #logger.info("running status " + str(self.redisDB.get("run:" + self.id)))
         #logger.debug("from redis: "+str(self.factory)+" type: "+str(type(self.factory)))
-        #self.factory=ThreadFactory()
+        # self.factory=ThreadFactory()
         #logger.debug("Normal: " + str(self.factory) + " type: " + str(type(self.factory)))
         #listNames, listValues = self.factory.startController()
 
-        #return "started"
-        #return (listNames, listValues)
-        #return buildAnswer(listNames, listValues, json_object.threshold_high, json_object.threshold_medium, json_object.threshold_low)
+        # return "started"
+        # return (listNames, listValues)
+        # return buildAnswer(listNames, listValues, json_object.threshold_high, json_object.threshold_medium, json_object.threshold_low)
 
     def abort(self, id):
         logger.debug("Abort signal received")
@@ -184,7 +186,9 @@ class CommandController:
                 break
             time.sleep(2)
 
+
 variable = CommandController()
+
 
 def abort_simulation(id):  # noqa: E501
     """Aborts a running simulation
@@ -237,6 +241,7 @@ def abort_simulation(id):  # noqa: E501
         message = "Error stoping the system"
     return message
 
+
 def get_simulation_status(id):  # noqa: E501
     """Get the status of the simulation
 
@@ -258,20 +263,21 @@ def get_simulation_status(id):  # noqa: E501
             return "Simulation has not been started"
         logger.debug("#############Getting status#####################")
 
-        timestep=int(redis_db.get("timestep_"+str(id)))
+        timestep = int(redis_db.get("timestep_"+str(id)))
         logger.debug("timestep "+str(timestep))
-        sim_days=int(redis_db.get("sim_days_"+str(id)))
+        sim_days = int(redis_db.get("sim_days_"+str(id)))
         logger.debug("sim_days "+str(sim_days))
         status = (timestep / (sim_days-1)) * 100.0
         if timestep == (sim_days-1):
-            flag_stop=redis_db.get("opt_stop_" + id)
-            if not flag_stop:
+            flag_stop = redis_db.get("opt_stop_" + id)
+            if flag_stop == "False":
                 status = status - 1
-        
+
     except Exception as e:
         logger.error(e)
-        status="id not present"
+        status = "id not present"
     return int(status)
+
 
 def run_simulation(id, body=None):  # noqa: E501
     """Runs a simulation
@@ -289,7 +295,7 @@ def run_simulation(id, body=None):  # noqa: E501
     if connexion.request.is_json:
         logger.info("Start command for simulation ID: " + id)
         data = connexion.request.get_json()
-        logger.debug("data "+str(data)+" type "+str(type(data)) )
+        logger.debug("data "+str(data)+" type "+str(type(data)))
 
         dir = os.path.join("data", str(id))
         if not os.path.exists(dir):
@@ -303,7 +309,7 @@ def run_simulation(id, body=None):  # noqa: E501
             return "System already running"
         else:
             try:
-                #start random values for the status to become zero
+                # start random values for the status to become zero
 
                 msg = variable.run(id, data)
                 if msg == 0:
@@ -342,41 +348,40 @@ def run_simulation(id, body=None):  # noqa: E501
     return response"""
 
 
-def buildAnswer(listNames=None, listValues=None, thres_High = 0.1, thres_Medium=0.05, thres_Low=0.025):
+def buildAnswer(listNames=None, listValues=None, thres_High=0.1, thres_Medium=0.05, thres_Low=0.025):
 
     body = []
     values = []
     names = []
-    values_error=[]
-
+    values_error = []
 
     for name in listNames:
-        names.append(name.split('.',1)[0])
-        names=list(unique_everseen(names))
+        names.append(name.split('.', 1)[0])
+        names = list(unique_everseen(names))
 
     group_value = [None] * 3
     for j in range(len(names)):
         for i in range(len(listValues)):
             if names[j] in listNames[i]:
-                if ".1"  in listNames[i]:
-                    group_value[0]=listValues[i]
-                elif ".2"  in listNames[i]:
+                if ".1" in listNames[i]:
+                    group_value[0] = listValues[i]
+                elif ".2" in listNames[i]:
                     group_value[1] = listValues[i]
-                elif ".3"  in listNames[i]:
+                elif ".3" in listNames[i]:
                     group_value[2] = listValues[i]
 
-
-        errors=checkError(group_value, thres_High, thres_Medium, thres_Low)
+        errors = checkError(group_value, thres_High, thres_Medium, thres_Low)
         values_error.append(errors)
-        voltages=Voltage(group_value[0],group_value[1],group_value[2])
+        voltages = Voltage(group_value[0], group_value[1], group_value[2])
         values.append(voltages)
         #del group_value[:]
         group_value = [None] * 3
 
     for i in range(len(names)):
-        body.append(SimulationResult(names[i], values[i],values_error[i]))
+        body.append(SimulationResult(names[i], values[i], values_error[i]))
 
     return body
+
 
 def checkError(value, thresHigh, thresMedium, thresLow):
     group_value_error_high = [None] * 3
@@ -387,7 +392,7 @@ def checkError(value, thresHigh, thresMedium, thresLow):
     for val in value:
         logger.info("Counter: " + str(counter))
         if val != None:
-            logger.info("Val: "+ str(val))
+            logger.info("Val: " + str(val))
             if float(val) < (1 - thresHigh) or float(val) > (1 + thresHigh):
                 group_value_error_high[counter] = val
             elif (float(val) < (1 - thresMedium) or float(val) > (1 + thresMedium)):
@@ -399,5 +404,6 @@ def checkError(value, thresHigh, thresMedium, thresLow):
         else:
             counter = counter + 1
 
-    error=Error(group_value_error_high,group_value_error_medium,group_value_error_low)
+    error = Error(group_value_error_high,
+                  group_value_error_medium, group_value_error_low)
     return error
