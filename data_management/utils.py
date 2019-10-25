@@ -52,8 +52,9 @@ class Utils(metaclass=Singleton):
             #with open(path, "wb") as outfile:
                 #outfile.write(str(data).encode('utf8'))
 
-            with open(path, "w") as outfile:
-                outfile.write(str(data))
+            with open(path, "w", encoding='utf-8') as outfile:
+                json.dump(data, outfile, ensure_ascii=False, indent=2)
+                # outfile.write(str(data))
 
             logger.debug("input data saved in " + str(path))
         except Exception as e:

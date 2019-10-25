@@ -348,28 +348,58 @@ def get_simulation_result(id):  # noqa: E501
         result = e
     return result
 
-def get_simulation_result_raw(id, result_type, node_name = None):  # noqa: E501
-    """Get a simulation result
+def get_simulation_result_raw_with_node(id, result_type, node_name):  # noqa: E501
+    """Get a simulation result from result_raw file
+    :param id: ID of the simulation :type str
+    :param result_type: Result type such as voltages/currents/losses :type str
+    :param node_name: Name of node/bus :type str
 
-     # noqa: E501
-
-    :param id: ID of the simulation
-    :type id: str
-
-    :rtype: Simulation result - array of nodes, and corresponding voltage
+    :rtype: Simulation result - list of simulation results for the given result_type and node.
     """
 
     try:
-        fname = str(id) + "_input_grid"
+        fname = str(id) + "_result_raw.json"
         logger.debug("File name = " + str(fname))
         path = os.path.join("data", str(id), fname)
-        result = utils.get_stored_data(path)
-
+        raw_data = utils.get_stored_data(path)
+        print("Hello")
+        output = []
+        if(result_type in raw_data.keys() and raw_data[result_type] is not None):
+            raw_data = raw_data[result_type]
+            raw_data_keys = raw_data.keys()
+            node_name = node_name + "."
+            for key in raw_data_keys:
+                if bool(re.search(node_name, key)):
+                    if(result_type == "voltages"):
+                        output.append(raw_data[key]['Voltage'])
+                    else:
+                        output.append(raw_data[key])
     except Exception as e:
         logger.error(e)
-        result = e
-    return result
-from swagger_server.models.electric_vehicle import ElectricVehicle
+        output = e
+    return output
+
+def get_simulation_result_raw(id, result_type):  # noqa: E501
+    """Get a simulation result from result_raw file
+    :param id: ID of the simulation :type str
+    :param result_type: Result type such as voltages/currents/losses :type str
+
+    :rtype: Simulation result - list of simulation results for the given result_type.
+    """
+
+    try:
+        fname = str(id) + "_result_raw.json"
+        logger.debug("File name = " + str(fname))
+        path = os.path.join("data", str(id), fname)
+        raw_data = utils.get_stored_data(path)
+        print("Hello")
+        output = []
+        if(result_type in raw_data.keys() and raw_data[result_type] is not None):
+            output = raw_data[result_type]
+    except Exception as e:
+        logger.error(e)
+        output = e
+    return output
 
 def delete_simulation(id):  # noqa: E501
     """Delete a simulation and its data

@@ -621,12 +621,12 @@ class gridController(threading.Thread):
 			
 			for i in range(len_elementNames):
 				number = int(i + (len_elementNames))
-				losses[i].append(complex(Losses[i], Losses[number]))
+				losses[i].append(str(complex(Losses[i], Losses[number])))
 			
 			for i in range(len_nodeNamesCurrents):
-				currents[i].append(complex(Currents[i], Currents[int(i + (len_nodeNamesCurrents))]))
+				currents[i].append(str(complex(Currents[i], Currents[int(i + (len_nodeNamesCurrents))])))
 			
-			total_losses.append(complex(tot_losses[0], tot_losses[1]))
+			total_losses.append(str(complex(tot_losses[0], tot_losses[1])))
 			logger.debug("Finish timestep "+str(hours))
 		
 		# logger.debug("volt finish "+str(voltages))
@@ -648,13 +648,13 @@ class gridController(threading.Thread):
 			raw_data_losses[elementNames[i]] = losses[i]
 		
 		for i in range(len_elementNames):
-			element = [abs(x) for x in losses[i]]
+			element = [abs(complex(x)) for x in (losses[i])]
 			data_losses[elementNames[i]] = max(element)
 		
 		abs_total_losses = []
 		raw_data_losses["circuit_total_losses"] = total_losses
 		for element in total_losses:
-			abs_total_losses.append(abs(element))
+			abs_total_losses.append(abs(complex(element)))
 		data_losses["circuit_total_losses"] = max(abs_total_losses)
 		
 		# logger.debug("total_losses " + str(total_losses))
@@ -664,7 +664,7 @@ class gridController(threading.Thread):
 			raw_data_currents[str(nodeNamesCurrents[i]).lower()] = currents[i]
 		
 		for i in range(len_nodeNamesCurrents):
-			element = [abs(x) for x in currents[i]]
+			element = [abs(complex(x)) for x in (currents[i])]
 			key = nodeNamesCurrents[i]
 			data_currents[key] = max(element)
 		
