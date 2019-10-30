@@ -262,7 +262,15 @@ def get_simulation_status(id):  # noqa: E501
         logger.debug("timestep "+str(timestep))
         sim_days=int(redis_db.get("sim_days_"+str(id)))
         logger.debug("sim_days "+str(sim_days))
+
         status = (timestep / (sim_days-1)) * 100.0
+        if timestep == (sim_days - 1):
+            flag_stop = redis_db.get("opt_stop_" + id)
+            logger.debug("flag stop "+str(flag_stop))
+            if flag_stop == "False":
+                status = status - 1
+
+
     except Exception as e:
         logger.error(e)
         status="id not present"

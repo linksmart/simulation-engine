@@ -107,7 +107,10 @@ class gridController(threading.Thread):
 		self.global_control = GESSCon()
 		# profess.json_parser.set_topology(data)
 		price_profile = None
-		self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
+		answer_setup = self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
+		if answer_setup == 1:
+			self.Stop()
+			sys.exit(0)
 		logger.debug("!---------------Elements added to simulator------------------------ \n")
 		
 		transformer_names = self.sim.get_transformer_names()
@@ -242,10 +245,11 @@ class gridController(threading.Thread):
 		
 		flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
 		logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
+
 		if flag_is_price_profile_needed or flag_global_control:
 			price_profile_data = self.input.get_price_profile()
 			logger.debug("length price profile " + str(len(price_profile_data)))
-		
+
 		for i in range(numSteps):
 			# time.sleep(0.1)
 			logger.info("#####################################################################")
