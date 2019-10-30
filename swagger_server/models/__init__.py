@@ -21,6 +21,7 @@ from swagger_server.models.radial import Radial
 from swagger_server.models.reg_control import RegControl
 from swagger_server.models.simulation import Simulation
 from swagger_server.models.simulation_result import SimulationResult
+from swagger_server.models.simulation_result_raw import SimulationResultRaw
 from swagger_server.models.storage import Storage
 from swagger_server.models.transformer import Transformer
 from swagger_server.models.transformer_regcontrol import TransformerRegcontrol

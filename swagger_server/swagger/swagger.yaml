@@ -36,12 +36,39 @@ paths:
           schema:
             type: "string"
       x-swagger-router-controller: "swagger_server.controllers.simulation_controller"
-  /simulation/{id}/{result_type}/{node_name}:
+  /simulation/{id}/{result_type}:
     get:
       tags:
       - "simulation"
       summary: "Get result of simulation"
       operationId: "get_simulation_result_raw"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of the simulation"
+        required: true
+        type: "string"
+      - name: "result_type"
+        in: "path"
+        description: "Result type(voltages, current, losses) of the simulation"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Results of successful simulation"
+          schema:
+            $ref: "#/definitions/SimulationResultRaw"
+        400:
+          description: "Invalid simulation configuration data supplied"
+        404:
+          description: "Simulation ID not found"
+      x-swagger-router-controller: "swagger_server.controllers.simulation_controller"
+  /simulation/{id}/{result_type}/{node_name}:
+    get:
+      tags:
+      - "simulation"
+      summary: "Get result of simulation"
+      operationId: "get_simulation_result_raw_with_node"
       parameters:
       - name: "id"
         in: "path"
@@ -62,9 +89,7 @@ paths:
         200:
           description: "Results of successful simulation"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/SimulationResult"
+            $ref: "#/definitions/SimulationResultRaw"
         400:
           description: "Invalid simulation configuration data supplied"
         404:
@@ -873,6 +898,17 @@ definitions:
         voltageT: 1.4658129805029452
         voltageR: 0.8008281904610115
         voltageS: 6.027456183070403
+  SimulationResultRaw:
+    type: "object"
+    properties:
+      node:
+        type: "array"
+        items:
+          type: "number"
+    example:
+      node:
+      - 0.80082819046101150206595775671303272247314453125
+      - 0.80082819046101150206595775671303272247314453125
   Voltage:
     type: "object"
     properties:
