@@ -737,7 +737,7 @@ class gridController(threading.Thread):
 		logger.debug("Storing results in data folder")
 		self.utils.store_data(path, result)
 		logger.debug("Results succesfully stored")
-		logger.debug("Stroring raw data in data folder")
+		logger.debug("Storing raw data in data folder")
 		fname_row = (str(self.id)) + "_result_raw.json"
 		path = os.path.join("data", str(self.id), fname_row)
 		self.utils.store_data_raw(path, raw_data)
