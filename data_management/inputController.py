@@ -185,8 +185,8 @@ class InputController:
             data_list.append(data_dict)
         return data_list
 
-    def get_price_profile_from_server(self, city, country, sim_hours):
-        price_profile_data= self.profiles.price_profile(city, country, sim_hours)
+    def get_price_profile_from_server(self, city, country, sim_days):
+        price_profile_data= self.profiles.price_profile(city, country, sim_days)
         return price_profile_data
 
     def is_price_profile_needed(self,topology):

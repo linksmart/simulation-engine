@@ -7,6 +7,7 @@ import jsonpickle
 
 from swagger_server.controllers.commands_controller import variable
 from swagger_server.models.grid import Grid  # noqa: E501
+from profiles.profiles import *
 from swagger_server import util
 
 
@@ -134,7 +135,7 @@ def create_simulation(body):  # noqa: E501
                                 element)
                             return message, 406
 
-
+                    is_price_needed = False
                     for storage_elements in storage:
                         # checking if default values are given
                         storage_eleement_change = storage_elements
@@ -147,11 +148,33 @@ def create_simulation(body):  # noqa: E501
 
                         data_to_store.append(storage_eleement_change)
 
-                        #checking if there is a PV in the node of the ESS
-                        if not storage_elements["optimization_model"] in models_list:
-                            message = "Solely the following optimization models for storage control are possible: " + str(
-                                models_list)
+                        #checking the optimization models
+                        if "optimization_model" in storage_elements.keys():
+                            if not storage_elements["optimization_model"] in models_list:
+                                message = "Solely the following optimization models for storage control are possible: " + str(
+                                    models_list)
+                                return message, 406
+
+                            if storage_elements["optimization_model"] == "MinimizeCosts":
+                                is_price_needed = True
+
+                        else:
+                            message = "No optimization model given"
                             return message, 406
+
+                        if "global_control" in storage_elements.keys():
+                            logger.debug("global control "+str(storage_elements["global_control"]))
+                            if storage_elements["global_control"]:
+                                is_price_needed = True
+                                logger.debug("price profile needed")
+
+                    if is_price_needed:
+                        price_profile = Profiles().price_profile("Fur", "Denmark", 1)
+                        if not isinstance(price_profile, list):
+                            message = "Problems while querying price profiles"
+                            logger.error(message)
+                            return message, 406
+
 
                         """if "." in storage_elements["bus1"]:
                             message = "Error: storage element with id: " + str(
