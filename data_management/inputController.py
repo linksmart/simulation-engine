@@ -24,8 +24,6 @@ class InputController:
         self.sim= sim_instance
         self.city = None
         self.country = None
-        self.profiles = None
-        self.profess = None
         self.sim_hours = sim_hours
         self.voltage_bases = None
         self.base_frequency = 60
@@ -159,10 +157,10 @@ class InputController:
         logger.debug("Photovoltaics charged")
         return message
 
-    def setPVshapes(self, id, pvs, city, country, sim_days):
+    def setPVshapes(self, id, profiles_object, profess_object, pvs, city, country, sim_days):
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
-            message = self.sim.setPVshapes(pvs, city, country, sim_days, self.profiles, self.profess)
+            message = self.sim.setPVshapes(pvs, city, country, sim_days, profiles_object, profess_object)
             logger.debug("loadshapes from profiles charged")
             return message
         else:
@@ -185,8 +183,8 @@ class InputController:
             data_list.append(data_dict)
         return data_list
 
-    def get_price_profile_from_server(self, city, country, sim_days):
-        price_profile_data= self.profiles.price_profile(city, country, sim_days)
+    def get_price_profile_from_server(self, profiles_object, city, country, sim_days):
+        price_profile_data= profiles_object.price_profile(city, country, sim_days)
         return price_profile_data
 
     def is_price_profile_needed(self,topology):
@@ -215,9 +213,9 @@ class InputController:
         logger.debug("loadshapes charged")
         return message
 
-    def setLoadshapes(self, id, loads, powerprofile, sim_days):
+    def setLoadshapes(self, id, profiles_object, profess_object, loads, powerprofile, sim_days):
         logger.debug("Charging the loadshapes into the simulator from profiles")
-        message = self.sim.setLoadshapes(loads, powerprofile, sim_days, self.profiles, self.profess)
+        message = self.sim.setLoadshapes(loads, powerprofile, sim_days, profiles_object, profess_object)
         logger.debug("loadshapes from profiles charged")
         return message
 
@@ -650,9 +648,6 @@ class InputController:
 
 
     def setup_elements_in_simulator(self, topology, profiles, profess):
-
-        self.profiles = profiles
-        self.profess = profess
         common = topology["common"]
         radial = topology["radials"]
         time_in_days = math.ceil(self.sim_hours / 24) + 1
@@ -666,7 +661,7 @@ class InputController:
             flag_global_control = self.is_global_control_in_Storage(topology)
             logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
             if flag_is_price_profile_needed or flag_global_control:
-                self.price_profile = self.get_price_profile_from_server(city, country, time_in_days)
+                self.price_profile = self.get_price_profile_from_server(profiles, city, country, time_in_days)
                 if not isinstance(self.price_profile, list):
                     return 1
                 #logger.debug("length price profile "+str(len(self.price_profile)))
@@ -721,7 +716,7 @@ class InputController:
                     powerprofile = values["powerProfile"]
                 logger.debug("power profile "+str(powerprofile))
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                message = self.setLoadshapes(id, load, powerprofile, time_in_days)
+                message = self.setLoadshapes(id, profiles, profess, load, powerprofile, time_in_days)
                 # message = self.setLoadshapes(id, load, time_in_days)
                 if not message == 0:
                     return message
@@ -798,7 +793,7 @@ class InputController:
 
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(id, photovoltaics, city, country, time_in_days)
+                    message = self.setPVshapes(id, profiles, profess, photovoltaics, city, country, time_in_days)
                     if not message == 0:
                         return message
                     logger.debug("! >>>  ---------------and the PVs afterwards ------------------------- \n")

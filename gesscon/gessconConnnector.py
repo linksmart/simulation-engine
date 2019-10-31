@@ -106,81 +106,85 @@ class GESSCon():
         Returns:
             list: as described above
         """
-                aggregated_pv = self.aggregate(pv)
-                aggregated_load = self.aggregate(load)
-                tele, config, soc_nodes, soc_ids = self.create_tele_config(Soc)
+                try:
+                        logger.debug("GESSCon connector started ")
+                        aggregated_pv = self.aggregate(pv)
+                        aggregated_load = self.aggregate(load)
+                        tele, config, soc_nodes, soc_ids = self.create_tele_config(Soc)
 
-                #Creating JSON payload to be sent to GESSCon service
-                elprices = []
-                demand = []
-                pv_list = []
-                ev_list  =[]
-                #string to date
-                #start_date = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
-                if not timestamp:
-                        start_date = datetime.datetime.now().strftime("%Y.%m.%d 00:00:00")
-                else:
-                        start_date = datetime.datetime.fromtimestamp(timestamp).strftime("%Y.%m.%d 00:00:00")
-                # timestamp from date to date format
-                start_date = datetime.datetime.strptime(start_date, '%Y.%m.%d %H:%M:%S')
-                #timestamp from date to date format
-                start_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
-                for val in range(24):
-                        date = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
-                        elprices.append({"DateTime": date, "elprice": price[val]})
-                        demand.append({"DateTime": date, "Loads": aggregated_load[val]})
-                        pv_list.append({"DateTime": date, "pv": aggregated_pv[val]})
-                        ev_list.append({"DateTime": date, "ev": 0.0})
-                        if(val == 23):
-                                continue
-                        start_date = start_date + datetime.timedelta(hours = 1)
-                end_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
-                raw = {"elprices":elprices, "demand": demand, "pv": pv_list, "ev": ev_list}
-
-                payload_var = {"site": "EDYNA-0018",
-                "time_start": start_date_format,
-                "time_stop": end_date_format,
-                "raw": raw,
-                "tele": tele,
-                "config": config }
-                payload = json.dumps(payload_var)
-                #logger.info("Payload: %s", payload)
-
-                # MQTT
-                #ca_cert_path_input = "/etc/openvpn/s4g-ca.crt"
-                ca_cert_path_input = "/usr/src/app/openvpn/s4g-ca.crt"
-                logger.debug("Publishing values in MQTT")
-                mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path_input, set_insecure=True, id=None)
-                logger.debug("mqtt send: "+str(mqtt_send))
-                mqtt_receive = MQTTClient("10.8.0.50", 8883, "gesscon_receive", keepalive=60, username="fronius-fur",
-                                        password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path_input,
-                                        set_insecure=True, id=None)
-                mqtt_receive.subscribe_to_topics([("GessconSimulationOutput",2)], self.on_msg_received)
-                logger.debug("successfully subscribed")
-                mqtt_send.publish("GessconSimulationInput", payload, False)
-                # Checks for output from GESSCon for atmost 15 seconds
-                t = 0
-                while t<= 60:
-                        logger.debug("Waiting for GESSCon response")
-
-                        if not self.payload_set:
-                                t = t + 1
-                                time.sleep(1)
+                        #Creating JSON payload to be sent to GESSCon service
+                        elprices = []
+                        demand = []
+                        pv_list = []
+                        ev_list  =[]
+                        #string to date
+                        #start_date = datetime.datetime.strptime(date, '%Y.%m.%d %H:%M:%S')
+                        if not timestamp:
+                                start_date = datetime.datetime.now().strftime("%Y.%m.%d 00:00:00")
                         else:
-                                break
-                output_list = []
-                if "data" in self.payload.keys() and self.payload["data"] is not None:
-                        dict_data = self.payload['data']
-                        for node_data, node, id in zip(dict_data, soc_nodes, soc_ids):
-                                node_data_double = node_data.copy()
-                                node_data_double.extend(node_data)
-                                id_output = {id: node_data_double}
-                                output_node = {node: id_output}
-                                output_list.append(output_node)
-                mqtt_send.MQTTExit()
-                mqtt_receive.MQTTExit()
-                #logger.debug("GESSCon Connector Output: %s", output_list)
-                return output_list
+                                start_date = datetime.datetime.fromtimestamp(timestamp).strftime("%Y.%m.%d 00:00:00")
+                        # timestamp from date to date format
+                        start_date = datetime.datetime.strptime(start_date, '%Y.%m.%d %H:%M:%S')
+                        #timestamp from date to date format
+                        start_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
+                        for val in range(24):
+                                date = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
+                                elprices.append({"DateTime": date, "elprice": price[val]})
+                                demand.append({"DateTime": date, "Loads": aggregated_load[val]})
+                                pv_list.append({"DateTime": date, "pv": aggregated_pv[val]})
+                                ev_list.append({"DateTime": date, "ev": 0.0})
+                                if(val == 23):
+                                        continue
+                                start_date = start_date + datetime.timedelta(hours = 1)
+                        end_date_format = datetime.datetime.fromtimestamp(start_date.timestamp()).strftime("%Y.%m.%d %H:%M:%S")
+                        raw = {"elprices":elprices, "demand": demand, "pv": pv_list, "ev": ev_list}
+
+                        payload_var = {"site": "EDYNA-0018",
+                        "time_start": start_date_format,
+                        "time_stop": end_date_format,
+                        "raw": raw,
+                        "tele": tele,
+                        "config": config }
+                        payload = json.dumps(payload_var)
+                        #logger.info("Payload: %s", payload)
+
+                        # MQTT
+                        #ca_cert_path_input = "/etc/openvpn/s4g-ca.crt"
+                        ca_cert_path_input = "/usr/src/app/openvpn/s4g-ca.crt"
+                        logger.debug("Publishing values in MQTT")
+                        mqtt_send = MQTTClient("10.8.0.50", 8883, "gesscon_send", keepalive=60, username="fronius-fur", password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path_input, set_insecure=True, id=None)
+                        logger.debug("mqtt send: "+str(mqtt_send))
+                        mqtt_receive = MQTTClient("10.8.0.50", 8883, "gesscon_receive", keepalive=60, username="fronius-fur",
+                                                password="r>U@U7J8xZ+fu_vq", ca_cert_path=ca_cert_path_input,
+                                                set_insecure=True, id=None)
+                        mqtt_receive.subscribe_to_topics([("GessconSimulationOutput",2)], self.on_msg_received)
+                        logger.debug("successfully subscribed")
+                        mqtt_send.publish("GessconSimulationInput", payload, False)
+                        # Checks for output from GESSCon for atmost 15 seconds
+                        t = 0
+                        while t<= 60:
+                                logger.debug("Waiting for GESSCon response")
+
+                                if not self.payload_set:
+                                        t = t + 1
+                                        time.sleep(1)
+                                else:
+                                        break
+                        output_list = []
+                        if "data" in self.payload.keys() and self.payload["data"] is not None:
+                                dict_data = self.payload['data']
+                                for node_data, node, id in zip(dict_data, soc_nodes, soc_ids):
+                                        node_data_double = node_data.copy()
+                                        node_data_double.extend(node_data)
+                                        id_output = {id: node_data_double}
+                                        output_node = {node: id_output}
+                                        output_list.append(output_node)
+                        mqtt_send.MQTTExit()
+                        mqtt_receive.MQTTExit()
+                        #logger.debug("GESSCon Connector Output: %s", output_list)
+                        return output_list
+                except Exception as e:
+                        logger.error(e)
 
         def on_msg_received(self, payload):
                 payload = json.loads(payload)

@@ -300,22 +300,24 @@ class gridController(threading.Thread):
 					# logger.debug("soc_list_new_total: " + str(soc_list_new_total))
 
 					if flag_global_control:
-						logger.debug("Trying to get global profile")
+						logger.debug("Global control present")
 						soc_list_new_total = soc_list_new_evs + soc_list_new_storages
 						#logger.debug("soc_list_new_total: "+str(soc_list_new_total))
 
-						if not ((hours + 1) % 24):
+						if hours == 0 or not ((hours + 1) % 24):
+							logger.debug("Getting global profile")
 							global_profile_total = self.global_control.gesscon(load_profiles, pv_profiles, price_profile,
 																			   soc_list_new_total)
+						logger.debug("global profile total "+str(global_profile_total))
 
-
-						if not global_profile_total == []:
+						if not global_profile_total == [] or global_profile_total == None:
 							logger.debug("Global profile received")
 							global_profile = self.input.get_profile(global_profile_total, hours, 24)
 						# logger.debug("profess_global_profile "+str(profess_global_profile))
 
 						else:
 							logger.error("GESSCon didn't answer to the request")
+							self.Stop()
 			except Exception as e:
 				logger.error(e)
 
