@@ -70,44 +70,54 @@ def create_simulation(body):  # noqa: E501
                             return message, 406
             logger.debug("Power lines succesfully checked")
 
-            if "powerProfile" in values.keys():
-                if values["powerProfile"] is not None:
-                    logger.debug("Checking power profile IDs")
-                    load_profiles = values["loads"]
-                    load_profile_ids = []
-                    for load_profile in load_profiles:
-                        if "power_profile_id" in load_profile.keys() and load_profile['power_profile_id'] is not None:
-                            load_profile_ids.append(load_profile['power_profile_id'])
+            if "loads" in values.keys() and values["loads"] is not None:
+                logger.debug("Checking power profile IDs")
+                load_profiles = values["loads"]
+                load_profile_ids = []
+                for load_profile in load_profiles:
+                    if "power_profile_id" in load_profile.keys() and load_profile['power_profile_id'] is not None:
+                        load_profile_ids.append(load_profile['power_profile_id'])
 
-                    power_profile_ids = []
+                power_profile_ids = []
+                power_profiles = []
+                if "powerProfile" in values.keys() and values["powerProfile"] is not None:
                     power_profiles = values['powerProfile']
-                    for power_profile in power_profiles:
-                        if "id" in power_profile.keys() and power_profile['id'] is not None:
-                            power_profile_ids.append(power_profile['id'])
+                for power_profile in power_profiles:
+                    if "id" in power_profile.keys() and power_profile['id'] is not None:
+                        power_profile_ids.append(power_profile['id'])
 
-                    for load_profile_id in  load_profile_ids:
-                        if not bool(re.search("profile_\d", load_profile_id)):
-                            if load_profile_id not in power_profile_ids:
-                                message = "Error: No Power profile found for this ID: " + str(load_profile_id)
-                                logger.error(message)
-                                return message, 406
-
-                    logger.debug("Power Profile IDs successfully checked")
-                    logger.debug("Checking Interval values")
-                    for power_profile in power_profiles:
-                        count_items = len(power_profile['items'])
-                        if power_profile['interval']:
-                            if count_items*power_profile['interval'] >= 24:
-                                continue
-                        elif power_profile['m_interval']:
-                            if count_items * power_profile['m_interval'] >= 24*60:
-                                continue
-                        elif power_profile['s_interval']:
-                            if count_items * power_profile['s_interval'] >= 24*3600:
-                                continue
-                        message = "Error: The number of items in powerProfile should be according to the interval given"
+                for load_profile_id in  load_profile_ids:
+                    if not bool(re.search("profile_\d", load_profile_id)):
+                        if load_profile_id not in power_profile_ids:
+                            message = "Error: No Power profile found for this ID: " + str(load_profile_id)
+                            logger.error(message)
+                            return message, 406
+                logger.debug("Power Profile IDs successfully checked")
+                logger.debug("Checking Interval values")
+                for power_profile in power_profiles:
+                    if not 'items' in power_profile.keys()or power_profile['items'] is None:
+                        message = "Please provide items for " + power_profile['id']
                         return message, 406
-                    logger.debug("Interval values successfully checked")
+                    count_items = len(power_profile['items'])
+                    if 'interval' in power_profile.keys() and power_profile['interval'] is not None:
+                        if count_items*power_profile['interval'] >= 24:
+                            continue
+                        else:
+                            message = "Hour interval values should be atleast for a day"
+                            return message, 406
+                    elif 'm_interval' in power_profile.keys() and power_profile['m_interval'] is not None:
+                        if count_items * power_profile['m_interval'] >= 24*60:
+                            continue
+                        else:
+                            message = "Minutes interval values should be atleast for a day"
+                            return message, 406
+                    elif 's_interval' in power_profile.keys() and power_profile['s_interval'] is not None:
+                        if count_items * power_profile['s_interval'] >= 24*3600:
+                            continue
+                        else:
+                            message = "Seconds interval values should be atleast for a day"
+                            return message, 406
+                logger.debug("Interval values successfully checked")
 
             data_to_store=[]
 
