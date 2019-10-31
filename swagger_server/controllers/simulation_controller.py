@@ -426,9 +426,7 @@ def get_simulation_result_raw_with_node(id, result_type, node_name):  # noqa: E5
 		if(result_type in raw_data.keys() and raw_data[result_type] is not None):
 			raw_data = raw_data[result_type]
 			raw_data_keys = raw_data.keys()
-			node_name_new = node_name
-			if "." not in node_name:
-				node_name_new = node_name + "."
+			node_name_new = node_name + "."
 			for key in raw_data_keys:
 				if (key.find(node_name_new) != -1) or key == node_name:
 					if(result_type == "voltages"):
