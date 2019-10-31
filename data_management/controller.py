@@ -310,7 +310,7 @@ class gridController(threading.Thread):
 																			   soc_list_new_total)
 						logger.debug("global profile total "+str(global_profile_total))
 
-						if not global_profile_total == [] or not global_profile_total == None:
+						if not global_profile_total == [] and not global_profile_total == None:
 							logger.debug("Global profile received")
 							global_profile = self.input.get_profile(global_profile_total, hours, 24)
 						# logger.debug("profess_global_profile "+str(profess_global_profile))
