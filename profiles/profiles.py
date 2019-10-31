@@ -153,7 +153,7 @@ class Profiles:
                 for i in range(no_of_years):
                     pv_list.extend(data)
                 pv_list.extend(data[0:days * 24])
-                logger.info("PV data = %s: ", pv_list)
+                #logger.info("PV data = %s: ", pv_list)
                 pv_list_2=[]
                 for element in pv_list:
                     pv_list_2.append((element / 1000)*max_power_kw)

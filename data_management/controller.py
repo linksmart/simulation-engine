@@ -76,6 +76,7 @@ class gridController(threading.Thread):
 				self.join(1)
 			except Exception as e:
 				logger.error(e)
+		sys.exit(0)
 	
 	def get_finish_status(self):
 		return self.redisDB.get(self.finish_status_key)
@@ -110,7 +111,6 @@ class gridController(threading.Thread):
 		answer_setup = self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
 		if answer_setup == 1:
 			self.Stop()
-			sys.exit(0)
 		logger.debug("!---------------Elements added to simulator------------------------ \n")
 		
 		transformer_names = self.sim.get_transformer_names()
@@ -236,22 +236,23 @@ class gridController(threading.Thread):
 		
 		if flag_is_storage:
 			soc_list = self.input.get_soc_list(self.topology)
-		
+
+		flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
+
 		flag_global_control = self.input.is_global_control_in_Storage(self.topology)
 		global_profile_total = []
 		logger.debug("Global control flag: " + str(flag_global_control))
+		if flag_global_control:
+			flag_is_price_profile_needed = True
+		logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
 		
 		logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
-		
-		flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
-		logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
+
+
+
 
 		if flag_is_price_profile_needed or flag_global_control:
 			price_profile_data = self.input.get_price_profile()
-			
-			if price_profile_data == None or price_profile_data == []:
-				self.Stop()
-				sys.exit(0)
 			logger.debug("length price profile " + str(len(price_profile_data)))
 
 		for i in range(numSteps):
@@ -267,7 +268,7 @@ class gridController(threading.Thread):
 			if self.redisDB.get(self.finish_status_key) == "True":
 				logger.debug("Setting finish_status_key as True")
 				self.Stop()
-			
+
 			# terminal=self.sim.get_monitor_terminals("mon_transformer")
 			# logger.debug("Number of terminals in monitor "+str(terminal))
 			
@@ -299,18 +300,14 @@ class gridController(threading.Thread):
 					# logger.debug("soc_list_new_total: " + str(soc_list_new_total))
 
 					if flag_global_control:
+						logger.debug("Trying to get global profile")
 						soc_list_new_total = soc_list_new_evs + soc_list_new_storages
-						# logger.debug("soc_list_new_total: "+str(soc_list_new_total))
+						#logger.debug("soc_list_new_total: "+str(soc_list_new_total))
 
 						if not ((hours + 1) % 24):
 							global_profile_total = self.global_control.gesscon(load_profiles, pv_profiles, price_profile,
 																			   soc_list_new_total)
-							# logger.debug("global profile "+str(profess_global_profile_total))
-							"""profess_global_profile_total = [{'node_a6': {
-								'Akku2': [0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
-									  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-										  0.03, 0.03, -0.03, 0.0024003110592032, 0.03, 0.0, 0.0, -0.028741258741258702, 0.0,
-									  0.0, 0.0, -0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}}]"""
+
 
 						if not global_profile_total == []:
 							logger.debug("Global profile received")
