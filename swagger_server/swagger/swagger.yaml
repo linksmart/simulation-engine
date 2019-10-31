@@ -111,9 +111,7 @@ paths:
         200:
           description: "Results of successful simulation"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/SimulationResult"
+            $ref: "#/definitions/SimulationResult"
         400:
           description: "Invalid simulation configuration data supplied"
         404:
@@ -175,16 +173,8 @@ paths:
         schema:
           $ref: "#/definitions/Simulation"
       responses:
-        200:
-          description: "Results of successful simulation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/SimulationResult"
-        400:
-          description: "Invalid simulation configuration data supplied"
-        404:
-          description: "Simulation ID not found"
+        default:
+          description: "successful operation"
       x-swagger-router-controller: "swagger_server.controllers.commands_controller"
   /commands/abort/{id}:
     put:
@@ -882,6 +872,38 @@ definitions:
   SimulationResult:
     type: "object"
     properties:
+      currents:
+        $ref: "#/definitions/Currents"
+      losses:
+        $ref: "#/definitions/Losses"
+      powers:
+        $ref: "#/definitions/Powers"
+      voltages:
+        $ref: "#/definitions/Voltages"
+    example:
+      currents:
+        node:
+          Phase1: 0
+          Phase2: 0
+          Phase3: 0
+      losses:
+        node: 1.1376741059344027
+      powers:
+        node: 11.008040700350694
+      voltages:
+        node:
+          Phase1:
+            max: 1.0000996955900572
+            min: 1.000099509215791
+          Phase2:
+            max: 1.0000992661714965
+            min: 1.0000990580105913
+          Phase3:
+            max: 1.0000999366840242
+            min: 1.0000996385962098
+  SimulationResult2:
+    type: "object"
+    properties:
       nodeId:
         type: "string"
       voltage:
@@ -909,6 +931,41 @@ definitions:
       node:
       - 0.80082819046101150206595775671303272247314453125
       - 0.80082819046101150206595775671303272247314453125
+  Currents:
+    type: "object"
+    properties:
+      node:
+        $ref: "#/definitions/PhaseVal"
+  PhaseVal:
+    type: "object"
+    properties:
+      phase:
+        type: "number"
+  Losses:
+    type: "object"
+    properties:
+      node:
+        type: "number"
+  Powers:
+    type: "object"
+    properties:
+      node:
+        type: "number"
+  Voltages:
+    type: "object"
+    properties:
+      node:
+        $ref: "#/definitions/PhaseValue"
+  PhaseValue:
+    type: "object"
+    properties:
+      phase:
+        $ref: "#/definitions/PhaseValMaxMin"
+  PhaseValMaxMin:
+    type: "object"
+    properties:
+      max/min:
+        type: "number"
   Voltage:
     type: "object"
     properties:
