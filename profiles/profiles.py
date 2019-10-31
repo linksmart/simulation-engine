@@ -82,7 +82,7 @@ class Profiles:
             for year in range(no_of_years-1):
                 price_list.extend(data_list)
             price_list.extend(data_list[0:extra_days*24])
-            logger.info("Price data = %s: ", price_list)
+            #logger.info("Price data = %s: ", price_list)
         return price_list
 
     def pv_profile(self, city, country, days = 365, max_power_kw=1, timestamp = None):
@@ -153,7 +153,7 @@ class Profiles:
                 for i in range(no_of_years):
                     pv_list.extend(data)
                 pv_list.extend(data[0:days * 24])
-                logger.info("PV data = %s: ", pv_list)
+                #logger.info("PV data = %s: ", pv_list)
                 pv_list_2=[]
                 for element in pv_list:
                     pv_list_2.append((element / 1000)*max_power_kw)

@@ -185,8 +185,8 @@ class InputController:
             data_list.append(data_dict)
         return data_list
 
-    def get_price_profile_from_server(self, city, country, sim_hours):
-        price_profile_data= self.profiles.price_profile(city, country, sim_hours)
+    def get_price_profile_from_server(self, city, country, sim_days):
+        price_profile_data= self.profiles.price_profile(city, country, sim_days)
         return price_profile_data
 
     def is_price_profile_needed(self,topology):
@@ -365,10 +365,18 @@ class InputController:
                                                                 }
 
                     for pv_element in photovoltaics:
-                        if pv_element["bus1"] == charger_element.get_bus_name():
+                        bus_pv = pv_element["bus1"]
+                        if "." in bus_pv:
+                            if len(bus_pv.split(".")) == 4:
+                                bus_pv = bus_pv.split(".")[0]
+                        if bus_pv == charger_element.get_bus_name():
                             soc_dict[charger_element.get_bus_name()]["PV"]={"pv_name": pv_element["id"]}
                     for ess_element in storages:
-                        if ess_element["bus1"] == charger_element.get_bus_name():
+                        bus_ess = ess_element["bus1"]
+                        if "." in bus_ess:
+                            if len(bus_ess.split(".")) == 4:
+                                bus_ess = bus_ess.split(".")[0]
+                        if bus_ess == charger_element.get_bus_name():
                             soc_dict[charger_element.get_bus_name()]["ESS"] = {"SoC":ess_element["soc"],
                                                             "T_SoC":25,
                                                             "id":ess_element["id"],
@@ -643,52 +651,6 @@ class InputController:
 
     def setup_elements_in_simulator(self, topology, profiles, profess):
 
-        """
-        dummyprofile = [3] * 24
-        dummyLoads = []
-        dummyPrice = []
-        dummyPV = []
-
-
-        dummyPVdict = []
-        print("profess.json_parser.get_node_name_list(): " + str(profess.json_parser.get_node_name_list()))
-
-        for element in profess.json_parser.get_node_name_list():
-            print("element: " + str(element))
-            dummyDict = { element: {element + ".1": copy.deepcopy(dummyprofile), element + ".2": copy.deepcopy(dummyprofile), element + ".3": copy.deepcopy(dummyprofile)}}
-            print("dummyDict: " + str(dummyDict))
-            dummyLoads.append(dummyDict)
-            dummyPVdict = {element: {element + ".1.2.3": copy.deepcopy(dummyprofile)}}
-            dummyPV.append(dummyPVdict)
-
-
-        dummyPrice = copy.deepcopy(dummyprofile)
-
-        element = "671"
-        dummyDict = {element: [{element + ".1.2.3": copy.deepcopy(dummyprofile)}]}
-
-        print("dummyDict: " + str(dummyDict))
-        print("dummyLoads: " + str(dummyLoads))
-        print("dummyPV: " +  str(dummyPV))
-        print("dummyPrice: " + str(dummyPrice))
-
-        print("dummyLoads len: " + str(len(dummyLoads)))
-
-        dummyLoads[0] = dummyDict
-        dummyGESSCON = [{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}},
-                        {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
-
-        #profess.set_up_profess( dummyLoads, dummyPV, dummyPrice, dummyGESSCON)
-        #profess.start_all()
-        print(profess.dataList)
-        print(profess.wait_and_get_output())
-
-        soc_list = [{"633": {"SoC": 0.5}}, {"671": {"SoC": 0.4}}, {"634": {"SoC": 0.2}}]
-        #profess.update(dummyLoads, dummyPV, dummyPrice, soc_list, dummyGESSCON)
-        #print(profess.dataList)
-        #---------------PROFESS_END--------------------#
-
-        """
         self.profiles = profiles
         self.profess = profess
         common = topology["common"]
@@ -705,6 +667,8 @@ class InputController:
             logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
             if flag_is_price_profile_needed or flag_global_control:
                 self.price_profile = self.get_price_profile_from_server(city, country, time_in_days)
+                if not isinstance(self.price_profile, list):
+                    return 1
                 #logger.debug("length price profile "+str(len(self.price_profile)))
 
         for values in radial:
