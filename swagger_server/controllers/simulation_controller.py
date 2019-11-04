@@ -178,7 +178,7 @@ def create_simulation(body):  # noqa: E501
                                 is_price_needed = True
                                 logger.debug("price profile needed")
 
-                    if is_price_needed:
+                    """if is_price_needed:
                         price_profile = Profiles().price_profile("Fur", "Denmark", 1)
                         if not isinstance(price_profile, list):
                             message = "Problems while querying price profiles"
@@ -186,7 +186,7 @@ def create_simulation(body):  # noqa: E501
                             return message, 406
 
 
-                        """if "." in storage_elements["bus1"]:
+                        if "." in storage_elements["bus1"]:
                             message = "Error: storage element with id: " + str(
                                 storage_elements["id"] +" is not three-phase")
                             return message"""
