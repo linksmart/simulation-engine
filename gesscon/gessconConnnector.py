@@ -179,6 +179,8 @@ class GESSCon():
                                         id_output = {id: node_data_double}
                                         output_node = {node: id_output}
                                         output_list.append(output_node)
+                        else:
+                                logger.error(str(self.payload))
                         mqtt_send.MQTTExit()
                         mqtt_receive.MQTTExit()
                         #logger.debug("GESSCon Connector Output: %s", output_list)
