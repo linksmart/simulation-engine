@@ -262,24 +262,28 @@ def get_simulation_status(id):  # noqa: E501
         if flag == None or flag == "created":
             return "Simulation has not been started"
         logger.debug("#############Getting status#####################")
+        status_message = redis_db.get("status:")
+        if status_message == "OK":
+            timestep = int(redis_db.get("timestep_"+str(id)))
+            logger.debug("timestep "+str(timestep))
+            sim_days = int(redis_db.get("sim_days_"+str(id)))
+            logger.debug("sim_days "+str(sim_days))
 
-        timestep = int(redis_db.get("timestep_"+str(id)))
-        logger.debug("timestep "+str(timestep))
-        sim_days = int(redis_db.get("sim_days_"+str(id)))
-        logger.debug("sim_days "+str(sim_days))
+            status = (timestep / (sim_days-1)) * 100.0
 
-        status = (timestep / (sim_days-1)) * 100.0
-
-        if timestep == (sim_days - 1):
-            flag_stop = redis_db.get("opt_stop_" + id)
-            logger.debug("flag stop "+str(flag_stop))
-            if flag_stop == "False":
-                status = status - 1
+            if timestep == (sim_days - 1):
+                flag_stop = redis_db.get("opt_stop_" + id)
+                logger.debug("flag stop "+str(flag_stop))
+                if flag_stop == "False":
+                    status = status - 1
+            return int(status)
+        else:
+            return status_message, 406
 
     except Exception as e:
         logger.error(e)
         status = "id not present"
-    return int(status)
+
 
 
 def run_simulation(id, body=None):  # noqa: E501

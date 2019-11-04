@@ -84,6 +84,7 @@ class gridController(threading.Thread):
 	def run(self):  # self, id, duration):
 		# self.id = id
 		# self.duration = duration
+		self.redisDB.set("status:", "OK")
 		start_time = time.time()
 		common = self.topology["common"]
 		radial = self.topology["radials"]
@@ -110,6 +111,8 @@ class gridController(threading.Thread):
 		price_profile = None
 		answer_setup = self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
 		if answer_setup == 1:
+			logger.error("Price prediction service missing")
+			self.redisDB.set("status:", "Price prediction service missing")
 			self.Stop()
 		logger.debug("!---------------Elements added to simulator------------------------ \n")
 		
@@ -308,7 +311,7 @@ class gridController(threading.Thread):
 							logger.debug("Getting global profile")
 							global_profile_total = self.global_control.gesscon(load_profiles, pv_profiles, price_profile,
 																			   soc_list_new_total)
-						logger.debug("global profile total "+str(global_profile_total))
+						#logger.debug("global profile total "+str(global_profile_total))
 
 						if not global_profile_total == [] and not global_profile_total == None:
 							logger.debug("Global profile received")
@@ -317,6 +320,8 @@ class gridController(threading.Thread):
 
 						else:
 							logger.error("GESSCon didn't answer to the request")
+							self.redisDB.set("status:","Global control service missing")
+							logger.error("Global control service missing")
 							self.Stop()
 			except Exception as e:
 				logger.error(e)
@@ -329,6 +334,7 @@ class gridController(threading.Thread):
 				
 				if flag_global_control:
 					# logger.debug("price profile " + str(price_profile))
+					logger.debug("global profile "+str(global_profile))
 					self.profess.set_up_profess(soc_list_new_storages, load_profiles, pv_profiles, price_profile,
 					                            global_profile)
 				elif not flag_global_control and flag_is_price_profile_needed:
