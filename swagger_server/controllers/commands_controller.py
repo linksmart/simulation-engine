@@ -262,7 +262,7 @@ def get_simulation_status(id):  # noqa: E501
         if flag == None or flag == "created":
             return "Simulation has not been started"
         logger.debug("#############Getting status#####################")
-        status_message = redis_db.get("status:")
+        status_message = redis_db.get("status_"+ str(id))
         if status_message == "OK":
             timestep = int(redis_db.get("timestep_"+str(id)))
             logger.debug("timestep "+str(timestep))

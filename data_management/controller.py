@@ -112,7 +112,7 @@ class gridController(threading.Thread):
 		answer_setup = self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
 		if answer_setup == 1:
 			logger.error("Price prediction service missing")
-			self.redisDB.set("status:", "Price prediction service missing")
+			self.redisDB.set("status_"+ str(self.id), "Price prediction service missing")
 			self.Stop()
 		logger.debug("!---------------Elements added to simulator------------------------ \n")
 		
@@ -320,7 +320,7 @@ class gridController(threading.Thread):
 
 						else:
 							logger.error("GESSCon didn't answer to the request")
-							self.redisDB.set("status:","Global control service missing")
+							self.redisDB.set("status_"+ str(self.id),"Global control service missing")
 							logger.error("Global control service missing")
 							self.Stop()
 			except Exception as e:
