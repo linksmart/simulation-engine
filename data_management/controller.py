@@ -158,10 +158,13 @@ class gridController(threading.Thread):
 		len_elementNames = len(elementNames)
 		nodeNamesCurrents = self.sim.get_YNodeOrder()
 		len_nodeNamesCurrents = len(nodeNamesCurrents)
+		lineNames = self.sim.get_all_lines_names()
+		len_lineNames = len(lineNames)
+
 		
 		# logger.debug("node_ names "+str(nodeNames))
 		voltages = [[] for i in range(len(nodeNames))]
-		currents = [[] for i in range(len_nodeNamesCurrents)]
+		currents = [[] for i in range(len_lineNames)]
 		losses = [[] for i in range(len_elementNames)]
 		total_losses = []
 		
@@ -276,7 +279,7 @@ class gridController(threading.Thread):
 			# logger.debug("Number of terminals in monitor "+str(terminal))
 			
 			######################################################################################
-			################  Storage control  ###################################################
+			################  Flag control  ###################################################
 			######################################################################################
 			try:
 				if flag_is_storage or flag_is_charging_station:
@@ -326,7 +329,9 @@ class gridController(threading.Thread):
 			except Exception as e:
 				logger.error(e)
 
-			logger.debug("status key " + str(self.redisDB.get(self.finish_status_key)))
+			######################################################################################
+			################  Storage control  ###################################################
+			######################################################################################
 			if flag_is_storage:
 				logger.debug("-------------------------------------------")
 				logger.debug("storages present in the simulation")
@@ -627,8 +632,12 @@ class gridController(threading.Thread):
 
 
 			puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
+
+			Currents = self.sim.get_line_magnitude_currents()
+
+
 			tot_losses = self.sim.get_total_losses()
-			
+
 			for i in range(len_nodeNames):
 				voltages[i].append(puVoltages[i])
 			
@@ -636,8 +645,9 @@ class gridController(threading.Thread):
 				number = int(i + (len_elementNames))
 				losses[i].append(str(complex(Losses[i], Losses[number])))
 			
-			for i in range(len_nodeNamesCurrents):
-				currents[i].append(str(complex(Currents[i], Currents[int(i + (len_nodeNamesCurrents))])))
+			for i in range(len_lineNames):
+				#currents[i].append(str(complex(Currents[i], Currents[int(i + (len_lineNames))])))
+				currents[i].append(Currents[i])
 			
 			total_losses.append(str(complex(tot_losses[0], tot_losses[1])))
 			logger.debug("Finish timestep "+str(hours))
@@ -673,21 +683,44 @@ class gridController(threading.Thread):
 		# logger.debug("total_losses " + str(total_losses))
 		# data_losses
 		############################### Currents ###################################
-		for i in range(len_nodeNamesCurrents):
-			raw_data_currents[str(nodeNamesCurrents[i]).lower()] = currents[i]
-		
-		for i in range(len_nodeNamesCurrents):
-			element = [abs(complex(x)) for x in (currents[i])]
-			key = nodeNamesCurrents[i]
-			data_currents[key] = max(element)
-		
+		for i in range(len_lineNames):
+			raw_data_currents[str(lineNames[i]).lower()] = currents[i]
+
 		data3 = {}
-		for key, value in data_currents.items():
+
+		for name_number in range(len_lineNames):
+			element = currents[name_number]#[abs(complex(x)) for x in (currents[i])]
+			len_element = len(element)
+			number_phases = len(element[0])
+			phase1=[]
+			phase2=[]
+			phase3=[]
+			for i in range(len_element):
+				for j in range(number_phases):
+					if j == 0:
+						phase1.append(element[i][j])
+					elif j==1:
+						phase2.append(element[i][j])
+					elif j==2:
+						phase3.append(element[i][j])
+
+			key= str(lineNames[name_number])
+
+			data3[key.lower()] = {}
+
+			if not phase1==[]:
+				data3[key]["Phase 1"] = {"max": max(phase1),"min": min(phase1)}
+			if not phase2 == []:
+				data3[key]["Phase 2"] = {"max": max(phase2), "min": min(phase2)}
+			if not phase3 == []:
+				data3[key]["Phase 3"] = {"max": max(phase3), "min": min(phase3)}
+
+		"""for key, value in data_currents.items():
 			node, phase = key.split(".", 1)
 			key_to_give = str(node).lower()
 			if key_to_give not in data3.keys():
 				data3[key_to_give] = {}
-			data3[key_to_give]["Phase " + phase] = value
+			data3[key_to_give]["Phase " + phase] = value"""
 		
 		############################### Voltages ###################################
 		for i in range(len(nodeNames)):

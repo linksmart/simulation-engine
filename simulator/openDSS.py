@@ -328,6 +328,42 @@ class OpenDSS:
 
         return (voltageList, ycurrents, elementLosses)
 
+    def get_line_magnitude_currents(self):
+
+        i_Line = dss.Lines.First()
+        currents_from_lines = []
+        while i_Line > 0:
+            currents = dss.CktElement.CurrentsMagAng()
+            len_currents = len(currents)
+            #logger.debug("currents "+str(currents))
+            if len_currents == 12:
+                list=[currents[0], currents[2], currents[4]]
+            elif len_currents == 8:
+                list = [currents[0], currents[2]]
+            elif len_currents == 4:
+                list = [currents[0]]
+            else:
+                logger.error("Length of currents not supported")
+
+            currents_from_lines.append(list)
+
+            #logger.debug("Currents from lines " + str(currents_from_lines))
+            i_Line = dss.Lines.Next()
+        return currents_from_lines
+
+    def get_line_currents(self):
+
+        i_Line = dss.Lines.First()
+        currents_from_lines = []
+        while i_Line > 0:
+            logger.debug("Currents "+str(dss.CktElement.Currents()))
+            currents_from_lines.append(dss.CktElement.Currents())
+            i_Line = dss.Lines.Next()
+        return currents_from_lines
+
+
+    def get_all_lines_names(self):
+        return dss.Lines.AllNames()
 
     def get_YNodeOrder(self):
         return dss.Circuit.YNodeOrder()
