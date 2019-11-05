@@ -426,15 +426,12 @@ def get_simulation_result_raw_with_node(id, result_type, node_name):  # noqa: E5
 		output = {}
 		if(result_type in raw_data.keys() and raw_data[result_type] is not None):
 			raw_data = raw_data[result_type]
+			output[result_type] = {}
 			raw_data_keys = raw_data.keys()
-			node_name_new = node_name + "."
 			for key in raw_data_keys:
-				if (key.find(node_name_new) != -1) or key == node_name:
-					if(result_type == "voltages"):
-						output[key] = raw_data[key]['Voltage']
-					else:
-						output[key] = raw_data[key]
-			if not output:
+				if key == node_name:
+					output[result_type][key] = raw_data[key]
+			if not output[result_type]:
 				output = "No record found for " + node_name
 		else:
 			output = "result_type not found"
@@ -458,13 +455,7 @@ def get_simulation_result_raw(id, result_type):  # noqa: E501
 		raw_data = utils.get_stored_data(path)
 		output = {}
 		if(result_type in raw_data.keys() and raw_data[result_type] is not None):
-			if result_type == "voltages":
-				for element in raw_data[result_type]:
-					output[element]=raw_data[result_type][element]['Voltage']
-			else:
-				for element in raw_data[result_type]:
-					if raw_data[result_type][element] is not None:
-						output[element] = raw_data[result_type][element]
+			output[result_type] = raw_data[result_type]
 		else:
 			output = "result_type not found"
 	except Exception as e:

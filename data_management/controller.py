@@ -688,7 +688,14 @@ class gridController(threading.Thread):
 			if key_to_give not in data3.keys():
 				data3[key_to_give] = {}
 			data3[key_to_give]["Phase " + phase] = value
-		
+			
+		raw_data_currents2 = {}
+		for key, value in raw_data_currents.items():
+			node, phase = key.split(".", 1)
+			key_to_give = str(node)
+			if key_to_give not in raw_data_currents2.keys():
+				raw_data_currents2[key_to_give] = {}
+			raw_data_currents2[key_to_give]["Phase " + phase] = value
 		############################### Voltages ###################################
 		for i in range(len(nodeNames)):
 			raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
@@ -700,7 +707,14 @@ class gridController(threading.Thread):
 			if node not in data2.keys():
 				data2[node] = {}
 			data2[node]["Phase " + phase] = value
-		
+			
+		raw_data_voltages2 = {}
+		for key, value in raw_data_voltages.items():
+			value = value['Voltage']
+			node, phase = key.split(".", 1)
+			if node not in raw_data_voltages2.keys():
+				raw_data_voltages2[node] = {}
+			raw_data_voltages2[node]["Phase " + phase] = value
 		###############################Max power in transformers###################################
 		S_total = []
 		mon_sample = []
@@ -716,7 +730,7 @@ class gridController(threading.Thread):
 		# logger.debug("power "+str(power))
 		data = {"voltages": data2, "currents": data3, "losses": data_losses, "powers": power}
 		
-		raw_data = {"voltages": raw_data_voltages, "currents": raw_data_currents, "losses": raw_data_losses,
+		raw_data = {"voltages": raw_data_voltages2, "currents": raw_data_currents2, "losses": raw_data_losses,
 		            "powers": raw_data_power}
 		
 		raw_data_pv_curtailment = {}
