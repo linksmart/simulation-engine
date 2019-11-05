@@ -84,7 +84,7 @@ class gridController(threading.Thread):
 	def run(self):  # self, id, duration):
 		# self.id = id
 		# self.duration = duration
-		self.redisDB.set("status:", "OK")
+		self.redisDB.set("status_"+ str(self.id), "OK")
 		start_time = time.time()
 		common = self.topology["common"]
 		radial = self.topology["radials"]

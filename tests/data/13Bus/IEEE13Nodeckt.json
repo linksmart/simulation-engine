@@ -17,6 +17,14 @@
     "radials": [
         {
             "radialId": "string",
+            "powerProfiles": [
+                {
+                    "id": "unit_proile",
+                    "items": [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    "interval": 1,
+                    "multiplier": 1
+            }
+            ],
 			"regcontrol": [
 					{
                         "id": "Reg1",
@@ -439,8 +447,7 @@
                     "kV": 4.16,
                     "kW": 1155,
                     "kVar": 660,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "634a",
@@ -451,8 +458,7 @@
                     "kV": 0.277,
                     "kW": 160,
                     "kVar": 110,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "634b",
@@ -463,8 +469,7 @@
                     "kV": 0.277,
                     "kW": 120,
                     "kVar": 90,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "634c",
@@ -475,8 +480,7 @@
                     "kV": 0.277,
                     "kW": 120,
                     "kVar": 90,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "645",
@@ -487,8 +491,7 @@
                     "kV": 2.4,
                     "kW": 170,
                     "kVar": 125,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "646",
@@ -499,8 +502,7 @@
                     "kV": 4.16,
                     "kW": 230,
                     "kVar": 132,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "692",
@@ -511,8 +513,7 @@
                     "kV": 4.16,
                     "kW": 170,
                     "kVar": 151,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "675a",
@@ -523,8 +524,7 @@
                     "kV": 2.4,
                     "kW": 485,
                     "kVar": 190,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "675b",
@@ -535,8 +535,7 @@
                     "kV": 2.4,
                     "kW": 68,
                     "kVar": 60,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "675c",
@@ -547,8 +546,7 @@
                     "kV": 2.4,
                     "kW": 290,
                     "kVar": 212,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "611",
@@ -559,8 +557,7 @@
                     "kV": 2.4,
                     "kW": 170,
                     "kVar": 80,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "652",
@@ -571,8 +568,7 @@
                     "kV": 2.4,
                     "kW": 128,
                     "kVar": 86,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "670a",
@@ -583,8 +579,7 @@
                     "kV": 2.4,
                     "kW": 17,
                     "kVar": 10,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "670b",
@@ -595,8 +590,7 @@
                     "kV": 2.4,
                     "kW": 66,
                     "kVar": 38,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 },
                 {
                     "id": "670c",
@@ -607,8 +601,7 @@
                     "kV": 2.4,
                     "kW": 117,
                     "kVar": 68,
-                    "powerfactor": 0,
-                    "power_profile_id": "string"
+                    "power_profile_id": "unit_profile"
                 }
             ],
             "capacitor": [
@@ -740,32 +733,6 @@
                     "c1": 0,
                     "c0": 0
                 }
-            ],
-            "photovoltaics":[{
-			"bus1": "633",
-			"id": "PV_1",
-			"max_power_kW":15,
-			"phases":3,
-			"kV":4.16
-		    }],
-                        "storageUnits": [
-						{
-                  "id": "Akku1",
-                  "bus1": "633",
-                  "phases": 3,
-				  "connection": "wye",
-                  "soc": 60,
-                  "min_soc":15,
-                  "max_soc":100,
-                  "kv": 4.16,
-                  "max_charging_power": 75,
-                  "max_discharging_power":75,
-                  "storage_capacity": 150,
-                  "optimization_model": "Maximize Self-Consumption",
-                  "powerfactor":1
-
-				}
-
             ]
         }
     ]

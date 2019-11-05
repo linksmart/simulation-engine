@@ -697,9 +697,9 @@ class InputController:
                     return message
                 
                 
-            if "powerProfile" in values.keys() and values["powerProfile"] is not None:
+            if "powerProfiles" in values.keys() and values["powerProfiles"] is not None:
                 logger.debug("!---------------Setting powerProfile------------------------- \n")
-                powerProfile = values["powerProfile"]
+                powerProfile = values["powerProfiles"]
                 message = self.setPowerProfile(id, powerProfile)
                 logger.debug(str(message))
                 if not message == 0:
@@ -712,9 +712,9 @@ class InputController:
                 # radial=radial.to_dict()
                 load = values["loads"]
                 powerprofile = []
-                if "powerProfile" in values.keys() and values["powerProfile"] is not None:
-                    powerprofile = values["powerProfile"]
-                logger.debug("power profile "+str(powerprofile))
+                if "powerProfiles" in values.keys() and values["powerProfiles"] is not None:
+                    powerprofile = values["powerProfiles"]
+                #logger.debug("power profile "+str(powerprofile))
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
                 message = self.setLoadshapes(id, profiles, profess, load, powerprofile, time_in_days)
                 # message = self.setLoadshapes(id, load, time_in_days)

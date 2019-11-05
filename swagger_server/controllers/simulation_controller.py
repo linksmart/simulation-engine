@@ -80,18 +80,19 @@ def create_simulation(body):  # noqa: E501
 
                 power_profile_ids = []
                 power_profiles = []
-                if "powerProfile" in values.keys() and values["powerProfile"] is not None:
-                    power_profiles = values['powerProfile']
+                if "powerProfiles" in values.keys() and values["powerProfiles"] is not None:
+                    power_profiles = values['powerProfiles']
                 for power_profile in power_profiles:
                     if "id" in power_profile.keys() and power_profile['id'] is not None:
                         power_profile_ids.append(power_profile['id'])
 
-                for load_profile_id in  load_profile_ids:
+                for load_profile_id in load_profile_ids:
                     if not bool(re.search("profile_\d", load_profile_id)):
-                        if load_profile_id not in power_profile_ids:
-                            message = "Error: No Power profile found for this ID: " + str(load_profile_id)
-                            logger.error(message)
-                            return message, 406
+                        if (not load_profile_id == "False" and not load_profile_id == "false"):
+                            if load_profile_id not in power_profile_ids:
+                                message = "Error: No Power profile found for this ID: " + str(load_profile_id)
+                                logger.error(message)
+                                return message, 406
                 logger.debug("Power Profile IDs successfully checked")
                 logger.debug("Checking Interval values")
                 for power_profile in power_profiles:
@@ -103,19 +104,19 @@ def create_simulation(body):  # noqa: E501
                         if count_items*power_profile['interval'] >= 24:
                             continue
                         else:
-                            message = "Hour interval values should be atleast for a day"
+                            message = "Hour interval values should be at least for one day"
                             return message, 406
                     elif 'm_interval' in power_profile.keys() and power_profile['m_interval'] is not None:
                         if count_items * power_profile['m_interval'] >= 24*60:
                             continue
                         else:
-                            message = "Minutes interval values should be atleast for a day"
+                            message = "Minutes interval values should be at least for one day"
                             return message, 406
                     elif 's_interval' in power_profile.keys() and power_profile['s_interval'] is not None:
                         if count_items * power_profile['s_interval'] >= 24*3600:
                             continue
                         else:
-                            message = "Seconds interval values should be atleast for a day"
+                            message = "Seconds interval values should be at least for one day"
                             return message, 406
                 logger.debug("Interval values successfully checked")
 
