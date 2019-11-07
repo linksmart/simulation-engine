@@ -133,31 +133,25 @@ class gridController(threading.Thread):
 		logger.debug("Active circuit: " + str(self.sim.getActiveCircuit()))
 		
 		##################################################################################PROBLEM################################
-		
-		# self.sim.setVoltageBases(115, 4.16, 0.48)
+		numSteps = self.sim_hours
+		logger.debug("Number of steps: " + str(numSteps))
+
 		self.sim.setVoltageBases(self.input.get_voltage_bases())
-		# self.sim.setMode("snap")
-		# self.sim.setMode("daily")
 		self.sim.setMode("yearly")
 		self.sim.setStepSize("hours")
-		self.sim.setNumberSimulations(1)
-		logger.info("Solution mode 2: " + str(self.sim.getMode()))
-		logger.info("Number simulations 2: " + str(self.sim.getNumberSimulations()))
-		logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
+		self.sim.setNumberSimulations(numSteps)
+		logger.info("Solution mode: " + str(self.sim.getMode()))
+		logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
+		logger.info("Solution stepsize: " + str(self.sim.getStepSize()))
 		logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
-		logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-		numSteps = self.sim_hours
-		# self.redisDB.set("sim_days_"+str(self.id),numSteps)
-		# numSteps=3
-		logger.debug("Number of steps: " + str(numSteps))
-		result = []
+
 		
 		nodeNames = self.sim.get_node_list()
 		len_nodeNames = len(nodeNames)
 		elementNames = self.sim.get_element_names()
 		len_elementNames = len(elementNames)
-		nodeNamesCurrents = self.sim.get_YNodeOrder()
-		len_nodeNamesCurrents = len(nodeNamesCurrents)
+		#nodeNamesCurrents = self.sim.get_YNodeOrder()
+		#len_nodeNamesCurrents = len(nodeNamesCurrents)
 		lineNames = self.sim.get_all_lines_names()
 		len_lineNames = len(lineNames)
 
@@ -672,7 +666,10 @@ class gridController(threading.Thread):
 		
 		for i in range(len_elementNames):
 			element = [abs(complex(x)) for x in (losses[i])]
-			data_losses[elementNames[i]] = max(element)
+			element_group, element_name  = elementNames[i].split(".", 1)
+			if element_group not in data_losses.keys():
+				data_losses[element_group] = {}
+			data_losses[element_group][element_name] = max(element)
 		
 		abs_total_losses = []
 		raw_data_losses["circuit_total_losses"] = total_losses
@@ -719,20 +716,7 @@ class gridController(threading.Thread):
 				data3[key]["Phase 3"] = {"max": max(phase3), "min": min(phase3)}
 				raw_data_currents[key]["Phase 3"] = phase3
 
-		"""for key, value in data_currents.items():
-			node, phase = key.split(".", 1)
-			key_to_give = str(node).lower()
-			if key_to_give not in data3.keys():
-				data3[key_to_give] = {}"""
 
-
-		"""raw_data_currents2 = {}
-		for key, value in raw_data_currents.items():
-			node, phase = key.split(".", 1)
-			key_to_give = str(node)
-			if key_to_give not in raw_data_currents2.keys():
-				raw_data_currents2[key_to_give] = {}
-			raw_data_currents2[key_to_give]["Phase " + phase] = value"""
 
 		############################### Voltages ###################################
 		for i in range(len(nodeNames)):
@@ -760,11 +744,12 @@ class gridController(threading.Thread):
 			name_monitor = "monitor_transformer_" + str(i)
 			# logger.debug("i in sample monitor "+str(i)+" "+str(name_monitor))
 			S_total.append(self.sim.get_monitor_sample(name_monitor))
-		
-		power = {}
+
+		power={}
+		power["Transformer"] = {}
 		for i in range(len(transformer_names)):
 			raw_data_power[transformer_names[i]] = S_total[i]
-			power["Transformer." + str(transformer_names[i])] = max(S_total[i])
+			power["Transformer"][str(transformer_names[i])] = max(S_total[i])
 		# logger.debug("power "+str(power))
 		data = {"voltages": data2, "currents": data3, "losses": data_losses, "powers": power}
 		

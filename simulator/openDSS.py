@@ -397,10 +397,10 @@ class OpenDSS:
 
     def setVoltageBases(self, bases_list):
         dss_string = "Set voltagebases = "+str(bases_list)
-        print(dss_string + "\n")
+        logger.debug(dss_string + "\n")
 
         dss.run_command(dss_string)
-        dss.run_command(" CalcVoltageBases");
+        dss.run_command("CalcVoltageBases");
 
 
     def solutionConverged(self):
@@ -542,7 +542,7 @@ class OpenDSS:
                 portion_str = portion_str + " %Rs={percent_rs} " if percent_rs != None else " "
                 portion_str = portion_str + " Conns={conns} " if conns != None else " "
 
-                dss_string = "New Transformer.{transformer_name} Phases={phases} Windings={winding} Buses={buses} kVAs={kvas} kVs={kvs} XscArray={xsc_array} " + portion_str + " "
+                dss_string = "New Transformer.{transformer_name} Phases={phases} Windings={winding} Buses={buses} kVAs={kvas} kVs={kvs} XscArray={xsc_array}" + portion_str + " "
 
                 #logger.info("portion_str: " + portion_str)
                 #logger.info("dss_string: " + dss_string)
@@ -976,7 +976,7 @@ class OpenDSS:
                 mult = []
                 load_name = element["id"]
                 bus_name = element["bus"]
-                max_power = element["kW"]
+                #max_power = element["kW"]
 
 
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
@@ -988,7 +988,7 @@ class OpenDSS:
                         if not load_profile_data:
                             logger.error("No load profile data found for %s", (load_name))
                             continue
-                        load_profile_data = [i * max_power for i in load_profile_data]
+                        load_profile_data = [i for i in load_profile_data]
 
                         npts = len(load_profile_data)
                         mult = load_profile_data
@@ -1005,11 +1005,11 @@ class OpenDSS:
                                 if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
                                     multiplier = powerprofile['multiplier']
                                 if powerprofile['interval']:
-                                    items = [item * multiplier * max_power for item in items]
+                                    items = [item * multiplier  for item in items]
                                 elif powerprofile['m_interval']:
-                                    items = [item * multiplier * max_power for item in items[::60]]
+                                    items = [item * multiplier  for item in items[::60]]
                                 elif powerprofile['s_interval']:
-                                    items = [item * multiplier * max_power for item in items[::3600]]
+                                    items = [item * multiplier  for item in items[::3600]]
                                 load_profile_data.extend(items)
                         npts = len(load_profile_data)
                         mult = load_profile_data
@@ -1020,7 +1020,7 @@ class OpenDSS:
                     #logger.debug("load_profile_data: randint=" + str(randint_value))
                     load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
 
-                    load_profile_data = [i * max_power for i in load_profile_data]
+                    load_profile_data = [i for i in load_profile_data]
                     npts = len(load_profile_data)
                     mult = load_profile_data
                 # --------store_profile_for_line----------#
@@ -1041,7 +1041,7 @@ class OpenDSS:
         try:
             logger.debug("New Loadshape." + id)
 
-            dss_string = "New Loadshape.{id} npts={npts} interval={interval} mult=({mult})".format(
+            dss_string = "New Loadshape.{id} npts={npts} interval={interval} mult=({mult}) Action=Normalize useactual=false".format(
                 id=id,
                 npts=npts,
                 interval=interval,
