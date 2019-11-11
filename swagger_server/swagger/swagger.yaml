@@ -442,6 +442,12 @@ definitions:
         type: "number"
       multiplier:
         type: "number"
+      normalized:
+        type: "boolean"
+        default: true
+      use_actual_values:
+        type: "boolean"
+        default: false
   Powerline:
     type: "object"
     required:
@@ -659,6 +665,8 @@ definitions:
       irrad:
         type: "number"
       voltageunit:
+        type: "string"
+      power_profile_id:
         type: "string"
   ChargingStation:
     type: "object"
@@ -929,8 +937,8 @@ definitions:
           type: "number"
     example:
       node:
-      - 0.80082819046101150206595775671303272247314453125
-      - 0.80082819046101150206595775671303272247314453125
+      - 0.8008281904610115
+      - 0.8008281904610115
   Currents:
     type: "object"
     properties:

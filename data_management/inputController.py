@@ -136,6 +136,8 @@ class InputController:
         self.object = object
         for element in powerprofile:
             items = element['items']
+            normalize = element['normalized']
+            useactual = element['use_actual_values']
             if 'multiplier' in element.keys() and element['multiplier'] is not None:
                 items = [item * element['multiplier'] for item in items]
             npts = len(items)
@@ -146,7 +148,7 @@ class InputController:
                 interval = element['m_interval']
             elif "s_interval" in element.keys() and element['s_interval'] is not None:
                 interval = element['s_interval']
-            message = self.sim.setLoadshape(element['id'], npts, interval, items)
+            message = self.sim.setLoadshape(element['id'], npts, interval, items, normalize, useactual)
         logger.debug("Powerprofile set")
         return message
 
@@ -157,10 +159,10 @@ class InputController:
         logger.debug("Photovoltaics charged")
         return message
 
-    def setPVshapes(self, id, profiles_object, profess_object, pvs, city, country, sim_days):
+    def setPVshapes(self, id, profiles_object, profess_object, pvs, city, country, sim_days, powerprofile):
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
-            message = self.sim.setPVshapes(pvs, city, country, sim_days, profiles_object, profess_object)
+            message = self.sim.setPVshapes(pvs, powerprofile, city, country, sim_days, profiles_object, profess_object)
             logger.debug("loadshapes from profiles charged")
             return message
         else:
@@ -206,12 +208,6 @@ class InputController:
                 return False
         else:
             return False
-
-    def setLoadshapes_Off(self, id, loadshapes):
-        logger.debug("Charging the loadshapes into the simulator")
-        message = self.sim.setLoadshapes(loadshapes)
-        logger.debug("loadshapes charged")
-        return message
 
     def setLoadshapes(self, id, profiles_object, profess_object, loads, powerprofile, sim_days):
         logger.debug("Charging the loadshapes into the simulator from profiles")
@@ -707,17 +703,15 @@ class InputController:
                 
                 
             if "loads" in values.keys() and values["loads"] is not None:
-                # logger.debug("---------------Setting Loads-------------------------")
                 logger.debug("! ---------------Setting Loads------------------------- \n")
-                # radial=radial.to_dict()
                 load = values["loads"]
                 powerprofile = []
                 if "powerProfiles" in values.keys() and values["powerProfiles"] is not None:
                     powerprofile = values["powerProfiles"]
-                #logger.debug("power profile "+str(powerprofile))
+
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
                 message = self.setLoadshapes(id, profiles, profess, load, powerprofile, time_in_days)
-                # message = self.setLoadshapes(id, load, time_in_days)
+
                 if not message == 0:
                     return message
                 logger.debug("! >>>  ---------------and the Loads afterwards ------------------------- \n")
@@ -791,9 +785,13 @@ class InputController:
                 logger.debug("! ---------------Setting Photovoltaic------------------------- \n")
                 photovoltaics = values["photovoltaics"]
 
+                powerprofile = []
+                if "powerProfiles" in values.keys() and values["powerProfiles"] is not None:
+                    powerprofile = values["powerProfiles"]
+
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(id, profiles, profess, photovoltaics, city, country, time_in_days)
+                    message = self.setPVshapes(id, profiles, profess, photovoltaics, city, country, time_in_days, powerprofile)
                     if not message == 0:
                         return message
                     logger.debug("! >>>  ---------------and the PVs afterwards ------------------------- \n")

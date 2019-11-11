@@ -27,6 +27,184 @@ logger = logging.getLogger(__file__)
 utils = Utils()
 
 
+def get_profile_names(radial_value, element_name):
+    profile_ids = []
+    if element_name in radial_value.keys() and radial_value[element_name] is not None:
+        logger.debug("Checking power profile IDs")
+        profiles = radial_value[element_name]
+
+        for profile in profiles:
+            if "power_profile_id" in profile.keys() and profile['power_profile_id'] is not None:
+                profile_ids.append(profile['power_profile_id'])
+    return profile_ids
+
+def check_power_profiles(radial_value):
+    profile_ids = get_profile_names(radial_value, "loads")
+    profile_names_pv = get_profile_names(radial_value, "photovoltaics")
+    if not profile_names_pv == []:
+        profile_ids.append(get_profile_names(radial_value, "photovoltaics")[0])
+
+    new_data=[]
+
+    if "powerProfiles" in radial_value.keys() and radial_value["powerProfiles"] is not None:
+        power_profile_ids = []
+        power_profiles = radial_value['powerProfiles']
+        for power_profile in power_profiles:
+            # checking if default values are given
+            element_change = power_profile
+            if "use_actual_values" in power_profile.keys():
+                if power_profile["use_actual_values"] == "true" or power_profile["use_actual_values"] == "True":
+                    if power_profile["normalized"] == "true" or power_profile["normalized"] == "True":
+                        message = "If use_actual_values is true then normalized should be false"
+                        logger.error(message)
+                        return message, 406
+                    element_change["use_actual_values"] = True
+                else:
+                    element_change["use_actual_values"] = False
+            else:
+                element_change["use_actual_values"] = False
+
+            if "normalized" in power_profile.keys():
+                if power_profile["normalized"] == "true" or power_profile["normalized"] == "True":
+                    element_change["normalized"] = True
+                else:
+                    element_change["normalized"] = False
+            else:
+                element_change["normalized"] = True
+
+            new_data.append(element_change)
+
+            if "id" in power_profile.keys() and power_profile['id'] is not None:
+                power_profile_ids.append(power_profile['id'])
+
+        logger.debug("profile ids "+str(profile_ids))
+        for profile_id in profile_ids:
+            if profile_id:
+                if not bool(re.search("profile_\d", profile_id)):
+                    if profile_id not in power_profile_ids:
+                        message = "Error: No Power profile found for this ID: " + str(profile_id)
+                        logger.error(message)
+                        return message, 406
+        logger.debug("Power Profile IDs successfully checked")
+
+        logger.debug("Checking Interval values")
+        for power_profile in power_profiles:
+            if not 'items' in power_profile.keys() or power_profile['items'] is None:
+                message = "Please provide items for " + power_profile['id']
+                return message, 406
+            count_items = len(power_profile['items'])
+            if 'interval' in power_profile.keys() and power_profile['interval'] is not None:
+                if count_items * power_profile['interval'] >= 24:
+                    continue
+                else:
+                    message = "Hour interval values should be at least for one day"
+                    return message, 406
+            elif 'm_interval' in power_profile.keys() and power_profile['m_interval'] is not None:
+                if count_items * power_profile['m_interval'] >= 24 * 60:
+                    continue
+                else:
+                    message = "Minutes interval values should be at least for one day"
+                    return message, 406
+            elif 's_interval' in power_profile.keys() and power_profile['s_interval'] is not None:
+                if count_items * power_profile['s_interval'] >= 24 * 3600:
+                    continue
+                else:
+                    message = "Seconds interval values should be at least for one day"
+                    return message, 406
+        logger.debug("Interval values successfully checked")
+
+        if new_data == []:
+            return 0
+        else:
+            return new_data
+    else:
+        logger.debug("No power profiles present")
+
+def check_loads(radial_value):
+    new_data = []
+    if "loads" in radial_value.keys():
+        if radial_value["loads"] is not None:
+            logger.debug("Checking loads")
+
+            loads = radial_value["loads"]
+            for load_elements in loads:
+                element_change = load_elements
+                if "power_profile_id" in load_elements.keys():
+                    if load_elements["power_profile_id"] == None:
+                        element_change["power_profile_id"] = False
+                    if load_elements["power_profile_id"] == "false" or load_elements["power_profile_id"] == "False":
+                        element_change["power_profile_id"] = False
+                    if load_elements["power_profile_id"] == "true" or load_elements["power_profile_id"] == "True":
+                        element_change["power_profile_id"] = True
+                #else:
+                    #element_change["power_profile_id"] = False
+                new_data.append(element_change)
+
+        logger.debug("Loads succesfully checked")
+        if new_data == []:
+            return 0
+        else:
+            return new_data
+
+def check_pvs(radial_value):
+    new_data = []
+    if "photovoltaics" in radial_value.keys():
+        if radial_value["photovoltaics"] is not None:
+            logger.debug("Checking pvs")
+
+            pvs = radial_value["photovoltaics"]
+            for pv_elements in pvs:
+                element_change = pv_elements
+                logger.debug("pv elements "+str(pv_elements))
+                if "power_profile_id" in pv_elements.keys():
+                    if pv_elements["power_profile_id"] == None:
+                        message = "Wrong power profile id"
+                        logger.error(message)
+                        return message, 406
+                    if pv_elements["power_profile_id"] == "false" or pv_elements["power_profile_id"] == "False":
+                        message = "Wrong power profile id"
+                        logger.error(message)
+                        return message, 406
+                    if pv_elements["power_profile_id"] == "true" or pv_elements["power_profile_id"] == "True":
+                        message = "Wrong power profile id"
+                        logger.error(message)
+                        return message, 406
+
+                new_data.append(element_change)
+
+        logger.debug("PVs succesfully checked")
+        if new_data == []:
+            return 0
+        else:
+            return new_data
+
+def check_power_lines(radial_value):
+    new_data=[]
+    if "powerLines" in radial_value.keys():
+        if radial_value["powerLines"] is not None:
+            logger.debug("Checking Powerlines")
+
+            powerLines = radial_value["powerLines"]
+            for power_lines_elements in powerLines:
+                element_change = power_lines_elements
+                if "r1" in power_lines_elements.keys() and "linecode" in power_lines_elements.keys():
+                    message = "r1 and linecode cannot be entered at the same time in power line with id: " + str(
+                        power_lines_elements["id"])
+                    logger.error(message)
+                    return message, 406
+
+
+                new_data.append(element_change)
+
+        logger.debug("Power lines succesfully checked")
+        if new_data == []:
+            return 0
+        else:
+            return new_data
+
+    else:
+        logger.debug("No power lines present")
+
 def create_simulation(body):  # noqa: E501
     """Send grid data to simulation engine in order to create a new simulation
 
@@ -55,70 +233,26 @@ def create_simulation(body):  # noqa: E501
         radial = data["radials"]
         models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts"]
 
+        count = 0
         for values in radial:
 
-            if "powerLines" in values.keys():
-                if values["powerLines"] is not None:
-                    logger.debug("Checking Powerlines")
+            new_data = check_power_lines(values)
+            if not isinstance(new_data, tuple):
+                data["radials"][count]["powerLines"] = new_data
+            else:
+                return new_data
 
-                    powerLines = values["powerLines"]
-                    for power_lines_elements in powerLines:
-                        if "r1" in power_lines_elements.keys() and "linecode" in power_lines_elements.keys():
-                            message = "r1 and linecode cannot be entered at the same time in power line with id: " + str(
-                                power_lines_elements["id"])
-                            logger.error(message)
-                            return message, 406
-            logger.debug("Power lines succesfully checked")
+            new_data = check_loads(values)
+            if not isinstance(new_data, tuple):
+                data["radials"][count]["loads"] = new_data
+            else:
+                return new_data
 
-            if "loads" in values.keys() and values["loads"] is not None:
-                logger.debug("Checking power profile IDs")
-                load_profiles = values["loads"]
-                load_profile_ids = []
-                for load_profile in load_profiles:
-                    if "power_profile_id" in load_profile.keys() and load_profile['power_profile_id'] is not None:
-                        load_profile_ids.append(load_profile['power_profile_id'])
-
-                power_profile_ids = []
-                power_profiles = []
-                if "powerProfiles" in values.keys() and values["powerProfiles"] is not None:
-                    power_profiles = values['powerProfiles']
-                for power_profile in power_profiles:
-                    if "id" in power_profile.keys() and power_profile['id'] is not None:
-                        power_profile_ids.append(power_profile['id'])
-
-                for load_profile_id in load_profile_ids:
-                    if not bool(re.search("profile_\d", load_profile_id)):
-                        if (not load_profile_id == "False" and not load_profile_id == "false"):
-                            if load_profile_id not in power_profile_ids:
-                                message = "Error: No Power profile found for this ID: " + str(load_profile_id)
-                                logger.error(message)
-                                return message, 406
-                logger.debug("Power Profile IDs successfully checked")
-                logger.debug("Checking Interval values")
-                for power_profile in power_profiles:
-                    if not 'items' in power_profile.keys()or power_profile['items'] is None:
-                        message = "Please provide items for " + power_profile['id']
-                        return message, 406
-                    count_items = len(power_profile['items'])
-                    if 'interval' in power_profile.keys() and power_profile['interval'] is not None:
-                        if count_items*power_profile['interval'] >= 24:
-                            continue
-                        else:
-                            message = "Hour interval values should be at least for one day"
-                            return message, 406
-                    elif 'm_interval' in power_profile.keys() and power_profile['m_interval'] is not None:
-                        if count_items * power_profile['m_interval'] >= 24*60:
-                            continue
-                        else:
-                            message = "Minutes interval values should be at least for one day"
-                            return message, 406
-                    elif 's_interval' in power_profile.keys() and power_profile['s_interval'] is not None:
-                        if count_items * power_profile['s_interval'] >= 24*3600:
-                            continue
-                        else:
-                            message = "Seconds interval values should be at least for one day"
-                            return message, 406
-                logger.debug("Interval values successfully checked")
+            new_data = check_power_profiles(values)
+            if not isinstance(new_data, tuple):
+                data["radials"][count]["powerProfiles"] = new_data
+            else:
+                return new_data
 
             data_to_store=[]
 
@@ -179,18 +313,6 @@ def create_simulation(body):  # noqa: E501
                                 is_price_needed = True
                                 logger.debug("price profile needed")
 
-                    """if is_price_needed:
-                        price_profile = Profiles().price_profile("Fur", "Denmark", 1)
-                        if not isinstance(price_profile, list):
-                            message = "Problems while querying price profiles"
-                            logger.error(message)
-                            return message, 406
-
-
-                        if "." in storage_elements["bus1"]:
-                            message = "Error: storage element with id: " + str(
-                                storage_elements["id"] +" is not three-phase")
-                            return message"""
 
 
             logger.debug("Storage successfully checked")
@@ -253,6 +375,7 @@ def create_simulation(body):  # noqa: E501
 
             data["radials"][0]["storageUnits"] = data_to_store
             data["radials"][0]["chargingStations"] = data_to_store_cs
+            count = count + 1
 
         #logger.debug("data"+str(data))
         #logger.debug("data" + str(data["radials"][0]["storageUnits"]))

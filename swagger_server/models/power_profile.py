@@ -15,7 +15,7 @@ class PowerProfile(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, items: List[float]=None, interval: float=None, m_interval: float=None, s_interval: float=None, multiplier: float=None):  # noqa: E501
+    def __init__(self, id: str=None, items: List[float]=None, interval: float=None, m_interval: float=None, s_interval: float=None, multiplier: float=None, normalized: bool=True, use_actual_values: bool=False):  # noqa: E501
         """PowerProfile - a model defined in Swagger
 
         :param id: The id of this PowerProfile.  # noqa: E501
@@ -30,6 +30,10 @@ class PowerProfile(Model):
         :type s_interval: float
         :param multiplier: The multiplier of this PowerProfile.  # noqa: E501
         :type multiplier: float
+        :param normalized: The normalized of this PowerProfile.  # noqa: E501
+        :type normalized: bool
+        :param use_actual_values: The use_actual_values of this PowerProfile.  # noqa: E501
+        :type use_actual_values: bool
         """
         self.swagger_types = {
             'id': str,
@@ -37,7 +41,9 @@ class PowerProfile(Model):
             'interval': float,
             'm_interval': float,
             's_interval': float,
-            'multiplier': float
+            'multiplier': float,
+            'normalized': bool,
+            'use_actual_values': bool
         }
 
         self.attribute_map = {
@@ -46,7 +52,9 @@ class PowerProfile(Model):
             'interval': 'interval',
             'm_interval': 'm_interval',
             's_interval': 's_interval',
-            'multiplier': 'multiplier'
+            'multiplier': 'multiplier',
+            'normalized': 'normalized',
+            'use_actual_values': 'use_actual_values'
         }
 
         self._id = id
@@ -55,6 +63,8 @@ class PowerProfile(Model):
         self._m_interval = m_interval
         self._s_interval = s_interval
         self._multiplier = multiplier
+        self._normalized = normalized
+        self._use_actual_values = use_actual_values
 
     @classmethod
     def from_dict(cls, dikt) -> 'PowerProfile':
@@ -196,3 +206,45 @@ class PowerProfile(Model):
         """
 
         self._multiplier = multiplier
+
+    @property
+    def normalized(self) -> bool:
+        """Gets the normalized of this PowerProfile.
+
+
+        :return: The normalized of this PowerProfile.
+        :rtype: bool
+        """
+        return self._normalized
+
+    @normalized.setter
+    def normalized(self, normalized: bool):
+        """Sets the normalized of this PowerProfile.
+
+
+        :param normalized: The normalized of this PowerProfile.
+        :type normalized: bool
+        """
+
+        self._normalized = normalized
+
+    @property
+    def use_actual_values(self) -> bool:
+        """Gets the use_actual_values of this PowerProfile.
+
+
+        :return: The use_actual_values of this PowerProfile.
+        :rtype: bool
+        """
+        return self._use_actual_values
+
+    @use_actual_values.setter
+    def use_actual_values(self, use_actual_values: bool):
+        """Sets the use_actual_values of this PowerProfile.
+
+
+        :param use_actual_values: The use_actual_values of this PowerProfile.
+        :type use_actual_values: bool
+        """
+
+        self._use_actual_values = use_actual_values

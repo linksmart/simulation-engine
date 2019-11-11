@@ -940,27 +940,54 @@ class OpenDSS:
 
 
 
-    def setPVshapes(self, pvs, city, country, sim_days, profiles, profess):
+    def setPVshapes(self, pvs, powerprofiles, city, country, sim_days, profiles, profess):
 
         #!logger.debug("Setting up the loads")
-        self.pvs=pvs
+
         try:
             # ----------get_a_profile---------------#
             pv_profile_data = profiles.pv_profile(city, country, sim_days)
-            for element in self.pvs:
+            for element in pvs:
                 pv_name = element["id"]
                 bus_name = element["bus1"]
                 max_power= element["max_power_kW"]
                 logger.debug("max power "+str(max_power))
 
 
-                pv_profile = [i * max_power for i in pv_profile_data]
+                if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
+
+                    powerprofile_id = element['power_profile_id']
+                    logger.debug("Power profile id found: " + str(powerprofile_id))
+                    pv_profile = []
+                    for powerprofile in powerprofiles:
+                        if (powerprofile_id == powerprofile['id']):
+                            loadshape_id = powerprofile_id
+                            items = powerprofile['items']
+                            normalize = powerprofile['normalized']
+                            useactual = powerprofile['use_actual_values']
+                            interval = powerprofile['interval']
+                            multiplier = 1
+                            if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
+                                multiplier = powerprofile['multiplier']
+                            if powerprofile['interval']:
+                                items = [item * multiplier for item in items]
+                            elif powerprofile['m_interval']:
+                                items = [item * multiplier for item in items[::60]]
+                            elif powerprofile['s_interval']:
+                                items = [item * multiplier for item in items[::3600]]
+                            pv_profile.extend(items)
+                else:
+                    loadshape_id = "Shape_"+pv_name
+                    pv_profile = [i for i in pv_profile_data]
+                    normalize = True
+                    useactual = False
+
                 #--------store_profile_for_line----------#
-                self.loadshapes_for_pv[pv_name] = {"bus":bus_name, "loadshape":pv_profile}
+                self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus":bus_name, "loadshape":pv_profile}
 
-                loadshape_id=pv_name
 
-                self.setLoadshapePV(loadshape_id, sim_days * 24, 1, pv_profile)
+
+                self.setLoadshape(loadshape_id, sim_days * 24, 1, pv_profile, normalize, useactual)
             return 0
 
         except Exception as e:
@@ -968,21 +995,24 @@ class OpenDSS:
             return e
 
     def setLoadshapes(self, loads, powerprofiles, sim_days, profiles, profess):
-        self.loads = loads
+
         try:
-            for element in self.loads:
+            for element in loads:
                 interval = 1
                 npts = 0
                 mult = []
                 load_name = element["id"]
                 bus_name = element["bus"]
                 #max_power = element["kW"]
-
+                set_load_shape_flag = False
 
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
                     powerprofile_id = element['power_profile_id']
-                    
-                    if bool(re.search("profile_\d", powerprofile_id)):
+                    if not powerprofile_id:
+                        logger.debug("power profile = False")
+                        continue
+                    elif bool(re.search("profile_\d", powerprofile_id)):
+                        logger.debug("2 ")
                         int_value = int(powerprofile_id[8:])
                         load_profile_data = profiles.load_profile(type="residential", randint=int_value, days=sim_days)
                         if not load_profile_data:
@@ -992,13 +1022,16 @@ class OpenDSS:
 
                         npts = len(load_profile_data)
                         mult = load_profile_data
-                    elif powerprofile_id == "false":
-                        logger.debug("power profile = False")
-                        return 0
+                        normalize = True
+                        useactual= False
+                        loadshape_id = "Lsp_" + str(int_value)
+                        set_load_shape_flag = True
                     else:
+                        logger.debug("4 ")
                         load_profile_data = []
                         for powerprofile in powerprofiles:
                             if (powerprofile_id == powerprofile['id']):
+                                loadshape_id = powerprofile_id
                                 items = powerprofile['items']
                                 interval = powerprofile['interval']
                                 multiplier = 1
@@ -1011,74 +1044,69 @@ class OpenDSS:
                                 elif powerprofile['s_interval']:
                                     items = [item * multiplier  for item in items[::3600]]
                                 load_profile_data.extend(items)
-                        npts = len(load_profile_data)
-                        mult = load_profile_data
-                    loadshape_id = load_name+"_"+powerprofile_id
+                                set_load_shape_flag = False
+
+
                 else:
+                    logger.debug("5 ")
                     # ----------get_a_profile---------------#
                     randint_value = random.randrange(0, 475)
-                    #logger.debug("load_profile_data: randint=" + str(randint_value))
+
                     load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
 
                     load_profile_data = [i for i in load_profile_data]
                     npts = len(load_profile_data)
                     mult = load_profile_data
+                    normalize = True
+                    useactual = False
                 # --------store_profile_for_line----------#
                     loadshape_id = "Lsp_" + str(randint_value)
+                    set_load_shape_flag = True
 
                 self.loadshapes_for_loads[load_name] = {"name": loadshape_id, "bus": bus_name,
                                                         "loadshape": load_profile_data}
 
-                
-                self.setLoadshape(loadshape_id, npts, interval, mult)
+                if set_load_shape_flag:
+                    self.setLoadshape(loadshape_id, npts, interval, mult, normalize, useactual)
             return 0
         except Exception as e:
             logger.error(e)
             return e
 
 
-    def setLoadshape(self, id, npts, interval, mult):
+    def setLoadshape(self, id, npts, interval, mult, normalize=True, useactual=False):
         try:
             logger.debug("New Loadshape." + id)
+            my_str=[]
+            if normalize:
+                my_str.append("Action=Normalize ")
+            if useactual:
+                my_str.append("useactual = true ")
+            else:
+                my_str.append("useactual = false ")
 
-            dss_string = "New Loadshape.{id} npts={npts} interval={interval} mult=({mult}) Action=Normalize useactual=false".format(
+            portion_str = ''.join(my_str)
+
+            dss_string = "New Loadshape.{id} npts={npts} interval={interval} mult=({mult}) "+ portion_str + " "
+            dss_string = dss_string.format(
                 id=id,
                 npts=npts,
                 interval=interval,
                 mult=' '.join(['{:f}'.format(x) for x in mult])
             )
 
-            dss.run_command(dss_string)
 
+            dss.run_command(dss_string)
+            logger.debug(dss_string)
             dss_string = "? Loadshape." + str(id) + ".mult"
 
             result = dss.run_command(dss_string)
-            logger.debug("data " + str(mult))
             logger.debug("Loadshape." + str(id) + ".mult count:" +  str(len((str(result)).split(" "))) + "\n")
             return 0
         except Exception as e:
             logger.error(e)
 
-    def setLoadshapePV(self, id, npts, interval, mult):
-        try:
-            logger.debug("New Loadshape.Shape_" + id)
 
-            dss_string = "New Loadshape.Shape_{id} npts={npts} interval={interval} mult=({mult})".format(
-                id=id,
-                npts=npts,
-                interval=interval,
-                mult=' '.join(['{:f}'.format(x) for x in mult])
-            )
-
-            dss.run_command(dss_string)
-
-            dss_string = "? Loadshape.Shape_" + str(id) + ".mult"
-
-            result = dss.run_command(dss_string)
-            logger.debug("Loadshape.Shape_" + str(id) + ".mult count:" +  str(len((str(result)).split(" "))) + "\n")
-
-        except Exception as e:
-            logger.error(e)
 
     def setTshapes(self, tshapes):
 
@@ -1186,7 +1214,7 @@ class OpenDSS:
 
         # ---------- chek for available loadschape and attach it to the load
         if id in self.loadshapes_for_pv:
-            dss_string = dss_string + " Yearly=Shape_" + id
+            dss_string = dss_string + " Yearly=" + str(self.loadshapes_for_pv[id]["name"])
 
         logger.debug(dss_string + "\n")
         dss.run_command(dss_string)
