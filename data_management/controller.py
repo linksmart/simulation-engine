@@ -139,13 +139,18 @@ class gridController(threading.Thread):
 		self.sim.setVoltageBases(self.input.get_voltage_bases())
 		self.sim.setMode("yearly")
 		self.sim.setStepSize("hours")
-		self.sim.setNumberSimulations(numSteps)
+		self.sim.setNumberSimulations(1)#(numSteps)
 		logger.info("Solution mode: " + str(self.sim.getMode()))
 		logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
 		logger.info("Solution stepsize: " + str(self.sim.getStepSize()))
 		logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
 
-		
+		loadNames = self.sim.get_all_load_names()
+		len_loadNames = len(loadNames)
+		pvNames = self.sim.get_all_pv_names()
+		len_pvNames = len(pvNames)
+		essNames = self.input.get_Storage_names(self.topology)
+		len_essNames = len(essNames)
 		nodeNames = self.sim.get_node_list()
 		len_nodeNames = len(nodeNames)
 		elementNames = self.sim.get_element_names()
@@ -157,6 +162,16 @@ class gridController(threading.Thread):
 
 		
 		# logger.debug("node_ names "+str(nodeNames))
+		load_powers_phase_1 = [[] for i in range(len_loadNames)]
+		load_powers_phase_2 = [[] for i in range(len_loadNames)]
+		load_powers_phase_3 = [[] for i in range(len_loadNames)]
+		pv_powers_phase_1 = [[] for i in range(len_pvNames)]
+		pv_powers_phase_2 = [[] for i in range(len_pvNames)]
+		pv_powers_phase_3 = [[] for i in range(len_pvNames)]
+		ess_powers_phase_1 = [[] for i in range(len_essNames)]
+		ess_powers_phase_2 = [[] for i in range(len_essNames)]
+		ess_powers_phase_3 = [[] for i in range(len_essNames)]
+		ess_soc = [[] for i in range(len_essNames)]
 		voltages = [[] for i in range(len(nodeNames))]
 		currents = [[] for i in range(len_lineNames)]
 		losses = [[] for i in range(len_elementNames)]
@@ -236,6 +251,9 @@ class gridController(threading.Thread):
 		
 		if flag_is_storage:
 			soc_list = self.input.get_soc_list(self.topology)
+			if isinstance(soc_list, str):
+				logger.error(soc_list)
+				self.Stop()
 
 		flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
 
@@ -631,6 +649,7 @@ class gridController(threading.Thread):
 
 
 			tot_losses = self.sim.get_total_losses()
+			total_losses.append(str(complex(tot_losses[0], tot_losses[1])))
 
 			for i in range(len_nodeNames):
 				voltages[i].append(puVoltages[i])
@@ -642,11 +661,44 @@ class gridController(threading.Thread):
 			for i in range(len_lineNames):
 				#currents[i].append(str(complex(Currents[i], Currents[int(i + (len_lineNames))])))
 				currents[i].append(Currents[i])
-			
-			total_losses.append(str(complex(tot_losses[0], tot_losses[1])))
+
+			Load_powers = self.sim.get_load_powers()
+			for i in range(len_loadNames):
+				load_powers_phase_1[i].append(Load_powers[i][0])
+				load_powers_phase_2[i].append(Load_powers[i][1])
+				load_powers_phase_3[i].append(Load_powers[i][2])
+
+			if not len_pvNames == 0:
+				PV_powers = self.sim.get_pv_powers()
+				for i in range(len_pvNames):
+					pv_powers_phase_1[i].append(PV_powers[i][0])
+					pv_powers_phase_2[i].append(PV_powers[i][1])
+					pv_powers_phase_3[i].append(PV_powers[i][2])
+
+			if not len_essNames == 0:
+				ESS_powers = self.input.get_storage_powers(self.topology)
+				logger.debug("ESS powers "+str(ESS_powers))
+				for i in range(len_essNames):
+					ess_powers_phase_1[i].append(ESS_powers[i])
+					ess_powers_phase_2[i].append(ESS_powers[i])
+					ess_powers_phase_3[i].append(ESS_powers[i])
+
+				ESS_soc = self.input.get_storage_socs(self.topology)
+				for i in range(len_essNames):
+					ess_soc[i].append(ESS_soc[i])
+
 			logger.debug("Finish timestep "+str(hours))
+			"""logger.debug("load names "+str(self.sim.get_all_load_names()))
+			logger.debug("load powers "+str(self.sim.get_load_powers()))
+			logger.debug("PV names " + str(self.sim.get_all_pv_names()))
+			logger.debug("PV powers " + str(self.sim.get_pv_powers()))
+			logger.debug("Storage names " + str(self.input.get_Storage_names(self.topology)))
+			logger.debug("Storage powers "+str(self.input.get_storage_powers(self.topology)))
+			logger.debug("Storage socs " + str(self.input.get_storage_socs(self.topology)))"""
+
+
 		
-		# logger.debug("volt finish "+str(voltages))
+
 		logger.debug("#####################################################################################")
 		
 		data = {}
@@ -658,6 +710,7 @@ class gridController(threading.Thread):
 		raw_data_currents = {}
 		raw_data_losses = {}
 		raw_data_power = {}
+		raw_data_load = {}
 		
 		############################### Losses ###################################
 		
@@ -742,37 +795,77 @@ class gridController(threading.Thread):
 		mon_sample = []
 		for i in range(len(transformer_names)):
 			name_monitor = "monitor_transformer_" + str(i)
-			# logger.debug("i in sample monitor "+str(i)+" "+str(name_monitor))
 			S_total.append(self.sim.get_monitor_sample(name_monitor))
 
 		power={}
 		power["Transformer"] = {}
+		raw_data_power["Transformer"] = {}
 		for i in range(len(transformer_names)):
-			raw_data_power[transformer_names[i]] = S_total[i]
+			raw_data_power["Transformer"][str(transformer_names[i])] = S_total[i]
 			power["Transformer"][str(transformer_names[i])] = max(S_total[i])
-		# logger.debug("power "+str(power))
+
+		raw_data_power["Load"] = {}
+		for i in range(len_loadNames):
+			if loadNames[i] not in raw_data_power["Load"].keys():
+				raw_data_power["Load"][loadNames[i]]={}
+			raw_data_power["Load"][loadNames[i]] = {"Phase 1":load_powers_phase_1[i], "Phase 2":load_powers_phase_2[i], "Phase 3":load_powers_phase_3[i]}
+
+		raw_data_power["Photovoltaic"] = {}
+		for i in range(len_pvNames):
+			if pvNames[i] not in raw_data_power["Photovoltaic"].keys():
+				raw_data_power["Photovoltaic"][pvNames[i]] = {}
+			raw_data_power["Photovoltaic"][pvNames[i]] = {"Phase 1": pv_powers_phase_1[i],
+													"Phase 2": pv_powers_phase_2[i],
+													"Phase 3": pv_powers_phase_3[i]}
+
+		raw_data_power["Storages"] = {}
+		for i in range(len_essNames):
+			if essNames[i] not in raw_data_power["Storages"].keys():
+				raw_data_power["Storages"][essNames[i]] = {}
+			raw_data_power["Storages"][essNames[i]] = {"Phase 1": ess_powers_phase_1[i],
+														  "Phase 2": ess_powers_phase_2[i],
+														  "Phase 3": ess_powers_phase_3[i]}
+
+		logger.debug("raw_data_power "+str(raw_data_power))
+
 		data = {"voltages": data2, "currents": data3, "losses": data_losses, "powers": power}
 		
 		raw_data = {"voltages": raw_data_voltages2, "currents": raw_data_currents, "losses": raw_data_losses,
 		            "powers": raw_data_power}
-		
+
+		#"pv_power": raw_data_pv,
+		###############################PV and ESS###################################
 		raw_data_pv_curtailment = {}
 		for i in range(len(PV_names)):
 			raw_data_pv_curtailment[PV_names[i]] = powers_pv_curtailed[i]
-		
+
+		raw_data_pv = {}
+		for i in range(len_pvNames):
+			raw_data_pv[pvNames[i]] = pv_powers_phase_1[i]
+
+		raw_ess_power_profess = {}
+		raw_ess_soc_profess = {}
+		for i in range(len(ESS_names)):
+			raw_ess_soc_profess[ESS_names[i]] = soc_from_profess[i]
+			raw_ess_power_profess[ESS_names[i]] = ess_powers_from_profess[i]
+
 		raw_ess_power = {}
 		raw_ess_soc = {}
-		for i in range(len(ESS_names)):
-			raw_ess_soc[ESS_names[i]] = soc_from_profess[i]
-			raw_ess_power[ESS_names[i]] = ess_powers_from_profess[i]
-		
+		for i in range(len_essNames):
+			raw_ess_soc[essNames[i]] = ess_soc[i]
+			raw_ess_power[essNames[i]] = ess_powers_phase_1[i]
+
 		raw_ev_power = {}
 		raw_ev_soc = {}
 		for i in range(len(EV_names)):
 			raw_ev_soc[EV_names[i]] = soc_from_EV[i]
 			raw_ev_power[EV_names[i]] = ev_powers[i]
-		
-		raw_data_control = {"pv_curtailment": raw_data_pv_curtailment, "ESS_SoC": raw_ess_soc,
+
+		logger.debug("raw_data_pv " + str(raw_data_pv))
+		logger.debug("raw_ess_soc "+str(raw_ess_soc))
+		logger.debug("raw_ess_power " + str(raw_ess_power))
+		raw_data_control = {"pv_curtailment_profess": raw_data_pv_curtailment,  "ESS_SoC_profess": raw_ess_soc_profess,
+		                    "ESS_power_profess": raw_ess_power_profess, "ESS_SoC": raw_ess_soc,
 		                    "ESS_power": raw_ess_power,
 		                    "EV_SoC": raw_ev_soc, "EV_power": raw_ev_power, "EV_position": EV_position}
 		

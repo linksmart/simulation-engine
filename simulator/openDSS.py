@@ -273,6 +273,8 @@ class OpenDSS:
 
     def getkWfromBattery(self, battery_name):
         self.set_active_element(battery_name)
+        logger.debug("name powers ESS " + str(dss.CktElement.Name()))
+        logger.debug("powers ESS "+str(dss.CktElement.Powers()))
         dss_string="? Storage."+str(battery_name)+".kW"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
@@ -307,6 +309,11 @@ class OpenDSS:
     def get_all_element_losses(self):
         return dss.Circuit.AllElementLosses()
 
+    def get_all_ckt_element_names(self):
+        return dss.CktElement.AllPropertyNames()
+
+    def get_all_ckt_powers(self):
+        return dss.CktElement.Powers()
 
     def Stop(self):
         logger.debug("Stopping the simulator")
@@ -327,6 +334,86 @@ class OpenDSS:
         elementLosses = dss.Circuit.AllElementLosses()
 
         return (voltageList, ycurrents, elementLosses)
+
+    def get_all_storage_names(self):
+        return dss.Storages.AllNames()
+
+    def get_all_load_names(self):
+        return dss.Loads.AllNames()
+
+    def get_all_pv_names(self):
+        return dss.Generators.AllNames()
+
+    def get_node_order(self):
+        return dss.CktElement.NodeOrder()
+
+    def get_load_powers(self):
+
+        i_Power = dss.Loads.First()
+
+        powers_from_loads = []
+        while i_Power > 0:
+            powers = dss.CktElement.Powers()
+            node_order = self.get_node_order()
+            list=[]
+            count = 0
+
+            if 1 in node_order:
+                list.append(complex(powers[count], powers[count + 1]))
+                count = count + 2
+            else:
+                list.append(0)
+            if 2 in node_order:
+                list.append(complex(powers[count], powers[count + 1]))
+                count = count + 2
+            else:
+                list.append(0)
+            if 3 in node_order:
+                list.append(complex(powers[count], powers[count + 1]))
+                count = count + 2
+            else:
+                list.append(0)
+
+
+            if not list == []:
+                powers_from_loads.append(list)
+
+            #logger.debug("powers_from_loads "+str(list))
+            i_Power = dss.Loads.Next()
+        return powers_from_loads
+
+    def get_pv_powers(self):
+
+        i_Power = dss.Generators.First()
+        powers_from_generators = []
+        while i_Power > 0:
+            powers = dss.CktElement.Powers()
+            node_order = self.get_node_order()
+            list = []
+            count = 0
+
+            if 1 in node_order:
+                list.append(complex(powers[count], powers[count + 1]))
+                count = count + 2
+            else:
+                list.append(0)
+            if 2 in node_order:
+                list.append(complex(powers[count], powers[count + 1]))
+                count = count + 2
+            else:
+                list.append(0)
+            if 3 in node_order:
+                list.append(complex(powers[count], powers[count + 1]))
+                count = count + 2
+            else:
+                list.append(0)
+
+            if not list == []:
+                powers_from_generators.append(list)
+
+            #logger.debug("Currents from lines " + str(currents_from_lines))
+            i_Power = dss.Generators.Next()
+        return powers_from_generators
 
     def get_line_magnitude_currents(self):
 
@@ -589,11 +676,9 @@ class OpenDSS:
                 bus_name = value["bus"]
                 #logger.debug("bus name " + str(bus_name))
                 main_bus_name = bus_name.split('.', 1)[0]
-                #logger.debug("main bus name "+str(main_bus_name))
-                #if main_bus_name in node_name_list:
-                #print("bus_name: " + str(bus_name) + ", main_bus_name: " + str(main_bus_name))
+
                 loadshape = value["loadshape"]
-                #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
+                #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ "size"+ str(size)+" start "+str(start)+" loadshape_size: " + str(len(loadshape)))
                 loadshape_portion=loadshape[int(start):int(start+size)]
                 #print("loadshape_portion: " + str(loadshape_portion))
                 bus_loadshape={bus_name:loadshape_portion}
@@ -763,7 +848,7 @@ class OpenDSS:
                                     + ") "
 
 
-                dss_string = "New linecode.{linecode_name} nphases={num_phases} rmatrix=(" + rmatrix_str + " ) xmatrix=(" + xmatrix_str + " ) " + cmatrix_str +  " units = {units}"
+                dss_string = "New linecode.{linecode_name} nphases={num_phases} rmatrix=(" + rmatrix_str + " ) xmatrix=(" + xmatrix_str + " ) " + cmatrix_str +  " units={units}"
                 dss_string = dss_string.format(
                 linecode_name = linecode_name,
                 num_phases = num_phases,
@@ -976,18 +1061,18 @@ class OpenDSS:
                             elif powerprofile['s_interval']:
                                 items = [item * multiplier for item in items[::3600]]
                             pv_profile.extend(items)
+                    # --------store_profile_for_line----------#
+                    self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name,"loadshape": pv_profile}
                 else:
                     loadshape_id = "Shape_"+pv_name
                     pv_profile = [i for i in pv_profile_data]
                     normalize = True
                     useactual = False
+                    # --------store_profile_for_line----------#
+                    self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name, "loadshape": pv_profile}
 
-                #--------store_profile_for_line----------#
-                self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus":bus_name, "loadshape":pv_profile}
+                    self.setLoadshape(loadshape_id, sim_days * 24, 1, pv_profile, normalize, useactual)
 
-
-
-                self.setLoadshape(loadshape_id, sim_days * 24, 1, pv_profile, normalize, useactual)
             return 0
 
         except Exception as e:

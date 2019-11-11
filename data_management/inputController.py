@@ -256,9 +256,13 @@ class InputController:
                 if key == "storageUnits":
                     storages = value
 
-        for ess_element in storages:
-            Storage_names.append(ess_element["id"])
-        return Storage_names
+        if not storages == []:
+            for ess_element in storages:
+                Storage_names.append(ess_element["id"])
+            return Storage_names
+        else:
+            return "No storage elements present"
+
 
     def get_Storage_nodes(self, topology):
         Storage_nodes = []
@@ -273,6 +277,20 @@ class InputController:
         for ess_element in storages:
             Storage_nodes.append(ess_element["bus1"])
         return Storage_nodes
+
+    def get_storage_powers(self, topology):
+        list_storage_names = self.get_Storage_names(topology)
+        list_power = []
+        for ess_name in list_storage_names:
+            list_power.append(self.sim.getkWfromBattery(ess_name))
+        return list_power
+
+    def get_storage_socs(self, topology):
+        list_storage_names = self.get_Storage_names(topology)
+        list_soc = []
+        for ess_name in list_storage_names:
+            list_soc.append(self.sim.getSoCfromBattery(ess_name))
+        return list_soc
 
     def get_soc_list(self,topology):
         radial=topology["radials"]#["storageUnits"]
@@ -300,17 +318,20 @@ class InputController:
             if not ess_element["bus1"] in charging_station_buses:
                 soc_dict = {}
                 #logger.debug("element intern "+str(ess_element))
-                soc_dict[ess_element["bus1"]]={"ESS":{"SoC":ess_element["soc"],
-                                                        "T_SoC":25,
-                                                        "id":ess_element["id"],
-                                                        "Battery_Capacity":ess_element["storage_capacity"],
-                                                        "max_charging_power":ess_element["max_charging_power"],
-                                                        "max_discharging_power":ess_element["max_discharging_power"],
-                                                        "charge_efficiency":ess_element["charge_efficiency"],
-                                                        "discharge_efficiency":ess_element["discharge_efficiency"]},
-                                                "Grid":{
-                                                        "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
-                                                        "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}}
+                if "max_reactive_power_in_kVar_to_grid" and "max_real_power_in_kW_to_grid" in common.keys():
+                    soc_dict[ess_element["bus1"]]={"ESS":{"SoC":ess_element["soc"],
+                                                            "T_SoC":25,
+                                                            "id":ess_element["id"],
+                                                            "Battery_Capacity":ess_element["storage_capacity"],
+                                                            "max_charging_power":ess_element["max_charging_power"],
+                                                            "max_discharging_power":ess_element["max_discharging_power"],
+                                                            "charge_efficiency":ess_element["charge_efficiency"],
+                                                            "discharge_efficiency":ess_element["discharge_efficiency"]},
+                                                    "Grid":{
+                                                            "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
+                                                            "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}}
+                else:
+                    return "Missing \"max_reactive_power_in_kVar_to_grid\" or \"max_real_power_in_kW_to_grid\" in common"
                 for pv_element in photovoltaics:
                     if pv_element["bus1"] == ess_element["bus1"]:
                         soc_dict[ess_element["bus1"]]["PV"]={"pv_name": pv_element["id"]}
