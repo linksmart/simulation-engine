@@ -282,7 +282,9 @@ class InputController:
         list_storage_names = self.get_Storage_names(topology)
         list_power = []
         for ess_name in list_storage_names:
-            list_power.append(self.sim.getkWfromBattery(ess_name))
+            value = self.sim.getkWfromBattery(ess_name)
+            logger.debug("value "+str(value))
+            list_power.append(value)
         return list_power
 
     def get_storage_socs(self, topology):

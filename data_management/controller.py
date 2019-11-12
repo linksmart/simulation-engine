@@ -677,11 +677,10 @@ class gridController(threading.Thread):
 
 			if not len_essNames == 0:
 				ESS_powers = self.input.get_storage_powers(self.topology)
-				logger.debug("ESS powers "+str(ESS_powers))
 				for i in range(len_essNames):
-					ess_powers_phase_1[i].append(ESS_powers[i])
-					ess_powers_phase_2[i].append(ESS_powers[i])
-					ess_powers_phase_3[i].append(ESS_powers[i])
+					ess_powers_phase_1[i].append(ESS_powers[i][0])
+					ess_powers_phase_2[i].append(ESS_powers[i][1])
+					ess_powers_phase_3[i].append(ESS_powers[i][2])
 
 				ESS_soc = self.input.get_storage_socs(self.topology)
 				for i in range(len_essNames):
@@ -729,9 +728,7 @@ class gridController(threading.Thread):
 		for element in total_losses:
 			abs_total_losses.append(abs(complex(element)))
 		data_losses["circuit_total_losses"] = max(abs_total_losses)
-		
-		# logger.debug("total_losses " + str(total_losses))
-		# data_losses
+
 		############################### Currents ###################################
 		#for i in range(len_lineNames):
 			#raw_data_currents[str(lineNames[i]).lower()] = currents[i]
@@ -826,22 +823,38 @@ class gridController(threading.Thread):
 														  "Phase 2": ess_powers_phase_2[i],
 														  "Phase 3": ess_powers_phase_3[i]}
 
-		logger.debug("raw_data_power "+str(raw_data_power))
+		logger.debug("raw_data_power_storages " + str(raw_data_power["Storages"]))
+
+		raw_soc = {}
+		raw_soc["EVs"] = {}
+		raw_data_power["EVs"] = {}
+		for i in range(len(EV_names)):
+			if EV_names[i] not in raw_data_power["EVs"].keys():
+				raw_data_power["EVs"][EV_names[i]] = {}
+			if EV_names[i] not in raw_soc["EVs"].keys():
+				raw_soc["EVs"][EV_names[i]] = {}
+			raw_data_power["EVs"][EV_names[i]] = ev_powers[i]
+			raw_soc["EVs"][EV_names[i]] = soc_from_EV[i]
+
+		raw_soc["Storages"] = {}
+		for i in range(len_essNames):
+			if essNames[i] not in raw_soc["Storages"].keys():
+				raw_soc["Storages"][essNames[i]] = {}
+			raw_soc["Storages"][essNames[i]] = ess_soc[i]
+
 
 		data = {"voltages": data2, "currents": data3, "losses": data_losses, "powers": power}
 		
 		raw_data = {"voltages": raw_data_voltages2, "currents": raw_data_currents, "losses": raw_data_losses,
-		            "powers": raw_data_power}
+		            "powers": raw_data_power, "soc": raw_soc}
 
-		#"pv_power": raw_data_pv,
+
 		###############################PV and ESS###################################
 		raw_data_pv_curtailment = {}
 		for i in range(len(PV_names)):
 			raw_data_pv_curtailment[PV_names[i]] = powers_pv_curtailed[i]
 
-		raw_data_pv = {}
-		for i in range(len_pvNames):
-			raw_data_pv[pvNames[i]] = pv_powers_phase_1[i]
+
 
 		raw_ess_power_profess = {}
 		raw_ess_soc_profess = {}
@@ -849,25 +862,15 @@ class gridController(threading.Thread):
 			raw_ess_soc_profess[ESS_names[i]] = soc_from_profess[i]
 			raw_ess_power_profess[ESS_names[i]] = ess_powers_from_profess[i]
 
-		raw_ess_power = {}
-		raw_ess_soc = {}
-		for i in range(len_essNames):
-			raw_ess_soc[essNames[i]] = ess_soc[i]
-			raw_ess_power[essNames[i]] = ess_powers_phase_1[i]
-
-		raw_ev_power = {}
-		raw_ev_soc = {}
+		raw_ev_power_profess = {}
+		raw_ev_soc_profess = {}
 		for i in range(len(EV_names)):
-			raw_ev_soc[EV_names[i]] = soc_from_EV[i]
-			raw_ev_power[EV_names[i]] = ev_powers[i]
+			raw_ev_soc_profess[EV_names[i]] = soc_from_EV[i]
+			raw_ev_power_profess[EV_names[i]] = ev_powers[i]
 
-		logger.debug("raw_data_pv " + str(raw_data_pv))
-		logger.debug("raw_ess_soc "+str(raw_ess_soc))
-		logger.debug("raw_ess_power " + str(raw_ess_power))
+
 		raw_data_control = {"pv_curtailment_profess": raw_data_pv_curtailment,  "ESS_SoC_profess": raw_ess_soc_profess,
-		                    "ESS_power_profess": raw_ess_power_profess, "ESS_SoC": raw_ess_soc,
-		                    "ESS_power": raw_ess_power,
-		                    "EV_SoC": raw_ev_soc, "EV_power": raw_ev_power, "EV_position": EV_position}
+		                    "ESS_power_profess": raw_ess_power_profess, "EV_SoC": raw_ev_soc_profess, "EV_power": raw_ev_power_profess, "EV_position": EV_position}
 		
 		result = data
 		

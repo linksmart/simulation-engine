@@ -118,12 +118,7 @@ class OpenDSS:
             dss_string=dss_string+" terminal="+str(terminal)
         logger.debug(dss_string)
         dss.run_command(dss_string)
-        #dss.Monitors.Name(name)
-        #logger.debug("Name " + str(dss.Monitors.Name()))
-        #dss.Monitors.Element(element_name)
-        #logger.debug("Element " + str(dss.Monitors.Element()))
-        #dss.Monitors.Mode(mode)
-        #logger.debug("Mode " + str(dss.Monitors.Mode()))
+
         logger.debug("Monitor "+str(name)+" for element "+str(element_name)+" in terminals "+str(terminal)+ " created")
 
     def get_monitor_terminals(self, name):
@@ -152,8 +147,6 @@ class OpenDSS:
         S_total=[]
         for i in range(len(channel[0])):
             S_total.append(math.sqrt(math.pow(channel[0][i],2)+math.pow(channel[2][i],2)+math.pow(channel[4][i],2)))
-        #logger.debug("S total "+str(S_total))
-        #logger.debug("Number samples " + str(dss.Monitors.SampleCount()))
 
         return S_total
 
@@ -193,27 +186,10 @@ class OpenDSS:
 
     def setActivePowertoBatery(self,battery_name, power, max_power):
         self.set_active_element(battery_name)
-        """storageName = "Storage.Akku1"
-                dss.Circuit.SetActiveElement(storageName)
-
-                print("kWhstored vor Solution.Solve: " + str(dss.Properties.Value("kWhstored")))
-                print("kW vor Solution.Solve: " + str(dss.Properties.Value("kW")))
-                print("Storage.Akku1.State: " + str(dss.Properties.Value("State")))
-                print("Storage.Akku1.DispMode: " + str(dss.Properties.Value("DispMode")))
-                
-        if hours < 5:
-                       dss.run_command('Storage.Akku1.kWrated = 15')  #power in kw to or from the battery (kWrated should be replaced with the value from PROFESS )
-                       #dss.run_command('Storage.Akku1.kW = 15')  #power in kw to or from the battery
-                       dss.run_command('Storage.Akku1.State = Discharging')
-                   else:
-                       dss.run_command('Storage.Akku1.kWrated = 30') # kWrated should be replaced with the value from PROFESS )
-                       #dss.run_command('Storage.Akku1.kW = -5')
-                       dss.run_command('Storage.Akku1.State = charging')"""
-        #logger.debug("power " + str(power))
+        logger.debug("Power to be set to the battery: "+str(power)+" kW with max charging power: "+str(max_power)+" kW")
         if power < 0:
             percentage_charge=(abs(power)/max_power)*100
             dss_string = "Storage."+str(battery_name)+".%Charge="+str(int(percentage_charge))
-            #dss_string = "Storage." + str(battery_name) + ".kW=" + str(power)
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
             dss_string="Storage."+str(battery_name)+".State = Charging"
@@ -243,8 +219,6 @@ class OpenDSS:
         dss.Transformers.Wdg(1)
         logger.debug("Tranformer KVA "+str(dss.Transformers.kVA()))
 
-        #dss_string = "? Transformer." + str(battery_name) + ".%stored"
-
     def setSoCBattery(self, battery_name, value):
         self.set_active_element(battery_name)
         dss_string="Storage."+str(battery_name)+".%stored="+str(value)
@@ -273,11 +247,38 @@ class OpenDSS:
 
     def getkWfromBattery(self, battery_name):
         self.set_active_element(battery_name)
-        logger.debug("name powers ESS " + str(dss.CktElement.Name()))
-        logger.debug("powers ESS "+str(dss.CktElement.Powers()))
-        dss_string="? Storage."+str(battery_name)+".kW"
-        #dss.run_command('? Storage.Akku1.%stored')
-        return dss.run_command(dss_string)
+
+        logger.debug("variable names " + str(dss.CktElement.AllVariableNames()))
+        logger.debug("variable values " + str(dss.CktElement.AllVariableValues()))
+        #dss_string="? Storage."+str(battery_name)+".kW"
+        powers_from_loads = []
+
+        powers = dss.CktElement.Powers()
+        logger.debug("powers "+str(powers))
+        node_order = self.get_node_order()
+        list = []
+        count = 0
+
+        if 1 in node_order:
+            list.append(complex(-powers[count], -powers[count + 1]))
+            count = count + 2
+        else:
+            list.append(0)
+        if 2 in node_order:
+            list.append(complex(-powers[count], -powers[count + 1]))
+            count = count + 2
+        else:
+            list.append(0)
+        if 3 in node_order:
+            list.append(complex(-powers[count], -powers[count + 1]))
+            count = count + 2
+        else:
+            list.append(0)
+
+        if not list == []:
+            return list
+        else:
+            return 1
 
     def getkWhStoredfromBattery(self, battery_name):
         self.set_active_element(battery_name)
@@ -393,17 +394,17 @@ class OpenDSS:
             count = 0
 
             if 1 in node_order:
-                list.append(complex(powers[count], powers[count + 1]))
+                list.append(complex(-powers[count], -powers[count + 1]))
                 count = count + 2
             else:
                 list.append(0)
             if 2 in node_order:
-                list.append(complex(powers[count], powers[count + 1]))
+                list.append(complex(-powers[count], -powers[count + 1]))
                 count = count + 2
             else:
                 list.append(0)
             if 3 in node_order:
-                list.append(complex(powers[count], powers[count + 1]))
+                list.append(complex(-powers[count], -powers[count + 1]))
                 count = count + 2
             else:
                 list.append(0)
@@ -1399,6 +1400,7 @@ class OpenDSS:
         #logger.info("Setting up the Storages")
         try:
             for element in storage:
+                logger.debug("storage element "+str(element))
                 id = None
                 bus1 = None
                 phases = None
