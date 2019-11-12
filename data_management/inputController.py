@@ -261,7 +261,7 @@ class InputController:
                 Storage_names.append(ess_element["id"])
             return Storage_names
         else:
-            return "No storage elements present"
+            return []
 
 
     def get_Storage_nodes(self, topology):
@@ -278,12 +278,10 @@ class InputController:
             Storage_nodes.append(ess_element["bus1"])
         return Storage_nodes
 
-    def get_storage_powers(self, topology):
-        list_storage_names = self.get_Storage_names(topology)
+    def get_storage_powers(self, list_storage_names):
         list_power = []
         for ess_name in list_storage_names:
             value = self.sim.getkWfromBattery(ess_name)
-            logger.debug("value "+str(value))
             list_power.append(value)
         return list_power
 

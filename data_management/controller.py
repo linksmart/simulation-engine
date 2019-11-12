@@ -668,6 +668,7 @@ class gridController(threading.Thread):
 				load_powers_phase_2[i].append(Load_powers[i][1])
 				load_powers_phase_3[i].append(Load_powers[i][2])
 
+			logger.debug("len pv names: "+str(len_pvNames))
 			if not len_pvNames == 0:
 				PV_powers = self.sim.get_pv_powers()
 				for i in range(len_pvNames):
@@ -675,8 +676,10 @@ class gridController(threading.Thread):
 					pv_powers_phase_2[i].append(PV_powers[i][1])
 					pv_powers_phase_3[i].append(PV_powers[i][2])
 
+			logger.debug("len storage names: "+str(len_essNames))
+			logger.debug("storage names: " + str(essNames))
 			if not len_essNames == 0:
-				ESS_powers = self.input.get_storage_powers(self.topology)
+				ESS_powers = self.input.get_storage_powers(essNames)
 				for i in range(len_essNames):
 					ess_powers_phase_1[i].append(ESS_powers[i][0])
 					ess_powers_phase_2[i].append(ESS_powers[i][1])
