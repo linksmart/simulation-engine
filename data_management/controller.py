@@ -133,35 +133,47 @@ class gridController(threading.Thread):
 		logger.debug("Active circuit: " + str(self.sim.getActiveCircuit()))
 		
 		##################################################################################PROBLEM################################
-		
-		# self.sim.setVoltageBases(115, 4.16, 0.48)
+		numSteps = self.sim_hours
+		logger.debug("Number of steps: " + str(numSteps))
+
 		self.sim.setVoltageBases(self.input.get_voltage_bases())
-		# self.sim.setMode("snap")
-		# self.sim.setMode("daily")
 		self.sim.setMode("yearly")
 		self.sim.setStepSize("hours")
-		self.sim.setNumberSimulations(1)
-		logger.info("Solution mode 2: " + str(self.sim.getMode()))
-		logger.info("Number simulations 2: " + str(self.sim.getNumberSimulations()))
-		logger.info("Solution step size 2: " + str(self.sim.getStepSize()))
+		self.sim.setNumberSimulations(1)#(numSteps)
+		logger.info("Solution mode: " + str(self.sim.getMode()))
+		logger.info("Number simulations: " + str(self.sim.getNumberSimulations()))
+		logger.info("Solution stepsize: " + str(self.sim.getStepSize()))
 		logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
-		logger.info("Starting Hour : " + str(self.sim.getStartingHour()))
-		numSteps = self.sim_hours
-		# self.redisDB.set("sim_days_"+str(self.id),numSteps)
-		# numSteps=3
-		logger.debug("Number of steps: " + str(numSteps))
-		result = []
-		
+
+		loadNames = self.sim.get_all_load_names()
+		len_loadNames = len(loadNames)
+		pvNames = self.sim.get_all_pv_names()
+		len_pvNames = len(pvNames)
+		essNames = self.input.get_Storage_names(self.topology)
+		len_essNames = len(essNames)
 		nodeNames = self.sim.get_node_list()
 		len_nodeNames = len(nodeNames)
 		elementNames = self.sim.get_element_names()
 		len_elementNames = len(elementNames)
-		nodeNamesCurrents = self.sim.get_YNodeOrder()
-		len_nodeNamesCurrents = len(nodeNamesCurrents)
+		#nodeNamesCurrents = self.sim.get_YNodeOrder()
+		#len_nodeNamesCurrents = len(nodeNamesCurrents)
+		lineNames = self.sim.get_all_lines_names()
+		len_lineNames = len(lineNames)
+
 		
 		# logger.debug("node_ names "+str(nodeNames))
+		load_powers_phase_1 = [[] for i in range(len_loadNames)]
+		load_powers_phase_2 = [[] for i in range(len_loadNames)]
+		load_powers_phase_3 = [[] for i in range(len_loadNames)]
+		pv_powers_phase_1 = [[] for i in range(len_pvNames)]
+		pv_powers_phase_2 = [[] for i in range(len_pvNames)]
+		pv_powers_phase_3 = [[] for i in range(len_pvNames)]
+		ess_powers_phase_1 = [[] for i in range(len_essNames)]
+		ess_powers_phase_2 = [[] for i in range(len_essNames)]
+		ess_powers_phase_3 = [[] for i in range(len_essNames)]
+		ess_soc = [[] for i in range(len_essNames)]
 		voltages = [[] for i in range(len(nodeNames))]
-		currents = [[] for i in range(len_nodeNamesCurrents)]
+		currents = [[] for i in range(len_lineNames)]
 		losses = [[] for i in range(len_elementNames)]
 		total_losses = []
 		
@@ -239,6 +251,9 @@ class gridController(threading.Thread):
 		
 		if flag_is_storage:
 			soc_list = self.input.get_soc_list(self.topology)
+			if isinstance(soc_list, str):
+				logger.error(soc_list)
+				self.Stop()
 
 		flag_is_price_profile_needed = self.input.is_price_profile_needed(self.topology)
 
@@ -276,7 +291,7 @@ class gridController(threading.Thread):
 			# logger.debug("Number of terminals in monitor "+str(terminal))
 			
 			######################################################################################
-			################  Storage control  ###################################################
+			################  Flag control  ###################################################
 			######################################################################################
 			try:
 				if flag_is_storage or flag_is_charging_station:
@@ -326,7 +341,9 @@ class gridController(threading.Thread):
 			except Exception as e:
 				logger.error(e)
 
-			logger.debug("status key " + str(self.redisDB.get(self.finish_status_key)))
+			######################################################################################
+			################  Storage control  ###################################################
+			######################################################################################
 			if flag_is_storage:
 				logger.debug("-------------------------------------------")
 				logger.debug("storages present in the simulation")
@@ -627,8 +644,13 @@ class gridController(threading.Thread):
 
 
 			puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
+
+			Currents = self.sim.get_line_magnitude_currents()
+
+
 			tot_losses = self.sim.get_total_losses()
-			
+			total_losses.append(str(complex(tot_losses[0], tot_losses[1])))
+
 			for i in range(len_nodeNames):
 				voltages[i].append(puVoltages[i])
 			
@@ -636,13 +658,49 @@ class gridController(threading.Thread):
 				number = int(i + (len_elementNames))
 				losses[i].append(str(complex(Losses[i], Losses[number])))
 			
-			for i in range(len_nodeNamesCurrents):
-				currents[i].append(str(complex(Currents[i], Currents[int(i + (len_nodeNamesCurrents))])))
-			
-			total_losses.append(str(complex(tot_losses[0], tot_losses[1])))
+			for i in range(len_lineNames):
+				#currents[i].append(str(complex(Currents[i], Currents[int(i + (len_lineNames))])))
+				currents[i].append(Currents[i])
+
+			Load_powers = self.sim.get_load_powers()
+			for i in range(len_loadNames):
+				load_powers_phase_1[i].append(Load_powers[i][0])
+				load_powers_phase_2[i].append(Load_powers[i][1])
+				load_powers_phase_3[i].append(Load_powers[i][2])
+
+			logger.debug("len pv names: "+str(len_pvNames))
+			if not len_pvNames == 0:
+				PV_powers = self.sim.get_pv_powers()
+				for i in range(len_pvNames):
+					pv_powers_phase_1[i].append(PV_powers[i][0])
+					pv_powers_phase_2[i].append(PV_powers[i][1])
+					pv_powers_phase_3[i].append(PV_powers[i][2])
+
+			logger.debug("len storage names: "+str(len_essNames))
+			logger.debug("storage names: " + str(essNames))
+			if not len_essNames == 0:
+				ESS_powers = self.input.get_storage_powers(essNames)
+				for i in range(len_essNames):
+					ess_powers_phase_1[i].append(ESS_powers[i][0])
+					ess_powers_phase_2[i].append(ESS_powers[i][1])
+					ess_powers_phase_3[i].append(ESS_powers[i][2])
+
+				ESS_soc = self.input.get_storage_socs(self.topology)
+				for i in range(len_essNames):
+					ess_soc[i].append(ESS_soc[i])
+
 			logger.debug("Finish timestep "+str(hours))
+			"""logger.debug("load names "+str(self.sim.get_all_load_names()))
+			logger.debug("load powers "+str(self.sim.get_load_powers()))
+			logger.debug("PV names " + str(self.sim.get_all_pv_names()))
+			logger.debug("PV powers " + str(self.sim.get_pv_powers()))
+			logger.debug("Storage names " + str(self.input.get_Storage_names(self.topology)))
+			logger.debug("Storage powers "+str(self.input.get_storage_powers(self.topology)))
+			logger.debug("Storage socs " + str(self.input.get_storage_socs(self.topology)))"""
+
+
 		
-		# logger.debug("volt finish "+str(voltages))
+
 		logger.debug("#####################################################################################")
 		
 		data = {}
@@ -654,6 +712,7 @@ class gridController(threading.Thread):
 		raw_data_currents = {}
 		raw_data_losses = {}
 		raw_data_power = {}
+		raw_data_load = {}
 		
 		############################### Losses ###################################
 		
@@ -662,40 +721,56 @@ class gridController(threading.Thread):
 		
 		for i in range(len_elementNames):
 			element = [abs(complex(x)) for x in (losses[i])]
-			data_losses[elementNames[i]] = max(element)
+			element_group, element_name  = elementNames[i].split(".", 1)
+			if element_group not in data_losses.keys():
+				data_losses[element_group] = {}
+			data_losses[element_group][element_name] = max(element)
 		
 		abs_total_losses = []
 		raw_data_losses["circuit_total_losses"] = total_losses
 		for element in total_losses:
 			abs_total_losses.append(abs(complex(element)))
 		data_losses["circuit_total_losses"] = max(abs_total_losses)
-		
-		# logger.debug("total_losses " + str(total_losses))
-		# data_losses
+
 		############################### Currents ###################################
-		for i in range(len_nodeNamesCurrents):
-			raw_data_currents[str(nodeNamesCurrents[i]).lower()] = currents[i]
-		
-		for i in range(len_nodeNamesCurrents):
-			element = [abs(complex(x)) for x in (currents[i])]
-			key = nodeNamesCurrents[i]
-			data_currents[key] = max(element)
-		
+		#for i in range(len_lineNames):
+			#raw_data_currents[str(lineNames[i]).lower()] = currents[i]
+
 		data3 = {}
-		for key, value in data_currents.items():
-			node, phase = key.split(".", 1)
-			key_to_give = str(node).lower()
-			if key_to_give not in data3.keys():
-				data3[key_to_give] = {}
-			data3[key_to_give]["Phase " + phase] = value
-			
-		raw_data_currents2 = {}
-		for key, value in raw_data_currents.items():
-			node, phase = key.split(".", 1)
-			key_to_give = str(node)
-			if key_to_give not in raw_data_currents2.keys():
-				raw_data_currents2[key_to_give] = {}
-			raw_data_currents2[key_to_give]["Phase " + phase] = value
+
+		for name_number in range(len_lineNames):
+			element = currents[name_number]#[abs(complex(x)) for x in (currents[i])]
+			len_element = len(element)
+			number_phases = len(element[0])
+			phase1=[]
+			phase2=[]
+			phase3=[]
+			for i in range(len_element):
+				for j in range(number_phases):
+					if j == 0:
+						phase1.append(element[i][j])
+					elif j==1:
+						phase2.append(element[i][j])
+					elif j==2:
+						phase3.append(element[i][j])
+
+			key= str(lineNames[name_number]).lower()
+
+			data3[key] = {}
+			raw_data_currents[key] = {}
+
+			if not phase1==[]:
+				data3[key]["Phase 1"] = {"max": max(phase1),"min": min(phase1)}
+				raw_data_currents[key]["Phase 1"]=phase1
+			if not phase2 == []:
+				data3[key]["Phase 2"] = {"max": max(phase2), "min": min(phase2)}
+				raw_data_currents[key]["Phase 2"] = phase2
+			if not phase3 == []:
+				data3[key]["Phase 3"] = {"max": max(phase3), "min": min(phase3)}
+				raw_data_currents[key]["Phase 3"] = phase3
+
+
+
 		############################### Voltages ###################################
 		for i in range(len(nodeNames)):
 			raw_data_voltages[nodeNames[i]] = {"Voltage": voltages[i]}
@@ -720,38 +795,85 @@ class gridController(threading.Thread):
 		mon_sample = []
 		for i in range(len(transformer_names)):
 			name_monitor = "monitor_transformer_" + str(i)
-			# logger.debug("i in sample monitor "+str(i)+" "+str(name_monitor))
 			S_total.append(self.sim.get_monitor_sample(name_monitor))
-		
-		power = {}
+
+		power={}
+		power["Transformer"] = {}
+		raw_data_power["Transformer"] = {}
 		for i in range(len(transformer_names)):
-			raw_data_power[transformer_names[i]] = S_total[i]
-			power["Transformer." + str(transformer_names[i])] = max(S_total[i])
-		# logger.debug("power "+str(power))
+			raw_data_power["Transformer"][str(transformer_names[i])] = S_total[i]
+			power["Transformer"][str(transformer_names[i])] = max(S_total[i])
+
+		raw_data_power["Load"] = {}
+		for i in range(len_loadNames):
+			if loadNames[i] not in raw_data_power["Load"].keys():
+				raw_data_power["Load"][loadNames[i]]={}
+			raw_data_power["Load"][loadNames[i]] = {"Phase 1":load_powers_phase_1[i], "Phase 2":load_powers_phase_2[i], "Phase 3":load_powers_phase_3[i]}
+
+		raw_data_power["Photovoltaic"] = {}
+		for i in range(len_pvNames):
+			if pvNames[i] not in raw_data_power["Photovoltaic"].keys():
+				raw_data_power["Photovoltaic"][pvNames[i]] = {}
+			raw_data_power["Photovoltaic"][pvNames[i]] = {"Phase 1": pv_powers_phase_1[i],
+													"Phase 2": pv_powers_phase_2[i],
+													"Phase 3": pv_powers_phase_3[i]}
+
+		raw_data_power["Storages"] = {}
+		for i in range(len_essNames):
+			if essNames[i] not in raw_data_power["Storages"].keys():
+				raw_data_power["Storages"][essNames[i]] = {}
+			raw_data_power["Storages"][essNames[i]] = {"Phase 1": ess_powers_phase_1[i],
+														  "Phase 2": ess_powers_phase_2[i],
+														  "Phase 3": ess_powers_phase_3[i]}
+
+		logger.debug("raw_data_power_storages " + str(raw_data_power["Storages"]))
+
+		raw_soc = {}
+		raw_soc["EVs"] = {}
+		raw_data_power["EVs"] = {}
+		for i in range(len(EV_names)):
+			if EV_names[i] not in raw_data_power["EVs"].keys():
+				raw_data_power["EVs"][EV_names[i]] = {}
+			if EV_names[i] not in raw_soc["EVs"].keys():
+				raw_soc["EVs"][EV_names[i]] = {}
+			raw_data_power["EVs"][EV_names[i]] = ev_powers[i]
+			raw_soc["EVs"][EV_names[i]] = soc_from_EV[i]
+
+		raw_soc["Storages"] = {}
+		for i in range(len_essNames):
+			if essNames[i] not in raw_soc["Storages"].keys():
+				raw_soc["Storages"][essNames[i]] = {}
+			raw_soc["Storages"][essNames[i]] = ess_soc[i]
+
+
 		data = {"voltages": data2, "currents": data3, "losses": data_losses, "powers": power}
 		
-		raw_data = {"voltages": raw_data_voltages2, "currents": raw_data_currents2, "losses": raw_data_losses,
-		            "powers": raw_data_power}
-		
+		raw_data = {"voltages": raw_data_voltages2, "currents": raw_data_currents, "losses": raw_data_losses,
+		            "powers": raw_data_power, "soc": raw_soc}
+
+
+		###############################PV and ESS###################################
 		raw_data_pv_curtailment = {}
 		for i in range(len(PV_names)):
 			raw_data_pv_curtailment[PV_names[i]] = powers_pv_curtailed[i]
-		
-		raw_ess_power = {}
-		raw_ess_soc = {}
+
+
+
+		raw_ess_power_profess = {}
+		raw_ess_soc_profess = {}
 		for i in range(len(ESS_names)):
-			raw_ess_soc[ESS_names[i]] = soc_from_profess[i]
-			raw_ess_power[ESS_names[i]] = ess_powers_from_profess[i]
-		
-		raw_ev_power = {}
-		raw_ev_soc = {}
+			raw_ess_soc_profess[ESS_names[i]] = soc_from_profess[i]
+			raw_ess_power_profess[ESS_names[i]] = ess_powers_from_profess[i]
+
+		raw_ev_power_profess = {}
+		raw_ev_soc_profess = {}
 		for i in range(len(EV_names)):
-			raw_ev_soc[EV_names[i]] = soc_from_EV[i]
-			raw_ev_power[EV_names[i]] = ev_powers[i]
-		
-		raw_data_control = {"pv_curtailment": raw_data_pv_curtailment, "ESS_SoC": raw_ess_soc,
-		                    "ESS_power": raw_ess_power,
-		                    "EV_SoC": raw_ev_soc, "EV_power": raw_ev_power, "EV_position": EV_position}
+			raw_ev_soc_profess[EV_names[i]] = soc_from_EV[i]
+			raw_ev_power_profess[EV_names[i]] = ev_powers[i]
+
+
+		raw_data_control = {"pv_curtailment_profess": raw_data_pv_curtailment,  "ESS_SoC_profess": raw_ess_soc_profess,
+		                    "ESS_power_profess": raw_ess_power_profess, "EV_SoC": raw_ev_soc_profess, "EV_power": raw_ev_power_profess, "EV_position": EV_position}
 		
 		result = data
 		

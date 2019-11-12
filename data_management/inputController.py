@@ -136,6 +136,8 @@ class InputController:
         self.object = object
         for element in powerprofile:
             items = element['items']
+            normalize = element['normalized']
+            useactual = element['use_actual_values']
             if 'multiplier' in element.keys() and element['multiplier'] is not None:
                 items = [item * element['multiplier'] for item in items]
             npts = len(items)
@@ -146,7 +148,7 @@ class InputController:
                 interval = element['m_interval']
             elif "s_interval" in element.keys() and element['s_interval'] is not None:
                 interval = element['s_interval']
-            message = self.sim.setLoadshape(element['id'], npts, interval, items)
+            message = self.sim.setLoadshape(element['id'], npts, interval, items, normalize, useactual)
         logger.debug("Powerprofile set")
         return message
 
@@ -157,10 +159,10 @@ class InputController:
         logger.debug("Photovoltaics charged")
         return message
 
-    def setPVshapes(self, id, profiles_object, profess_object, pvs, city, country, sim_days):
+    def setPVshapes(self, id, profiles_object, profess_object, pvs, city, country, sim_days, powerprofile):
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
-            message = self.sim.setPVshapes(pvs, city, country, sim_days, profiles_object, profess_object)
+            message = self.sim.setPVshapes(pvs, powerprofile, city, country, sim_days, profiles_object, profess_object)
             logger.debug("loadshapes from profiles charged")
             return message
         else:
@@ -206,12 +208,6 @@ class InputController:
                 return False
         else:
             return False
-
-    def setLoadshapes_Off(self, id, loadshapes):
-        logger.debug("Charging the loadshapes into the simulator")
-        message = self.sim.setLoadshapes(loadshapes)
-        logger.debug("loadshapes charged")
-        return message
 
     def setLoadshapes(self, id, profiles_object, profess_object, loads, powerprofile, sim_days):
         logger.debug("Charging the loadshapes into the simulator from profiles")
@@ -260,9 +256,13 @@ class InputController:
                 if key == "storageUnits":
                     storages = value
 
-        for ess_element in storages:
-            Storage_names.append(ess_element["id"])
-        return Storage_names
+        if not storages == []:
+            for ess_element in storages:
+                Storage_names.append(ess_element["id"])
+            return Storage_names
+        else:
+            return []
+
 
     def get_Storage_nodes(self, topology):
         Storage_nodes = []
@@ -277,6 +277,20 @@ class InputController:
         for ess_element in storages:
             Storage_nodes.append(ess_element["bus1"])
         return Storage_nodes
+
+    def get_storage_powers(self, list_storage_names):
+        list_power = []
+        for ess_name in list_storage_names:
+            value = self.sim.getkWfromBattery(ess_name)
+            list_power.append(value)
+        return list_power
+
+    def get_storage_socs(self, topology):
+        list_storage_names = self.get_Storage_names(topology)
+        list_soc = []
+        for ess_name in list_storage_names:
+            list_soc.append(self.sim.getSoCfromBattery(ess_name))
+        return list_soc
 
     def get_soc_list(self,topology):
         radial=topology["radials"]#["storageUnits"]
@@ -304,17 +318,20 @@ class InputController:
             if not ess_element["bus1"] in charging_station_buses:
                 soc_dict = {}
                 #logger.debug("element intern "+str(ess_element))
-                soc_dict[ess_element["bus1"]]={"ESS":{"SoC":ess_element["soc"],
-                                                        "T_SoC":25,
-                                                        "id":ess_element["id"],
-                                                        "Battery_Capacity":ess_element["storage_capacity"],
-                                                        "max_charging_power":ess_element["max_charging_power"],
-                                                        "max_discharging_power":ess_element["max_discharging_power"],
-                                                        "charge_efficiency":ess_element["charge_efficiency"],
-                                                        "discharge_efficiency":ess_element["discharge_efficiency"]},
-                                                "Grid":{
-                                                        "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
-                                                        "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}}
+                if "max_reactive_power_in_kVar_to_grid" and "max_real_power_in_kW_to_grid" in common.keys():
+                    soc_dict[ess_element["bus1"]]={"ESS":{"SoC":ess_element["soc"],
+                                                            "T_SoC":25,
+                                                            "id":ess_element["id"],
+                                                            "Battery_Capacity":ess_element["storage_capacity"],
+                                                            "max_charging_power":ess_element["max_charging_power"],
+                                                            "max_discharging_power":ess_element["max_discharging_power"],
+                                                            "charge_efficiency":ess_element["charge_efficiency"],
+                                                            "discharge_efficiency":ess_element["discharge_efficiency"]},
+                                                    "Grid":{
+                                                            "Q_Grid_Max_Export_Power": common["max_reactive_power_in_kVar_to_grid"],
+                                                            "P_Grid_Max_Export_Power": common["max_real_power_in_kW_to_grid"]}}
+                else:
+                    return "Missing \"max_reactive_power_in_kVar_to_grid\" or \"max_real_power_in_kW_to_grid\" in common"
                 for pv_element in photovoltaics:
                     if pv_element["bus1"] == ess_element["bus1"]:
                         soc_dict[ess_element["bus1"]]["PV"]={"pv_name": pv_element["id"]}
@@ -707,17 +724,15 @@ class InputController:
                 
                 
             if "loads" in values.keys() and values["loads"] is not None:
-                # logger.debug("---------------Setting Loads-------------------------")
                 logger.debug("! ---------------Setting Loads------------------------- \n")
-                # radial=radial.to_dict()
                 load = values["loads"]
                 powerprofile = []
                 if "powerProfiles" in values.keys() and values["powerProfiles"] is not None:
                     powerprofile = values["powerProfiles"]
-                #logger.debug("power profile "+str(powerprofile))
+
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
                 message = self.setLoadshapes(id, profiles, profess, load, powerprofile, time_in_days)
-                # message = self.setLoadshapes(id, load, time_in_days)
+
                 if not message == 0:
                     return message
                 logger.debug("! >>>  ---------------and the Loads afterwards ------------------------- \n")
@@ -791,9 +806,13 @@ class InputController:
                 logger.debug("! ---------------Setting Photovoltaic------------------------- \n")
                 photovoltaics = values["photovoltaics"]
 
+                powerprofile = []
+                if "powerProfiles" in values.keys() and values["powerProfiles"] is not None:
+                    powerprofile = values["powerProfiles"]
+
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(id, profiles, profess, photovoltaics, city, country, time_in_days)
+                    message = self.setPVshapes(id, profiles, profess, photovoltaics, city, country, time_in_days, powerprofile)
                     if not message == 0:
                         return message
                     logger.debug("! >>>  ---------------and the PVs afterwards ------------------------- \n")

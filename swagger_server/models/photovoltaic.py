@@ -15,7 +15,7 @@ class Photovoltaic(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, inverter_efficiency: float=None, phases: int=None, power: float=None, max_power_k_w: float=None, powerunit: str=None, powerfactor: float=None, bus1: str=None, k_v: float=None, effcurve: str=None, ptcurve: str=None, daily: str=None, tdaily: str=None, temperature: float=None, irrad: float=None, voltageunit: str=None):  # noqa: E501
+    def __init__(self, id: str=None, inverter_efficiency: float=None, phases: int=None, power: float=None, max_power_k_w: float=None, powerunit: str=None, powerfactor: float=None, bus1: str=None, k_v: float=None, effcurve: str=None, ptcurve: str=None, daily: str=None, tdaily: str=None, temperature: float=None, irrad: float=None, voltageunit: str=None, power_profile_id: str=None):  # noqa: E501
         """Photovoltaic - a model defined in Swagger
 
         :param id: The id of this Photovoltaic.  # noqa: E501
@@ -50,6 +50,8 @@ class Photovoltaic(Model):
         :type irrad: float
         :param voltageunit: The voltageunit of this Photovoltaic.  # noqa: E501
         :type voltageunit: str
+        :param power_profile_id: The power_profile_id of this Photovoltaic.  # noqa: E501
+        :type power_profile_id: str
         """
         self.swagger_types = {
             'id': str,
@@ -67,7 +69,8 @@ class Photovoltaic(Model):
             'tdaily': str,
             'temperature': float,
             'irrad': float,
-            'voltageunit': str
+            'voltageunit': str,
+            'power_profile_id': str
         }
 
         self.attribute_map = {
@@ -86,7 +89,8 @@ class Photovoltaic(Model):
             'tdaily': 'tdaily',
             'temperature': 'temperature',
             'irrad': 'irrad',
-            'voltageunit': 'voltageunit'
+            'voltageunit': 'voltageunit',
+            'power_profile_id': 'power_profile_id'
         }
 
         self._id = id
@@ -105,6 +109,7 @@ class Photovoltaic(Model):
         self._temperature = temperature
         self._irrad = irrad
         self._voltageunit = voltageunit
+        self._power_profile_id = power_profile_id
 
     @classmethod
     def from_dict(cls, dikt) -> 'Photovoltaic':
@@ -462,3 +467,24 @@ class Photovoltaic(Model):
         """
 
         self._voltageunit = voltageunit
+
+    @property
+    def power_profile_id(self) -> str:
+        """Gets the power_profile_id of this Photovoltaic.
+
+
+        :return: The power_profile_id of this Photovoltaic.
+        :rtype: str
+        """
+        return self._power_profile_id
+
+    @power_profile_id.setter
+    def power_profile_id(self, power_profile_id: str):
+        """Sets the power_profile_id of this Photovoltaic.
+
+
+        :param power_profile_id: The power_profile_id of this Photovoltaic.
+        :type power_profile_id: str
+        """
+
+        self._power_profile_id = power_profile_id
