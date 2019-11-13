@@ -807,25 +807,24 @@ class gridController(threading.Thread):
 		for i in range(len_loadNames):
 			if loadNames[i] not in raw_data_power["Load"].keys():
 				raw_data_power["Load"][loadNames[i]]={}
-			raw_data_power["Load"][loadNames[i]] = {"Phase 1":load_powers_phase_1[i], "Phase 2":load_powers_phase_2[i], "Phase 3":load_powers_phase_3[i]}
+			raw_data_power["Load"][loadNames[i]] = {"Phase 1":[str(i) for i in load_powers_phase_1[i]],
+			                                        "Phase 2":[str(i) for i in load_powers_phase_2[i]], "Phase 3":[str(i) for i in load_powers_phase_3[i]]}
 
 		raw_data_power["Photovoltaic"] = {}
 		for i in range(len_pvNames):
 			if pvNames[i] not in raw_data_power["Photovoltaic"].keys():
 				raw_data_power["Photovoltaic"][pvNames[i]] = {}
-			raw_data_power["Photovoltaic"][pvNames[i]] = {"Phase 1": pv_powers_phase_1[i],
-													"Phase 2": pv_powers_phase_2[i],
-													"Phase 3": pv_powers_phase_3[i]}
+			raw_data_power["Photovoltaic"][pvNames[i]] = {"Phase 1": [str(i) for i in pv_powers_phase_1[i]],
+													"Phase 2": [str(i) for i in pv_powers_phase_2[i]],
+													"Phase 3": [str(i) for i in pv_powers_phase_3[i]]}
 
 		raw_data_power["Storages"] = {}
 		for i in range(len_essNames):
 			if essNames[i] not in raw_data_power["Storages"].keys():
 				raw_data_power["Storages"][essNames[i]] = {}
-			raw_data_power["Storages"][essNames[i]] = {"Phase 1": ess_powers_phase_1[i],
-														  "Phase 2": ess_powers_phase_2[i],
-														  "Phase 3": ess_powers_phase_3[i]}
-
-		logger.debug("raw_data_power_storages " + str(raw_data_power["Storages"]))
+			raw_data_power["Storages"][essNames[i]] = {"Phase 1": [str(i) for i in ess_powers_phase_1[i]],
+														  "Phase 2": [str(i) for i in ess_powers_phase_2[i]],
+														  "Phase 3": [str(i) for i in ess_powers_phase_3[i]]}
 
 		raw_soc = {}
 		raw_soc["EVs"] = {}
