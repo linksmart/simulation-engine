@@ -82,8 +82,7 @@ class gridController(threading.Thread):
 		return self.redisDB.get(self.finish_status_key)
 	
 	def run(self):  # self, id, duration):
-		# self.id = id
-		# self.duration = duration
+
 		self.redisDB.set("status_"+ str(self.id), "OK")
 		start_time = time.time()
 		common = self.topology["common"]
@@ -176,7 +175,8 @@ class gridController(threading.Thread):
 		currents = [[] for i in range(len_lineNames)]
 		losses = [[] for i in range(len_elementNames)]
 		total_losses = []
-		
+
+		PV_objects_dict = self.sim.get_photovoltaics_objects()
 		PV_names = self.input.get_PV_names(self.topology)
 		logger.debug("PV_names " + str(PV_names))
 		powers_pv_curtailed = [[] for i in range(len(PV_names))]
@@ -298,24 +298,19 @@ class gridController(threading.Thread):
 					load_profiles = self.sim.getProfessLoadschapes(hours, 24)
 					#logger.debug("loads "+str(load_profiles))
 					pv_profiles = self.sim.getProfessLoadschapesPV(hours, 24)
-					# logger.debug("PVs "+str(professPVs))
+					logger.debug("pv profiles "+str(pv_profiles))
 					if flag_is_price_profile_needed or flag_global_control:
 						if self.input.is_price_profile():
-							# logger.debug("price profile present")
 							price_profile = price_profile_data[int(hours):int(hours + 24)]
 							logger.debug("price profile present")
 
 					if flag_is_charging_station:
 						soc_list_new_evs = self.input.set_new_soc_evs(soc_list_evs_commercial, soc_list_evs_residential,
 																	  chargers)
-					# logger.debug("soc_list_new_evs " + str(soc_list_new_evs))
 
 					if flag_is_storage:
 						soc_list_new_storages = self.input.set_new_soc(soc_list)
-					# logger.debug("soc_list_new_storages " + str(soc_list_new_storages))
 
-					# soc_list_new_total = soc_list_new_evs + soc_list_new_storages
-					# logger.debug("soc_list_new_total: " + str(soc_list_new_total))
 
 					if flag_global_control:
 						logger.debug("Global control present")
@@ -326,7 +321,7 @@ class gridController(threading.Thread):
 							logger.debug("Getting global profile")
 							global_profile_total = self.global_control.gesscon(load_profiles, pv_profiles, price_profile,
 																			   soc_list_new_total)
-						#logger.debug("global profile total "+str(global_profile_total))
+
 
 						if not global_profile_total == [] and not global_profile_total == None:
 							logger.debug("Global profile received")
@@ -389,9 +384,13 @@ class gridController(threading.Thread):
 							
 							logger.debug("p_ess: " + str(p_ess_output) + " p_pv: " + str(p_pv_output))
 							self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
-							self.sim.setActivePowertoPV(pv_name, p_pv_output)
+							#todo change p_pv_output to real_power of pv
+
+							pv_power_momentary = self.sim.get_single_pv_power(pv_name)
+							meta={"power": p_pv_output}
+							power_set = self.sim.setActivePowertoPV(pv_name, pv_power_momentary,None, "profess", meta)
 							#### Creating lists for storing values
-							powers_pv_curtailed[PV_names.index(pv_name)].append(p_pv_output)
+							powers_pv_curtailed[PV_names.index(pv_name)].append(power_set)
 							soc_from_profess[ESS_names.index(ess_name)].append(self.sim.getSoCfromBattery(ess_name))
 							ess_powers_from_profess[ESS_names.index(ess_name)].append(p_ess_output)
 					else:

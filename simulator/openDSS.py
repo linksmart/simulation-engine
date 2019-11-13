@@ -13,6 +13,7 @@ import re
 import opendssdirect as dss
 from data_management.redisDB import RedisDB
 
+from simulator.photovoltaic import Photovoltaic as PV
 from profess.EV import EV
 from profess.EV import Charger
 
@@ -34,6 +35,7 @@ class OpenDSS:
         self.loadshapes_for_loads={} #empty Dictionary for laod_id:load_profile pairs
         self.EVs = {}
         self.Chargers = {}
+        self.PVs = {}
         self.loadshapes_for_pv = {}
         self.dummyGESSCON=[{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}, {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
         self.dummyPrice=[3] * 24
@@ -157,16 +159,52 @@ class OpenDSS:
     def get_total_power(self):
         return dss.Circuit.TotalPower()
 
-    def setActivePowertoPV(self, pv_name, power):
+    def setActivePowertoPV(self, pv_name, real_power, voltage_pu=1.0, control_strategy = "profess", meta = None):
+        """
+
+        :param pv_name:
+        :param power:
+        :param voltage_pu:
+        :param control_strategy: possible strategies:
+            - profess
+            - limit_power
+            - volt-watt
+            - volt-var
+        :return:
+        """
         self.set_active_element(pv_name)
-        #logger.debug("pv power " + str(power))
-        if power >= 0:
-            dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
-            logger.debug("dss_string " + str(dss_string))
-            dss.run_command(dss_string)
-            return 0
-        else:
-            return 1
+
+
+        if control_strategy == "profess":
+            power = meta["power"]
+            if power >= 0:
+                dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+                return power
+            else:
+                return -1
+        elif control_strategy == "limit_power":
+            power = real_power
+            pv_max_power = meta["max_power"]
+            percentage_max_power = meta["percentage_max_power"]
+
+            max_power = pv_max_power * (percentage_max_power/100)
+            if power >= 0:
+                if power <= max_power:
+                    power_to_set = power
+                else:
+                    power_to_set = max_power
+
+                dss_string = "Generator." + str(pv_name) + ".kw=" + str(power_to_set)
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+                return power_to_set
+            else:
+                return -1
+
+
+
 
     def set_switch(self, line_name, opened):
         self.set_active_element(line_name)
@@ -467,10 +505,6 @@ class OpenDSS:
 
     def get_number_of_elements(self):
         dss.Circuit.NumCktElements()
-    #def setSolveMode(self, mode):
-     #   self.mode=mode
-      #  dss.run_command("Solve mode=" + self.mode)
-
 
     def getStartingHour(self):
         return dss.Solution.DblHour()
@@ -486,10 +520,8 @@ class OpenDSS:
     def setVoltageBases(self, bases_list):
         dss_string = "Set voltagebases = "+str(bases_list)
         logger.debug(dss_string + "\n")
-
         dss.run_command(dss_string)
         dss.run_command("CalcVoltageBases");
-
 
     def solutionConverged(self):
         return dss.Solution.Coverged()
@@ -500,12 +532,19 @@ class OpenDSS:
     def setMode(self, mode):
         self.mode = mode
         dss.run_command("Set mode="+self.mode)
-        #logger.debug("Solution mode "+str(dss.Solution.ModeID()))
 
     def getStepSize(self):
         return dss.Solution.StepSize()
-    #Options: minutes or hours
+
+
     def setStepSize(self, time_step):
+        """
+
+        :param time_step: options:
+                - "minutes"
+                - "hours"
+        :return:
+        """
         self.time_step=time_step
         if "minutes" in self.time_step:
             dss.Solution.StepSizeMin(1)
@@ -562,7 +601,7 @@ class OpenDSS:
                 R=line_drop_compensator_R_Volt,
                 X=line_drop_compensator_X_Volt)
 
-                #logger.info("run_command: " + cmd)
+
                 logger.debug(cmd + "\n")
                 dss.run_command(cmd)
             return 0
@@ -571,17 +610,14 @@ class OpenDSS:
             return e
 
     def setTransformers(self, transformers):
-        #logger.debug("Setting up the transformers")
-        #logger.debug("transformers: " + str(transformers))
+
         self.transformers = transformers
         try:
             for element in self.transformers:
-                #logger.info("element:" + str(element))
+
                 bank=None
                 for key, value in element.items():
-                    #logger.debug("Key: " + str(key) + " Value: " + str(value))
-                    #logger.info("key:" + str(key))
-                    #logger.info("value:" + str(value))
+
                     if key == "id":
                         transformer_id = value
                     elif key == "phases":
@@ -632,8 +668,6 @@ class OpenDSS:
 
                 dss_string = "New Transformer.{transformer_name} Phases={phases} Windings={winding} Buses={buses} kVAs={kvas} kVs={kvs} XscArray={xsc_array}" + portion_str + " "
 
-                #logger.info("portion_str: " + portion_str)
-                #logger.info("dss_string: " + dss_string)
 
                 dss_string = dss_string.format(
                         transformer_name=self._id,
@@ -649,16 +683,10 @@ class OpenDSS:
                         bank=self._bank,
                         taps=self._taps)
 
-                #logger.info("dss_string: " + dss_string)
                 logger.debug(dss_string + "\n")
                 dss.run_command(dss_string)
             return 0
 
-
-            # !logger.debug("Transformer_names: " + str(dss.Transformers.AllNames()))
-            # dss.run_command('Solve')
-            # !logger.debug("Load SOLVED") #It does not get here. This is now good
-            # logger.info("Load names: " + str(dss.Loads.AllNames())) #listed load names
         except Exception as e:
             logger.error(e)
             return e
@@ -670,7 +698,7 @@ class OpenDSS:
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
-        #logger.debug( "getProfessLoadschapes")
+
         try:
             for key, value in self.loadshapes_for_loads.items():
                 load_id = key
@@ -679,11 +707,8 @@ class OpenDSS:
                 main_bus_name = bus_name.split('.', 1)[0]
 
                 loadshape = value["loadshape"]
-                #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ "size"+ str(size)+" start "+str(start)+" loadshape_size: " + str(len(loadshape)))
                 loadshape_portion=loadshape[int(start):int(start+size)]
-                #print("loadshape_portion: " + str(loadshape_portion))
                 bus_loadshape={bus_name:loadshape_portion}
-                #print("bus_loadshape: " + str(bus_loadshape))
 
                 if main_bus_name in result:
                     # extend existing  element
@@ -693,7 +718,6 @@ class OpenDSS:
                     result[main_bus_name] = bus_loadshape
         except Exception as e:
             logger.error(e)
-        #print("resulting_loadshape_profess: " + str(result))
         return [result]
 
 
@@ -701,8 +725,7 @@ class OpenDSS:
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
-        #logger.debug( "getPVLoadschapes")
-        #logger.debug("node_name_list " + str(node_name_list))
+
         try:
             for key, value in self.loadshapes_for_pv.items():
                 pv_id = key
@@ -802,12 +825,9 @@ class OpenDSS:
 
 
     def setLineCodes(self, lines):
-        #logger.debug("Setting up linecodes")
-        #logger.debug("lines "+str(lines))
-        self.linecodes=lines
 
         try:
-            for element in self.linecodes:
+            for element in lines:
                 #logger.debug(str(element))
                 cmatrix_str = " "
                 linecode_name = None
@@ -868,10 +888,9 @@ class OpenDSS:
             return e
 
     def setPowerLines(self, lines):
-        #logger.debug("Setting up the powerlines")
-        self.lines=lines
+
         try:
-            for element in self.lines:
+            for element in lines:
                 linecode = None
                 line_id = None
                 bus1 = None
@@ -931,7 +950,6 @@ class OpenDSS:
     def setPowerLine(self, id, phases, bus1, bus2, length=None, unitlength=None, linecode=None, r1=None, r0=None, x1=None, x0=None, c1=None, c0=None, switch=None):
         my_str = []
         if not r1 == None and linecode == None:
-            # portion_str = "r1={r1} r0={r0} x1={x1} x0={x0} c1={c1}  c0={c0} " if switch == True else " length={length} units={unitlength} linecode={linecode} "
             my_str.append("r1={r1} ")
 
             if not r0 == None:
@@ -951,8 +969,6 @@ class OpenDSS:
                 # raise Exception("r1 and linecode cannot be entered at the same time")
                 logger.error("r1 and linecode cannot be entered at the same time")
                 return "r1 and linecode cannot be entered at the same time"
-                # sys.exit(0)
-                # raise ValueError('r1 and linecode cannot be entered at the same time')
 
         if not length == None:
             my_str.append("length={length} ")
@@ -986,8 +1002,7 @@ class OpenDSS:
         return 0
 
     def setXYCurves(self, xycurves):
-        #!logger.info("Setting up the XYCurves")
-        #!logger.debug("XY Curve in OpenDSS: " + str(xycurves))
+
         try:
             for element in xycurves:
                 id = None
@@ -1005,7 +1020,6 @@ class OpenDSS:
                     if key == "yarray":
                         yarray = value
                 self.setXYCurve(id, npts, xarray, yarray)
-                #dss.run_command('Solve')
             return 0
         except Exception as e:
             logger.error(e)
@@ -1249,6 +1263,7 @@ class OpenDSS:
                 temperature = None
                 irrad = None
                 pmpp = None
+                control = "profess"
                 for key, value in element.items():
                     if key == "id":
                         id = value
@@ -1276,10 +1291,12 @@ class OpenDSS:
                         temperature = value
                     elif key == "irrad":
                         irrad = value
+                    elif key == "control_strategy":
+                        control = value
                     else:
                         logger.debug("keys not registered "+str(key))
 
-                self.setPhotovoltaic(id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp)
+                self.setPhotovoltaic(id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp, control)
                 #!dss.run_command('Solve')
                 #!logger.debug("Photovoltaics: " + str(dss.PVsystems.AllNames()))
             return 0
@@ -1287,7 +1304,7 @@ class OpenDSS:
             logger.error(e)
             return e
 
-    def setPhotovoltaic(self, id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp):
+    def setPhotovoltaic(self, id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp, control):
         dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} PF={pf} model=1".format(
             id=id,
             phases=phases,
@@ -1301,6 +1318,9 @@ class OpenDSS:
         # ---------- chek for available loadschape and attach it to the load
         if id in self.loadshapes_for_pv:
             dss_string = dss_string + " Yearly=" + str(self.loadshapes_for_pv[id]["name"])
+
+        self.PVs[id] = PV(id, phases, voltage, pmpp, pf, control)
+
 
         logger.debug(dss_string + "\n")
         dss.run_command(dss_string)
@@ -1395,6 +1415,9 @@ class OpenDSS:
 
     def get_chargers(self):
         return self.Chargers
+
+    def get_photovoltaics_objects(self):
+        return self.PVs
 
     def setStorages(self, storage):
         #logger.info("Setting up the Storages")
