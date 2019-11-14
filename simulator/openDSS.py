@@ -159,35 +159,47 @@ class OpenDSS:
     def get_total_power(self):
         return dss.Circuit.TotalPower()
 
-    def setActivePowertoPV(self, pv_name, real_power, voltage_pu=1.0, control_strategy = "profess", meta = None):
+    def setActivePowertoPV(self, pv_object, list_voltages_pu):
         """
 
-        :param pv_name:
-        :param power:
-        :param voltage_pu:
-        :param control_strategy: possible strategies:
-            - profess
+        :param pv_object:
+            - ofw
             - limit_power
             - volt-watt
             - volt-var
+        :param list_voltages_pu:
         :return:
         """
-        self.set_active_element(pv_name)
+        self.set_active_element(pv_object.get_name())
+        pv_name = pv_object.get_name()
+
+        control_strategy = pv_object.get_control_strategy().get_strategy()
+        control_strategy_name = control_strategy.get_name()
+        logger.debug("control_strategy_name: "+str(control_strategy_name))
+
+        if control_strategy_name == "ofw":
+            power = control_strategy.get_control_power()
 
 
-        if control_strategy == "profess":
-            power = meta["power"]
             if power >= 0:
                 dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
                 logger.debug("dss_string " + str(dss_string))
                 dss.run_command(dss_string)
-                return power
+                dss_string = "Generator." + str(pv_name) + ".kvar=0"
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+
+                pv_object.set_output_power(power)
+                pv_object.set_output_q_power(0)
+
+                return 0
             else:
-                return -1
-        elif control_strategy == "limit_power":
-            power = real_power
-            pv_max_power = meta["max_power"]
-            percentage_max_power = meta["percentage_max_power"]
+                return 1
+
+        elif control_strategy_name == "limit_power":
+            power = pv_object.get_momentary_power()
+            pv_max_power = pv_object.get_max_power()
+            percentage_max_power = pv_object.get_control_strategy().get_strategy().get_percentage()
 
             max_power = pv_max_power * (percentage_max_power/100)
             if power >= 0:
@@ -199,9 +211,95 @@ class OpenDSS:
                 dss_string = "Generator." + str(pv_name) + ".kw=" + str(power_to_set)
                 logger.debug("dss_string " + str(dss_string))
                 dss.run_command(dss_string)
-                return power_to_set
+                dss_string = "Generator." + str(pv_name) + ".kvar=0"
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+                pv_object.set_output_power(power_to_set)
+                pv_object.set_output_q_power(0)
+                return 0
             else:
-                return -1
+                return 1
+
+        elif control_strategy_name == "volt-watt":
+            max_volt_input = max(list_voltages_pu)
+            min_vpu = 1.06
+            max_vpu = 1.1
+            diff_pu = max_vpu - min_vpu
+            power = pv_object.get_momentary_power()
+            pv_max_power = pv_object.get_max_power()
+
+            if max_volt_input >= min_vpu:
+                percentage_max_power = (max_volt_input - min_vpu) / diff_pu
+                if percentage_max_power > 1:
+                    percentage_max_power = 1
+                percentage_max_power = 1 - percentage_max_power
+                logger.debug("percentage_max_power "+str(percentage_max_power))
+                max_power = pv_max_power * percentage_max_power
+                if power >= 0:
+                    if power <= max_power:
+                        power_to_set = power
+                    else:
+                        power_to_set = max_power
+
+                else:
+                    return 1
+            else:
+                power_to_set = power
+
+            dss_string = "Generator." + str(pv_name) + ".kw=" + str(power_to_set)
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            dss_string = "Generator." + str(pv_name) + ".kvar=0"
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            pv_object.set_output_power(power_to_set)
+            pv_object.set_output_q_power(0)
+            return 0
+
+        elif control_strategy_name == "volt-var":
+            max_volt_input = max(list_voltages_pu)
+            min_volt_input = min(list_voltages_pu)
+
+            min_vpu_1 = 0.94
+            min_vpu_2 = 1
+            diff_pu_positive = min_vpu_2 - min_vpu_1
+
+            max_vpu_1 = 1
+            max_vpu_2 = 1.06
+            diff_pu_negative = max_vpu_2 - max_vpu_1
+
+            power = pv_object.get_momentary_power()
+            pv_max_q_power = pv_object.get_max_q_power()
+
+
+            if min_volt_input <= min_vpu_2:
+                percentage_max_q_power = (min_vpu_2 - min_volt_input) / diff_pu_positive
+                if percentage_max_q_power > 1:
+                    percentage_max_q_power = 1
+                logger.debug("percentage_max_q_power "+str(percentage_max_q_power))
+                max_power = pv_max_q_power * percentage_max_q_power
+                q_power_to_set = max_power
+
+            elif max_volt_input >= max_vpu_1:
+                percentage_max_q_power = (max_vpu_1 - max_volt_input) / diff_pu_negative
+                if percentage_max_q_power < -1:
+                    percentage_max_q_power = -1
+                logger.debug("percentage_max_q_power " + str(percentage_max_q_power))
+                max_power = pv_max_q_power * percentage_max_q_power
+                q_power_to_set = max_power
+
+            else:
+                q_power_to_set = 0
+
+            dss_string = "Generator." + str(pv_name) + ".kvar=" + str(q_power_to_set)
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            pv_object.set_output_q_power(q_power_to_set)
+
+            cktpower, qcktpower = self.get_single_pv_power(pv_name)
+            pv_object.set_output_power(cktpower)
+            return 0
+
 
 
 
@@ -285,14 +383,9 @@ class OpenDSS:
 
     def getkWfromBattery(self, battery_name):
         self.set_active_element(battery_name)
-
-        logger.debug("variable names " + str(dss.CktElement.AllVariableNames()))
-        logger.debug("variable values " + str(dss.CktElement.AllVariableValues()))
         #dss_string="? Storage."+str(battery_name)+".kW"
-        powers_from_loads = []
-
         powers = dss.CktElement.Powers()
-        logger.debug("powers "+str(powers))
+        #logger.debug("powers "+str(powers))
         node_order = self.get_node_order()
         list = []
         count = 0
@@ -420,6 +513,16 @@ class OpenDSS:
             #logger.debug("powers_from_loads "+str(list))
             i_Power = dss.Loads.Next()
         return powers_from_loads
+
+    def get_single_pv_power(self, pv_name):
+        #logger.debug("Generator."+pv_name)
+        self.set_active_element("Generator."+pv_name)
+        logger.debug("name "+str(dss.CktElement.Name()))
+        powers = dss.CktElement.Powers()
+        #logger.debug("powers " + str(dss.CktElement.Powers()))
+        power_to_return = -1*(powers[0] + powers[2] + powers[4])
+        q_power_to_return = -1*(powers[1] + powers[3] + powers[5])
+        return (power_to_return, q_power_to_return)
 
     def get_pv_powers(self):
 
@@ -738,9 +841,9 @@ class OpenDSS:
                 loadshape = value["loadshape"]
                 #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
                 loadshape_portion=loadshape[int(start):int(start+size)]
-                #print("loadshape_portion: " + str(loadshape_portion))
+                self.PVs[pv_id].set_momentary_power(loadshape_portion[0])
+                #logger.debug("momentary value for "+str(pv_id)+" is "+str(self.PVs[pv_id].get_momentary_power()))
                 bus_loadshape={bus_name:loadshape_portion}
-                #print("bus_loadshape: " + str(bus_loadshape))
 
                 if main_bus_name in result:
                     # extend existing  element
@@ -1042,11 +1145,11 @@ class OpenDSS:
 
     def setPVshapes(self, pvs, powerprofiles, city, country, sim_days, profiles, profess):
 
-        #!logger.debug("Setting up the loads")
-
         try:
             # ----------get_a_profile---------------#
-            pv_profile_data = profiles.pv_profile(city, country, sim_days)
+            pv_profile_data = profiles.pv_profile(city, country, sim_days, 1, 1561932000)
+            if not isinstance(pv_profile_data, list):
+                return "PV profile could not be queried"
             for element in pvs:
                 pv_name = element["id"]
                 bus_name = element["bus1"]
@@ -1080,7 +1183,7 @@ class OpenDSS:
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name,"loadshape": pv_profile}
                 else:
                     loadshape_id = "Shape_"+pv_name
-                    pv_profile = [i for i in pv_profile_data]
+                    pv_profile = [i * max_power for i in pv_profile_data]
                     normalize = True
                     useactual = False
                     # --------store_profile_for_line----------#
@@ -1150,7 +1253,7 @@ class OpenDSS:
                 else:
                     logger.debug("5 ")
                     # ----------get_a_profile---------------#
-                    randint_value = random.randrange(0, 475)
+                    randint_value = random.randrange(1, 475)
 
                     load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
 
@@ -1181,9 +1284,9 @@ class OpenDSS:
             if normalize:
                 my_str.append("Action=Normalize ")
             if useactual:
-                my_str.append("useactual = true ")
+                my_str.append("useactual=true ")
             else:
-                my_str.append("useactual = false ")
+                my_str.append("useactual=false ")
 
             portion_str = ''.join(my_str)
 
@@ -1246,24 +1349,17 @@ class OpenDSS:
         dss.run_command(dss_string)
 
     def setPhotovoltaics(self, photovoltaics):
-        #!logger.debug("Setting up the Photovoltaics")
+
         try:
             for element in photovoltaics:
                 id = None
                 phases = None
                 bus1 = None
                 voltage = None
-                power = None
-                powerunit= None
-                effcurve = None
-                ptcurve = None
-                daily = None
-                tdaily = None
                 pf = 1 #default value
-                temperature = None
-                irrad = None
-                pmpp = None
-                control = "profess"
+                max_power_kw = None
+                max_power_kvar = None
+                control = "ofw"
                 for key, value in element.items():
                     if key == "id":
                         id = value
@@ -1273,10 +1369,10 @@ class OpenDSS:
                         bus1 = value
                     elif key == "kV":
                         voltage = value
-                    elif key == "power":
-                        power = value
                     elif key == "max_power_kW":
-                        pmpp = value
+                        max_power_kw = value
+                    elif key == "max_power_kvar":
+                        max_power_kvar = value
                     elif key == "effcurve":
                         effcurve = value
                     elif key == "ptcurve":
@@ -1296,30 +1392,30 @@ class OpenDSS:
                     else:
                         logger.debug("keys not registered "+str(key))
 
-                self.setPhotovoltaic(id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp, control)
-                #!dss.run_command('Solve')
-                #!logger.debug("Photovoltaics: " + str(dss.PVsystems.AllNames()))
-            return 0
+                self.setPhotovoltaic(id, phases, bus1, voltage, pf,  max_power_kw, max_power_kvar, control)
+
         except Exception as e:
             logger.error(e)
             return e
 
-    def setPhotovoltaic(self, id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp, control):
+    def setPhotovoltaic(self, id, phases, bus1, voltage, pf, max_power_kw, max_power_kvar, control):
+        logger.debug("Photovoltaic 2")
         dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} PF={pf} model=1".format(
             id=id,
             phases=phases,
             bus1=bus1,
             voltage=voltage,
-            pmpp=pmpp,
-            pf=pf,
-            ptcurve=ptcurve,
+            pmpp=max_power_kw,
+            pf=pf
         )
 
         # ---------- chek for available loadschape and attach it to the load
-        if id in self.loadshapes_for_pv:
+        if id in self.loadshapes_for_pv and control == "no_control":
             dss_string = dss_string + " Yearly=" + str(self.loadshapes_for_pv[id]["name"])
 
-        self.PVs[id] = PV(id, phases, voltage, pmpp, pf, control)
+        if max_power_kvar == None:
+            max_power_kvar = max_power_kw
+        self.PVs[id] = PV(id, bus1, phases, voltage, max_power_kw, max_power_kvar, pf, control)
 
 
         logger.debug(dss_string + "\n")

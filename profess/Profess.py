@@ -921,7 +921,7 @@ class Profess:
         :param ess_con: [{node_name:{node_name.1.2.3:[value1,value2, ...]}, ...}
         :return:
         """
-        logger.debug("set_up_profess started")
+        logger.debug("setup profess started")
         #logger.debug("price prifile profess " + str(price_profiles))
         #logger.debug("soc_list " + str(soc_list))
         #logger.debug("load_profiles "+ str(load_profiles))

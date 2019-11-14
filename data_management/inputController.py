@@ -163,7 +163,8 @@ class InputController:
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
             message = self.sim.setPVshapes(pvs, powerprofile, city, country, sim_days, profiles_object, profess_object)
-            logger.debug("loadshapes from profiles charged")
+            if message == 0:
+                logger.debug("Loadshapes for PVs charged")
             return message
         else:
             error = "City and country are not present"
@@ -680,7 +681,7 @@ class InputController:
             if flag_is_price_profile_needed or flag_global_control:
                 self.price_profile = self.get_price_profile_from_server(profiles, city, country, time_in_days)
                 if not isinstance(self.price_profile, list):
-                    return 1
+                    return "Price prediction service missing"
                 #logger.debug("length price profile "+str(len(self.price_profile)))
 
         for values in radial:
@@ -813,6 +814,7 @@ class InputController:
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
                     message = self.setPVshapes(id, profiles, profess, photovoltaics, city, country, time_in_days, powerprofile)
+                    logger.debug("message "+str(message))
                     if not message == 0:
                         return message
                     logger.debug("! >>>  ---------------and the PVs afterwards ------------------------- \n")

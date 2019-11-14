@@ -92,16 +92,18 @@ class Profiles:
             city(String): variable to enter a city.
             country(String): variable to enter a country.
             days(int): number of days.
-            timestamp(float) : timestamp of the start date
+            timestamp(float) : timestamp of the start date in seconds
 
         Returns:
             list: Number of elements = number of days * 24
         """
-        if not timestamp:
+        if timestamp == None:
             timestamp = datetime.datetime.now()
         else:
             timestamp = datetime.datetime.fromtimestamp(timestamp)
+        logger.debug("timestamp "+str(timestamp))
         date = timestamp.strftime("%m%d")
+        #logger.debug("date "+str(date))
         if (not (city) or not (country)):
             logger.error(
                 "\nPlease provide both city and country name, currenty we support price calculation for Bolzano,Italy and Fur,Denmark")
