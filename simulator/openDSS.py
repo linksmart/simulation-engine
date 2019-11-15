@@ -159,7 +159,7 @@ class OpenDSS:
     def get_total_power(self):
         return dss.Circuit.TotalPower()
 
-    def setActivePowertoPV(self, pv_object, list_voltages_pu):
+    def setActivePowertoPV(self, pv_object, list_voltages_pu = [1,1,1]):
         """
 
         :param pv_object:
@@ -177,7 +177,25 @@ class OpenDSS:
         control_strategy_name = control_strategy.get_name()
         logger.debug("control_strategy_name: "+str(control_strategy_name))
 
-        if control_strategy_name == "ofw":
+        if control_strategy_name == "no_control":
+            power = pv_object.get_momentary_power()
+
+            if power >= 0:
+                dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+                dss_string = "Generator." + str(pv_name) + ".kvar=0"
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+
+                pv_object.set_output_power(power)
+                pv_object.set_output_q_power(0)
+
+                return 0
+            else:
+                return 1
+
+        elif control_strategy_name == "ofw":
             power = control_strategy.get_control_power()
             #power = pv_object.get_momentary_power()
 

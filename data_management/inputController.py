@@ -560,6 +560,53 @@ class InputController:
             list_nodes_cs.append(charger_element.get_bus_name())
         return list_nodes_cs
 
+
+    def get_list_nodes_storages(self, radial):
+        for element in radial:
+            for key, value in element.items():
+                if key == "storageUnits":
+                    storages = value
+
+        list_nodes_storages=[]
+
+        for ess_element in storages:
+            list_nodes_storages.append(ess_element["bus1"])
+        return list_nodes_storages
+
+    def get_list_pvs_alone(self, topology, pv_object_dict,chargers=None):
+        radial = topology["radials"]
+
+        list_nodes_cs = []
+        if not chargers == None:
+            list_nodes_cs = self.get_nodes_Charging_Station_in_Topology(chargers)
+        logger.debug("list_nodes_cs "+str(list_nodes_cs))
+
+
+        list_nodes_storage = self.get_list_nodes_storages(radial)
+        logger.debug("list_nodes_storage "+ str(list_nodes_storage))
+
+        list_nodes_pvs = []
+        for id, pv_object in pv_object_dict.items():
+            list_nodes_pvs.append(pv_object.get_node())
+
+        logger.debug("list_nodes_pvs "+str(list_nodes_pvs))
+
+        list_nodes_pvs_single = []
+
+        for node_pv in list_nodes_pvs:
+            if node_pv not in list_nodes_storage and node_pv not in list_nodes_cs:
+                list_nodes_pvs_single.append(node_pv)
+
+        logger.debug("list_nodes_pvs_single "+str(list_nodes_pvs_single))
+        list_pv_single=[]
+
+        for id, pv_object in pv_object_dict.items():
+            for node_pv in list_nodes_pvs_single:
+                if pv_object.get_node() == node_pv:
+                    list_pv_single.append(pv_object)
+                    pv_object.set_control_strategy("no_control")
+        return list_pv_single
+
     def get_list_nodes_charging_station_without_storage(self, topology, chargers):
         radial = topology["radials"]
 

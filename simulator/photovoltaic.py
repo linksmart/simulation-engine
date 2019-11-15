@@ -79,6 +79,8 @@ class Control_strategy:
             self.strategy = Volt_Var()
         elif name == "ofw":
             self.strategy = Ofw()
+        elif name == "no_control":
+            self.strategy = No_control()
         else:
             return "Control strategy not implemented"
 
@@ -88,6 +90,20 @@ class Control_strategy:
     def get_name(self):
         return self.name
 
+
+class No_control:
+    def __init__(self):
+        self.power =  0
+        self.name = "no_control"
+
+    def get_name(self):
+        return self.name
+
+    def set_control_power(self, power):
+        self.power = power
+
+    def get_control_power(self):
+        return self.power
 
 class Ofw:
     def __init__(self):

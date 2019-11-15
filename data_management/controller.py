@@ -181,7 +181,7 @@ class gridController(threading.Thread):
 		PV_names = self.input.get_PV_names(self.topology)
 		logger.debug("PV_names " + str(PV_names))
 
-		
+
 		ESS_names = self.input.get_Storage_names(self.topology)
 		logger.debug("ESS_names " + str(ESS_names))
 		soc_from_profess = [[] for i in range(len(ESS_names))]
@@ -199,6 +199,8 @@ class gridController(threading.Thread):
 		soc_list_new_storages = []
 		EV_names = []
 		EV_position = []
+
+		chargers= None
 		if flag_is_charging_station:
 			chargers = self.sim.get_chargers()
 			
@@ -242,7 +244,14 @@ class gridController(threading.Thread):
 			if not charger_commercial_list == []:
 				soc_list_evs_commercial = self.input.get_soc_list_evs(self.topology, charger_commercial_list)
 				logger.debug("soc_list_evs commercial" + str(soc_list_evs_commercial))
-		
+
+		pv_objects_alone = []
+		if not chargers == None:
+			pv_objects_alone = self.input.get_list_pvs_alone(self.topology, PV_objects_dict, chargers)
+		else:
+			pv_objects_alone = self.input.get_list_pvs_alone(self.topology, PV_objects_dict)
+
+		logger.debug("pv_objects_alone " + str(pv_objects_alone))
 		logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
 		if flag_is_charging_station:
 			flag_is_storage = self.input.is_Storage_in_Topology_without_charging_station(self.topology, chargers)
@@ -335,6 +344,17 @@ class gridController(threading.Thread):
 				logger.error(e)
 
 			######################################################################################
+			################  PV control  ###################################################
+			######################################################################################
+			if not pv_objects_alone == []:
+				logger.debug("-------------------------------------------")
+				logger.debug("Single PVs present in the simulation")
+				logger.debug("-------------------------------------------")
+				for pv_object in pv_objects_alone:
+					self.sim.setActivePowertoPV(pv_object)
+
+
+			######################################################################################
 			################  Storage control  ###################################################
 			######################################################################################
 			if flag_is_storage:
@@ -392,10 +412,9 @@ class gridController(threading.Thread):
 								voltage_S_pu = puVoltages[nodeNames.index(str(node) + ".2")]
 								voltage_T_pu = puVoltages[nodeNames.index(str(node) + ".3")]
 								list_voltage_at_node = [voltage_R_pu, voltage_S_pu, voltage_T_pu]
+								self.sim.setActivePowertoPV(pv_object, list_voltage_at_node)
 							else:
-								list_voltage_at_node = [1,1,1]
-
-							self.sim.setActivePowertoPV(PV_objects_dict[pv_name], list_voltage_at_node)
+								self.sim.setActivePowertoPV(pv_object)
 
 
 							soc_from_profess[ESS_names.index(ess_name)].append(self.sim.getSoCfromBattery(ess_name))
@@ -521,13 +540,24 @@ class gridController(threading.Thread):
 									pv_name = self.input.get_PV_name_for_node(soc_list_new_evs,
 									                                          charger_element.get_bus_name())
 									if not pv_name == None:
-										self.sim.setActivePowertoPV(pv_name, p_pv)
+										pv_object = PV_objects_dict[pv_name]
+										control_strategy_object = pv_object.get_control_strategy().get_strategy()
+										control_strategy_object.set_control_power(p_pv)
+										if not int(hours) == 0:
+											node = pv_object.get_node_base()
+											voltage_R_pu = puVoltages[nodeNames.index(str(node) + ".1")]
+											voltage_S_pu = puVoltages[nodeNames.index(str(node) + ".2")]
+											voltage_T_pu = puVoltages[nodeNames.index(str(node) + ".3")]
+											list_voltage_at_node = [voltage_R_pu, voltage_S_pu, voltage_T_pu]
+											self.sim.setActivePowertoPV(pv_object, list_voltage_at_node)
+										else:
+											self.sim.setActivePowertoPV(pv_object)
 
 									else:
 										logger.error("Problems for finding PV name of node " + str(
 											charger_element.get_bus_name()))
-						
-						
+
+
 						else:
 							logger.error("OFW instances could not be started")
 							self.Stop()
@@ -593,7 +623,18 @@ class gridController(threading.Thread):
 									pv_name = self.input.get_PV_name_for_node(soc_list_new_evs,
 									                                          charger_element.get_bus_name())
 									if not pv_name == None:
-										self.sim.setActivePowertoPV(pv_name, p_pv)
+										pv_object = PV_objects_dict[pv_name]
+										control_strategy_object = pv_object.get_control_strategy().get_strategy()
+										control_strategy_object.set_control_power(p_pv)
+										if not int(hours) == 0:
+											node = pv_object.get_node_base()
+											voltage_R_pu = puVoltages[nodeNames.index(str(node) + ".1")]
+											voltage_S_pu = puVoltages[nodeNames.index(str(node) + ".2")]
+											voltage_T_pu = puVoltages[nodeNames.index(str(node) + ".3")]
+											list_voltage_at_node = [voltage_R_pu, voltage_S_pu, voltage_T_pu]
+											self.sim.setActivePowertoPV(pv_object, list_voltage_at_node)
+										else:
+											self.sim.setActivePowertoPV(pv_object)
 
 									else:
 										logger.error("Problems for finding PV name of node " + str(
