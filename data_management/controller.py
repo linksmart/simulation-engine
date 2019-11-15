@@ -109,6 +109,7 @@ class gridController(threading.Thread):
 		# profess.json_parser.set_topology(data)
 		price_profile = None
 		answer_setup = self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
+		logger.debug("answer "+ str(answer_setup))
 		if not answer_setup == 0:
 			logger.error(answer_setup)
 			self.redisDB.set("status_"+ str(self.id), answer_setup)
@@ -206,7 +207,7 @@ class gridController(threading.Thread):
 			logger.debug(
 				"list_node_charging_station_without_storage " + str(list_node_charging_station_without_storage))
 			
-			# logger.debug("type chargers " + str(type(chargers)))
+
 			for key, charger_element in chargers.items():
 				logger.debug("charger_element.get_bus_name() " + str(charger_element.get_bus_name()))
 				
@@ -368,22 +369,23 @@ class gridController(threading.Thread):
 							p_ess_output = None
 							p_pv_output = None
 							max_charging_power = None
+
+
+							pv_object = None
 							for key, value in element.items():
 								ess_name = value["ess_name"]
 								p_ess_output = value["P_ESS_Output"]
 								pv_name = value["pv_name"]
 								p_pv_output = value["P_PV_Output"]
+								pv_object = PV_objects_dict[pv_name]
+								control_strategy_object = pv_object.get_control_strategy().get_strategy()
+								control_strategy_object.set_control_power(p_pv_output)
 								max_charging_power = value["max_charging_power"]
 								max_discharging_power = value["max_discharging_power"]
 							
 							logger.debug("p_ess: " + str(p_ess_output) + " p_pv: " + str(p_pv_output))
 							self.sim.setActivePowertoBatery(ess_name, p_ess_output, max_charging_power)
 
-							pv_object = PV_objects_dict[pv_name]
-							control_strategy_object =pv_object.get_control_strategy().get_strategy()
-							strategy_name = control_strategy_object.get_name()
-							if strategy_name == "ofw":
-								control_strategy_object.set_control_power(p_pv_output)
 							if not int(hours) == 0:
 								node = pv_object.get_node_base()
 								voltage_R_pu = puVoltages[nodeNames.index(str(node) + ".1")]
@@ -393,14 +395,8 @@ class gridController(threading.Thread):
 							else:
 								list_voltage_at_node = [1,1,1]
 
-
-							logger.debug("Voltages at node "+str(list_voltage_at_node))
-
-
 							self.sim.setActivePowertoPV(PV_objects_dict[pv_name], list_voltage_at_node)
-							#powers_pv_entered[PV_names.index(pv_name)].append(power_entered)
-							#powers_pv_read_ckt[PV_names.index(pv_name)].append(power_ckt_read)
-							#### Creating lists for storing values
+
 
 							soc_from_profess[ESS_names.index(ess_name)].append(self.sim.getSoCfromBattery(ess_name))
 							ess_powers_from_profess[ESS_names.index(ess_name)].append(p_ess_output)

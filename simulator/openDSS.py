@@ -179,7 +179,7 @@ class OpenDSS:
 
         if control_strategy_name == "ofw":
             power = control_strategy.get_control_power()
-
+            #power = pv_object.get_momentary_power()
 
             if power >= 0:
                 dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
@@ -1146,10 +1146,7 @@ class OpenDSS:
     def setPVshapes(self, pvs, powerprofiles, city, country, sim_days, profiles, profess):
 
         try:
-            # ----------get_a_profile---------------#
-            pv_profile_data = profiles.pv_profile(city, country, sim_days, 1, 1561932000)
-            if not isinstance(pv_profile_data, list):
-                return "PV profile could not be queried"
+
             for element in pvs:
                 pv_name = element["id"]
                 bus_name = element["bus1"]
@@ -1182,6 +1179,10 @@ class OpenDSS:
                     # --------store_profile_for_line----------#
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name,"loadshape": pv_profile}
                 else:
+                    # ----------get_a_profile---------------#
+                    pv_profile_data = profiles.pv_profile(city, country, sim_days, 1, 1561932000)
+                    if not isinstance(pv_profile_data, list):
+                        return "PV profile could not be queried"
                     loadshape_id = "Shape_"+pv_name
                     pv_profile = [i * max_power for i in pv_profile_data]
                     normalize = True
@@ -1394,32 +1395,38 @@ class OpenDSS:
 
                 self.setPhotovoltaic(id, phases, bus1, voltage, pf,  max_power_kw, max_power_kvar, control)
 
+            return 0
         except Exception as e:
             logger.error(e)
             return e
 
     def setPhotovoltaic(self, id, phases, bus1, voltage, pf, max_power_kw, max_power_kvar, control):
-        logger.debug("Photovoltaic 2")
-        dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} PF={pf} model=1".format(
-            id=id,
-            phases=phases,
-            bus1=bus1,
-            voltage=voltage,
-            pmpp=max_power_kw,
-            pf=pf
-        )
+        try:
+            logger.debug("Photovoltaic 2")
+            dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} pf={pf} model=1".format(
+                id=id,
+                phases=phases,
+                bus1=bus1,
+                voltage=voltage,
+                pmpp=max_power_kw,
+                pf=pf
+            )
 
-        # ---------- chek for available loadschape and attach it to the load
-        if id in self.loadshapes_for_pv and control == "no_control":
-            dss_string = dss_string + " Yearly=" + str(self.loadshapes_for_pv[id]["name"])
+            # ---------- chek for available loadschape and attach it to the load
+            if id in self.loadshapes_for_pv and control == "no_control":
+                dss_string = dss_string + " Yearly=" + str(self.loadshapes_for_pv[id]["name"])
 
-        if max_power_kvar == None:
-            max_power_kvar = max_power_kw
-        self.PVs[id] = PV(id, bus1, phases, voltage, max_power_kw, max_power_kvar, pf, control)
+            if max_power_kvar == None:
+                max_power_kvar = max_power_kw
+            self.PVs[id] = PV(id, bus1, phases, voltage, max_power_kw, max_power_kvar, pf, control)
 
 
-        logger.debug(dss_string + "\n")
-        dss.run_command(dss_string)
+            logger.debug(dss_string + "\n")
+            dss.run_command(dss_string)
+            return 0
+        except Exception as e:
+            logger.error(e)
+            return e
 
     def setChargingStations(self, charging_stations):
         import sys
