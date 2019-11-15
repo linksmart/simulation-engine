@@ -240,12 +240,13 @@ class OpenDSS:
 
         elif control_strategy_name == "volt-watt":
             max_volt_input = max(list_voltages_pu)
-            min_vpu = 1.06
+            min_vpu = 0.96#1.06
             max_vpu = 1.1
             diff_pu = max_vpu - min_vpu
             power = pv_object.get_momentary_power()
             pv_max_power = pv_object.get_max_power()
-
+            logger.debug("momentary power "+str(power))
+            logger.debug("max volt input "+str(max_volt_input))
             if max_volt_input >= min_vpu:
                 percentage_max_power = (max_volt_input - min_vpu) / diff_pu
                 if percentage_max_power > 1:
@@ -253,12 +254,12 @@ class OpenDSS:
                 percentage_max_power = 1 - percentage_max_power
                 logger.debug("percentage_max_power "+str(percentage_max_power))
                 max_power = pv_max_power * percentage_max_power
+                logger.debug("Possible max power to be supplied by PV "+str(max_power))
                 if power >= 0:
                     if power <= max_power:
                         power_to_set = power
                     else:
                         power_to_set = max_power
-
                 else:
                     return 1
             else:
@@ -1182,7 +1183,9 @@ class OpenDSS:
                             loadshape_id = powerprofile_id
                             items = powerprofile['items']
                             normalize = powerprofile['normalized']
+                            logger.debug("normalize "+str(normalize))
                             useactual = powerprofile['use_actual_values']
+                            logger.debug("use actual "+str(useactual))
                             interval = powerprofile['interval']
                             multiplier = 1
                             if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
@@ -1194,6 +1197,10 @@ class OpenDSS:
                             elif powerprofile['s_interval']:
                                 items = [item * multiplier for item in items[::3600]]
                             pv_profile.extend(items)
+                            if normalize:
+                                max_value = max(pv_profile)
+                                pv_profile = [(value / max_value)*max_power for value in pv_profile]
+                            logger.debug("pv profile "+str(pv_profile))
                     # --------store_profile_for_line----------#
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name,"loadshape": pv_profile}
                 else:
@@ -1225,7 +1232,7 @@ class OpenDSS:
                 mult = []
                 load_name = element["id"]
                 bus_name = element["bus"]
-                #max_power = element["kW"]
+                max_power = element["kW"]
                 set_load_shape_flag = False
 
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
@@ -1256,6 +1263,8 @@ class OpenDSS:
                                 loadshape_id = powerprofile_id
                                 items = powerprofile['items']
                                 interval = powerprofile['interval']
+                                normalize = powerprofile['normalized']
+                                logger.debug("normalize " + str(normalize))
                                 multiplier = 1
                                 if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
                                     multiplier = powerprofile['multiplier']
@@ -1266,6 +1275,10 @@ class OpenDSS:
                                 elif powerprofile['s_interval']:
                                     items = [item * multiplier  for item in items[::3600]]
                                 load_profile_data.extend(items)
+                                if normalize:
+                                    max_value = max(load_profile_data)
+                                    load_profile_data = [(value / max_value) * max_power for value in load_profile_data]
+
                                 set_load_shape_flag = False
 
 

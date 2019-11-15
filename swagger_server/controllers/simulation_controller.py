@@ -169,7 +169,14 @@ def check_pvs(radial_value):
                         message = "Wrong power profile id"
                         logger.error(message)
                         return message, 406
-
+                if "control_strategy" not in pv_elements.keys():
+                    element_change["control_strategy"] = "no_control"
+                else:
+                    list_strategy=["no_control", "ofw", "limit_power", "volt-watt", "volt-var"]
+                    if pv_elements["control_strategy"] not in list_strategy:
+                        message = "Wrong control strategy. Possible strategies: "+str(list_strategy)
+                        logger.error(message)
+                        return message, 406
                 new_data.append(element_change)
 
         logger.debug("PVs succesfully checked")
@@ -251,6 +258,12 @@ def create_simulation(body):  # noqa: E501
             new_data = check_power_profiles(values)
             if not isinstance(new_data, tuple):
                 data["radials"][count]["powerProfiles"] = new_data
+            else:
+                return new_data
+
+            new_data = check_pvs(values)
+            if not isinstance(new_data, tuple):
+                data["radials"][count]["photovoltaics"] = new_data
             else:
                 return new_data
 

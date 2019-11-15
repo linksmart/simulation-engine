@@ -604,7 +604,9 @@ class InputController:
             for node_pv in list_nodes_pvs_single:
                 if pv_object.get_node() == node_pv:
                     list_pv_single.append(pv_object)
-                    pv_object.set_control_strategy("no_control")
+                    control = pv_object.get_control_strategy()
+                    if control == "ofw":
+                        pv_object.set_control_strategy("no_control")
         return list_pv_single
 
     def get_list_nodes_charging_station_without_storage(self, topology, chargers):

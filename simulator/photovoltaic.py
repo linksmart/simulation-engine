@@ -133,12 +133,18 @@ class Limit_power:
     def set_percentage(self, percentage_max_power):
         self.percentage = percentage_max_power
 
+    def set_control_power(self, power):
+        self.power = power
+
+    def get_control_power(self):
+        return self.power
+
 
 class Volt_Watt:
     def __init__(self):
         self.percentage = 50
 
-        self.name = "volt_watt"
+        self.name = "volt-watt"
 
     def get_name(self):
         return self.name
@@ -148,12 +154,18 @@ class Volt_Watt:
 
     def set_percentage(self, percentage_max_power):
         self.percentage = percentage_max_power
+
+    def set_control_power(self, power):
+        self.power = power
+
+    def get_control_power(self):
+        return self.power
 
 class Volt_Var:
     def __init__(self):
         self.percentage = 50
 
-        self.name = "volt_var"
+        self.name = "volt-var"
 
     def get_name(self):
         return self.name
@@ -163,3 +175,9 @@ class Volt_Var:
 
     def set_percentage(self, percentage_max_power):
         self.percentage = percentage_max_power
+
+    def set_control_power(self, power):
+        self.power = power
+
+    def get_control_power(self):
+        return self.power

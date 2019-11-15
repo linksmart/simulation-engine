@@ -668,6 +668,10 @@ definitions:
         type: "string"
       power_profile_id:
         type: "string"
+      control_strategy:
+        type: "string"
+        description: "Possibilities: no_control, ofw, limit_power, volt-watt, volt-var"
+        default: "no_control"
   ChargingStation:
     type: "object"
     required:

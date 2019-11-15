@@ -351,7 +351,15 @@ class gridController(threading.Thread):
 				logger.debug("Single PVs present in the simulation")
 				logger.debug("-------------------------------------------")
 				for pv_object in pv_objects_alone:
-					self.sim.setActivePowertoPV(pv_object)
+					if not int(hours) == 0:
+						node = pv_object.get_node_base()
+						voltage_R_pu = puVoltages[nodeNames.index(str(node) + ".1")]
+						voltage_S_pu = puVoltages[nodeNames.index(str(node) + ".2")]
+						voltage_T_pu = puVoltages[nodeNames.index(str(node) + ".3")]
+						list_voltage_at_node = [voltage_R_pu, voltage_S_pu, voltage_T_pu]
+						self.sim.setActivePowertoPV(pv_object, list_voltage_at_node)
+					else:
+						self.sim.setActivePowertoPV(pv_object)
 
 
 			######################################################################################
@@ -430,7 +438,9 @@ class gridController(threading.Thread):
 					self.profess.erase_all_ofw_instances(soc_list_new_storages)
 
 			else:
-				logger.debug("No Storage Units present")
+				logger.debug("-------------------------------------------")
+				logger.debug("No storages present in the simulation")
+				logger.debug("-------------------------------------------")
 			
 			######################################################################################
 			################  Charging station control  ###################################################
@@ -687,7 +697,10 @@ class gridController(threading.Thread):
 					if not soc_list_evs_residential == None:
 						self.profev.erase_all_ofw_instances(soc_list_evs_residential)
 			else:
+				logger.debug("-------------------------------------------")
 				logger.debug("No charging stations present in the simulation")
+				logger.debug("-------------------------------------------")
+
 
 
 			puVoltages, Currents, Losses = self.sim.solveCircuitSolution()
