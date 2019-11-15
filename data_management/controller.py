@@ -756,7 +756,10 @@ class gridController(threading.Thread):
 		############################### Losses ###################################
 		
 		for i in range(len_elementNames):
-			raw_data_losses[elementNames[i]] = losses[i]
+			element_group, element_name = elementNames[i].split(".", 1)
+			if element_group not in raw_data_losses.keys():
+				raw_data_losses[element_group] = {}
+			raw_data_losses[element_group][element_name] = losses[i]
 		
 		for i in range(len_elementNames):
 			element = [abs(complex(x)) for x in (losses[i])]
