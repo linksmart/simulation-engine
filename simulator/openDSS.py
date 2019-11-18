@@ -239,14 +239,18 @@ class OpenDSS:
                 return 1
 
         elif control_strategy_name == "volt-watt":
+            logger.debug("list_voltages_pu "+str(list_voltages_pu))
             max_volt_input = max(list_voltages_pu)
             min_vpu = 0.96#1.06
             max_vpu = 1.1
             diff_pu = max_vpu - min_vpu
             power = pv_object.get_momentary_power()
-            pv_max_power = pv_object.get_max_power()
+            #pv_max_power = pv_object.get_max_power()
+            pv_max_power = power
             logger.debug("momentary power "+str(power))
             logger.debug("max volt input "+str(max_volt_input))
+            logger.debug("min_vpu "+str(min_vpu))
+            logger.debug("max_vpu " + str(max_vpu))
             if max_volt_input >= min_vpu:
                 percentage_max_power = (max_volt_input - min_vpu) / diff_pu
                 if percentage_max_power > 1:
@@ -255,13 +259,14 @@ class OpenDSS:
                 logger.debug("percentage_max_power "+str(percentage_max_power))
                 max_power = pv_max_power * percentage_max_power
                 logger.debug("Possible max power to be supplied by PV "+str(max_power))
-                if power >= 0:
+                power_to_set = max_power
+                """if power >= 0:
                     if power <= max_power:
                         power_to_set = power
                     else:
                         power_to_set = max_power
                 else:
-                    return 1
+                    return 1"""
             else:
                 power_to_set = power
 
@@ -271,11 +276,13 @@ class OpenDSS:
             dss_string = "Generator." + str(pv_name) + ".kvar=0"
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
+            logger.debug("Power to PV / 3: "+str(power_to_set/3))
             pv_object.set_output_power(power_to_set)
             pv_object.set_output_q_power(0)
             return 0
 
         elif control_strategy_name == "volt-var":
+            logger.debug("list_voltages_pu " + str(list_voltages_pu))
             max_volt_input = max(list_voltages_pu)
             min_volt_input = min(list_voltages_pu)
 
@@ -290,7 +297,12 @@ class OpenDSS:
             power = pv_object.get_momentary_power()
             pv_max_q_power = pv_object.get_max_q_power()
 
+            logger.debug("min volt input " + str(min_volt_input))
+            logger.debug("min_vpu_2 " + str(min_vpu_2))
+            logger.debug("max volt input " + str(max_volt_input))
+            logger.debug("max_vpu_1 " + str(max_vpu_1))
 
+            logger.debug("pv_max_q_power " + str(pv_max_q_power))
             if min_volt_input <= min_vpu_2:
                 percentage_max_q_power = (min_vpu_2 - min_volt_input) / diff_pu_positive
                 if percentage_max_q_power > 1:
@@ -310,6 +322,10 @@ class OpenDSS:
             else:
                 q_power_to_set = 0
 
+            logger.debug("momentary power " + str(power))
+            dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
             dss_string = "Generator." + str(pv_name) + ".kvar=" + str(q_power_to_set)
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
@@ -1170,7 +1186,7 @@ class OpenDSS:
                 pv_name = element["id"]
                 bus_name = element["bus1"]
                 max_power= element["max_power_kW"]
-                logger.debug("max power "+str(max_power))
+                #logger.debug("max power "+str(max_power))
 
 
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
@@ -1179,6 +1195,7 @@ class OpenDSS:
                     logger.debug("Power profile id found: " + str(powerprofile_id))
                     pv_profile = []
                     for powerprofile in powerprofiles:
+                        #logger.debug("powerprofile "+str(powerprofile))
                         if (powerprofile_id == powerprofile['id']):
                             loadshape_id = powerprofile_id
                             items = powerprofile['items']
@@ -1200,7 +1217,30 @@ class OpenDSS:
                             if normalize:
                                 max_value = max(pv_profile)
                                 pv_profile = [(value / max_value)*max_power for value in pv_profile]
-                            logger.debug("pv profile "+str(pv_profile))
+
+                            #logger.debug("sim_days "+str(sim_days))
+
+                            sim_hours = sim_days*24+24
+                            #logger.debug("sim_hours " + str(sim_hours))
+                            len_pv_profile = len(pv_profile)
+                            if len_pv_profile < sim_hours:
+                                rest = sim_hours - len_pv_profile
+                                if len_pv_profile >= rest:
+                                    pv_profile.extend(pv_profile[0:rest])
+                                elif len_pv_profile < rest:
+                                    number_times, number_missing = divmod(rest, len_pv_profile)
+                                    #logger.debug("number_times "+str(number_times)+" number_missing "+str(number_missing))
+
+                                    if number_times > 1:
+                                        for i in range(number_times-1):
+                                            pv_profile.extend(pv_profile[0:len_pv_profile])
+
+                                    if number_missing > 0:
+                                        final_to_take = len_pv_profile * number_missing
+                                        pv_profile.extend(pv_profile[0:final_to_take])
+
+                            #logger.debug("pv profile "+str(pv_profile))
+                            #logger.debug("len pv profile " + str(len(pv_profile)))
                     # --------store_profile_for_line----------#
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name,"loadshape": pv_profile}
                 else:

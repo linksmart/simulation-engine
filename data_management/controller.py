@@ -180,7 +180,10 @@ class gridController(threading.Thread):
 		PV_objects_dict = self.sim.get_photovoltaics_objects()
 		PV_names = self.input.get_PV_names(self.topology)
 		logger.debug("PV_names " + str(PV_names))
-
+		if not PV_names == []:
+			flag_is_PV = True
+		else:
+			flag_is_PV = False
 
 		ESS_names = self.input.get_Storage_names(self.topology)
 		logger.debug("ESS_names " + str(ESS_names))
@@ -251,7 +254,7 @@ class gridController(threading.Thread):
 		else:
 			pv_objects_alone = self.input.get_list_pvs_alone(self.topology, PV_objects_dict)
 
-		logger.debug("pv_objects_alone " + str(pv_objects_alone))
+
 		logger.debug("+++++++++++++++++++++++++++++++++++++++++++")
 		if flag_is_charging_station:
 			flag_is_storage = self.input.is_Storage_in_Topology_without_charging_station(self.topology, chargers)
@@ -304,10 +307,12 @@ class gridController(threading.Thread):
 			try:
 				logger.debug("flag_is_storage "+str(flag_is_storage))
 				logger.debug("flag_is_charging_station "+str(flag_is_charging_station))
+				if flag_is_PV:
+					pv_profiles = self.sim.getProfessLoadschapesPV(hours, 24)
+
 				if flag_is_storage or flag_is_charging_station:
 					load_profiles = self.sim.getProfessLoadschapes(hours, 24)
 
-					pv_profiles = self.sim.getProfessLoadschapesPV(hours, 24)
 
 					if flag_is_price_profile_needed or flag_global_control:
 						if self.input.is_price_profile():
@@ -732,6 +737,7 @@ class gridController(threading.Thread):
 			#logger.debug("len pv names: "+str(len_pvNames))
 			if not len_pvNames == 0:
 				PV_powers = self.sim.get_pv_powers()
+				#logger.debug("PV_powers "+str(PV_powers))
 				for i in range(len_pvNames):
 					pv_powers_phase_1[i].append(PV_powers[i][0])
 					pv_powers_phase_2[i].append(PV_powers[i][1])
