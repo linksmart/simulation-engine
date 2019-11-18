@@ -1493,8 +1493,10 @@ class OpenDSS:
 
             if max_power_kvar == None:
                 max_power_kvar = max_power_kw
-            logger.debug("meta "+str(meta))
+            if not meta == None:
+                logger.debug("meta "+str(meta))
             self.PVs[id] = PV(id, bus1, phases, voltage, max_power_kw, max_power_kvar, pf, control, meta)
+
 
 
             logger.debug(dss_string + "\n")

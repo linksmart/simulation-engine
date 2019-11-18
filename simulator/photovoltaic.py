@@ -13,22 +13,23 @@ class Photovoltaic:
         self.max_q_power = max_q_power
         self.pf = powerfactor
         self.control = Control_strategy(control_strategy)
-        for control_setting, value_control in meta.items():
-            if control_strategy == "limit_power":
-                if control_setting == "percentage_max_power":
-                    self.control.get_strategy().set_percentage = value_control
-                if control_setting == "sensitivity_factor":
-                    self.control.get_strategy().set_sensitivity_factor = value_control
-            if control_strategy == "volt-watt" or control_strategy == "volt-var":
-                if control_setting == "min_vpu_high":
-                    self.control.get_strategy().set_min_vpu_high(value_control)
-                if control_setting == "max_vpu_high":
-                    self.control.get_strategy().set_max_vpu_high(value_control)
-            if control_strategy == "volt-var":
-                if control_setting == "min_vpu_low":
-                    self.control.get_strategy().set_min_vpu_low(value_control)
-                if control_setting == "max_vpu_low":
-                    self.control.get_strategy().set_max_vpu_low(value_control)
+        if not meta== None:
+            for control_setting, value_control in meta.items():
+                if control_strategy == "limit_power":
+                    if control_setting == "percentage_max_power":
+                        self.control.get_strategy().set_percentage = value_control
+                    if control_setting == "sensitivity_factor":
+                        self.control.get_strategy().set_sensitivity_factor = value_control
+                if control_strategy == "volt-watt" or control_strategy == "volt-var":
+                    if control_setting == "min_vpu_high":
+                        self.control.get_strategy().set_min_vpu_high(value_control)
+                    if control_setting == "max_vpu_high":
+                        self.control.get_strategy().set_max_vpu_high(value_control)
+                if control_strategy == "volt-var":
+                    if control_setting == "min_vpu_low":
+                        self.control.get_strategy().set_min_vpu_low(value_control)
+                    if control_setting == "max_vpu_low":
+                        self.control.get_strategy().set_max_vpu_low(value_control)
 
 
         self.momentary_power = 0

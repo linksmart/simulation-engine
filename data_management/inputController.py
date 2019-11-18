@@ -604,7 +604,7 @@ class InputController:
             for node_pv in list_nodes_pvs_single:
                 if pv_object.get_node() == node_pv:
                     list_pv_single.append(pv_object)
-                    control = pv_object.get_control_strategy()
+                    control = pv_object.get_control_strategy().get_name()
                     if control == "ofw":
                         pv_object.set_control_strategy("no_control")
         return list_pv_single
