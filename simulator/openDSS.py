@@ -218,6 +218,7 @@ class OpenDSS:
             power = pv_object.get_momentary_power()
             pv_max_power = pv_object.get_max_power()
             percentage_max_power = pv_object.get_control_strategy().get_strategy().get_percentage()
+            sensitivity_factor = pv_object.get_control_strategy().get_strategy().get_sensitivity_factor()
 
             max_power = pv_max_power * (percentage_max_power/100)
             if power >= 0:
@@ -241,8 +242,8 @@ class OpenDSS:
         elif control_strategy_name == "volt-watt":
             logger.debug("list_voltages_pu "+str(list_voltages_pu))
             max_volt_input = max(list_voltages_pu)
-            min_vpu = 0.96#1.06
-            max_vpu = 1.1
+            min_vpu = pv_object.get_control_strategy().get_strategy().get_min_vpu_high()
+            max_vpu = pv_object.get_control_strategy().get_strategy().get_max_vpu_high()
             diff_pu = max_vpu - min_vpu
             power = pv_object.get_momentary_power()
             #pv_max_power = pv_object.get_max_power()
@@ -286,33 +287,33 @@ class OpenDSS:
             max_volt_input = max(list_voltages_pu)
             min_volt_input = min(list_voltages_pu)
 
-            min_vpu_1 = 0.94
-            min_vpu_2 = 1
-            diff_pu_positive = min_vpu_2 - min_vpu_1
+            min_vpu_low = pv_object.get_control_strategy().get_strategy().get_min_vpu_low()
+            max_vpu_low = pv_object.get_control_strategy().get_strategy().get_max_vpu_low()
+            diff_pu_positive = max_vpu_low - min_vpu_low
 
-            max_vpu_1 = 1
-            max_vpu_2 = 1.06
-            diff_pu_negative = max_vpu_2 - max_vpu_1
+            min_vpu_high = pv_object.get_control_strategy().get_strategy().get_min_vpu_high()
+            max_vpu_high = pv_object.get_control_strategy().get_strategy().get_max_vpu_high()
+            diff_pu_negative = max_vpu_high - min_vpu_high
 
             power = pv_object.get_momentary_power()
             pv_max_q_power = pv_object.get_max_q_power()
 
             logger.debug("min volt input " + str(min_volt_input))
-            logger.debug("min_vpu_2 " + str(min_vpu_2))
+            logger.debug("max_vpu_low " + str(max_vpu_low))
             logger.debug("max volt input " + str(max_volt_input))
-            logger.debug("max_vpu_1 " + str(max_vpu_1))
+            logger.debug("min_vpu_high " + str(min_vpu_high))
 
             logger.debug("pv_max_q_power " + str(pv_max_q_power))
-            if min_volt_input <= min_vpu_2:
-                percentage_max_q_power = (min_vpu_2 - min_volt_input) / diff_pu_positive
+            if min_volt_input <= max_vpu_low:
+                percentage_max_q_power = (max_vpu_low - min_volt_input) / diff_pu_positive
                 if percentage_max_q_power > 1:
                     percentage_max_q_power = 1
                 logger.debug("percentage_max_q_power "+str(percentage_max_q_power))
                 max_power = pv_max_q_power * percentage_max_q_power
                 q_power_to_set = max_power
 
-            elif max_volt_input >= max_vpu_1:
-                percentage_max_q_power = (max_vpu_1 - max_volt_input) / diff_pu_negative
+            elif max_volt_input >= min_vpu_high:
+                percentage_max_q_power = (min_vpu_high - max_volt_input) / diff_pu_negative
                 if percentage_max_q_power < -1:
                     percentage_max_q_power = -1
                 logger.debug("percentage_max_q_power " + str(percentage_max_q_power))
@@ -1432,6 +1433,7 @@ class OpenDSS:
                 max_power_kw = None
                 max_power_kvar = None
                 control = "ofw"
+                meta = None
                 for key, value in element.items():
                     if key == "id":
                         id = value
@@ -1461,17 +1463,19 @@ class OpenDSS:
                         irrad = value
                     elif key == "control_strategy":
                         control = value
+                    elif key == "meta":
+                        meta = value
                     else:
                         logger.debug("keys not registered "+str(key))
 
-                self.setPhotovoltaic(id, phases, bus1, voltage, pf,  max_power_kw, max_power_kvar, control)
+                self.setPhotovoltaic(id, phases, bus1, voltage, pf,  max_power_kw, max_power_kvar, control, meta)
 
             return 0
         except Exception as e:
             logger.error(e)
             return e
 
-    def setPhotovoltaic(self, id, phases, bus1, voltage, pf, max_power_kw, max_power_kvar, control):
+    def setPhotovoltaic(self, id, phases, bus1, voltage, pf, max_power_kw, max_power_kvar, control, meta=None):
         try:
             logger.debug("Photovoltaic 2")
             dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} pf={pf} model=1".format(
@@ -1489,7 +1493,8 @@ class OpenDSS:
 
             if max_power_kvar == None:
                 max_power_kvar = max_power_kw
-            self.PVs[id] = PV(id, bus1, phases, voltage, max_power_kw, max_power_kvar, pf, control)
+            logger.debug("meta "+str(meta))
+            self.PVs[id] = PV(id, bus1, phases, voltage, max_power_kw, max_power_kvar, pf, control, meta)
 
 
             logger.debug(dss_string + "\n")
