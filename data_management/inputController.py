@@ -238,9 +238,9 @@ class InputController:
             for key, value in element.items():
                 if key == "photovoltaics":
                     photovoltaics = value
-
-        for pv_element in photovoltaics:
-            PV_names.append(pv_element["id"])
+        if not photovoltaics == None:
+            for pv_element in photovoltaics:
+                PV_names.append(pv_element["id"])
         return PV_names
 
     def get_Storage_names(self, topology):

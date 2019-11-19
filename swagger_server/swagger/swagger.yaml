@@ -377,7 +377,6 @@ definitions:
     - "bus"
     - "id"
     - "kV"
-    - "kVAR"
     - "phases"
     properties:
       id:
@@ -387,7 +386,7 @@ definitions:
         description: "ID for the connected node"
       phases:
         type: "integer"
-      kVAR:
+      kVar:
         type: "number"
       kV:
         type: "number"
@@ -422,6 +421,12 @@ definitions:
         type: "number"
       kVar:
         type: "number"
+      kVA:
+        type: "number"
+      powerfactor:
+        type: "number"
+        minimum: 0
+        maximum: 1
   PowerProfile:
     type: "object"
     required:
@@ -850,7 +855,6 @@ definitions:
         items:
           type: "number"
           minimum: 0
-          maximum: 1
   Duration:
     type: "object"
     properties:

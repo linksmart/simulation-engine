@@ -906,6 +906,7 @@ class OpenDSS:
                 connection_type =  None
                 voltage_kV = None
                 power_kVar = None
+                power_kVA = None
                 power_kW = None
                 connection_type = None
                 powerfactor = None
@@ -928,6 +929,8 @@ class OpenDSS:
                         power_kW = value
                     elif key == "kVar":
                         power_kVar = value
+                    elif key == "kVA":
+                        power_kVA = value
                     elif key == "powerfactor":
                         powerfactor = value
                     else:
@@ -935,18 +938,23 @@ class OpenDSS:
 
 
                 #dss_string = "New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW} kVar={voltage_kVar} pf={power_factor} power_profile_id={shape}".format(
-                dss_string="New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW}".format(
+                dss_string="New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV}".format(
                 load_name=load_name,
                 bus_name=bus_name,
                 num_phases=num_phases,
                 conn=connection_type,
                 model=model,
-                voltage_kV=voltage_kV,
-                voltage_kW=power_kW,
+                voltage_kV=voltage_kV
                 )
+
+                if not power_kW == None:
+                    dss_string = dss_string + " kW=" + str(power_kW)
 
                 if not power_kVar == None:
                     dss_string = dss_string + " kVar=" + str(power_kVar)
+
+                if not power_kVA == None:
+                    dss_string = dss_string + " kVA=" + str(power_kVA)
 
                 if not powerfactor == None:
                     dss_string = dss_string + " pf=" + str(powerfactor)
