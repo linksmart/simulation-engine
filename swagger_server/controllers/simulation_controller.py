@@ -50,11 +50,12 @@ def check_power_profiles(radial_value):
         power_profile_ids = []
         power_profiles = radial_value['powerProfiles']
         for power_profile in power_profiles:
+            #logger.debug("power profiles "+str(power_profile))
             # checking if default values are given
             element_change = power_profile
             if "use_actual_values" in power_profile.keys():
-                if power_profile["use_actual_values"] == "true" or power_profile["use_actual_values"] == "True":
-                    if power_profile["normalized"] == "true" or power_profile["normalized"] == "True":
+                if power_profile["use_actual_values"] == "true" or power_profile["use_actual_values"] == "True" or power_profile["use_actual_values"] == True:
+                    if power_profile["normalized"] == "true" or power_profile["normalized"] == "True" or power_profile["normalized"] == True:
                         message = "If use_actual_values is true then normalized should be false"
                         logger.error(message)
                         return message, 406
@@ -65,7 +66,7 @@ def check_power_profiles(radial_value):
                 element_change["use_actual_values"] = False
 
             if "normalized" in power_profile.keys():
-                if power_profile["normalized"] == "true" or power_profile["normalized"] == "True":
+                if power_profile["normalized"] == "true" or power_profile["normalized"] == "True" or power_profile["normalized"] == True:
                     element_change["normalized"] = True
                 else:
                     element_change["normalized"] = False
@@ -155,21 +156,28 @@ def check_pvs(radial_value):
             pvs = radial_value["photovoltaics"]
             for pv_elements in pvs:
                 element_change = pv_elements
-                logger.debug("pv elements "+str(pv_elements))
+                #logger.debug("pv elements "+str(pv_elements))
                 if "power_profile_id" in pv_elements.keys():
                     if pv_elements["power_profile_id"] == None:
                         message = "Wrong power profile id"
                         logger.error(message)
                         return message, 406
-                    if pv_elements["power_profile_id"] == "false" or pv_elements["power_profile_id"] == "False":
+                    if pv_elements["power_profile_id"] == "false" or pv_elements["power_profile_id"] == "False" or pv_elements["power_profile_id"] == False:
                         message = "Wrong power profile id"
                         logger.error(message)
                         return message, 406
-                    if pv_elements["power_profile_id"] == "true" or pv_elements["power_profile_id"] == "True":
+                    if pv_elements["power_profile_id"] == "true" or pv_elements["power_profile_id"] == "True" or pv_elements["power_profile_id"] == True:
                         message = "Wrong power profile id"
                         logger.error(message)
                         return message, 406
-
+                if "control_strategy" not in pv_elements.keys():
+                    element_change["control_strategy"] = "no_control"
+                else:
+                    list_strategy=["no_control", "ofw", "limit_power", "volt-watt", "volt-var"]
+                    if pv_elements["control_strategy"] not in list_strategy:
+                        message = "Wrong control strategy. Possible strategies: "+str(list_strategy)
+                        logger.error(message)
+                        return message, 406
                 new_data.append(element_change)
 
         logger.debug("PVs succesfully checked")
@@ -251,6 +259,12 @@ def create_simulation(body):  # noqa: E501
             new_data = check_power_profiles(values)
             if not isinstance(new_data, tuple):
                 data["radials"][count]["powerProfiles"] = new_data
+            else:
+                return new_data
+
+            new_data = check_pvs(values)
+            if not isinstance(new_data, tuple):
+                data["radials"][count]["photovoltaics"] = new_data
             else:
                 return new_data
 

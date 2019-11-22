@@ -80,35 +80,35 @@ class InputController:
         self.sim.disableCircuit(name)
         logger.debug("Circuit " + str(name) + " disabled")
 
-    def setLoads(self, id, object):
+    def setLoads(self, object):
         self.object = object
         logger.debug("Charging loads into the simulator")
         message = self.sim.setLoads(self.object)
         logger.debug("Loads charged")
         return message
 
-    def setTransformers(self, id, object):
+    def setTransformers(self, object):
         logger.debug("Charging transformers into the simulator")
         self.object = object
         message = self.sim.setTransformers(self.object)
         logger.debug("Transformers charged")
         return message
 
-    def setRegControls(self, id, object):
+    def setRegControls(self, object):
         logger.debug("Charging RegControls into the simulator")
         self.object = object
         message = self.sim.setRegControls(self.object)
         logger.debug("RegControls charged")
         return message
 
-    def setPowerLines(self, id, powerlines):  # (self, id, powerlines, linecodes):
+    def setPowerLines(self, powerlines):  # (self, id, powerlines, linecodes):
         logger.debug("Charging power lines into the simulator")
         # self.sim.setLineCodes(linecodes)
         message = self.sim.setPowerLines(powerlines)
         logger.debug("Power lines charged")
         return message
 
-    def setCapacitors(self, id, capacitors):
+    def setCapacitors(self, capacitors):
         logger.debug("Charging capacitors into the simulator")
         # self.object = object
         # self.sim.setCapacitors(self.object)
@@ -116,7 +116,7 @@ class InputController:
         logger.debug("Capacitor charged")
         return message
 
-    def setLineCodes(self, id, linecode):
+    def setLineCodes(self, linecode):
         logger.debug("Charging LineCode into the simulator")
         # self.object = object
         # self.sim.setLineCodes(self.object)
@@ -124,14 +124,14 @@ class InputController:
         logger.debug("LineCode charged")
         return message
 
-    def setXYCurve(self, id, npts, xarray, yarray):
+    def setXYCurve(self, npts, xarray, yarray):
         logger.debug("Setting the XYCurve into the simulator")
         self.object = object
         message = self.sim.setXYCurve(self.object)
         logger.debug("XYCurve set")
         return message
     
-    def setPowerProfile(self, id, powerprofile):
+    def setPowerProfile(self, powerprofile):
         logger.debug("Setting the Powerprofile into the simulator")
         self.object = object
         for element in powerprofile:
@@ -152,18 +152,20 @@ class InputController:
         logger.debug("Powerprofile set")
         return message
 
-    def setPhotovoltaic(self, id, photovoltaics):
+    def setPhotovoltaic(self, photovoltaics):
         logger.debug("Charging the photovoltaics into the simulator")
 
         message = self.sim.setPhotovoltaics(photovoltaics)
+        logger.debug("message "+str(message))
         logger.debug("Photovoltaics charged")
         return message
 
-    def setPVshapes(self, id, profiles_object, profess_object, pvs, city, country, sim_days, powerprofile):
+    def setPVshapes(self, profiles_object, profess_object, pvs, city, country, sim_days, powerprofile):
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
             message = self.sim.setPVshapes(pvs, powerprofile, city, country, sim_days, profiles_object, profess_object)
-            logger.debug("loadshapes from profiles charged")
+            if message == 0:
+                logger.debug("Loadshapes for PVs charged")
             return message
         else:
             error = "City and country are not present"
@@ -209,25 +211,20 @@ class InputController:
         else:
             return False
 
-    def setLoadshapes(self, id, profiles_object, profess_object, loads, powerprofile, sim_days):
+    def setLoadshapes(self, profiles_object, profess_object, loads, powerprofile, sim_days):
         logger.debug("Charging the loadshapes into the simulator from profiles")
         message = self.sim.setLoadshapes(loads, powerprofile, sim_days, profiles_object, profess_object)
         logger.debug("loadshapes from profiles charged")
         return message
 
-    def setLoadshape(self, list_loadshapes):
-        logger.debug("Charging a loadshape into the simulator")
-        message = self.sim.setLoadshapes_off(id, list_loadshapes)
-        logger.debug("a loadshape charged")
-        return message
 
-    def setStorage(self, id, storage):
+    def setStorage(self, storage):
         logger.debug("Charging the ESS into the simulator")
         message = self.sim.setStorages(storage)
         logger.debug("ESS charged")
         return message
 
-    def setChargingStations(self, id, object):
+    def setChargingStations(self, object):
         logger.debug("Charging the charging stations into the simulator")
         message = self.sim.setChargingStations(object)
         logger.debug("Charging stations charged")
@@ -241,9 +238,9 @@ class InputController:
             for key, value in element.items():
                 if key == "photovoltaics":
                     photovoltaics = value
-
-        for pv_element in photovoltaics:
-            PV_names.append(pv_element["id"])
+        if not photovoltaics == None:
+            for pv_element in photovoltaics:
+                PV_names.append(pv_element["id"])
         return PV_names
 
     def get_Storage_names(self, topology):
@@ -563,6 +560,55 @@ class InputController:
             list_nodes_cs.append(charger_element.get_bus_name())
         return list_nodes_cs
 
+
+    def get_list_nodes_storages(self, radial):
+        for element in radial:
+            for key, value in element.items():
+                if key == "storageUnits":
+                    storages = value
+
+        list_nodes_storages=[]
+
+        for ess_element in storages:
+            list_nodes_storages.append(ess_element["bus1"])
+        return list_nodes_storages
+
+    def get_list_pvs_alone(self, topology, pv_object_dict,chargers=None):
+        radial = topology["radials"]
+
+        list_nodes_cs = []
+        if not chargers == None:
+            list_nodes_cs = self.get_nodes_Charging_Station_in_Topology(chargers)
+        logger.debug("list_nodes_cs "+str(list_nodes_cs))
+
+
+        list_nodes_storage = self.get_list_nodes_storages(radial)
+        logger.debug("list_nodes_storage "+ str(list_nodes_storage))
+
+        list_nodes_pvs = []
+        for id, pv_object in pv_object_dict.items():
+            list_nodes_pvs.append(pv_object.get_node())
+
+        logger.debug("list_nodes_pvs "+str(list_nodes_pvs))
+
+        list_nodes_pvs_single = []
+
+        for node_pv in list_nodes_pvs:
+            if node_pv not in list_nodes_storage and node_pv not in list_nodes_cs:
+                list_nodes_pvs_single.append(node_pv)
+
+        logger.debug("list_nodes_pvs_single "+str(list_nodes_pvs_single))
+        list_pv_single=[]
+
+        for id, pv_object in pv_object_dict.items():
+            for node_pv in list_nodes_pvs_single:
+                if pv_object.get_node() == node_pv:
+                    list_pv_single.append(pv_object)
+                    control = pv_object.get_control_strategy().get_name()
+                    if control == "ofw":
+                        pv_object.set_control_strategy("no_control")
+        return list_pv_single
+
     def get_list_nodes_charging_station_without_storage(self, topology, chargers):
         radial = topology["radials"]
 
@@ -680,7 +726,7 @@ class InputController:
             if flag_is_price_profile_needed or flag_global_control:
                 self.price_profile = self.get_price_profile_from_server(profiles, city, country, time_in_days)
                 if not isinstance(self.price_profile, list):
-                    return 1
+                    return "Price prediction service missing"
                 #logger.debug("length price profile "+str(len(self.price_profile)))
 
         for values in radial:
@@ -693,7 +739,7 @@ class InputController:
                 logger.debug("!---------------Setting Transformers------------------------ \n")
                 transformer = values["transformer"]
                 #                logger.debug("Transformers" + str(transformer))
-                message = self.setTransformers(id, transformer)
+                message = self.setTransformers(transformer)
                 if not message == 0:
                     return message
 
@@ -701,7 +747,7 @@ class InputController:
                 logger.debug("!---------------Setting RegControl------------------------ \n")
                 regcontrol = values["regcontrol"]
                 #                logger.debug("RegControl" + str(regcontrol))
-                message = self.setRegControls(id, regcontrol)
+                message = self.setRegControls(regcontrol)
                 if not message == 0:
                     return message
 
@@ -709,7 +755,7 @@ class InputController:
                 logger.debug("! ---------------Setting LineCode------------------------- \n")
                 linecode = values["linecode"]
                 #logger.debug("LineCode: " + str(linecode))
-                message = self.setLineCodes(id, linecode)
+                message = self.setLineCodes(linecode)
                 if not message == 0:
                     return message
                 
@@ -717,7 +763,7 @@ class InputController:
             if "powerProfiles" in values.keys() and values["powerProfiles"] is not None:
                 logger.debug("!---------------Setting powerProfile------------------------- \n")
                 powerProfile = values["powerProfiles"]
-                message = self.setPowerProfile(id, powerProfile)
+                message = self.setPowerProfile(powerProfile)
                 logger.debug(str(message))
                 if not message == 0:
                     return message
@@ -731,12 +777,12 @@ class InputController:
                     powerprofile = values["powerProfiles"]
 
                 logger.debug("! >>>  ---------------Loading Load Profiles beforehand ------------------------- \n")
-                message = self.setLoadshapes(id, profiles, profess, load, powerprofile, time_in_days)
+                message = self.setLoadshapes(profiles, profess, load, powerprofile, time_in_days)
 
                 if not message == 0:
                     return message
                 logger.debug("! >>>  ---------------and the Loads afterwards ------------------------- \n")
-                message = self.setLoads(id, load)
+                message = self.setLoads(load)
                 if not message == 0:
                     return message
 
@@ -745,7 +791,7 @@ class InputController:
                 logger.debug("! ---------------Setting Capacitors------------------------- \p")
                 capacitor = values["capacitor"]
                 # logger.debug("Capacitors: " + str(capacitor))
-                message = self.setCapacitors(id, capacitor)
+                message = self.setCapacitors(capacitor)
                 if not message == 0:
                     return message
 
@@ -754,7 +800,7 @@ class InputController:
                 logger.debug("!---------------Setting Powerlines------------------------- \n")
 
                 powerLines = values["powerLines"]
-                message = self.setPowerLines(id, powerLines)
+                message = self.setPowerLines(powerLines)
                 logger.debug(str(message))
                 if not message == 0:
                     return message
@@ -762,7 +808,7 @@ class InputController:
 
             if "xycurves" in values.keys() and values["xycurves"] is not None:
                 xycurves = values["xycurves"]  # TORemove
-                message = self.setXYCurves(id, xycurves)
+                message = self.setXYCurves(xycurves)
                 if not message == 0:
                     return message
 
@@ -776,7 +822,7 @@ class InputController:
                     #if not storage_elements["optimization_model"] in models_list:
                         #message = "Following optimization models are possible: " + str(models_list)
                         #return message
-                message = self.setStorage(id, storage)  # TODO: fix and remove comment
+                message = self.setStorage(storage)  # TODO: fix and remove comment
                 if not message == 0:
                     return message
 
@@ -784,7 +830,7 @@ class InputController:
             if "chargingStations" in values.keys() and values["chargingStations"] is not None:
                 logger.debug("---------------Setting charging stations-------------------------")
                 chargingStations = values["chargingStations"]
-                message = self.setChargingStations(id, chargingStations)
+                message = self.setChargingStations(chargingStations)
                 if not message == 0:
                     return message
 
@@ -799,7 +845,7 @@ class InputController:
                 logger.debug("---------------Setting tshapes-------------------------")
                 tshapes = values["tshapes"]
                 logger.debug("Tshapes: " + str(tshapes))
-                message = self.setTShape(id, tshapes)
+                message = self.setTShape(tshapes)
                 if not message == 0:
                     return message
             if "photovoltaics" in values.keys() and values["photovoltaics"] is not None:
@@ -812,11 +858,13 @@ class InputController:
 
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(id, profiles, profess, photovoltaics, city, country, time_in_days, powerprofile)
+                    message = self.setPVshapes(profiles, profess, photovoltaics, city, country, time_in_days, powerprofile)
+                    logger.debug("message "+str(message))
                     if not message == 0:
                         return message
                     logger.debug("! >>>  ---------------and the PVs afterwards ------------------------- \n")
-                    message = self.setPhotovoltaic(id, photovoltaics)
+                    message = self.setPhotovoltaic(photovoltaics)
+                    logger.debug("message "+str(message))
                     if not message == 0:
                         return message
                 else:
@@ -827,7 +875,7 @@ class InputController:
                 logger.debug("! >>>  ---------------PVs finished ------------------------- \n")
 
 
-        return id
+        return 0
 
 
 

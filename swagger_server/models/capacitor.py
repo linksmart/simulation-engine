@@ -41,7 +41,7 @@ class Capacitor(Model):
             'id': 'id',
             'bus': 'bus',
             'phases': 'phases',
-            'k_var': 'kVAR',
+            'k_var': 'kVar',
             'k_v': 'kV'
         }
 
@@ -151,8 +151,6 @@ class Capacitor(Model):
         :param k_var: The k_var of this Capacitor.
         :type k_var: float
         """
-        if k_var is None:
-            raise ValueError("Invalid value for `k_var`, must not be `None`")  # noqa: E501
 
         self._k_var = k_var
 

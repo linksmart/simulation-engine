@@ -13,6 +13,7 @@ import re
 import opendssdirect as dss
 from data_management.redisDB import RedisDB
 
+from simulator.photovoltaic import Photovoltaic as PV
 from profess.EV import EV
 from profess.EV import Charger
 
@@ -34,6 +35,7 @@ class OpenDSS:
         self.loadshapes_for_loads={} #empty Dictionary for laod_id:load_profile pairs
         self.EVs = {}
         self.Chargers = {}
+        self.PVs = {}
         self.loadshapes_for_pv = {}
         self.dummyGESSCON=[{'633': {'633.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}, {'671': {'671.1.2.3': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}}]
         self.dummyPrice=[3] * 24
@@ -157,16 +159,186 @@ class OpenDSS:
     def get_total_power(self):
         return dss.Circuit.TotalPower()
 
-    def setActivePowertoPV(self, pv_name, power):
-        self.set_active_element(pv_name)
-        #logger.debug("pv power " + str(power))
-        if power >= 0:
+    def setActivePowertoPV(self, pv_object, list_voltages_pu = [1,1,1]):
+        """
+
+        :param pv_object:
+            - ofw
+            - limit_power
+            - volt-watt
+            - volt-var
+        :param list_voltages_pu:
+        :return:
+        """
+        self.set_active_element(pv_object.get_name())
+        pv_name = pv_object.get_name()
+
+        control_strategy = pv_object.get_control_strategy().get_strategy()
+        control_strategy_name = control_strategy.get_name()
+        logger.debug("control_strategy_name: "+str(control_strategy_name))
+
+        if control_strategy_name == "no_control":
+            power = pv_object.get_momentary_power()
+
+            if power >= 0:
+                dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+                dss_string = "Generator." + str(pv_name) + ".kvar=0"
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+
+                pv_object.set_output_power(power)
+                pv_object.set_output_q_power(0)
+
+                return 0
+            else:
+                return 1
+
+        elif control_strategy_name == "ofw":
+            power = control_strategy.get_control_power()
+            #power = pv_object.get_momentary_power()
+
+            if power >= 0:
+                dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+                dss_string = "Generator." + str(pv_name) + ".kvar=0"
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+
+                pv_object.set_output_power(power)
+                pv_object.set_output_q_power(0)
+
+                return 0
+            else:
+                return 1
+
+        elif control_strategy_name == "limit_power":
+            power = pv_object.get_momentary_power()
+            pv_max_power = pv_object.get_max_power()
+            percentage_max_power = pv_object.get_control_strategy().get_strategy().get_percentage()
+            sensitivity_factor = pv_object.get_control_strategy().get_strategy().get_sensitivity_factor()
+
+            max_power = pv_max_power * (percentage_max_power/100)
+            if power >= 0:
+                if power <= max_power:
+                    power_to_set = power
+                else:
+                    power_to_set = max_power
+
+                dss_string = "Generator." + str(pv_name) + ".kw=" + str(power_to_set)
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+                dss_string = "Generator." + str(pv_name) + ".kvar=0"
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
+                pv_object.set_output_power(power_to_set)
+                pv_object.set_output_q_power(0)
+                return 0
+            else:
+                return 1
+
+        elif control_strategy_name == "volt-watt":
+            logger.debug("list_voltages_pu "+str(list_voltages_pu))
+            max_volt_input = max(list_voltages_pu)
+            min_vpu = pv_object.get_control_strategy().get_strategy().get_min_vpu_high()
+            max_vpu = pv_object.get_control_strategy().get_strategy().get_max_vpu_high()
+            diff_pu = max_vpu - min_vpu
+            power = pv_object.get_momentary_power()
+            #pv_max_power = pv_object.get_max_power()
+            pv_max_power = power
+            logger.debug("momentary power "+str(power))
+            logger.debug("max volt input "+str(max_volt_input))
+            logger.debug("min_vpu "+str(min_vpu))
+            logger.debug("max_vpu " + str(max_vpu))
+            if max_volt_input >= min_vpu:
+                percentage_max_power = (max_volt_input - min_vpu) / diff_pu
+                if percentage_max_power > 1:
+                    percentage_max_power = 1
+                percentage_max_power = 1 - percentage_max_power
+                logger.debug("percentage_max_power "+str(percentage_max_power))
+                max_power = pv_max_power * percentage_max_power
+                logger.debug("Possible max power to be supplied by PV "+str(max_power))
+                power_to_set = max_power
+                """if power >= 0:
+                    if power <= max_power:
+                        power_to_set = power
+                    else:
+                        power_to_set = max_power
+                else:
+                    return 1"""
+            else:
+                power_to_set = power
+
+            dss_string = "Generator." + str(pv_name) + ".kw=" + str(power_to_set)
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            dss_string = "Generator." + str(pv_name) + ".kvar=0"
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            logger.debug("Power to PV / 3: "+str(power_to_set/3))
+            pv_object.set_output_power(power_to_set)
+            pv_object.set_output_q_power(0)
+            return 0
+
+        elif control_strategy_name == "volt-var":
+            logger.debug("list_voltages_pu " + str(list_voltages_pu))
+            max_volt_input = max(list_voltages_pu)
+            min_volt_input = min(list_voltages_pu)
+
+            min_vpu_low = pv_object.get_control_strategy().get_strategy().get_min_vpu_low()
+            max_vpu_low = pv_object.get_control_strategy().get_strategy().get_max_vpu_low()
+            diff_pu_positive = max_vpu_low - min_vpu_low
+
+            min_vpu_high = pv_object.get_control_strategy().get_strategy().get_min_vpu_high()
+            max_vpu_high = pv_object.get_control_strategy().get_strategy().get_max_vpu_high()
+            diff_pu_negative = max_vpu_high - min_vpu_high
+
+            power = pv_object.get_momentary_power()
+            pv_max_q_power = pv_object.get_max_q_power()
+
+            logger.debug("min volt input " + str(min_volt_input))
+            logger.debug("max_vpu_low " + str(max_vpu_low))
+            logger.debug("max volt input " + str(max_volt_input))
+            logger.debug("min_vpu_high " + str(min_vpu_high))
+
+            logger.debug("pv_max_q_power " + str(pv_max_q_power))
+            if min_volt_input <= max_vpu_low:
+                percentage_max_q_power = (max_vpu_low - min_volt_input) / diff_pu_positive
+                if percentage_max_q_power > 1:
+                    percentage_max_q_power = 1
+                logger.debug("percentage_max_q_power "+str(percentage_max_q_power))
+                max_power = pv_max_q_power * percentage_max_q_power
+                q_power_to_set = max_power
+
+            elif max_volt_input >= min_vpu_high:
+                percentage_max_q_power = (min_vpu_high - max_volt_input) / diff_pu_negative
+                if percentage_max_q_power < -1:
+                    percentage_max_q_power = -1
+                logger.debug("percentage_max_q_power " + str(percentage_max_q_power))
+                max_power = pv_max_q_power * percentage_max_q_power
+                q_power_to_set = max_power
+
+            else:
+                q_power_to_set = 0
+
+            logger.debug("momentary power " + str(power))
             dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
+            dss_string = "Generator." + str(pv_name) + ".kvar=" + str(q_power_to_set)
+            logger.debug("dss_string " + str(dss_string))
+            dss.run_command(dss_string)
+            pv_object.set_output_q_power(q_power_to_set)
+
+            cktpower, qcktpower = self.get_single_pv_power(pv_name)
+            pv_object.set_output_power(cktpower)
             return 0
-        else:
-            return 1
+
+
+
+
 
     def set_switch(self, line_name, opened):
         self.set_active_element(line_name)
@@ -247,14 +419,9 @@ class OpenDSS:
 
     def getkWfromBattery(self, battery_name):
         self.set_active_element(battery_name)
-
-        logger.debug("variable names " + str(dss.CktElement.AllVariableNames()))
-        logger.debug("variable values " + str(dss.CktElement.AllVariableValues()))
         #dss_string="? Storage."+str(battery_name)+".kW"
-        powers_from_loads = []
-
         powers = dss.CktElement.Powers()
-        logger.debug("powers "+str(powers))
+        #logger.debug("powers "+str(powers))
         node_order = self.get_node_order()
         list = []
         count = 0
@@ -383,6 +550,16 @@ class OpenDSS:
             i_Power = dss.Loads.Next()
         return powers_from_loads
 
+    def get_single_pv_power(self, pv_name):
+        #logger.debug("Generator."+pv_name)
+        self.set_active_element("Generator."+pv_name)
+        logger.debug("name "+str(dss.CktElement.Name()))
+        powers = dss.CktElement.Powers()
+        #logger.debug("powers " + str(dss.CktElement.Powers()))
+        power_to_return = -1*(powers[0] + powers[2] + powers[4])
+        q_power_to_return = -1*(powers[1] + powers[3] + powers[5])
+        return (power_to_return, q_power_to_return)
+
     def get_pv_powers(self):
 
         i_Power = dss.Generators.First()
@@ -467,10 +644,6 @@ class OpenDSS:
 
     def get_number_of_elements(self):
         dss.Circuit.NumCktElements()
-    #def setSolveMode(self, mode):
-     #   self.mode=mode
-      #  dss.run_command("Solve mode=" + self.mode)
-
 
     def getStartingHour(self):
         return dss.Solution.DblHour()
@@ -486,10 +659,8 @@ class OpenDSS:
     def setVoltageBases(self, bases_list):
         dss_string = "Set voltagebases = "+str(bases_list)
         logger.debug(dss_string + "\n")
-
         dss.run_command(dss_string)
         dss.run_command("CalcVoltageBases");
-
 
     def solutionConverged(self):
         return dss.Solution.Coverged()
@@ -500,12 +671,19 @@ class OpenDSS:
     def setMode(self, mode):
         self.mode = mode
         dss.run_command("Set mode="+self.mode)
-        #logger.debug("Solution mode "+str(dss.Solution.ModeID()))
 
     def getStepSize(self):
         return dss.Solution.StepSize()
-    #Options: minutes or hours
+
+
     def setStepSize(self, time_step):
+        """
+
+        :param time_step: options:
+                - "minutes"
+                - "hours"
+        :return:
+        """
         self.time_step=time_step
         if "minutes" in self.time_step:
             dss.Solution.StepSizeMin(1)
@@ -562,7 +740,7 @@ class OpenDSS:
                 R=line_drop_compensator_R_Volt,
                 X=line_drop_compensator_X_Volt)
 
-                #logger.info("run_command: " + cmd)
+
                 logger.debug(cmd + "\n")
                 dss.run_command(cmd)
             return 0
@@ -571,17 +749,14 @@ class OpenDSS:
             return e
 
     def setTransformers(self, transformers):
-        #logger.debug("Setting up the transformers")
-        #logger.debug("transformers: " + str(transformers))
+
         self.transformers = transformers
         try:
             for element in self.transformers:
-                #logger.info("element:" + str(element))
+
                 bank=None
                 for key, value in element.items():
-                    #logger.debug("Key: " + str(key) + " Value: " + str(value))
-                    #logger.info("key:" + str(key))
-                    #logger.info("value:" + str(value))
+
                     if key == "id":
                         transformer_id = value
                     elif key == "phases":
@@ -632,8 +807,6 @@ class OpenDSS:
 
                 dss_string = "New Transformer.{transformer_name} Phases={phases} Windings={winding} Buses={buses} kVAs={kvas} kVs={kvs} XscArray={xsc_array}" + portion_str + " "
 
-                #logger.info("portion_str: " + portion_str)
-                #logger.info("dss_string: " + dss_string)
 
                 dss_string = dss_string.format(
                         transformer_name=self._id,
@@ -649,16 +822,10 @@ class OpenDSS:
                         bank=self._bank,
                         taps=self._taps)
 
-                #logger.info("dss_string: " + dss_string)
                 logger.debug(dss_string + "\n")
                 dss.run_command(dss_string)
             return 0
 
-
-            # !logger.debug("Transformer_names: " + str(dss.Transformers.AllNames()))
-            # dss.run_command('Solve')
-            # !logger.debug("Load SOLVED") #It does not get here. This is now good
-            # logger.info("Load names: " + str(dss.Loads.AllNames())) #listed load names
         except Exception as e:
             logger.error(e)
             return e
@@ -670,7 +837,7 @@ class OpenDSS:
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
-        #logger.debug( "getProfessLoadschapes")
+
         try:
             for key, value in self.loadshapes_for_loads.items():
                 load_id = key
@@ -679,11 +846,8 @@ class OpenDSS:
                 main_bus_name = bus_name.split('.', 1)[0]
 
                 loadshape = value["loadshape"]
-                #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ "size"+ str(size)+" start "+str(start)+" loadshape_size: " + str(len(loadshape)))
                 loadshape_portion=loadshape[int(start):int(start+size)]
-                #print("loadshape_portion: " + str(loadshape_portion))
                 bus_loadshape={bus_name:loadshape_portion}
-                #print("bus_loadshape: " + str(bus_loadshape))
 
                 if main_bus_name in result:
                     # extend existing  element
@@ -693,7 +857,6 @@ class OpenDSS:
                     result[main_bus_name] = bus_loadshape
         except Exception as e:
             logger.error(e)
-        #print("resulting_loadshape_profess: " + str(result))
         return [result]
 
 
@@ -701,8 +864,7 @@ class OpenDSS:
         # Preparing loadshape values in a format required by PROFESS
         # All loads are includet, not only the one having storage attached
         result = {}
-        #logger.debug( "getPVLoadschapes")
-        #logger.debug("node_name_list " + str(node_name_list))
+
         try:
             for key, value in self.loadshapes_for_pv.items():
                 pv_id = key
@@ -715,9 +877,9 @@ class OpenDSS:
                 loadshape = value["loadshape"]
                 #logger.debug("load_id: " + str(load_id) + " bus_name: " + str(bus_name)+ " main_bus_name: " + str(main_bus_name)+ " loadshape_size: " + str(len(loadshape)))
                 loadshape_portion=loadshape[int(start):int(start+size)]
-                #print("loadshape_portion: " + str(loadshape_portion))
+                self.PVs[pv_id].set_momentary_power(loadshape_portion[0])
+                #logger.debug("momentary value for "+str(pv_id)+" is "+str(self.PVs[pv_id].get_momentary_power()))
                 bus_loadshape={bus_name:loadshape_portion}
-                #print("bus_loadshape: " + str(bus_loadshape))
 
                 if main_bus_name in result:
                     # extend existing  element
@@ -744,6 +906,7 @@ class OpenDSS:
                 connection_type =  None
                 voltage_kV = None
                 power_kVar = None
+                power_kVA = None
                 power_kW = None
                 connection_type = None
                 powerfactor = None
@@ -766,6 +929,8 @@ class OpenDSS:
                         power_kW = value
                     elif key == "kVar":
                         power_kVar = value
+                    elif key == "kVA":
+                        power_kVA = value
                     elif key == "powerfactor":
                         powerfactor = value
                     else:
@@ -773,18 +938,23 @@ class OpenDSS:
 
 
                 #dss_string = "New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW} kVar={voltage_kVar} pf={power_factor} power_profile_id={shape}".format(
-                dss_string="New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW}".format(
+                dss_string="New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV}".format(
                 load_name=load_name,
                 bus_name=bus_name,
                 num_phases=num_phases,
                 conn=connection_type,
                 model=model,
-                voltage_kV=voltage_kV,
-                voltage_kW=power_kW,
+                voltage_kV=voltage_kV
                 )
+
+                if not power_kW == None:
+                    dss_string = dss_string + " kW=" + str(power_kW)
 
                 if not power_kVar == None:
                     dss_string = dss_string + " kVar=" + str(power_kVar)
+
+                if not power_kVA == None:
+                    dss_string = dss_string + " kVA=" + str(power_kVA)
 
                 if not powerfactor == None:
                     dss_string = dss_string + " pf=" + str(powerfactor)
@@ -802,12 +972,9 @@ class OpenDSS:
 
 
     def setLineCodes(self, lines):
-        #logger.debug("Setting up linecodes")
-        #logger.debug("lines "+str(lines))
-        self.linecodes=lines
 
         try:
-            for element in self.linecodes:
+            for element in lines:
                 #logger.debug(str(element))
                 cmatrix_str = " "
                 linecode_name = None
@@ -868,10 +1035,9 @@ class OpenDSS:
             return e
 
     def setPowerLines(self, lines):
-        #logger.debug("Setting up the powerlines")
-        self.lines=lines
+
         try:
-            for element in self.lines:
+            for element in lines:
                 linecode = None
                 line_id = None
                 bus1 = None
@@ -931,7 +1097,6 @@ class OpenDSS:
     def setPowerLine(self, id, phases, bus1, bus2, length=None, unitlength=None, linecode=None, r1=None, r0=None, x1=None, x0=None, c1=None, c0=None, switch=None):
         my_str = []
         if not r1 == None and linecode == None:
-            # portion_str = "r1={r1} r0={r0} x1={x1} x0={x0} c1={c1}  c0={c0} " if switch == True else " length={length} units={unitlength} linecode={linecode} "
             my_str.append("r1={r1} ")
 
             if not r0 == None:
@@ -951,8 +1116,6 @@ class OpenDSS:
                 # raise Exception("r1 and linecode cannot be entered at the same time")
                 logger.error("r1 and linecode cannot be entered at the same time")
                 return "r1 and linecode cannot be entered at the same time"
-                # sys.exit(0)
-                # raise ValueError('r1 and linecode cannot be entered at the same time')
 
         if not length == None:
             my_str.append("length={length} ")
@@ -986,8 +1149,7 @@ class OpenDSS:
         return 0
 
     def setXYCurves(self, xycurves):
-        #!logger.info("Setting up the XYCurves")
-        #!logger.debug("XY Curve in OpenDSS: " + str(xycurves))
+
         try:
             for element in xycurves:
                 id = None
@@ -1005,7 +1167,6 @@ class OpenDSS:
                     if key == "yarray":
                         yarray = value
                 self.setXYCurve(id, npts, xarray, yarray)
-                #dss.run_command('Solve')
             return 0
         except Exception as e:
             logger.error(e)
@@ -1028,16 +1189,13 @@ class OpenDSS:
 
     def setPVshapes(self, pvs, powerprofiles, city, country, sim_days, profiles, profess):
 
-        #!logger.debug("Setting up the loads")
-
         try:
-            # ----------get_a_profile---------------#
-            pv_profile_data = profiles.pv_profile(city, country, sim_days)
+
             for element in pvs:
                 pv_name = element["id"]
                 bus_name = element["bus1"]
                 max_power= element["max_power_kW"]
-                logger.debug("max power "+str(max_power))
+                #logger.debug("max power "+str(max_power))
 
 
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
@@ -1046,11 +1204,14 @@ class OpenDSS:
                     logger.debug("Power profile id found: " + str(powerprofile_id))
                     pv_profile = []
                     for powerprofile in powerprofiles:
+                        #logger.debug("powerprofile "+str(powerprofile))
                         if (powerprofile_id == powerprofile['id']):
                             loadshape_id = powerprofile_id
                             items = powerprofile['items']
                             normalize = powerprofile['normalized']
+                            logger.debug("normalize "+str(normalize))
                             useactual = powerprofile['use_actual_values']
+                            logger.debug("use actual "+str(useactual))
                             interval = powerprofile['interval']
                             multiplier = 1
                             if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
@@ -1062,11 +1223,42 @@ class OpenDSS:
                             elif powerprofile['s_interval']:
                                 items = [item * multiplier for item in items[::3600]]
                             pv_profile.extend(items)
+                            if normalize:
+                                max_value = max(pv_profile)
+                                pv_profile = [(value / max_value)*max_power for value in pv_profile]
+
+                            #logger.debug("sim_days "+str(sim_days))
+
+                            sim_hours = sim_days*24+24
+                            #logger.debug("sim_hours " + str(sim_hours))
+                            len_pv_profile = len(pv_profile)
+                            if len_pv_profile < sim_hours:
+                                rest = sim_hours - len_pv_profile
+                                if len_pv_profile >= rest:
+                                    pv_profile.extend(pv_profile[0:rest])
+                                elif len_pv_profile < rest:
+                                    number_times, number_missing = divmod(rest, len_pv_profile)
+                                    #logger.debug("number_times "+str(number_times)+" number_missing "+str(number_missing))
+
+                                    if number_times > 1:
+                                        for i in range(number_times-1):
+                                            pv_profile.extend(pv_profile[0:len_pv_profile])
+
+                                    if number_missing > 0:
+                                        final_to_take = len_pv_profile * number_missing
+                                        pv_profile.extend(pv_profile[0:final_to_take])
+
+                            #logger.debug("pv profile "+str(pv_profile))
+                            #logger.debug("len pv profile " + str(len(pv_profile)))
                     # --------store_profile_for_line----------#
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name,"loadshape": pv_profile}
                 else:
+                    # ----------get_a_profile---------------#
+                    pv_profile_data = profiles.pv_profile(city, country, sim_days, 1, 1561932000)
+                    if not isinstance(pv_profile_data, list):
+                        return "PV profile could not be queried"
                     loadshape_id = "Shape_"+pv_name
-                    pv_profile = [i for i in pv_profile_data]
+                    pv_profile = [i * max_power for i in pv_profile_data]
                     normalize = True
                     useactual = False
                     # --------store_profile_for_line----------#
@@ -1089,7 +1281,7 @@ class OpenDSS:
                 mult = []
                 load_name = element["id"]
                 bus_name = element["bus"]
-                #max_power = element["kW"]
+                max_power = element["kW"]
                 set_load_shape_flag = False
 
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
@@ -1120,6 +1312,8 @@ class OpenDSS:
                                 loadshape_id = powerprofile_id
                                 items = powerprofile['items']
                                 interval = powerprofile['interval']
+                                normalize = powerprofile['normalized']
+                                logger.debug("normalize " + str(normalize))
                                 multiplier = 1
                                 if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
                                     multiplier = powerprofile['multiplier']
@@ -1130,13 +1324,17 @@ class OpenDSS:
                                 elif powerprofile['s_interval']:
                                     items = [item * multiplier  for item in items[::3600]]
                                 load_profile_data.extend(items)
+                                if normalize:
+                                    max_value = max(load_profile_data)
+                                    load_profile_data = [(value / max_value) * max_power for value in load_profile_data]
+
                                 set_load_shape_flag = False
 
 
                 else:
                     logger.debug("5 ")
                     # ----------get_a_profile---------------#
-                    randint_value = random.randrange(0, 475)
+                    randint_value = random.randrange(1, 475)
 
                     load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
 
@@ -1167,9 +1365,9 @@ class OpenDSS:
             if normalize:
                 my_str.append("Action=Normalize ")
             if useactual:
-                my_str.append("useactual = true ")
+                my_str.append("useactual=true ")
             else:
-                my_str.append("useactual = false ")
+                my_str.append("useactual=false ")
 
             portion_str = ''.join(my_str)
 
@@ -1232,23 +1430,18 @@ class OpenDSS:
         dss.run_command(dss_string)
 
     def setPhotovoltaics(self, photovoltaics):
-        #!logger.debug("Setting up the Photovoltaics")
+
         try:
             for element in photovoltaics:
                 id = None
                 phases = None
                 bus1 = None
                 voltage = None
-                power = None
-                powerunit= None
-                effcurve = None
-                ptcurve = None
-                daily = None
-                tdaily = None
                 pf = 1 #default value
-                temperature = None
-                irrad = None
-                pmpp = None
+                max_power_kw = None
+                max_power_kvar = None
+                control = "ofw"
+                meta = None
                 for key, value in element.items():
                     if key == "id":
                         id = value
@@ -1258,10 +1451,10 @@ class OpenDSS:
                         bus1 = value
                     elif key == "kV":
                         voltage = value
-                    elif key == "power":
-                        power = value
                     elif key == "max_power_kW":
-                        pmpp = value
+                        max_power_kw = value
+                    elif key == "max_power_kvar":
+                        max_power_kvar = value
                     elif key == "effcurve":
                         effcurve = value
                     elif key == "ptcurve":
@@ -1276,34 +1469,50 @@ class OpenDSS:
                         temperature = value
                     elif key == "irrad":
                         irrad = value
+                    elif key == "control_strategy":
+                        control = value
+                    elif key == "meta":
+                        meta = value
                     else:
                         logger.debug("keys not registered "+str(key))
 
-                self.setPhotovoltaic(id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp)
-                #!dss.run_command('Solve')
-                #!logger.debug("Photovoltaics: " + str(dss.PVsystems.AllNames()))
+                self.setPhotovoltaic(id, phases, bus1, voltage, pf,  max_power_kw, max_power_kvar, control, meta)
+
             return 0
         except Exception as e:
             logger.error(e)
             return e
 
-    def setPhotovoltaic(self, id, phases, bus1, voltage, power, effcurve, ptcurve, daily, tdaily, pf, temperature, irrad, pmpp):
-        dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} PF={pf} model=1".format(
-            id=id,
-            phases=phases,
-            bus1=bus1,
-            voltage=voltage,
-            pmpp=pmpp,
-            pf=pf,
-            ptcurve=ptcurve,
-        )
+    def setPhotovoltaic(self, id, phases, bus1, voltage, pf, max_power_kw, max_power_kvar, control, meta=None):
+        try:
+            logger.debug("Photovoltaic 2")
+            dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} pf={pf} model=1".format(
+                id=id,
+                phases=phases,
+                bus1=bus1,
+                voltage=voltage,
+                pmpp=max_power_kw,
+                pf=pf
+            )
 
-        # ---------- chek for available loadschape and attach it to the load
-        if id in self.loadshapes_for_pv:
-            dss_string = dss_string + " Yearly=" + str(self.loadshapes_for_pv[id]["name"])
+            # ---------- chek for available loadschape and attach it to the load
+            if id in self.loadshapes_for_pv and control == "no_control":
+                dss_string = dss_string + " Yearly=" + str(self.loadshapes_for_pv[id]["name"])
 
-        logger.debug(dss_string + "\n")
-        dss.run_command(dss_string)
+            if max_power_kvar == None:
+                max_power_kvar = max_power_kw
+            if not meta == None:
+                logger.debug("meta "+str(meta))
+            self.PVs[id] = PV(id, bus1, phases, voltage, max_power_kw, max_power_kvar, pf, control, meta)
+
+
+
+            logger.debug(dss_string + "\n")
+            dss.run_command(dss_string)
+            return 0
+        except Exception as e:
+            logger.error(e)
+            return e
 
     def setChargingStations(self, charging_stations):
         import sys
@@ -1395,6 +1604,9 @@ class OpenDSS:
 
     def get_chargers(self):
         return self.Chargers
+
+    def get_photovoltaics_objects(self):
+        return self.PVs
 
     def setStorages(self, storage):
         #logger.info("Setting up the Storages")

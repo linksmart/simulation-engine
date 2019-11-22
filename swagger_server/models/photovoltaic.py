@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
+from swagger_server.models.meta import Meta
 from swagger_server import util
 
 
@@ -15,7 +16,7 @@ class Photovoltaic(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, inverter_efficiency: float=None, phases: int=None, power: float=None, max_power_k_w: float=None, powerunit: str=None, powerfactor: float=None, bus1: str=None, k_v: float=None, effcurve: str=None, ptcurve: str=None, daily: str=None, tdaily: str=None, temperature: float=None, irrad: float=None, voltageunit: str=None, power_profile_id: str=None):  # noqa: E501
+    def __init__(self, id: str=None, inverter_efficiency: float=None, phases: int=None, power: float=None, max_power_k_w: float=None, powerunit: str=None, powerfactor: float=None, bus1: str=None, k_v: float=None, effcurve: str=None, ptcurve: str=None, daily: str=None, tdaily: str=None, temperature: float=None, irrad: float=None, voltageunit: str=None, power_profile_id: str=None, control_strategy: str='no_control', meta: Meta=None):  # noqa: E501
         """Photovoltaic - a model defined in Swagger
 
         :param id: The id of this Photovoltaic.  # noqa: E501
@@ -52,6 +53,10 @@ class Photovoltaic(Model):
         :type voltageunit: str
         :param power_profile_id: The power_profile_id of this Photovoltaic.  # noqa: E501
         :type power_profile_id: str
+        :param control_strategy: The control_strategy of this Photovoltaic.  # noqa: E501
+        :type control_strategy: str
+        :param meta: The meta of this Photovoltaic.  # noqa: E501
+        :type meta: Meta
         """
         self.swagger_types = {
             'id': str,
@@ -70,7 +75,9 @@ class Photovoltaic(Model):
             'temperature': float,
             'irrad': float,
             'voltageunit': str,
-            'power_profile_id': str
+            'power_profile_id': str,
+            'control_strategy': str,
+            'meta': Meta
         }
 
         self.attribute_map = {
@@ -90,7 +97,9 @@ class Photovoltaic(Model):
             'temperature': 'temperature',
             'irrad': 'irrad',
             'voltageunit': 'voltageunit',
-            'power_profile_id': 'power_profile_id'
+            'power_profile_id': 'power_profile_id',
+            'control_strategy': 'control_strategy',
+            'meta': 'meta'
         }
 
         self._id = id
@@ -110,6 +119,8 @@ class Photovoltaic(Model):
         self._irrad = irrad
         self._voltageunit = voltageunit
         self._power_profile_id = power_profile_id
+        self._control_strategy = control_strategy
+        self._meta = meta
 
     @classmethod
     def from_dict(cls, dikt) -> 'Photovoltaic':
@@ -488,3 +499,47 @@ class Photovoltaic(Model):
         """
 
         self._power_profile_id = power_profile_id
+
+    @property
+    def control_strategy(self) -> str:
+        """Gets the control_strategy of this Photovoltaic.
+
+        Possibilities: no_control, ofw, limit_power, volt-watt, volt-var  # noqa: E501
+
+        :return: The control_strategy of this Photovoltaic.
+        :rtype: str
+        """
+        return self._control_strategy
+
+    @control_strategy.setter
+    def control_strategy(self, control_strategy: str):
+        """Sets the control_strategy of this Photovoltaic.
+
+        Possibilities: no_control, ofw, limit_power, volt-watt, volt-var  # noqa: E501
+
+        :param control_strategy: The control_strategy of this Photovoltaic.
+        :type control_strategy: str
+        """
+
+        self._control_strategy = control_strategy
+
+    @property
+    def meta(self) -> Meta:
+        """Gets the meta of this Photovoltaic.
+
+
+        :return: The meta of this Photovoltaic.
+        :rtype: Meta
+        """
+        return self._meta
+
+    @meta.setter
+    def meta(self, meta: Meta):
+        """Sets the meta of this Photovoltaic.
+
+
+        :param meta: The meta of this Photovoltaic.
+        :type meta: Meta
+        """
+
+        self._meta = meta
