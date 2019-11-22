@@ -367,13 +367,15 @@ class dssToJson:
 								if isinstance(value, list) and key != 'wdg'and key != "xht" and key != "xlt":
 									for v in value:
 										radials['transformer'][previous_index - 1][key].append(v)
+								elif key == 'percent_load_loss':
+									radials['transformer'][previous_index - 1][key] = value
 								elif key != 'wdg'and key != "xht" and key != "xlt":
 									radials['transformer'][previous_index - 1][key].append(value)
 					previous_type = 'Transformer'
 				# previous_index = previous_index + 1
 				# previous_index = previous_index + 1
 				cnt = len(words)
-		result['common']["url_storage_controller"] = "http://localhost:9090"
+		result['common']["url_storage_controller"] = "http://192.168.99.100:8080"
 		result['common']["city"] = "Fur"
 		result['common']["country"] = "Denmark"
 		result['common']["max_real_power_in_kW_to_grid"] = 6
