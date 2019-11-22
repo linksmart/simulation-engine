@@ -565,8 +565,16 @@ def get_simulation_result_raw_with_node(id, result_type, node_name):  # noqa: E5
 			raw_data = raw_data[result_type]
 			output[result_type] = {}
 			raw_data_keys = raw_data.keys()
+			nodes = node_name.split(".")
 			for key in raw_data_keys:
-				if key == node_name:
+				if len(nodes) > 1:
+					if key == nodes[0]:
+						for k in raw_data[key].keys():
+							if nodes[1] == k:
+								output[result_type][key] = {}
+								output[result_type][key][k] = raw_data[key][k]
+								return output
+				elif key == nodes[0]:
 					output[result_type][key] = raw_data[key]
 			if not output[result_type]:
 				output = "No record found for " + node_name
