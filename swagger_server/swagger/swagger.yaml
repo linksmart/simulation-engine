@@ -95,6 +95,26 @@ paths:
         "404":
           description: "Simulation ID not found"
       x-swagger-router-controller: "swagger_server.controllers.simulation_controller"
+  /simulation/{id}/connections:
+    get:
+      tags:
+      - "simulation"
+      summary: "Get topology ordered per nodes"
+      operationId: "get_topology_per_node"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of the simulation"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Results of connections ordered per node"
+          schema:
+            $ref: "#/definitions/SimulationResult"
+        "404":
+          description: "Simulation ID not found"
+      x-swagger-router-controller: "swagger_server.controllers.simulation_controller"
   /simulation/{id}:
     get:
       tags:

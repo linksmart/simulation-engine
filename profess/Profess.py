@@ -397,7 +397,7 @@ class Profess:
                                 solver = "cbc"
                                 single_ev = False
                             if storage_opt_model == "Maximize Self-Production" and not global_control:
-                                solver = "ipopt"
+                                solver = "gurobi"
                                 single_ev = False
                             if storage_opt_model == "MinimizeCosts" and not global_control:
                                 solver = "cbc"
