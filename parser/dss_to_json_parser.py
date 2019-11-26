@@ -1,8 +1,9 @@
 import json
 import re
 
+
 class dssToJson:
-	def convert(self):
+	def convert_dss_to_json(self):
 		result = {}
 		previous_type = ''
 		result['common'] = {}
@@ -15,8 +16,11 @@ class dssToJson:
 		radials['loads'] = []
 		radials['capacitor'] = []
 		radials['powerLines'] = []
-
-		with open('IEEE13Nodeckt.dss', 'r') as f:
+		
+		rel_path = "IEEE13Nodeckt.dss"
+		cur_path = '/opt/project/tests/data/13Bus' + '/' + rel_path
+		
+		with open(cur_path, 'r') as f:
 			for cnt, line in enumerate(f):
 				
 				words = line.strip().split(" ")
@@ -35,14 +39,14 @@ class dssToJson:
 					split_words_key_value = line.split("=")
 					split_words = split_words_key_value[0].split(".")
 					if len(split_words) > 2:
-						if(split_words[0]=="Transformer"):
+						if (split_words[0] == "Transformer"):
 							for reg in radials['transformer']:
 								if reg['id'] == split_words[1]:
 									reg[split_words[2].lower()] = []
 									values = re.findall(r'[-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))', split_words_key_value[1])
 									for value in values:
 										reg[split_words[2].lower()].append(float(value))
-									
+				
 				if str(words[0]).lower() == 'new':
 					type = words[1].split('.')[0]
 					if (type == 'circuit'):
@@ -100,15 +104,15 @@ class dssToJson:
 									key = split_word[0].lower()
 									if not value_set:
 										value = split_word[1]
-										if re.compile('^\s*\d+\s*$').search(value)and key!= 'bus':
+										if re.compile('^\s*\d+\s*$').search(value) and key != 'bus':
 											value = int(value)
-										elif re.compile('^\s*(\d*\.\d+)|(\d+\.\d*)\s*$').search(value)and key!= 'bus':
+										elif re.compile('^\s*(\d*\.\d+)|(\d+\.\d*)\s*$').search(value) and key != 'bus':
 											value = float(value)
 									trans[key] = value
 						radials['transformer'].append(trans)
 						previous_type = 'Transformer'
 						previous_index = len(radials['transformer'])
-						# previous_index = 1
+					# previous_index = 1
 					if (type == "linecode" or type == "Linecode"):
 						# linecode = []
 						linecode = {}
@@ -123,7 +127,7 @@ class dssToJson:
 									key = 'units'
 								if key == 'nphases':
 									value = int(value)
-								if len(split_word) > 1 and key!= 'BaseFreq':
+								if len(split_word) > 1 and key != 'BaseFreq':
 									linecode[key] = value
 						previous_type = "linecode"
 						radials['linecode'].append(linecode)
@@ -149,9 +153,9 @@ class dssToJson:
 									if key == 'pf':
 										key = 'powerfactor'
 									value = split_word[1]
-									if re.compile('^\s*\d+\s*$').search(value) and key!= 'bus':
+									if re.compile('^\s*\d+\s*$').search(value) and key != 'bus':
 										value = int(value)
-									elif re.compile('^\s*(\d*\.\d+)|(\d+\.\d*)\s*$').search(value)and key!= 'bus':
+									elif re.compile('^\s*(\d*\.\d+)|(\d+\.\d*)\s*$').search(value) and key != 'bus':
 										value = float(value)
 									load[key] = value
 						previous_type = "load"
@@ -172,9 +176,9 @@ class dssToJson:
 									if key == 'kvar':
 										key = 'kVar'
 									value = split_word[1]
-									if re.compile('^\s*\d+\s*$').search(value) and key!= 'bus':
+									if re.compile('^\s*\d+\s*$').search(value) and key != 'bus':
 										value = int(value)
-									elif re.compile('^\s*(\d*\.\d+)|(\d+\.\d*)\s*$').search(value) and key!= 'bus':
+									elif re.compile('^\s*(\d*\.\d+)|(\d+\.\d*)\s*$').search(value) and key != 'bus':
 										value = float(value)
 									capacitator[key] = value
 						previous_type = "capacitor"
@@ -223,7 +227,8 @@ class dssToJson:
 											value = False
 									elif re.compile('^\s*\d+\s*$').search(value) and key != 'bus1' and key != 'bus2':
 										value = int(value)
-									elif re.compile('^(\d*\.\d+)|(\d+\.\d*)\s*$').search(value) and key != 'bus1' and key != 'bus2':
+									elif re.compile('^(\d*\.\d+)|(\d+\.\d*)\s*$').search(
+										value) and key != 'bus1' and key != 'bus2':
 										value = float(value)
 									powerline[key] = value
 						previous_type = "powerLines"
@@ -241,7 +246,8 @@ class dssToJson:
 						split_word = word.split('=')
 						# line_dict = {}
 						to_check = split_word[0]
-						if (to_check == "Rmatrix" or to_check == "Xmatrix" or to_check == "Cmatrix" or previous_set_square == True):
+						if (
+							to_check == "Rmatrix" or to_check == "Xmatrix" or to_check == "Cmatrix" or previous_set_square == True):
 							previous_set_square = True
 							if (to_check == "Rmatrix" or to_check == "Xmatrix" or to_check == "Cmatrix"):
 								key = to_check.lower()
@@ -278,7 +284,7 @@ class dssToJson:
 								value = re.findall(r'[-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))', word)
 								if (len(value) != 0):
 									val.append(float(value[0]))
-							if (']' in word and len(val)!=0):
+							if (']' in word and len(val) != 0):
 								linecode[word_set].append(val)
 								val = []
 				
@@ -327,17 +333,21 @@ class dssToJson:
 								elements = []
 								operation_word = split_word[1]
 								if key == "buses":
-									elements.append((re.findall(r'[-+]?(?:(?:\w*\d*\.\d+)|(?:\w*\d+\.?))', operation_word)[0]))
+									elements.append(
+										(re.findall(r'[-+]?(?:(?:\w*\d*\.\d+)|(?:\w*\d+\.?))', operation_word)[0]))
 								else:
-									elements.append(float(re.findall(r'[-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))', operation_word)[0]))
+									elements.append(
+										float(re.findall(r'[-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))', operation_word)[0]))
 								second_word = ''
 								while ']' not in operation_word:
 									operation_word = words[index + 1]
 									if operation_word != '':
 										if key == "buses":
-											elements.append((re.findall(r'[-+]?(?:(?:\w*\d*\.\d+)|(?:\w*\d+\.?))', operation_word)[0]))
+											elements.append((re.findall(r'[-+]?(?:(?:\w*\d*\.\d+)|(?:\w*\d+\.?))',
+											                            operation_word)[0]))
 										else:
-											elements.append(float(re.findall(r'[-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))', operation_word)[0]))
+											elements.append(float(
+												re.findall(r'[-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))', operation_word)[0]))
 									index = index + 1
 								value_set = True
 								value = elements
@@ -345,12 +355,13 @@ class dssToJson:
 							if (len(split_word) > 1):
 								if not value_set:
 									value = split_word[1]
-									if re.compile('^\s*\d+\s*$').search(value)and key!= 'bus' and key!= 'buses':
+									if re.compile('^\s*\d+\s*$').search(value) and key != 'bus' and key != 'buses':
 										value = int(value)
-									elif re.compile('^\s*(\d*\.\d+)|(\d+\.\d*)\s*$').search(value)and key!= 'bus' and key!= 'buses':
+									elif re.compile('^\s*(\d*\.\d+)|(\d+\.\d*)\s*$').search(
+										value) and key != 'bus' and key != 'buses':
 										value = float(value)
 								if key in ['conn', 'kv', 'kva']:
-									key = key +'s'
+									key = key + 's'
 								if key == 'conns':
 									value = value.lower()
 								if key == 'bus':
@@ -359,17 +370,18 @@ class dssToJson:
 									key = 'percent_rs'
 								if key == '%loadloss':
 									key = 'percent_load_loss'
-								if not key in radials['transformer'][previous_index - 1].keys() and key != "wdg" and key != "xht" and key != "xlt" and key != "percent_load_loss":
+								if not key in radials['transformer'][
+									previous_index - 1].keys() and key != "wdg" and key != "xht" and key != "xlt" and key != "percent_load_loss":
 									radials['transformer'][previous_index - 1][key] = []
 								if not 'windings' in radials['transformer'][previous_index - 1].keys():
 									radials['transformer'][previous_index - 1]['windings'] = count
 								# result['radials']['transformer'][previous_index - 1]['windings'] = count
-								if isinstance(value, list) and key != 'wdg'and key != "xht" and key != "xlt":
+								if isinstance(value, list) and key != 'wdg' and key != "xht" and key != "xlt":
 									for v in value:
 										radials['transformer'][previous_index - 1][key].append(v)
 								elif key == 'percent_load_loss':
 									radials['transformer'][previous_index - 1][key] = value
-								elif key != 'wdg'and key != "xht" and key != "xlt":
+								elif key != 'wdg' and key != "xht" and key != "xlt":
 									radials['transformer'][previous_index - 1][key].append(value)
 					previous_type = 'Transformer'
 				# previous_index = previous_index + 1
@@ -381,11 +393,10 @@ class dssToJson:
 		result['common']["max_real_power_in_kW_to_grid"] = 6
 		result['common']["max_reactive_power_in_kVar_to_grid"] = 6
 		result['radials'].append(radials)
-		with open("Result.json", 'w') as file:
+		with open("Result_parser.json", 'w') as file:
 			json.dump(result, file, ensure_ascii=False, indent=4)
-		# print(json.dumps(result))
 		print(result)
-		
 
-ob = dssToJson()
-ob.convert()
+
+obj = dssToJson()
+obj.convert_dss_to_json()

@@ -562,7 +562,7 @@ def get_simulation_result_raw_with_node(id, result_type, node_name):  # noqa: E5
 		path = os.path.join("data", str(id), fname)
 		raw_data = utils.get_stored_data(path)
 		if raw_data == 1:
-			message = "Filepath "+str(path)+" not existing"
+			message = "No simulation found for id: "+str(id)
 			logger.error(message)
 			return message
 		output = {}
@@ -604,7 +604,7 @@ def get_simulation_result_raw(id, result_type):  # noqa: E501
 		path = os.path.join("data", str(id), fname)
 		raw_data = utils.get_stored_data(path)
 		if raw_data == 1:
-			message = "Filepath "+str(path)+" not existing"
+			message = "No simulation found for id: "+str(id)
 			logger.error(message)
 			return message
 		output = {}

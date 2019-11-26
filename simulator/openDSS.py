@@ -1356,21 +1356,27 @@ class OpenDSS:
                     else:
                         logger.debug("4 ")
                         load_profile_data = []
+                        if not powerprofiles:
+                            message = "No Power profile found for this ID:" + powerprofile_id
+                            logger.debug(message)
+                            return message
                         for powerprofile in powerprofiles:
                             if (powerprofile_id == powerprofile['id']):
                                 loadshape_id = powerprofile_id
                                 items = powerprofile['items']
-                                interval = powerprofile['interval']
-                                normalize = powerprofile['normalized']
+                                if 'interval' in powerprofile.keys() and powerprofile['interval'] is not None:
+                                    interval = powerprofile['interval']
+                                if 'normalized' in powerprofile.keys() and powerprofile['normalized'] is not None:
+                                    normalize = powerprofile['normalized']
                                 logger.debug("normalize " + str(normalize))
                                 multiplier = 1
                                 if 'multiplier' in powerprofile.keys() and powerprofile['multiplier'] is not None:
                                     multiplier = powerprofile['multiplier']
-                                if powerprofile['interval']:
+                                if 'interval' in powerprofile.keys() and powerprofile['interval'] is not None:
                                     items = [item * multiplier  for item in items]
-                                elif powerprofile['m_interval']:
+                                elif 'm_interval' in powerprofile.keys() and powerprofile['m_interval'] is not None:
                                     items = [item * multiplier  for item in items[::60]]
-                                elif powerprofile['s_interval']:
+                                elif 's_interval' in powerprofile.keys() and powerprofile['s_interval'] is not None:
                                     items = [item * multiplier  for item in items[::3600]]
                                 load_profile_data.extend(items)
                                 if normalize:
