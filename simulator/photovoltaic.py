@@ -35,6 +35,7 @@ class Photovoltaic:
         self.momentary_power = 0
         self.output_power = 0
         self.output_q_power = 0
+        self.use_in_percent = []
         self.meta = meta
         logger.debug("PV "+str(self.id)+" created")
 
@@ -85,6 +86,16 @@ class Photovoltaic:
 
     def get_output_q_power(self):
         return self.output_q_power
+
+    def get_use_percent(self):
+        return self.use_in_percent
+
+    def set_use_percent(self, percentage_value):
+        if percentage_value > 100:
+            percentage_value = 100
+        if percentage_value < 0:
+            percentage_value = 0
+        self.use_in_percent.append(percentage_value)
 
 
 class Control_strategy:

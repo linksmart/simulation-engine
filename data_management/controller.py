@@ -145,10 +145,20 @@ class gridController(threading.Thread):
 		logger.info("Solution stepsize: " + str(self.sim.getStepSize()))
 		logger.info("Voltage bases: " + str(self.sim.getVoltageBases()))
 
+		PV_objects_dict = self.sim.get_photovoltaics_objects()
+		PV_names = self.input.get_PV_names(self.topology)
+		logger.debug("PV_names " + str(PV_names))
+		if not PV_names == []:
+			flag_is_PV = True
+		else:
+			flag_is_PV = False
+
+		pvNames = list(PV_objects_dict.keys())
+		len_pvNames = len(pvNames)
 		loadNames = self.sim.get_all_load_names()
 		len_loadNames = len(loadNames)
-		pvNames = self.sim.get_all_pv_names()
-		len_pvNames = len(pvNames)
+		#pvNames = self.sim.get_all_pv_names()
+		#len_pvNames = len(pvNames)
 		essNames = self.input.get_Storage_names(self.topology)
 		len_essNames = len(essNames)
 		nodeNames = self.sim.get_node_list()
@@ -159,6 +169,7 @@ class gridController(threading.Thread):
 		#len_nodeNamesCurrents = len(nodeNamesCurrents)
 		lineNames = self.sim.get_all_lines_names()
 		len_lineNames = len(lineNames)
+		len_transformerNames = len(transformer_names)
 
 		
 		# logger.debug("node_ names "+str(nodeNames))
@@ -171,19 +182,15 @@ class gridController(threading.Thread):
 		ess_powers_phase_1 = [[] for i in range(len_essNames)]
 		ess_powers_phase_2 = [[] for i in range(len_essNames)]
 		ess_powers_phase_3 = [[] for i in range(len_essNames)]
+		trafo_powers_phase_1 = [[] for i in range(len_transformerNames)]
+		trafo_powers_phase_2 = [[] for i in range(len_transformerNames)]
+		trafo_powers_phase_3 = [[] for i in range(len_transformerNames)]
 		ess_soc = [[] for i in range(len_essNames)]
 		voltages = [[] for i in range(len(nodeNames))]
 		currents = [[] for i in range(len_lineNames)]
 		losses = [[] for i in range(len_elementNames)]
 		total_losses = []
 
-		PV_objects_dict = self.sim.get_photovoltaics_objects()
-		PV_names = self.input.get_PV_names(self.topology)
-		logger.debug("PV_names " + str(PV_names))
-		if not PV_names == []:
-			flag_is_PV = True
-		else:
-			flag_is_PV = False
 
 		ESS_names = self.input.get_Storage_names(self.topology)
 		logger.debug("ESS_names " + str(ESS_names))
@@ -725,26 +732,30 @@ class gridController(threading.Thread):
 				losses[i].append(str(complex(Losses[i], Losses[number])))
 			
 			for i in range(len_lineNames):
-				#currents[i].append(str(complex(Currents[i], Currents[int(i + (len_lineNames))])))
 				currents[i].append(Currents[i])
 
-			Load_powers = self.sim.get_load_powers()
-			for i in range(len_loadNames):
-				load_powers_phase_1[i].append(Load_powers[i][0])
-				load_powers_phase_2[i].append(Load_powers[i][1])
-				load_powers_phase_3[i].append(Load_powers[i][2])
 
-			#logger.debug("len pv names: "+str(len_pvNames))
+			if not len_loadNames == 0:
+				Trafo_powers = self.sim.get_trafo_powers()
+				for i in range(len_transformerNames):
+					trafo_powers_phase_1[i].append(Trafo_powers[i][0])
+					trafo_powers_phase_2[i].append(Trafo_powers[i][1])
+					trafo_powers_phase_3[i].append(Trafo_powers[i][2])
+
+			if not len_loadNames == 0:
+				Load_powers = self.sim.get_load_powers()
+				for i in range(len_loadNames):
+					load_powers_phase_1[i].append(Load_powers[i][0])
+					load_powers_phase_2[i].append(Load_powers[i][1])
+					load_powers_phase_3[i].append(Load_powers[i][2])
+
 			if not len_pvNames == 0:
 				PV_powers = self.sim.get_pv_powers()
-				#logger.debug("PV_powers "+str(PV_powers))
 				for i in range(len_pvNames):
 					pv_powers_phase_1[i].append(PV_powers[i][0])
 					pv_powers_phase_2[i].append(PV_powers[i][1])
 					pv_powers_phase_3[i].append(PV_powers[i][2])
 
-			#logger.debug("len storage names: "+str(len_essNames))
-			#logger.debug("storage names: " + str(essNames))
 			if not len_essNames == 0:
 				ESS_powers = self.input.get_storage_powers(essNames)
 				for i in range(len_essNames):
@@ -862,7 +873,11 @@ class gridController(threading.Thread):
 		power["Transformer"] = {}
 		raw_data_power["Transformer"] = {}
 		for i in range(len(transformer_names)):
-			raw_data_power["Transformer"][str(transformer_names[i])] = S_total[i]
+			if transformer_names[i] not in raw_data_power["Transformer"].keys():
+				raw_data_power["Transformer"][transformer_names[i]]={}
+			raw_data_power["Transformer"][transformer_names[i]] = {"Phase 1":[str(i) for i in trafo_powers_phase_1[i]],
+			                                        "Phase 2":[str(i) for i in trafo_powers_phase_2[i]], "Phase 3":[str(i) for i in trafo_powers_phase_3[i]]}
+			#raw_data_power["Transformer"][str(transformer_names[i])] = S_total[i]
 			power["Transformer"][str(transformer_names[i])] = max(S_total[i])
 
 		raw_data_power["Load"] = {}
@@ -905,11 +920,26 @@ class gridController(threading.Thread):
 				raw_soc["Storages"][essNames[i]] = {}
 			raw_soc["Storages"][essNames[i]] = ess_soc[i]
 
+		raw_soc["Storages"] = {}
+		for i in range(len_essNames):
+			if essNames[i] not in raw_soc["Storages"].keys():
+				raw_soc["Storages"][essNames[i]] = {}
+			raw_soc["Storages"][essNames[i]] = ess_soc[i]
+
+		raw_usage = {}
+		raw_usage["Photovoltaic"] = {}
+
+		for i in range(len_pvNames):
+			if pvNames[i] not in raw_usage["Photovoltaic"].keys():
+				raw_usage["Photovoltaic"][pvNames[i]] = {}
+			for name, pv_object in PV_objects_dict.items():
+				if name == pvNames[i]:
+					raw_usage["Photovoltaic"][pvNames[i]] = pv_object.get_use_percent()
 
 		data = {"voltages": data2, "currents": data3, "losses": data_losses, "powers": power}
 		
 		raw_data = {"voltages": raw_data_voltages2, "currents": raw_data_currents, "losses": raw_data_losses,
-		            "powers": raw_data_power, "soc": raw_soc}
+		            "powers": raw_data_power, "soc": raw_soc, "usage":raw_usage}
 
 
 		###############################PV and ESS###################################

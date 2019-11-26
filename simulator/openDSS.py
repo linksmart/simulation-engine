@@ -179,6 +179,7 @@ class OpenDSS:
 
         if control_strategy_name == "no_control":
             power = pv_object.get_momentary_power()
+            pv_object.set_use_percent(100)
 
             if power >= 0:
                 dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
@@ -197,7 +198,12 @@ class OpenDSS:
 
         elif control_strategy_name == "ofw":
             power = control_strategy.get_control_power()
-            #power = pv_object.get_momentary_power()
+            power_momentary = pv_object.get_momentary_power()
+            if not power_momentary == 0:
+                use_in_percent = (power * 100) / power_momentary
+            else:
+                use_in_percent = 100
+            pv_object.set_use_percent(use_in_percent)
 
             if power >= 0:
                 dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
@@ -215,17 +221,24 @@ class OpenDSS:
                 return 1
 
         elif control_strategy_name == "limit_power":
-            power = pv_object.get_momentary_power()
+            power_momentary = pv_object.get_momentary_power()
             pv_max_power = pv_object.get_max_power()
             percentage_max_power = pv_object.get_control_strategy().get_strategy().get_percentage()
             sensitivity_factor = pv_object.get_control_strategy().get_strategy().get_sensitivity_factor()
 
             max_power = pv_max_power * (percentage_max_power/100)
-            if power >= 0:
-                if power <= max_power:
-                    power_to_set = power
+            if power_momentary >= 0:
+                if power_momentary <= max_power:
+                    power_to_set = power_momentary
                 else:
                     power_to_set = max_power
+
+                if not power_momentary == 0:
+                    use_in_percent = (power_to_set * 100) / power_momentary
+                else:
+                    use_in_percent = 100
+
+                pv_object.set_use_percent(use_in_percent)
 
                 dss_string = "Generator." + str(pv_name) + ".kw=" + str(power_to_set)
                 logger.debug("dss_string " + str(dss_string))
@@ -245,10 +258,10 @@ class OpenDSS:
             min_vpu = pv_object.get_control_strategy().get_strategy().get_min_vpu_high()
             max_vpu = pv_object.get_control_strategy().get_strategy().get_max_vpu_high()
             diff_pu = max_vpu - min_vpu
-            power = pv_object.get_momentary_power()
+            power_momentary = pv_object.get_momentary_power()
             #pv_max_power = pv_object.get_max_power()
-            pv_max_power = power
-            logger.debug("momentary power "+str(power))
+            pv_max_power = power_momentary
+            logger.debug("momentary power "+str(power_momentary))
             logger.debug("max volt input "+str(max_volt_input))
             logger.debug("min_vpu "+str(min_vpu))
             logger.debug("max_vpu " + str(max_vpu))
@@ -257,6 +270,7 @@ class OpenDSS:
                 if percentage_max_power > 1:
                     percentage_max_power = 1
                 percentage_max_power = 1 - percentage_max_power
+
                 logger.debug("percentage_max_power "+str(percentage_max_power))
                 max_power = pv_max_power * percentage_max_power
                 logger.debug("Possible max power to be supplied by PV "+str(max_power))
@@ -269,15 +283,20 @@ class OpenDSS:
                 else:
                     return 1"""
             else:
-                power_to_set = power
+                power_to_set = power_momentary
 
+            if not power_momentary == 0:
+                use_in_percent = (power_to_set * 100) / power_momentary
+            else:
+                use_in_percent = 100
+            pv_object.set_use_percent(use_in_percent)
             dss_string = "Generator." + str(pv_name) + ".kw=" + str(power_to_set)
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
             dss_string = "Generator." + str(pv_name) + ".kvar=0"
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
-            logger.debug("Power to PV / 3: "+str(power_to_set/3))
+            #logger.debug("Power to PV / 3: "+str(power_to_set/3))
             pv_object.set_output_power(power_to_set)
             pv_object.set_output_q_power(0)
             return 0
@@ -295,7 +314,7 @@ class OpenDSS:
             max_vpu_high = pv_object.get_control_strategy().get_strategy().get_max_vpu_high()
             diff_pu_negative = max_vpu_high - min_vpu_high
 
-            power = pv_object.get_momentary_power()
+            power_momentary = pv_object.get_momentary_power()
             pv_max_q_power = pv_object.get_max_q_power()
 
             logger.debug("min volt input " + str(min_volt_input))
@@ -323,8 +342,8 @@ class OpenDSS:
             else:
                 q_power_to_set = 0
 
-            logger.debug("momentary power " + str(power))
-            dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
+            logger.debug("momentary power " + str(power_momentary))
+            dss_string = "Generator." + str(pv_name) + ".kw=" + str(power_momentary)
             logger.debug("dss_string " + str(dss_string))
             dss.run_command(dss_string)
             dss_string = "Generator." + str(pv_name) + ".kvar=" + str(q_power_to_set)
@@ -334,6 +353,11 @@ class OpenDSS:
 
             cktpower, qcktpower = self.get_single_pv_power(pv_name)
             pv_object.set_output_power(cktpower)
+            if not power_momentary == 0:
+                use_in_percent = (cktpower * 100) / power_momentary
+            else:
+                use_in_percent = 100
+            pv_object.set_use_percent(use_in_percent)
             return 0
 
 
@@ -514,6 +538,39 @@ class OpenDSS:
 
     def get_node_order(self):
         return dss.CktElement.NodeOrder()
+
+    def get_trafo_powers(self):
+        i_Power = dss.Transformers.First()
+
+        powers_from_trafo = []
+        while i_Power > 0:
+            powers = dss.CktElement.Powers()
+            node_order = self.get_node_order()
+            list = []
+            count = 0
+
+            if 1 in node_order:
+                list.append(complex(powers[count], powers[count + 1]))
+                count = count + 2
+            else:
+                list.append(0)
+            if 2 in node_order:
+                list.append(complex(powers[count], powers[count + 1]))
+                count = count + 2
+            else:
+                list.append(0)
+            if 3 in node_order:
+                list.append(complex(powers[count], powers[count + 1]))
+                count = count + 2
+            else:
+                list.append(0)
+
+            if not list == []:
+                powers_from_trafo.append(list)
+
+            # logger.debug("powers_from_loads "+str(list))
+            i_Power = dss.Transformers.Next()
+        return powers_from_trafo
 
     def get_load_powers(self):
 
@@ -755,6 +812,12 @@ class OpenDSS:
             for element in self.transformers:
 
                 bank=None
+                taps = None
+                percent_load_loss = None
+                percent_rs = None
+                conns = None
+                xsc_array = None
+
                 for key, value in element.items():
 
                     if key == "id":
@@ -782,21 +845,7 @@ class OpenDSS:
                     elif key == "taps":
                         taps = value
                     else:
-                        break
-
-                self._id = transformer_id
-                self._phases = phases
-                self._windings = windings
-                self._buses = buses
-                self._kvas = kvas
-                self._kvs = kvs
-                self._conns = conns
-                self._xsc_array = xsc_array
-                self._percent_rs = percent_rs
-                self._percent_load_loss = percent_load_loss
-                self._bank = bank
-                self._taps = taps
-
+                        logger.debug("key not processed "+str(key))
 
                 portion_str = " bank={bank} " if bank != None else " "
                 #portion_str = portion_str + " Basefreq={base_frequency} " if base_frequency != None else " "
@@ -805,22 +854,22 @@ class OpenDSS:
                 portion_str = portion_str + " %Rs={percent_rs} " if percent_rs != None else " "
                 portion_str = portion_str + " Conns={conns} " if conns != None else " "
 
-                dss_string = "New Transformer.{transformer_name} Phases={phases} Windings={winding} Buses={buses} kVAs={kvas} kVs={kvs} XscArray={xsc_array}" + portion_str + " "
+                dss_string = "New Transformer.{transformer_name} Phases={phases} Windings={winding} Buses={buses} kVAs={kvas} kVs={kvs} XscArray={xsc_array}" + portion_str
 
 
                 dss_string = dss_string.format(
-                        transformer_name=self._id,
-                        phases=self._phases,
-                        winding=self._windings,
-                        buses=self._buses,
-                        kvas=self._kvas,
-                        kvs=self._kvs,
-                        conns=self._conns,
-                        xsc_array=self._xsc_array,
-                        percent_rs=self._percent_rs,
-                        percent_load_loss=self._percent_load_loss,
-                        bank=self._bank,
-                        taps=self._taps)
+                        transformer_name=transformer_id,
+                        phases=phases,
+                        winding=windings,
+                        buses=buses,
+                        kvas=kvas,
+                        kvs=kvs,
+                        conns=conns,
+                        xsc_array=xsc_array,
+                        percent_rs=percent_rs,
+                        percent_load_loss=percent_load_loss,
+                        bank=bank,
+                        taps=taps)
 
                 logger.debug(dss_string + "\n")
                 dss.run_command(dss_string)
