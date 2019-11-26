@@ -560,6 +560,10 @@ def get_simulation_result_raw_with_node(id, result_type, node_name):  # noqa: E5
 		logger.debug("File name = " + str(fname))
 		path = os.path.join("data", str(id), fname)
 		raw_data = utils.get_stored_data(path)
+		if raw_data == 1:
+			message = "Filepath "+str(path)+" not existing"
+			logger.error(message)
+			return message
 		output = {}
 		if(result_type in raw_data.keys() and raw_data[result_type] is not None):
 			raw_data = raw_data[result_type]
@@ -579,10 +583,10 @@ def get_simulation_result_raw_with_node(id, result_type, node_name):  # noqa: E5
 			if not output[result_type]:
 				output = "No record found for " + node_name
 		else:
-			output = "result_type not found"
+			output = "result type not found"
 	except Exception as e:
 		logger.error(e)
-		output = e
+		output = str(e)
 	return output
 
 def get_simulation_result_raw(id, result_type):  # noqa: E501
@@ -598,14 +602,18 @@ def get_simulation_result_raw(id, result_type):  # noqa: E501
 		logger.debug("File name = " + str(fname))
 		path = os.path.join("data", str(id), fname)
 		raw_data = utils.get_stored_data(path)
+		if raw_data == 1:
+			message = "Filepath "+str(path)+" not existing"
+			logger.error(message)
+			return message
 		output = {}
 		if(result_type in raw_data.keys() and raw_data[result_type] is not None):
 			output[result_type] = raw_data[result_type]
 		else:
-			output = "result_type not found"
+			output = "result type not found"
 	except Exception as e:
 		logger.error(e)
-		output = e
+		output = str(e)
 	return output
 
 def delete_simulation(id):  # noqa: E501
