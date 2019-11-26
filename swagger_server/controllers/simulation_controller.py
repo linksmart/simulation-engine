@@ -15,6 +15,7 @@ from data_management.redisDB import RedisDB
 
 from swagger_server.controllers.threadFactory import ThreadFactory
 from data_management.utils import Utils
+from data_management.inputController import InputController
 
 
 from profess.Profess import *
@@ -682,3 +683,20 @@ def update_simulation(id):  # noqa: E501 ##TODO: work in progress
 	except:
 		logger.debug("Error updating")
 	return 'Simulation ' + fileid + ' updated!'
+
+
+
+
+def get_topology_per_node(id):  # noqa: E501
+    """Get topology ordered per nodes
+
+     # noqa: E501
+
+    :param id: ID of the simulation
+    :type id: str
+
+    :rtype: SimulationResult
+    """
+    input = InputController(id,None,None)
+    data_to_return = input.get_topology_per_node(id)
+    return data_to_return
