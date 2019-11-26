@@ -15,6 +15,7 @@ from data_management.redisDB import RedisDB
 
 from swagger_server.controllers.threadFactory import ThreadFactory
 from data_management.utils import Utils
+from data_management.inputController import InputController
 
 
 from profess.Profess import *
@@ -560,21 +561,33 @@ def get_simulation_result_raw_with_node(id, result_type, node_name):  # noqa: E5
 		logger.debug("File name = " + str(fname))
 		path = os.path.join("data", str(id), fname)
 		raw_data = utils.get_stored_data(path)
+		if raw_data == 1:
+			message = "No simulation found for id: "+str(id)
+			logger.error(message)
+			return message
 		output = {}
 		if(result_type in raw_data.keys() and raw_data[result_type] is not None):
 			raw_data = raw_data[result_type]
 			output[result_type] = {}
 			raw_data_keys = raw_data.keys()
+			nodes = node_name.split(".")
 			for key in raw_data_keys:
-				if key == node_name:
+				if len(nodes) > 1:
+					if key == nodes[0]:
+						for k in raw_data[key].keys():
+							if nodes[1] == k:
+								output[result_type][key] = {}
+								output[result_type][key][k] = raw_data[key][k]
+								return output
+				elif key == nodes[0]:
 					output[result_type][key] = raw_data[key]
 			if not output[result_type]:
 				output = "No record found for " + node_name
 		else:
-			output = "result_type not found"
+			output = "result type not found"
 	except Exception as e:
 		logger.error(e)
-		output = e
+		output = str(e)
 	return output
 
 def get_simulation_result_raw(id, result_type):  # noqa: E501
@@ -590,14 +603,18 @@ def get_simulation_result_raw(id, result_type):  # noqa: E501
 		logger.debug("File name = " + str(fname))
 		path = os.path.join("data", str(id), fname)
 		raw_data = utils.get_stored_data(path)
+		if raw_data == 1:
+			message = "No simulation found for id: "+str(id)
+			logger.error(message)
+			return message
 		output = {}
 		if(result_type in raw_data.keys() and raw_data[result_type] is not None):
 			output[result_type] = raw_data[result_type]
 		else:
-			output = "result_type not found"
+			output = "result type not found"
 	except Exception as e:
 		logger.error(e)
-		output = e
+		output = str(e)
 	return output
 
 def delete_simulation(id):  # noqa: E501
@@ -666,3 +683,20 @@ def update_simulation(id):  # noqa: E501 ##TODO: work in progress
 	except:
 		logger.debug("Error updating")
 	return 'Simulation ' + fileid + ' updated!'
+
+
+
+
+def get_topology_per_node(id):  # noqa: E501
+    """Get topology ordered per nodes
+
+     # noqa: E501
+
+    :param id: ID of the simulation
+    :type id: str
+
+    :rtype: SimulationResult
+    """
+    input = InputController(id,None,None)
+    data_to_return = input.get_topology_per_node(id)
+    return data_to_return

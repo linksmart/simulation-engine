@@ -5,7 +5,7 @@ logger = logging.getLogger(__file__)
 
 class Photovoltaic:
 
-    def __init__(self,id, node, phases, voltage, max_power, max_q_power, powerfactor, control_strategy="ofw"):
+    def __init__(self,id, node, phases, voltage, max_power, max_q_power, powerfactor, control_strategy="ofw", meta=None):
         self.id =id
         self.voltage = voltage
         self.node =  node
@@ -13,9 +13,30 @@ class Photovoltaic:
         self.max_q_power = max_q_power
         self.pf = powerfactor
         self.control = Control_strategy(control_strategy)
+        if not meta== None:
+            for control_setting, value_control in meta.items():
+                if control_strategy == "limit_power":
+                    if control_setting == "percentage_max_power":
+                        self.control.get_strategy().set_percentage = value_control
+                    if control_setting == "sensitivity_factor":
+                        self.control.get_strategy().set_sensitivity_factor = value_control
+                if control_strategy == "volt-watt" or control_strategy == "volt-var":
+                    if control_setting == "min_vpu_high":
+                        self.control.get_strategy().set_min_vpu_high(value_control)
+                    if control_setting == "max_vpu_high":
+                        self.control.get_strategy().set_max_vpu_high(value_control)
+                if control_strategy == "volt-var":
+                    if control_setting == "min_vpu_low":
+                        self.control.get_strategy().set_min_vpu_low(value_control)
+                    if control_setting == "max_vpu_low":
+                        self.control.get_strategy().set_max_vpu_low(value_control)
+
+
         self.momentary_power = 0
         self.output_power = 0
         self.output_q_power = 0
+        self.use_in_percent = []
+        self.meta = meta
         logger.debug("PV "+str(self.id)+" created")
 
     def get_name(self):
@@ -65,6 +86,16 @@ class Photovoltaic:
 
     def get_output_q_power(self):
         return self.output_q_power
+
+    def get_use_percent(self):
+        return self.use_in_percent
+
+    def set_use_percent(self, percentage_value):
+        if percentage_value > 100:
+            percentage_value = 100
+        if percentage_value < 0:
+            percentage_value = 0
+        self.use_in_percent.append(percentage_value)
 
 
 class Control_strategy:
@@ -122,6 +153,7 @@ class Ofw:
 class Limit_power:
     def __init__(self):
         self.percentage  = 50
+        self.sensitivity_factor = 1
         self.name = "limit_power"
 
     def get_name(self):
@@ -133,6 +165,12 @@ class Limit_power:
     def set_percentage(self, percentage_max_power):
         self.percentage = percentage_max_power
 
+    def get_sensitivity_factor(self):
+        return self.sensitivity_factor
+
+    def set_sensitivity_factor(self, sensitivity_factor):
+        self.sensitivity_factor = sensitivity_factor
+
     def set_control_power(self, power):
         self.power = power
 
@@ -142,18 +180,24 @@ class Limit_power:
 
 class Volt_Watt:
     def __init__(self):
-        self.percentage = 50
-
+        self.min_vpu_low = 1.06
+        self.max_vpu_low = 1.1
         self.name = "volt-watt"
 
     def get_name(self):
         return self.name
 
-    def get_percentage(self):
-        return self.percentage
+    def get_min_vpu_high(self):
+        return self.min_vpu_high
 
-    def set_percentage(self, percentage_max_power):
-        self.percentage = percentage_max_power
+    def set_min_vpu_high(self, min_vpu_high):
+        self.min_vpu_high = min_vpu_high
+
+    def get_max_vpu_high(self):
+        return self.max_vpu_high
+
+    def set_max_vpu_high(self, max_vpu_high):
+        self.max_vpu_high = max_vpu_high
 
     def set_control_power(self, power):
         self.power = power
@@ -163,18 +207,38 @@ class Volt_Watt:
 
 class Volt_Var:
     def __init__(self):
-        self.percentage = 50
-
+        self.min_vpu_low = 0.92
+        self.max_vpu_low = 0.98
+        self.min_vpu_high = 1.02
+        self.max_vpu_high = 1.08
         self.name = "volt-var"
 
     def get_name(self):
         return self.name
 
-    def get_percentage(self):
-        return self.percentage
+    def get_min_vpu_low(self):
+        return self.min_vpu_low
 
-    def set_percentage(self, percentage_max_power):
-        self.percentage = percentage_max_power
+    def set_min_vpu_low(self, min_vpu_low):
+        self.min_vpu_low = min_vpu_low
+
+    def get_max_vpu_low(self):
+        return self.max_vpu_low
+
+    def set_max_vpu_low(self, max_vpu_low):
+        self.max_vpu_low = max_vpu_low
+
+    def get_min_vpu_high(self):
+        return self.min_vpu_high
+
+    def set_min_vpu_high(self, min_vpu_high):
+        self.min_vpu_high = min_vpu_high
+
+    def get_max_vpu_high(self):
+        return self.max_vpu_high
+
+    def set_max_vpu_high(self, max_vpu_high):
+        self.max_vpu_high = max_vpu_high
 
     def set_control_power(self, power):
         self.power = power

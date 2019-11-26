@@ -24,12 +24,20 @@ class Utils(metaclass=Singleton):
     def get_ID(self):
         return self.id
 
+    def folder_path(self, filename):
+        folder_name = os.path.dirname(filename)
+        return folder_name
+
+    def create_path(self, filename):
+        folder_name = self.folder_path(filename)
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+
     def store_data(self, fname, data):
         path = self.get_path(fname)
-        #folder_path = self.getFolderPath(path)
+        self.create_path(path)
         logger.debug("path " + str(path))
-        #path=self.get_path(fname)
-        #logger.debug("folderpath "+str(folder_path))
+
         try:
 
             with open(path, 'w', encoding='utf-8') as outfile:

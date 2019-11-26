@@ -28,11 +28,11 @@ class InputController:
         self.voltage_bases = None
         self.base_frequency = 60
         self.price_profile = None
-        logger.debug("id " + str(id))
+        logger.debug("Grid id " + str(id))
         self.utils = Utils()
 
     def get_topology(self):
-        logger.debug("id "+str(self.id))
+        logger.debug("getting topology of grid id "+str(self.id))
         fname = str(self.id) + "_input_grid"
         path = os.path.join("data", str(self.id), fname)
         data = self.utils.get_stored_data(path)
@@ -41,6 +41,52 @@ class InputController:
             return 1
         else:
             return data
+
+    def get_topology_per_node(self, id):
+        topology = self.get_topology()
+        radial = topology["radials"]
+
+        data_to_return = {}
+        for radial_element in radial:
+
+            for grid_element_type, values_element in radial_element.items():
+                logger.debug("grid_element "+str(grid_element_type))
+                for elements in values_element:
+                    if not elements == [] and not elements == None:
+                        if grid_element_type == "transformer":
+                            id = elements["id"]
+                            bus1 = elements["buses"][0]
+                            bus2 = elements["buses"][1]
+                            if not bus1 in data_to_return.keys():
+                                data_to_return[bus1]={"transformers":[]}
+                            if not bus2 in data_to_return.keys():
+                                data_to_return[bus2]={"transformers":[]}
+
+                            data_to_return[bus1]["transformers"].append(id)
+                            data_to_return[bus2]["transformers"].append(id)
+
+                        if grid_element_type == "loads" or grid_element_type == "chargingStations":
+                            id = elements["id"]
+                            bus = elements["bus"]
+                            if not bus in data_to_return.keys():
+                                data_to_return[bus]={}
+                            if not grid_element_type in data_to_return[bus].keys():
+                                data_to_return[bus][grid_element_type]=[]
+
+                            data_to_return[bus][grid_element_type].append(id)
+                        if grid_element_type == "photovoltaics" or grid_element_type == "storageUnits":
+                            id = elements["id"]
+                            bus = elements["bus1"]
+                            if not bus in data_to_return.keys():
+                                data_to_return[bus] = {}
+                            if not grid_element_type in data_to_return[bus].keys():
+                                data_to_return[bus][grid_element_type] = []
+
+                            data_to_return[bus][grid_element_type].append(id)
+
+        logger.debug("data_to_return "+str(data_to_return))
+        return data_to_return
+
 
     def get_price_profile(self):
         return self.price_profile
@@ -238,9 +284,9 @@ class InputController:
             for key, value in element.items():
                 if key == "photovoltaics":
                     photovoltaics = value
-
-        for pv_element in photovoltaics:
-            PV_names.append(pv_element["id"])
+        if not photovoltaics == None:
+            for pv_element in photovoltaics:
+                PV_names.append(pv_element["id"])
         return PV_names
 
     def get_Storage_names(self, topology):
@@ -604,7 +650,7 @@ class InputController:
             for node_pv in list_nodes_pvs_single:
                 if pv_object.get_node() == node_pv:
                     list_pv_single.append(pv_object)
-                    control = pv_object.get_control_strategy()
+                    control = pv_object.get_control_strategy().get_name()
                     if control == "ofw":
                         pv_object.set_control_strategy("no_control")
         return list_pv_single
