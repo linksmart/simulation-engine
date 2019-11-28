@@ -222,11 +222,15 @@ class OpenDSS:
 
         elif control_strategy_name == "limit_power":
             power_momentary = pv_object.get_momentary_power()
+            logger.debug("power_momentary "+str(power_momentary))
             pv_max_power = pv_object.get_max_power()
+            logger.debug("pv_max_power "+str(pv_max_power))
             percentage_max_power = pv_object.get_control_strategy().get_strategy().get_percentage()
+            logger.debug("percentage_max_power "+str(percentage_max_power))
             sensitivity_factor = pv_object.get_control_strategy().get_strategy().get_sensitivity_factor()
 
             max_power = pv_max_power * (percentage_max_power/100)
+            logger.debug("max allow power "+str(max_power))
             if power_momentary >= 0:
                 if power_momentary <= max_power:
                     power_to_set = power_momentary
