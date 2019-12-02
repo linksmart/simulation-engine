@@ -2,9 +2,16 @@ version: '3'
 services:
   redis:
     image: redis:latest
+    container_name: "redis_S4G"
     command: redis-server
     ports:
       - "6379:6379"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    restart: "always"
   ofw:
     image: garagon/optimization:amd
     container_name: "ofw"
@@ -25,18 +32,25 @@ services:
         max-size: "10m"
         max-file: "10"
     command: ["python3", "-u", "ofw.py"]
+    #restart: "always"
   se:
     build:
       context: ""
       dockerfile: Dockerfile
     image: "simulation_engine"
+    #image: garagon/simulation-engine:latest
+    container_name: "se"
+    depends_on:
+      - redis
+    volumes:
+      - /mnt/c/Linksmart/simulation-engine/results:/usr/src/app/data
     ports:
-        - "9090:9090"
-    command: ["python3", "-u", "main.py"]
+      - "9090:9090"
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "10"
-   # restart: "always"
+    # restart: "always"
+    command: ["python3", "-u", "main.py"]
 
