@@ -1340,16 +1340,22 @@ class OpenDSS:
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
                     powerprofile_id = element['power_profile_id']
                     if not powerprofile_id:
-                        logger.debug("power profile = False")
-                        continue
+                        message = "No Power profile found for this ID:" + str(powerprofile_id)
+                        logger.error(message)
+                        return message
                     elif bool(re.search("profile_\d", powerprofile_id)):
-                        logger.debug("2 ")
+                        logger.debug("Getting an internal power profile with the name: "+str(powerprofile_id))
                         int_value = int(powerprofile_id[8:])
                         load_profile_data = profiles.load_profile(type="residential", randint=int_value, days=sim_days)
+                        logger.debug("len load profile data "+str(len(load_profile_data)))
                         if not load_profile_data:
-                            logger.error("No load profile data found for %s", (load_name))
-                            continue
+                            message = "No Power profile found for this ID:" + str(powerprofile_id)
+                            logger.error(message)
+                            return message
                         load_profile_data = [i for i in load_profile_data]
+
+                        max_value = max(load_profile_data)
+                        load_profile_data = [(value / max_value) * max_power for value in load_profile_data]
 
                         npts = len(load_profile_data)
                         mult = load_profile_data
@@ -1358,11 +1364,11 @@ class OpenDSS:
                         loadshape_id = "Lsp_" + str(int_value)
                         set_load_shape_flag = True
                     else:
-                        logger.debug("4 ")
+                        logger.debug("Inserting an external power profile entered thorugh the API: "+str(powerprofile_id))
                         load_profile_data = []
                         if not powerprofiles:
-                            message = "No Power profile found for this ID:" + powerprofile_id
-                            logger.debug(message)
+                            message = "No Power profile found for this ID:" + str(powerprofile_id)
+                            logger.error(message)
                             return message
                         for powerprofile in powerprofiles:
                             if (powerprofile_id == powerprofile['id']):
@@ -1391,11 +1397,13 @@ class OpenDSS:
 
 
                 else:
-                    logger.debug("5 ")
+                    logger.debug("Getting a random power profile")
                     # ----------get_a_profile---------------#
                     randint_value = random.randrange(1, 475)
 
                     load_profile_data = profiles.load_profile(type="residential", randint=randint_value, days=sim_days)
+                    max_value = max(load_profile_data)
+                    load_profile_data = [(value / max_value) * max_power for value in load_profile_data]
 
                     load_profile_data = [i for i in load_profile_data]
                     npts = len(load_profile_data)

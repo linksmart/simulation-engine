@@ -586,9 +586,15 @@ class Plotter:
         folder_path = []
         for base_path in paths:
             currently_folder_path = self.utils.get_path(base_path)
+            logger.debug("currently_folder_path "+str(currently_folder_path))
             folder_path.append(currently_folder_path)
-            node_names = next(os.walk(currently_folder_path))[1]
-            logger.debug("node_names " + str(node_names))
+            try:
+                node_names = next(os.walk(currently_folder_path))[1]
+                logger.debug("node_names " + str(node_names))
+            except Exception as e:
+                logger.error("Folder path:"+ str(currently_folder_path)+" not existing")
+                logger.error(e)
+                break
 
         xlabel = "Timestamp [h]"
         ylabel = "Power [kW]"
@@ -620,20 +626,34 @@ class Plotter:
 
 def main():
 
-    url = "http://192.168.99.100:9090"
+    #url = "http://192.168.99.100:9090"
+    url = "http://localhost:9090"
     plotter = Plotter(url)
-    comparison = True
+    comparison = False
 
     if not comparison:
 
-        id = "b41044f87ce1"  #with ESS self-production
-        folder_name = "grid_with_ESS_self_production_equal_PV"
-        #id = "98f66512d5a2"   #with PV_no_control
+        #id = "3d68cf40d742"  #with ESS self-production
+        #folder_name = "grid_with_ESS_self_production"
+        #id = "a72a26137c54"   #with PV_no_control
         #folder_name = "grid_with_PV"
-        #id = "232191936be1"  # with PV limit power
+        #id = "a81684261326"  # with PV limit power
         #folder_name = "grid_with_PV_limit_power_60"
+        #id = "4b47e3bdc403"  # with PV limit power
+        #folder_name = "grid_with_PV_volt_watt"
 
-
+        #id = "1b6f84097d7f"  # with ESS self-production
+        #folder_name = "grid_with_ESS_self_production_equal_gurobi_simplon"
+        #id = "1f94e9a9a371"  # with ESS self-production
+        #folder_name = "grid_with_ESS_self_production_gurobi_local"
+        id = "3350a4f1c2e5"  # with ESS self-production
+        folder_name = "grid_with_ESS_self_production_ipopt_local"
+        #id = "22912f50dc71"   #with PV_no_control
+        #folder_name = "grid_with_PV_gurobi"
+        #id = "b7690dbeac26"  # with PV limit power
+        #folder_name = "grid_with_PV_limit_power_60_gurobi"
+        #id = "32d8e9338170"  # with PV limit power
+        #folder_name = "grid_with_PV_volt_watt_gurobi"
 
 
         plotter.create_plots_for_voltages(id, folder_name)
@@ -643,11 +663,20 @@ def main():
 
     else:
 
-        folder_name = "grid_with_PV_limit_power_60"
+        """folder_name = "grid_with_PV_limit_power_60"
+        folder_name1 = "grid_with_PV_volt_watt"
         folder_name2 = "grid_with_ESS_self_production"
-        folder_name3 = "grid_with_ESS_self_production_equal_PV"
+        #folder_name3 = "grid_with_ESS_self_production_equal_PV"
         folder_name4 = "grid_with_PV"
-        list_folders = [folder_name, folder_name2, folder_name3, folder_name4]
+        list_folders = [folder_name, folder_name1, folder_name2, folder_name4]"""
+
+        folder_name = "grid_with_ESS_self_production_equal_gurobi_simplon"
+        folder_name1 = "grid_with_ESS_self_production_gurobi_local"
+
+        list_folders = [folder_name, folder_name1]
+        #list_names = ["Limit power 60%", "Volt-Watt", "Min self-production", "PV penetration 100%"]
+        list_names = ["Min self-production simplon", "Min self-production localhost"]
+
         len_list_folders = len(list_folders)
         count = 0
         file_path_to_store = ""
@@ -659,7 +688,6 @@ def main():
 
         logger.debug("file_path_to_store: "+str(file_path_to_store))
 
-        list_names = ["Limit power 60%", "Min self-production","Min self-production > PV", "PV penetration 100%"]
 
         plotter.compare_files(list_folders, file_path_to_store, "voltage_phase_1.json",None, list_names)
 

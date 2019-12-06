@@ -80,7 +80,9 @@ def check_power_profiles(radial_value):
                 power_profile_ids.append(power_profile['id'])
 
         logger.debug("profile ids "+str(profile_ids))
+        logger.debug("power_profile_ids "+str(power_profile_ids))
         for profile_id in profile_ids:
+            logger.debug("profile id "+str(profile_id))
             if profile_id:
                 if not bool(re.search("profile_\d", profile_id)):
                     if profile_id not in power_profile_ids:

@@ -180,8 +180,8 @@ class Limit_power:
 
 class Volt_Watt:
     def __init__(self):
-        self.min_vpu_low = 1.06
-        self.max_vpu_low = 1.1
+        self.min_vpu_high = 1.06
+        self.max_vpu_high = 1.1
         self.name = "volt-watt"
 
     def get_name(self):

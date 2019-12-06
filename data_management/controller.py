@@ -106,7 +106,9 @@ class gridController(threading.Thread):
 		# ----------PROFILES----------------#
 		self.profiles = Profiles()
 		self.global_control = GESSCon()
-		# profess.json_parser.set_topology(data)
+
+
+		################################### Setting elements to opendss ###############################
 		price_profile = None
 		answer_setup = self.input.setup_elements_in_simulator(self.topology, self.profiles, self.profess)
 		logger.debug("answer "+ str(answer_setup))
@@ -115,6 +117,7 @@ class gridController(threading.Thread):
 			self.redisDB.set("status_"+ str(self.id), answer_setup)
 			self.Stop()
 		logger.debug("!---------------Elements added to simulator------------------------ \n")
+		################################################################################################
 		
 		transformer_names = self.sim.get_transformer_names()
 		logger.debug("Transformer names: " + str(transformer_names))
@@ -381,7 +384,7 @@ class gridController(threading.Thread):
 				logger.debug("-------------------------------------------")
 				logger.debug("storages present in the simulation")
 				logger.debug("-------------------------------------------")
-				
+				logger.debug("soc_list_new_storages" +str(soc_list_new_storages))
 				if flag_global_control:
 					# logger.debug("price profile " + str(price_profile))
 					logger.debug("global profile "+str(global_profile))
@@ -397,7 +400,7 @@ class gridController(threading.Thread):
 				if not status_profess:
 					profess_output = self.profess.wait_and_get_output(soc_list_new_storages)
 					logger.debug("output profess " + str(profess_output))
-					if not profess_output == []:
+					if not profess_output == [] and not profess_output == 1:
 						logger.debug("Optimization succeded")
 
 						profess_result = self.input.get_powers_from_profess_output(profess_output,

@@ -13,6 +13,9 @@ services:
         max-file: "10"
     restart: "always"
   ofw:
+    build:
+      context: /Linksmart/optimization-framework
+      dockerfile: Dockerfile
     image: garagon/optimization:amd
     container_name: "ofw"
     ports:
@@ -25,25 +28,26 @@ services:
       - ./optimization-framework/utils/resources:/usr/src/app/utils/resources
       - ./optimization-framework/logs:/usr/src/app/logs
       - ./optimization-framework/logs/pyomo:/usr/src/app/logs/pyomo
-      - ./optimization-framework/utils/gurobi/license:/usr/src/app/share/gurobi811/license/gurobi.lic
+      - ./optimization-framework/utils/gurobi/license:/usr/src/app/share/gurobi811/license
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "10"
     command: ["python3", "-u", "ofw.py"]
-    #restart: "always"
+    restart: "always"
   se:
     build:
       context: ""
       dockerfile: Dockerfile
-    image: "simulation_engine"
-    #image: garagon/simulation-engine:latest
+    #image: "simulation_engine"
+    image: garagon/simulation-engine:latest
     container_name: "se"
     depends_on:
       - redis
     volumes:
-      - /mnt/c/Linksmart/simulation-engine/results:/usr/src/app/data
+      - ../simulation-engine/results:/usr/src/app/data
+      - /c/Program Files/OpenVPN/config:/usr/src/app/openvpn
     ports:
       - "9090:9090"
     logging:
@@ -51,6 +55,6 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
-    # restart: "always"
+    restart: "always"
     command: ["python3", "-u", "main.py"]
 
