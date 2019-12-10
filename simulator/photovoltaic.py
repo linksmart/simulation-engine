@@ -17,9 +17,9 @@ class Photovoltaic:
             for control_setting, value_control in meta.items():
                 if control_strategy == "limit_power":
                     if control_setting == "percentage_max_power":
-                        self.control.get_strategy().set_percentage = value_control
+                        self.control.get_strategy().set_percentage(value_control)
                     if control_setting == "sensitivity_factor":
-                        self.control.get_strategy().set_sensitivity_factor = value_control
+                        self.control.get_strategy().set_sensitivity_factor(value_control)
                 if control_strategy == "volt-watt" or control_strategy == "volt-var":
                     if control_setting == "min_vpu_high":
                         self.control.get_strategy().set_min_vpu_high(value_control)
@@ -180,8 +180,8 @@ class Limit_power:
 
 class Volt_Watt:
     def __init__(self):
-        self.min_vpu_low = 1.06
-        self.max_vpu_low = 1.1
+        self.min_vpu_high = 1.06
+        self.max_vpu_high = 1.1
         self.name = "volt-watt"
 
     def get_name(self):

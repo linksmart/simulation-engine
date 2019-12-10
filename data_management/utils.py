@@ -33,6 +33,20 @@ class Utils(metaclass=Singleton):
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
 
+
+    def read_data_from_file(self, file_path):
+        path = self.get_path(file_path)
+        try:
+            logger.debug("reading data from "+str(path))
+            data = None
+            if os.path.exists(path):
+                with open(path, "r") as json_file:
+                    data = json.load(json_file)
+            return data
+        except Exception as e:
+            logger.error("Error while reading file ", str(path))
+            logger.error(e)
+
     def store_data(self, fname, data):
         path = self.get_path(fname)
         self.create_path(path)

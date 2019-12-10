@@ -1,22 +1,9 @@
 import datetime
 
-import six, logging
+import six
 import typing
-import os
 
-logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
-logger = logging.getLogger(__file__)
 
-def rmfile(id, directory):
-    os.chdir(directory)
-    
-    curdir = os.getcwd()
-    files = os.listdir(curdir)
-    for file in files:
-        if file.startswith(str(id)):
-            os.remove(os.path.join(curdir,file))
-    os.chdir("..")
-    
 def _deserialize(data, klass):
     """Deserializes dict, list, str into an object.
 
@@ -36,13 +23,18 @@ def _deserialize(data, klass):
         return deserialize_date(data)
     elif klass == datetime.datetime:
         return deserialize_datetime(data)
-    elif type(klass) == typing.GenericMeta:
-        if klass.__extra__ == list:
+    elif hasattr(klass, '__origin__'):
+        if klass.__origin__ == list:
             return _deserialize_list(data, klass.__args__[0])
-        if klass.__extra__ == dict:
+        if klass.__origin__ == dict:
             return _deserialize_dict(data, klass.__args__[1])
     else:
         return deserialize_model(data, klass)
+    """elif type(klass) == typing.GenericMeta:
+            if klass.__extra__ == list:
+                return _deserialize_list(data, klass.__args__[0])
+            if klass.__extra__ == dict:
+                return _deserialize_dict(data, klass.__args__[1])"""
 
 
 def _deserialize_primitive(data, klass):
@@ -117,15 +109,14 @@ def deserialize_model(data, klass):
         return data
 
     for attr, attr_type in six.iteritems(instance.swagger_types):
-        #logger.debug(" Data: "+str(data)+"\n")
-        #logger.debug(" instance.attribute_map[attr]: "+str(instance.attribute_map[attr])+" " +str(isinstance(data, (list, dict))))
-        #logger.debug("isinstance(data, (list, dict))"+str(isinstance(data, (list, dict)))+"\n")
         if data is not None \
                 and instance.attribute_map[attr] in data \
                 and isinstance(data, (list, dict)):
             value = data[instance.attribute_map[attr]]
             setattr(instance, attr, _deserialize(value, attr_type))
+
     return instance
+
 
 def _deserialize_list(data, boxed_type):
     """Deserializes a list and its elements.

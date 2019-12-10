@@ -69,7 +69,7 @@ class JsonParser:
         if "radials" in self.topology.keys():
             for radial_number in range(len(self.topology["radials"])):
                 node_list = self.get_node_name_list(soc_list)
-                logger.debug("node list "+str(node_list))
+                #logger.debug("node list "+str(node_list))
                 index = 0
                 if node_list!=0:
                     for node_name in node_list:

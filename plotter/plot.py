@@ -10,6 +10,7 @@ import seaborn as sns
 from profess.Http_commands import Http_commands
 import os
 from data_management.utils import Utils
+from plotter.comparison import Comparison
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -20,6 +21,7 @@ class Plotter:
         self.url_dsf_se = url
         self.httpClass = Http_commands()
         self.utils = Utils()
+        self.compare = Comparison()
         logger.debug("Plotter created")
 
     def get_connection_topology(self, id):
@@ -244,7 +246,7 @@ class Plotter:
             power_consumption = data_list_Load
         else:
             logger.error("No data for power consumption")
-            return None
+            #return None
 
         #logger.debug("power_consumption "+str(power_consumption))
 
@@ -267,6 +269,8 @@ class Plotter:
             #logger.debug("power_grid "+str(power_grid))
         elif not power_consumption == []:
             power_grid = power_consumption
+        elif not power_generation == []:
+            power_grid = [-x for x in power_generation]
 
         #logger.debug("power grid "+str(power_grid))
             #power_consumption = [0]*n
@@ -294,10 +298,11 @@ class Plotter:
         for key, value in data.items():
             len_data = len(value)
 
-        for key, value in data.items():
-            logger.debug("data "+str(data) +" type "+str(type(value[0])))
-        obj= pd.DataFrame.from_dict(data)
-        logger.debug("obj "+str(obj))
+        #for key, value in data.items():
+            #logger.debug("data "+str(data) +" type "+str(type(value[0])))
+        #obj= pd.DataFrame.from_dict(data)
+        obj = pd.DataFrame.from_dict(data, dtype=np.float32)
+        #logger.debug("obj "+str(obj))
 
         if not data2== {}:
             obj2 = pd.DataFrame.from_dict(data2)
@@ -314,7 +319,7 @@ class Plotter:
 
         number_colors = len(data)
 
-        if not file_name.find("voltage") == -1 or not file_name.find("soc") == -1 or not file_name.find("usage") == -1:
+        if not file_name.find("voltage") == -1 or not file_name.find("soc") == -1 or not file_name.find("usage") == -1 or not file_name.find("comparison") == -1:
             palete = {}
             if number_colors == 1:
                 for key in data.keys():
@@ -338,6 +343,7 @@ class Plotter:
                 elif "transformer" in key:
                     palete[key] = "#0652DD"
 
+
             logger.debug("palete "+str(palete))
 
         g = sns.lineplot(data=obj, sort=False, ax=ax1, dashes=False, palette= palete)
@@ -346,7 +352,7 @@ class Plotter:
             g1 = sns.lineplot(data=obj2, sort=False, ax=ax1, legend="full", dashes=[[4,2], [1,4]], palette={"higher limit": "#EA2027","lower limit":"#EA2027"}) # just limits and "--"
 
 
-        #g.set_ylim(99.7,100.2)
+        #g.set_ylim(99.7,100.3)
         #leg = g._legend.texts
         #logger.debug("legend "+str(leg))
 
@@ -366,10 +372,10 @@ class Plotter:
         g.set_position([box.x0, box.y0, box.width * 0.85, box.height])  # resize position
         g.legend(loc='center right', bbox_to_anchor=(1.25, 0.5), ncol=1)
         plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-        plt.autoscale(enable=True)
+        #plt.autoscale(enable=True)
 
         if not file_name == None:
-            file_name = "./" + file_name + ".jpg"
+            file_name = file_name + ".jpg"#"./" + file_name + ".jpg"
             path = self.utils.get_path(file_name)
             self.utils.create_path(path)
             logger.debug("filename "+str(path))
@@ -388,8 +394,8 @@ class Plotter:
         ######################################################################
 
         for bus_name, element_object in connections.items():
-            base = "results/" + folder_name + "/" + bus_name + "/"
-            file_name_soc = base + "soc"
+            base = os.path.join("results", folder_name, bus_name)
+            file_name_soc = os.path.join(base, "soc")
 
             element_type_to_get = None
             for element_type, element_names in element_object.items():
@@ -416,10 +422,10 @@ class Plotter:
         ######################################################################
 
         for bus_name, element_object in connections.items():
-            base = "results/" + folder_name + "/" + bus_name + "/"
-            file_name_P = base + "powers_P"
-            file_name_Q = base + "powers_Q"
-            file_name_soc = base + "soc"
+            base = os.path.join("results", folder_name, bus_name)
+            file_name_P = os.path.join(base, "powers_P")
+            file_name_Q = os.path.join(base, "powers_Q")
+
             logger.debug("file name P: " + str(file_name_P))
             logger.debug("file name Q: " + str(file_name_Q))
             phase_number = 4
@@ -510,8 +516,8 @@ class Plotter:
         ylabel = "PV usage [%]"
 
         for bus_name, element_object in connections.items():
-            base = "results/" + folder_name + "/" + bus_name + "/"
-            file_name = base + "usage_PV"
+            base = os.path.join("results", folder_name, bus_name)#"results/" + folder_name + "/" + bus_name + "/"
+            file_name = os.path.join(base, "usage_PV")
             for element_type, element_names in element_object.items():
 
                 if element_type == "photovoltaics":
@@ -534,8 +540,8 @@ class Plotter:
         connections = self.get_connection_topology(id)
         logger.debug("connections " + str(connections))
 
-        base_all_voltages = "results/" + folder_name + "/"
-        file_name_voltages = base_all_voltages + "all_voltages"
+        base_all_voltages = os.path.join("results", folder_name)
+        file_name_voltages = os.path.join(base_all_voltages, "all_voltages")
         logger.debug("file_name_voltages " + str(file_name_voltages))
 
         xlabel = "Timestamp [h]"
@@ -552,38 +558,155 @@ class Plotter:
         for bus_name, connected_elements in connections.items():
             xlabel = "Timestamp [h]"
             ylabel = "Voltage [pu]"
-            base = "results/"+ folder_name + "/" + bus_name + "/"
-            file_name_voltage_node = base + "voltage_" + bus_name
+            base = os.path.join("results", folder_name, bus_name)
+            file_name_voltage_node = os.path.join(base,"voltage")
             logger.debug("file_name_voltage_node "+str(file_name_voltage_node))
 
             for i in range(3):
                 voltages_node = self.get_data_voltages(id, bus_name, phase_number=(i + 1))
+                voltages_node_to_store = voltages_node.copy()
                 file_name = file_name_voltage_node + "_phase_" + str(i + 1)
+                #logger.debug("voltages_node " + str(voltages_node))
+                self.utils.store_data(file_name + ".json", voltages_node)
                 self.plot(voltages_node, file_name=file_name, xlabel=xlabel, ylabel=ylabel)
+                #voltages_node_to_store["phase_"+ str(i + 1)]=voltages_node_to_store.pop(bus_name)
+                #logger.debug("voltages_node " + str(voltages_node_to_store))
 
 
 
 
+    def compare_files(self, base_path_list, file_path_to_store, data_file_name="powers_P.json", data_type="grid_power", list_plot_names=None):
+        paths = []
+        for base_path in base_path_list:
+            paths.append(os.path.join("results", base_path))
+
+        #self.compare.get_grid_data_from_file(paths)
+
+        node_names = []
+        folder_path = []
+        for base_path in paths:
+            currently_folder_path = self.utils.get_path(base_path)
+            logger.debug("currently_folder_path "+str(currently_folder_path))
+            folder_path.append(currently_folder_path)
+            try:
+                node_names = next(os.walk(currently_folder_path))[1]
+                logger.debug("node_names " + str(node_names))
+            except Exception as e:
+                logger.error("Folder path:"+ str(currently_folder_path)+" not existing")
+                logger.error(e)
+                break
+
+        xlabel = "Timestamp [h]"
+        ylabel = "Power [kW]"
+
+        data_to_plot = []
+        base_path_to_store = self.utils.get_path(os.path.join("results","comparison",file_path_to_store))
+        for node in node_names:
+            data = self.compare.get_grid_data_from_node(folder_path, node, data_file_name, data_type, list_plot_names)
+            if not data == {} and not data == []:
+                data_to_plot.append(data)
+                if not data_type == None:
+                    if "." in data_file_name:
+                        ending_file = data_file_name.split(".")[0]
+                    else:
+                        ending_file = data_file_name
+                    complete_file_path_to_store = os.path.join(base_path_to_store, node, ending_file, data_type)
+                else:
+                    if "." in data_file_name:
+                        ending_file = data_file_name.split(".")[0]
+                    else:
+                        ending_file = data_file_name
+                    complete_file_path_to_store = os.path.join(base_path_to_store, node, ending_file)
+                #logger.debug("data "+str(data))
+                self.plot(data, file_name=complete_file_path_to_store, xlabel=xlabel, ylabel=ylabel)
+        #logger.debug("data_to_plot " + str(data_to_plot))
 
 
 
 
 def main():
-    import sys
-    url = "http://192.168.99.100:9090"
+
+    #url = "http://192.168.99.100:9090"
+    url = "http://localhost:9090"
     plotter = Plotter(url)
-    id = "80dcb13d0478"  #with ESS
-    folder_name = "grid_with_ESS"
-    #id = "24fafe423bcc"   #with PV
-    #folder_name = "grid_with_PV"
+    comparison = False
+
+    if not comparison:
+
+        #id = "3d68cf40d742"  #with ESS self-production
+        #folder_name = "grid_with_ESS_self_production"
+        #id = "a72a26137c54"   #with PV_no_control
+        #folder_name = "grid_with_PV"
+        #id = "a81684261326"  # with PV limit power
+        #folder_name = "grid_with_PV_limit_power_60"
+        #id = "4b47e3bdc403"  # with PV limit power
+        #folder_name = "grid_with_PV_volt_watt"
+
+        #id = "1b6f84097d7f"  # with ESS self-production
+        #folder_name = "grid_with_ESS_self_production_equal_gurobi_simplon"
+        #id = "1f94e9a9a371"  # with ESS self-production
+        #folder_name = "grid_with_ESS_self_production_gurobi_local"
+        id = "3350a4f1c2e5"  # with ESS self-production
+        folder_name = "grid_with_ESS_self_production_ipopt_local"
+        #id = "22912f50dc71"   #with PV_no_control
+        #folder_name = "grid_with_PV_gurobi"
+        #id = "b7690dbeac26"  # with PV limit power
+        #folder_name = "grid_with_PV_limit_power_60_gurobi"
+        #id = "32d8e9338170"  # with PV limit power
+        #folder_name = "grid_with_PV_volt_watt_gurobi"
 
 
+        plotter.create_plots_for_voltages(id, folder_name)
+        plotter.create_plots_for_powers(id, folder_name)
+        plotter.create_plots_for_socs(id, folder_name)
+        plotter.create_plots_for_pv_usage(id, folder_name)
 
-    #plotter.create_plots_for_voltages(id, folder_name)
-    #plotter.create_plots_for_powers(id, folder_name)
-    #plotter.create_plots_for_socs(id, folder_name)
-    plotter.create_plots_for_pv_usage(id, folder_name)
-    sys.exit(0)
+    else:
+
+        """folder_name = "grid_with_PV_limit_power_60"
+        folder_name1 = "grid_with_PV_volt_watt"
+        folder_name2 = "grid_with_ESS_self_production"
+        #folder_name3 = "grid_with_ESS_self_production_equal_PV"
+        folder_name4 = "grid_with_PV"
+        list_folders = [folder_name, folder_name1, folder_name2, folder_name4]"""
+
+        folder_name = "grid_with_ESS_self_production_equal_gurobi_simplon"
+        folder_name1 = "grid_with_ESS_self_production_gurobi_local"
+
+        list_folders = [folder_name, folder_name1]
+        #list_names = ["Limit power 60%", "Volt-Watt", "Min self-production", "PV penetration 100%"]
+        list_names = ["Min self-production simplon", "Min self-production localhost"]
+
+        len_list_folders = len(list_folders)
+        count = 0
+        file_path_to_store = ""
+        for folder in list_folders:
+            file_path_to_store = file_path_to_store + folder
+            if not count == (len_list_folders - 1):
+                file_path_to_store = file_path_to_store + "_and_"
+            count = count + 1
+
+        logger.debug("file_path_to_store: "+str(file_path_to_store))
+
+
+        plotter.compare_files(list_folders, file_path_to_store, "voltage_phase_1.json",None, list_names)
+
+        plotter.compare_files(list_folders, file_path_to_store, "powers_P.json", "grid",list_names)
+
+        plotter.compare_files(list_folders, file_path_to_store, "powers_P.json","load", list_names)
+
+        plotter.compare_files(list_folders, file_path_to_store, "powers_P.json", "pv", list_names)
+
+        plotter.compare_files(list_folders, file_path_to_store, "powers_P.json","storage", list_names)
+
+        plotter.compare_files(list_folders, file_path_to_store, "powers_Q.json", "grid", list_names)
+
+        plotter.compare_files(list_folders, file_path_to_store, "powers_Q.json", "load", list_names)
+
+        plotter.compare_files(list_folders, file_path_to_store, "powers_Q.json", "pv", list_names)
+
+        plotter.compare_files(list_folders, file_path_to_store, "powers_Q.json", "storage", list_names)
+
 
 
 
