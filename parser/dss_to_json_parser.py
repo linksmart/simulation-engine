@@ -290,7 +290,7 @@ class dssToJson:
 											value = False
 									elif key != 'length' and key != 'linecode' and re.compile('^\s*\d+\s*$').search(value) and key != 'bus1' and key != 'bus2':
 										value = int(value)
-									elif key != 'linecode' and re.compile('^(\d*\.\d+)|(\d+\.\d*)\s*$').search(
+									elif key != 'linecode' and re.compile('^(\d*\.\d+)|(\d+\.\d*)|(\d+)\s*$').search(
 										value) and key != 'bus1' and key != 'bus2':
 										value = float(value)
 									if powerline['phases']==3 and(key == 'bus1' or key == 'bus2'):
