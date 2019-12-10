@@ -22,12 +22,24 @@ class dssToJson:
 		result['common']['phases'] = 3
 		unit_linecode = None
 		
-		rel_path = "Check.dss"
-		cur_path = '/opt/project/tests/data/13Bus' + '/' + rel_path
-		
+		rel_path = "IEEE123Master.DSS"
+		path = '/opt/project/tests/data/123Bus'
+		cur_path = path  + '/' + rel_path
+		new_path = '/opt/project/tests/data/123Bus' + '/' + 'ResultFile.DSS'
+		f1 = open(new_path, 'a')
 		with open(cur_path, 'r') as f:
 			for cnt, line in enumerate(f):
-				
+				words = line.strip(' ').split()
+				if len(words)>0 and words[0] == 'Redirect':
+					file_path = path + '/' + words[1]
+					with open(file_path, 'r') as file:
+						f1.writelines(file.readlines())
+				else:
+					f1.write(line)
+		f1.close()
+		
+		with open(new_path, 'r') as f:
+			for cnt, line in enumerate(f):
 				words = line.strip().split(" ")
 				if words[0] == "!":
 					continue
