@@ -18,6 +18,7 @@ class dssToJson:
 		radials['powerLines'] = []
 		result['common']['angle'] = 30
 		result['common']['MVAsc3'] = 20000
+		result['common']['MVAsc1'] = 21000
 		result['common']['base_frequency'] = 60
 		result['common']['phases'] = 3
 		unit_linecode = None

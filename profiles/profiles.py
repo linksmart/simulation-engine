@@ -132,7 +132,7 @@ class Profiles:
                 rad = []
                 for x in range(0, red_arr.__len__()):
                     w = red_arr[x][:-2].split(",")
-                    if w.__len__() != 9:
+                    if w.__len__() != 8:
                         break
 
                     rad.append(w)
