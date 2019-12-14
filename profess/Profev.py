@@ -68,6 +68,8 @@ class Profev:
                 }
             },
             "generic": {
+                "GlobalTargetWeight": 1,
+                "LocalTargetWeight": 3
             },
             "ESS": {
                 "meta": {
@@ -184,13 +186,12 @@ class Profev:
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         all_successful = True
         for node_name in node_name_list:
+            logger.debug("standard data "+str(self.standard_data))
             if self.post_data((self.standard_data), node_name, soc_list):
                 all_successful = False
-        """for node_element in node_element_list:
-            for node_name in node_element:
-                if self.post_data((self.standard_data), node_name, soc_list):
-                    all_successful = False"""
-        #logger.debug("##############")
+                logger.error("failed to post_all_standard_data to OFW ")
+                return 1
+
         if all_successful:
             return 0
         else:
@@ -239,7 +240,6 @@ class Profev:
             response = self.httpClass.get(self.domain + "optimization/status")
             json_response = response.json()
             if response.status_code == 200:
-
                 return json_response
             else:
                 logger.error("Failed to get_optimization_status, response from ofw:" + str(json_response))
@@ -247,6 +247,7 @@ class Profev:
         except:
             logger.error("Failed to get optimization status, No connection to the OFW could be established at :" + str(
                 self.domain) + "optimization/status")
+            return 1
 
     def get_output(self, profess_id):
         """
@@ -282,13 +283,15 @@ class Profev:
         """
         # busy waiting
         for i in range(1,4):
-            logger.debug("finish status key " +str(self.redisDB.get(self.finish_status_key)))
+            #logger.debug("finish status key " +str(self.redisDB.get(self.finish_status_key)))
             if self.redisDB.get(self.finish_status_key) == "True":
                 break
             else:
                 time.sleep(1)
 
         opt_status = self.get_optimization_status()
+        if opt_status == 1:
+            return -1
         # logger.debug("optimization status: " + str(opt_status))
         running_flag = False
         node_name_list = self.json_parser.get_node_name_list(soc_list)
@@ -317,12 +320,16 @@ class Profev:
         logger.debug("wait for OFW output")
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
-            while self.is_running(soc_list):
+            running = True
+            while running:
+                running = self.is_running(soc_list)
                 logger.debug("finish status key " + str(self.redisDB.get(self.finish_status_key)))
                 if self.redisDB.get(self.finish_status_key) == "True":
                     break
                 else:
                     pass
+                if running == -1:
+                    return 1
             output_list = []
 
             for node_name in node_name_list:
@@ -412,23 +419,33 @@ class Profev:
                             type_optimization = "stochastic"
                             if type == "residential" and storage_opt_model == "Maximize Self-Consumption":
                                 storage_opt_model = "StochasticResidentialMaxPV"
-                                solver = "cbc"
+                                #solver = "cbc"
+                                solver = "gurobi"
                                 single_ev = True
-                            if type == "residential" and storage_opt_model == "Maximize Self-Production":
+                            if type == "residential" and storage_opt_model == "Maximize Self-Production" and not global_control:
                                 storage_opt_model = "StochasticResidentialMinGrid"
-                                solver = "ipopt"
+                                #solver = "ipopt"
+                                solver = "gurobi"
                                 single_ev = True
                             if type == "residential" and storage_opt_model == "MinimizeCosts":
                                 storage_opt_model = "StochasticResidentialMinPBill"
-                                solver = "cbc"
+                                #solver = "ipopt"
+                                solver = "gurobi"
+                                single_ev = True
+                            if type == "residential" and storage_opt_model == "Maximize Self-Production" and global_control:
+                                storage_opt_model = "StochasticResidentialMinGridGESSConSimulation"
+                                #solver = "ipopt"
+                                solver = "gurobi"
                                 single_ev = True
                             if type == "commercial" and storage_opt_model == "Maximize Self-Consumption":
                                 storage_opt_model = "CarParkModel"
-                                solver = "cbc"
+                                #solver = "cbc"
+                                solver = "gurobi"
                                 single_ev = False
                             if type == "commercial" and storage_opt_model == "Maximize Self-Production":
                                 storage_opt_model = "CarParkModelMinGrid"
-                                solver = "ipopt"
+                                #solver = "ipopt"
+                                solver = "gurobi"
                                 single_ev = False
                         else:
                             type_optimization = "discrete"
@@ -464,11 +481,10 @@ class Profev:
                                             profess_id, single_ev)
 
                 if start_response is None:
-                    break
                     return 1
+
                 if start_response.status_code is not 200 and start_response is not None:
                     self.check_start_issue(start_response, node_name, soc_list)
-                    break
                     return 1
             return 0
         else:
@@ -541,6 +557,7 @@ class Profev:
         :return: 0 when successful, else 1
         """
         logger.debug("update_config_json has started at " + str(profess_id))
+        #logger.debug("config_json "+str(config_json))
         if profess_id != 0:
             response = self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
             json_response = response.json()
@@ -856,24 +873,30 @@ class Profev:
                         profess_id = self.get_profess_id(node_name, soc_list)
                         if profess_id != 0:
                             config_data_of_node = self.dataList[node_number][node_name][profess_id]
+
                             node_name_base = node_name
                             if "." in node_name_base:
                                 node_name_base = node_name.split(".")[0]
-                            if node_name_base in load_profile_for_node:
-                                phase = load_profile_for_node[node_name_base]
-                                # logger.debug("phase pv "+str(phase))
 
-                                # if node_name_base + ".1.2.3" or node_name_base in phase:
-                                # logger.debug("node_name_base or 123 in phase")
-                                for node_name_complete in phase.keys():
+                            if node_name_base in load_profile_for_node:
+                                profile_per_node = load_profile_for_node[node_name_base]
+                                #logger.debug("profile_per_node  "+str(profile_per_node))
+
+                                # if node_name_base + ".1.2.3" or node_name_base in profile_per_node:
+                                # logger.debug("node_name_base or 123 in profile_per_node")
+                                flag_per_phase = False
+                                r_flag = False
+                                s_flag = False
+                                t_flag = False
+                                for node_name_complete, values in profile_per_node.items():
 
                                     len_node_name_complete = 1
                                     if "." in node_name_complete:
                                         len_node_name_complete = len(node_name_complete.split("."))
 
                                     if (node_name_base == node_name_complete) or len_node_name_complete > 2:
-                                        config_data_of_node["load"]["P_Load"] = phase[node_name_complete]
-                                        three_phase = phase[node_name_complete]
+                                        config_data_of_node["load"]["P_Load"] = values
+                                        three_phase = values
                                         single_phase = []
 
                                         if len_node_name_complete != 3:
@@ -881,12 +904,14 @@ class Profev:
                                                 # when one profile is given, a symetrical load is assumed
                                                 value = value / 3
                                                 single_phase.append(value)
+
                                             config_data_of_node["load"][
                                                 "P_Load_R"] = single_phase
                                             config_data_of_node["load"][
                                                 "P_Load_S"] = single_phase
                                             config_data_of_node["load"][
                                                 "P_Load_T"] = single_phase
+
                                         elif len_node_name_complete == 3:
                                             logger.debug("three phase " + str(three_phase))
 
@@ -910,68 +935,44 @@ class Profev:
                                             else:
                                                 config_data_of_node["load"]["P_Load_T"] = [0] * 24
 
-                                    elif node_name_base in node_name_complete:
-
-                                        r_flag = False
-                                        s_flag = False
-                                        t_flag = False
+                                    elif node_name_base in node_name_complete and len_node_name_complete == 2:
+                                        flag_per_phase = True
                                         # checks which phases are used
                                         if node_name_base + ".1" == node_name_complete:
-                                            config_data_of_node["load"]["P_Load_R"] = phase[node_name_complete]
+                                            config_data_of_node["load"]["P_Load_R"] = values
                                             r_flag = True
                                         if node_name_base + ".2" == node_name_complete:
-                                            config_data_of_node["load"]["P_Load_S"] = phase[node_name_complete]
+                                            config_data_of_node["load"]["P_Load_S"] = values
                                             s_flag = True
                                         if node_name_base + ".3" == node_name_complete:
-                                            config_data_of_node["load"]["P_Load_T"] = phase[node_name_complete]
+                                            config_data_of_node["load"]["P_Load_T"] = values
                                             t_flag = True
-
-                                        if not r_flag:
-                                            config_data_of_node["load"]["P_Load_R"] = [0] * 24
-                                        if not s_flag:
-                                            config_data_of_node["load"]["P_Load_S"] = [0] * 24
-                                        if not t_flag:
-                                            config_data_of_node["load"]["P_Load_T"] = [0] * 24
-                                        three_phase = []
-                                        for value in range(24):
-                                            three_phase_value = config_data_of_node["load"]["P_Load_R"][value] + \
-                                                                config_data_of_node["load"]["P_Load_S"][value] + \
-                                                                config_data_of_node["load"]["P_Load_T"][value]
-                                            three_phase.append(three_phase_value)
-                                        config_data_of_node["load"]["P_Load"] = three_phase
 
                                     else:
                                         logger.debug("No node_name in phase")
 
-                                    logger.debug("load profile set for " + str(node_name))
+                                if flag_per_phase:
+                                    flag_per_phase = False
+
+                                    if not r_flag:
+                                        config_data_of_node["load"]["P_Load_R"] = [0] * 24
+                                    if not s_flag:
+                                        config_data_of_node["load"]["P_Load_S"] = [0] * 24
+                                    if not t_flag:
+                                        config_data_of_node["load"]["P_Load_T"] = [0] * 24
+                                    three_phase = []
+                                    for value in range(24):
+                                        three_phase_value = config_data_of_node["load"]["P_Load_R"][value] + \
+                                                            config_data_of_node["load"]["P_Load_S"][value] + \
+                                                            config_data_of_node["load"]["P_Load_T"][value]
+                                        three_phase.append(three_phase_value)
+                                    config_data_of_node["load"]["P_Load"] = three_phase
+
+                                logger.debug("load profile set for " + str(node_name))
 
                 else:
                     logger.debug("no load profile was given")
-                """if pv_profiles is not None:
-                    # setting pv_profiles
-                    for pv_profiles_for_node in pv_profiles:
-                        profess_id = self.get_profess_id(node_name, soc_list)
-                        if profess_id != 0:
-                            config_data_of_node = self.dataList[node_number][node_name][profess_id]
-                            if node_name in pv_profiles_for_node:
-                                phase = pv_profiles_for_node[node_name]
-                                if node_name + ".1.2.3" or node_name in phase:
-                                    if node_name in phase:
-                                        config_data_of_node["photovoltaic"]["P_PV"] = phase[node_name]
-                                        three_phase = phase[node_name]
-                                    if node_name + ".1.2.3" in phase:
-                                        config_data_of_node["photovoltaic"]["P_PV"] = phase[node_name + ".1.2.3"]
-                                        three_phase = phase[node_name + ".1.2.3"]
-                                    single_phase = []
-                                    for value in three_phase:
-                                        value = value / 3
-                                        single_phase.append(value)
-                                    config_data_of_node["photovoltaic"]["P_PV_R"] = copy.deepcopy(single_phase)
-                                    config_data_of_node["photovoltaic"]["P_PV_S"] = copy.deepcopy(single_phase)
-                                    config_data_of_node["photovoltaic"]["P_PV_T"] = copy.deepcopy(single_phase)
-                                    logger.debug("pv profile set for " + str(node_name))
-                else:
-                    logger.debug("no pv_profile was given")"""
+
                 if pv_profiles is not None:
                     # setting pv_profiles
                     for pv_profiles_for_node in pv_profiles:
@@ -983,17 +984,21 @@ class Profev:
                                 node_name_base = node_name.split(".")[0]
 
                             if node_name_base in pv_profiles_for_node:
-                                phase = pv_profiles_for_node[node_name_base]
+                                profile_per_node = pv_profiles_for_node[node_name_base]
 
-                                for node_name_complete in phase.keys():
+                                flag_per_phase = False
+                                r_flag = False
+                                s_flag = False
+                                t_flag = False
+                                for node_name_complete, values in profile_per_node.items():
 
                                     len_node_name_complete = 1
                                     if "." in node_name_complete:
                                         len_node_name_complete = len(node_name_complete.split("."))
 
                                     if (node_name_base == node_name_complete) or len_node_name_complete > 2:
-                                        config_data_of_node["photovoltaic"]["P_PV"] = phase[node_name_complete]
-                                        three_phase = phase[node_name_complete]
+                                        config_data_of_node["photovoltaic"]["P_PV"] = values
+                                        three_phase = values
                                         single_phase = []
 
                                         if len_node_name_complete != 3:
@@ -1030,52 +1035,62 @@ class Profev:
                                             else:
                                                 config_data_of_node["photovoltaic"]["P_PV_T"] = [0] * 24
 
-                                    elif node_name_base in node_name_complete:
-
+                                    elif node_name_base in node_name_complete and len_node_name_complete == 2:
+                                        flag_per_phase = True
                                         r_flag = False
                                         s_flag = False
                                         t_flag = False
                                         # checks which phases are used
                                         if node_name_base + ".1" == node_name_complete:
-                                            config_data_of_node["photovoltaic"]["P_PV_R"] = phase[node_name_complete]
+                                            config_data_of_node["photovoltaic"]["P_PV_R"] = values
                                             r_flag = True
                                         if node_name_base + ".2" == node_name_complete:
-                                            config_data_of_node["photovoltaic"]["P_PV_S"] = phase[node_name_complete]
+                                            config_data_of_node["photovoltaic"]["P_PV_S"] = values
                                             s_flag = True
                                         if node_name_base + ".3" == node_name_complete:
-                                            config_data_of_node["photovoltaic"]["P_PV_T"] = phase[node_name_complete]
+                                            config_data_of_node["photovoltaic"]["P_PV_T"] = values
                                             t_flag = True
 
-                                        if not r_flag:
-                                            config_data_of_node["photovoltaic"]["P_PV_R"] = [0] * 24
-                                        if not s_flag:
-                                            config_data_of_node["photovoltaic"]["P_PV_S"] = [0] * 24
-                                        if not t_flag:
-                                            config_data_of_node["photovoltaic"]["P_PV_T"] = [0] * 24
-                                        three_phase = []
-                                        for value in range(24):
-                                            three_phase_value = config_data_of_node["photovoltaic"]["P_PV_R"][value] + \
-                                                                config_data_of_node["photovoltaic"]["P_PV_S"][value] + \
-                                                                config_data_of_node["photovoltaic"]["P_PV_T"][value]
-                                            three_phase.append(three_phase_value)
-                                        config_data_of_node["photovoltaic"]["P_PV"] = three_phase
                                     else:
                                         logger.debug("No node_name in phase")
+
+                                if flag_per_phase:
+                                    flag_per_phase = False
+                                    if not r_flag:
+                                        config_data_of_node["photovoltaic"]["P_PV_R"] = [0] * 24
+                                    if not s_flag:
+                                        config_data_of_node["photovoltaic"]["P_PV_S"] = [0] * 24
+                                    if not t_flag:
+                                        config_data_of_node["photovoltaic"]["P_PV_T"] = [0] * 24
+                                    three_phase = []
+                                    for value in range(24):
+                                        three_phase_value = config_data_of_node["photovoltaic"]["P_PV_R"][value] + \
+                                                            config_data_of_node["photovoltaic"]["P_PV_S"][value] + \
+                                                            config_data_of_node["photovoltaic"]["P_PV_T"][value]
+                                        three_phase.append(three_phase_value)
+                                    config_data_of_node["photovoltaic"]["P_PV"] = three_phase
+
+                                logger.debug("PV profile set for " + str(node_name))
+
                 else:
                     logger.debug("no pv_profile was given")
                 if ess_con is not None:
                     # setting gesscon profile
+                    logger.debug("ess_con "+str(ess_con))
                     for ess_con_global in ess_con:
                         profess_id = self.get_profess_id(node_name, soc_list)
                         if profess_id != 0:
                             config_data_of_node = self.dataList[node_number][node_name][profess_id]
                             if node_name in ess_con_global:
                                 phase = ess_con_global[node_name]
-                                if node_name + ".1.2.3" in phase:
+                                logger.debug("phase "+str(phase))
+                                for storage_name, global_profile in phase.items():
+                                    config_data_of_node["global_control"]["ESS_Control"] = global_profile
+                                """if node_name + ".1.2.3" in phase:
                                     config_data_of_node["global_control"]["ESS_Control"] = phase[node_name + ".1.2.3"]
                                     # logger.debug("ess_con profile set")
                                 if node_name in phase:
-                                    config_data_of_node["global_control"]["ESS_Control"] = phase[node_name]
+                                    config_data_of_node["global_control"]["ESS_Control"] = phase[node_name]"""
                                 logger.debug("ess_con profile set")
                 else:
                     logger.debug("no ess_con profile was given")
@@ -1155,7 +1170,7 @@ class Profev:
         :return:
         """
         logger.debug("set_up_profess started")
-        #logger.debug("soc_list " + str(soc_list))
+        #logger.debug("load_profile " + str(load_profiles))
         # logger.debug("load_profiles "+ str(load_profiles))
         # logger.debug("pv_profiles "+ str(pv_profiles))
         # logger.debug("price_profiles "+ str(price_profiles))
@@ -1163,7 +1178,9 @@ class Profev:
         if self.dataList == []:
             # this happends just for the first set_up
             self.set_data_list(soc_list)
-            self.post_all_standard_data(soc_list)
+            answer = self.post_all_standard_data(soc_list)
+            if answer:
+                return 1
             node_name_list = self.json_parser.get_node_name_list(soc_list)
             node_name_list = list(dict.fromkeys(node_name_list))
             if node_name_list != 0:

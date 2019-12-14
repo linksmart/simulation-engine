@@ -497,9 +497,9 @@ class InputController:
                         for value_key, value in results.items():
                             if ev_unit.get_id() in value_key:
                                 p_ev = value
-                            if "p_ess" == value_key:
+                            if "P_ESS_Output" == value_key:
                                 p_ess = value
-                            if "p_pv" == value_key:
+                            if "P_PV_Output" == value_key:
                                 p_pv = value
         if p_ev == None:
             p_ev = 0

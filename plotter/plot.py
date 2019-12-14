@@ -626,28 +626,29 @@ class Plotter:
 
 def main():
 
-    #url = "http://192.168.99.100:9090"
-    url = "http://localhost:9090"
+    #url = "http://192.168.99.100:9091"
+    url = "http://localhost:9091"
     plotter = Plotter(url)
-    comparison = False
+    comparison = True
 
     if not comparison:
+        logger.debug("Reading information from dsf-se")
 
         #id = "3d68cf40d742"  #with ESS self-production
         #folder_name = "grid_with_ESS_self_production"
-        #id = "a72a26137c54"   #with PV_no_control
-        #folder_name = "grid_with_PV"
-        #id = "a81684261326"  # with PV limit power
-        #folder_name = "grid_with_PV_limit_power_60"
-        #id = "4b47e3bdc403"  # with PV limit power
+        #id = "8fe2e7980820"   #with PV_no_control
+        #folder_name = "grid_with_PV_no_control"
+        id = "1add147eeb22"  # with PV limit power
+        folder_name = "grid_with_PV_limit_power_60"
+        #id = "d1f51b384763"  # with PV limit power
         #folder_name = "grid_with_PV_volt_watt"
 
-        #id = "1b6f84097d7f"  # with ESS self-production
-        #folder_name = "grid_with_ESS_self_production_equal_gurobi_simplon"
-        #id = "1f94e9a9a371"  # with ESS self-production
+        #id = "5807c499a61b"  # with ESS self-production
+        #folder_name = "grid_with_ESS_self_production_gurobi_simplon"
+        #id = "28b61889ef6b"  # with ESS self-production
         #folder_name = "grid_with_ESS_self_production_gurobi_local"
-        id = "3350a4f1c2e5"  # with ESS self-production
-        folder_name = "grid_with_ESS_self_production_ipopt_local"
+        #id = "3350a4f1c2e5"  # with ESS self-production
+        #folder_name = "grid_with_ESS_self_production_ipopt_local"
         #id = "22912f50dc71"   #with PV_no_control
         #folder_name = "grid_with_PV_gurobi"
         #id = "b7690dbeac26"  # with PV limit power
@@ -663,19 +664,20 @@ def main():
 
     else:
 
-        """folder_name = "grid_with_PV_limit_power_60"
-        folder_name1 = "grid_with_PV_volt_watt"
-        folder_name2 = "grid_with_ESS_self_production"
+        folder_name1 = "grid_with_PV_no_control"
+        folder_name2 = "grid_with_PV_limit_power_60"
+        #folder_name3 = "grid_with_PV_volt_watt"
+        #folder_name4 = "grid_with_ESS_self_production_gurobi_simplon"
         #folder_name3 = "grid_with_ESS_self_production_equal_PV"
-        folder_name4 = "grid_with_PV"
-        list_folders = [folder_name, folder_name1, folder_name2, folder_name4]"""
 
-        folder_name = "grid_with_ESS_self_production_equal_gurobi_simplon"
-        folder_name1 = "grid_with_ESS_self_production_gurobi_local"
+        list_folders = [folder_name1, folder_name2]#, folder_name3, folder_name4]
 
-        list_folders = [folder_name, folder_name1]
-        #list_names = ["Limit power 60%", "Volt-Watt", "Min self-production", "PV penetration 100%"]
-        list_names = ["Min self-production simplon", "Min self-production localhost"]
+        #folder_name = "grid_with_ESS_self_production_equal_gurobi_simplon"
+        #folder_name1 = "grid_with_ESS_self_production_gurobi_local"
+
+        #list_folders = [folder_name, folder_name1]
+        list_names = ["PV penetration 100%","Limit power 60%"]#, "Volt-Watt", "Min self-production"]
+        #list_names = ["Min self-production simplon", "Min self-production localhost"]
 
         len_list_folders = len(list_folders)
         count = 0

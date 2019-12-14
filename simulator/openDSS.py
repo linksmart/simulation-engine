@@ -170,21 +170,26 @@ class OpenDSS:
         :param list_voltages_pu:
         :return:
         """
-        self.set_active_element(pv_object.get_name())
+
+        self.set_active_element("Generator." + pv_object.get_name())
         pv_name = pv_object.get_name()
+        logger.debug("pv_name "+str(pv_name))
 
         control_strategy = pv_object.get_control_strategy().get_strategy()
         control_strategy_name = control_strategy.get_name()
-        logger.debug("control_strategy_name: "+str(control_strategy_name))
+        #logger.debug("control_strategy_name: "+str(control_strategy_name))
 
         if control_strategy_name == "no_control":
+            logger.debug("control_strategy: no control")
             power = pv_object.get_momentary_power()
             pv_object.set_use_percent(100)
 
             if power >= 0:
-                dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
-                logger.debug("dss_string " + str(dss_string))
-                dss.run_command(dss_string)
+                dss.Generators.kW(power)
+                logger.debug("kW "+str(power))
+                #dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
+                #logger.debug("dss_string " + str(dss_string))
+                #dss.run_command(dss_string)
                 dss_string = "Generator." + str(pv_name) + ".kvar=0"
                 logger.debug("dss_string " + str(dss_string))
                 dss.run_command(dss_string)
@@ -197,6 +202,7 @@ class OpenDSS:
                 return 1
 
         elif control_strategy_name == "ofw":
+            logger.debug("control_strategy: ofw")
             power = control_strategy.get_control_power()
             power_momentary = pv_object.get_momentary_power()
             if not power_momentary == 0:
@@ -221,6 +227,7 @@ class OpenDSS:
                 return 1
 
         elif control_strategy_name == "limit_power":
+            logger.debug("control_strategy: limit_power")
             power_momentary = pv_object.get_momentary_power()
             logger.debug("power_momentary "+str(power_momentary))
             pv_max_power = pv_object.get_max_power()
@@ -257,6 +264,7 @@ class OpenDSS:
                 return 1
 
         elif control_strategy_name == "volt-watt":
+            logger.debug("control_strategy: volt-watt")
             logger.debug("list_voltages_pu "+str(list_voltages_pu))
             max_volt_input = max(list_voltages_pu)
             min_vpu = pv_object.get_control_strategy().get_strategy().get_min_vpu_high()
@@ -306,6 +314,7 @@ class OpenDSS:
             return 0
 
         elif control_strategy_name == "volt-var":
+            logger.debug("control_strategy: volt-var")
             logger.debug("list_voltages_pu " + str(list_voltages_pu))
             max_volt_input = max(list_voltages_pu)
             min_volt_input = min(list_voltages_pu)
@@ -363,6 +372,8 @@ class OpenDSS:
                 use_in_percent = 100
             pv_object.set_use_percent(use_in_percent)
             return 0
+        else:
+            logger.error("strategy not implemented")
 
 
 
@@ -624,8 +635,10 @@ class OpenDSS:
     def get_pv_powers(self):
 
         i_Power = dss.Generators.First()
+
         powers_from_generators = []
         while i_Power > 0:
+            logger.debug("Generator name " + str(dss.CktElement.Name()))
             powers = dss.CktElement.Powers()
             node_order = self.get_node_order()
             list = []
@@ -650,7 +663,7 @@ class OpenDSS:
             if not list == []:
                 powers_from_generators.append(list)
 
-            #logger.debug("Currents from lines " + str(currents_from_lines))
+            #logger.debug("list "+str(list))
             i_Power = dss.Generators.Next()
         return powers_from_generators
 
@@ -1259,7 +1272,7 @@ class OpenDSS:
                     for powerprofile in powerprofiles:
                         #logger.debug("powerprofile "+str(powerprofile))
                         if (powerprofile_id == powerprofile['id']):
-                            loadshape_id = powerprofile_id
+                            loadshape_id = powerprofile_id+"_"+pv_name
                             items = powerprofile['items']
                             normalize = powerprofile['normalized']
                             logger.debug("normalize "+str(normalize))
@@ -1301,10 +1314,13 @@ class OpenDSS:
                                         final_to_take = len_pv_profile * number_missing
                                         pv_profile.extend(pv_profile[0:final_to_take])
 
-                            #logger.debug("pv profile "+str(pv_profile))
-                            #logger.debug("len pv profile " + str(len(pv_profile)))
+                            logger.debug("pv profile "+str(pv_profile))
+                            logger.debug("len pv profile " + str(len(pv_profile)))
                     # --------store_profile_for_line----------#
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name,"loadshape": pv_profile}
+                    normalize = False
+                    useactual = True
+                    self.setLoadshape(loadshape_id, sim_days * 24, 1, pv_profile, normalize, useactual)
                 else:
                     # ----------get_a_profile---------------#
                     pv_profile_data = profiles.pv_profile(city, country, sim_days, 1, 1561932000)
@@ -1312,8 +1328,8 @@ class OpenDSS:
                         return "PV profile could not be queried"
                     loadshape_id = "Shape_"+pv_name
                     pv_profile = [i * max_power for i in pv_profile_data]
-                    normalize = True
-                    useactual = False
+                    normalize = False
+                    useactual = True
                     # --------store_profile_for_line----------#
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name, "loadshape": pv_profile}
 
@@ -1352,19 +1368,19 @@ class OpenDSS:
                             message = "No Power profile found for this ID:" + str(powerprofile_id)
                             logger.error(message)
                             return message
-                        load_profile_data = [i for i in load_profile_data]
+                        #load_profile_data = [i for i in load_profile_data]
 
                         max_value = max(load_profile_data)
                         load_profile_data = [(value / max_value) * max_power for value in load_profile_data]
 
                         npts = len(load_profile_data)
                         mult = load_profile_data
-                        normalize = True
-                        useactual= False
+                        normalize = False
+                        useactual= True
                         loadshape_id = "Lsp_" + str(int_value)
                         set_load_shape_flag = True
                     else:
-                        logger.debug("Inserting an external power profile entered thorugh the API: "+str(powerprofile_id))
+                        logger.debug("Inserting an external power profile entered through the API: "+str(powerprofile_id))
                         load_profile_data = []
                         if not powerprofiles:
                             message = "No Power profile found for this ID:" + str(powerprofile_id)
@@ -1392,7 +1408,8 @@ class OpenDSS:
                                 if normalize:
                                     max_value = max(load_profile_data)
                                     load_profile_data = [(value / max_value) * max_power for value in load_profile_data]
-
+                                normalize = False
+                                useactual = True
                                 set_load_shape_flag = False
 
 
@@ -1405,11 +1422,11 @@ class OpenDSS:
                     max_value = max(load_profile_data)
                     load_profile_data = [(value / max_value) * max_power for value in load_profile_data]
 
-                    load_profile_data = [i for i in load_profile_data]
+                    #load_profile_data = [i for i in load_profile_data]
                     npts = len(load_profile_data)
                     mult = load_profile_data
-                    normalize = True
-                    useactual = False
+                    normalize = False
+                    useactual = True
                 # --------store_profile_for_line----------#
                     loadshape_id = "Lsp_" + str(randint_value)
                     set_load_shape_flag = True
@@ -1552,8 +1569,8 @@ class OpenDSS:
 
     def setPhotovoltaic(self, id, phases, bus1, voltage, pf, max_power_kw, max_power_kvar, control, meta=None):
         try:
-            logger.debug("Photovoltaic 2")
-            dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} pf={pf} model=1".format(
+            #logger.debug("Photovoltaic 2")
+            dss_string = "New Generator.{id} phases={phases} bus1={bus1} kV={voltage} kW={pmpp} pf={pf} model=1 Vmaxpu=1.5 Dispvalue=0".format(
                 id=id,
                 phases=phases,
                 bus1=bus1,
@@ -1571,9 +1588,6 @@ class OpenDSS:
             if not meta == None:
                 logger.debug("meta "+str(meta))
             self.PVs[id] = PV(id, bus1, phases, voltage, max_power_kw, max_power_kvar, pf, control, meta)
-
-
-
             logger.debug(dss_string + "\n")
             dss.run_command(dss_string)
             return 0

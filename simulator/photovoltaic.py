@@ -42,6 +42,9 @@ class Photovoltaic:
     def get_name(self):
         return self.id
 
+    def set_name(self, id):
+        self.id = id
+
     def get_node_base(self):
         node=self.node
         if "." in node:
