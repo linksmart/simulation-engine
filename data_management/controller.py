@@ -157,11 +157,16 @@ class gridController(threading.Thread):
 			flag_is_PV = False
 
 		pvNames = list(PV_objects_dict.keys())
+		pvNames_opendss = self.sim.get_all_pv_names()
+		for name in pvNames_opendss:
+			for name_pv in pvNames:
+				if name_pv.lower() == name.lower():
+					pv_object = PV_objects_dict[name_pv]
+					pv_object.set_name(name)
+
 		len_pvNames = len(pvNames)
 		loadNames = self.sim.get_all_load_names()
 		len_loadNames = len(loadNames)
-		#pvNames = self.sim.get_all_pv_names()
-		#len_pvNames = len(pvNames)
 		essNames = self.input.get_Storage_names(self.topology)
 		len_essNames = len(essNames)
 		nodeNames = self.sim.get_node_list()
@@ -361,6 +366,7 @@ class gridController(threading.Thread):
 			######################################################################################
 			################  PV control  ###################################################
 			######################################################################################
+			flag = False
 			if not pv_objects_alone == []:
 				logger.debug("-------------------------------------------")
 				logger.debug("Single PVs present in the simulation")
@@ -384,22 +390,23 @@ class gridController(threading.Thread):
 				logger.debug("-------------------------------------------")
 				logger.debug("storages present in the simulation")
 				logger.debug("-------------------------------------------")
-				logger.debug("soc_list_new_storages" +str(soc_list_new_storages))
+				#logger.debug("soc_list_new_storages" +str(soc_list_new_storages))
 				if flag_global_control:
 					# logger.debug("price profile " + str(price_profile))
 					logger.debug("global profile "+str(global_profile))
-					self.profess.set_up_profess(soc_list_new_storages, load_profiles, pv_profiles, price_profile,
-					                            global_profile)
+					answer = self.profess.set_up_profess(soc_list_new_storages, load_profiles, pv_profiles, price_profile, global_profile)
 				elif not flag_global_control and flag_is_price_profile_needed:
-					self.profess.set_up_profess(soc_list_new_storages, load_profiles, pv_profiles, price_profile)
+					answer = self.profess.set_up_profess(soc_list_new_storages, load_profiles, pv_profiles, price_profile)
 				else:
-					self.profess.set_up_profess(soc_list_new_storages, load_profiles, pv_profiles)
-				
+					answer = self.profess.set_up_profess(soc_list_new_storages, load_profiles, pv_profiles)
+
+				if answer:
+					self.Stop()
+
 				status_profess = self.profess.start_all(soc_list_new_storages)
-				
 				if not status_profess:
 					profess_output = self.profess.wait_and_get_output(soc_list_new_storages)
-					logger.debug("output profess " + str(profess_output))
+					#logger.debug("output profess " + str(profess_output))
 					if not profess_output == [] and not profess_output == 1:
 						logger.debug("Optimization succeded")
 
@@ -504,16 +511,21 @@ class gridController(threading.Thread):
 							self.sim.setSoCBattery(element_id, SoC)
 				
 				if not soc_list_new_evs == []:
-					
+					logger.debug("soc_list_new_evs "+str(soc_list_new_evs))
 					if flag_global_control:
-						self.profev.set_up_profev(soc_list_new_evs, load_profiles, pv_profiles, price_profile,
+						logger.debug("global profile " + str(global_profile))
+						answer = self.profev.set_up_profev(soc_list_new_evs, load_profiles, pv_profiles, price_profile,
 						                          global_profile, chargers=chargers)
 					elif not flag_global_control and flag_is_price_profile_needed:
-						self.profev.set_up_profev(soc_list_new_evs, load_profiles, pv_profiles, price_profile, None,
+						answer = self.profev.set_up_profev(soc_list_new_evs, load_profiles, pv_profiles, price_profile, None,
 						                          chargers=chargers)
 					else:
-						self.profev.set_up_profev(soc_list_new_evs, load_profiles, pv_profiles, None, None,
+						answer = self.profev.set_up_profev(soc_list_new_evs, load_profiles, pv_profiles, None, None,
 						                          chargers=chargers)
+
+					if answer:
+						self.Stop()
+
 					parallel = True
 					if parallel:
 						logger.debug("Starting parallel")
@@ -523,8 +535,8 @@ class gridController(threading.Thread):
 						if not status_profev:
 							logger.debug("Optimization succeded")
 							profev_output = self.profev.wait_and_get_output(soc_list_new_evs)
-							logger.debug("profev output " + str(profev_output))
-							if profev_output == []:
+							#logger.debug("profev output " + str(profev_output))
+							if profev_output == [] or profev_output == 1:
 								logger.error("OFW instances sent and empty response")
 								self.Stop()
 
@@ -752,6 +764,10 @@ class gridController(threading.Thread):
 					load_powers_phase_2[i].append(Load_powers[i][1])
 					load_powers_phase_3[i].append(Load_powers[i][2])
 
+
+			for name in pvNames:
+				logger.debug("power "+str(name)+": " + str(self.sim.get_single_pv_power(name)))
+
 			if not len_pvNames == 0:
 				PV_powers = self.sim.get_pv_powers()
 				for i in range(len_pvNames):
@@ -891,6 +907,8 @@ class gridController(threading.Thread):
 			                                        "Phase 2":[str(i) for i in load_powers_phase_2[i]], "Phase 3":[str(i) for i in load_powers_phase_3[i]]}
 
 		raw_data_power["Photovoltaic"] = {}
+		#logger.debug("pvNames "+str(pvNames))
+		#logger.debug("pv names from opendss "+str(self.sim.get_all_pv_names()))
 		for i in range(len_pvNames):
 			if pvNames[i] not in raw_data_power["Photovoltaic"].keys():
 				raw_data_power["Photovoltaic"][pvNames[i]] = {}
@@ -986,6 +1004,16 @@ class gridController(threading.Thread):
 		logger.info("Total simulation time: " + str(int(total_time)) + " s or " + str(
 			"{0:.2f}".format(total_time_min)) + " min")
 		logger.debug("-------------------------------------------------------------------------------------")
+		data.clear()
+		data_voltages.clear()
+		data_currents.clear()
+		data_losses.clear()
+		raw_data.clear()
+		raw_data_voltages.clear()
+		raw_data_currents.clear()
+		raw_data_losses.clear()
+		raw_data_power.clear()
+		raw_data_load.clear()
 		self.Stop()
 		
 		logger.debug("#####################################################################################")

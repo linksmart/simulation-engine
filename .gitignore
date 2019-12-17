@@ -98,6 +98,6 @@ ENV/
 .idea
 .idea/workspace.xml
 
-plotter/results/
-/plotter/results
+plotter/results
+results
 optimization-framework

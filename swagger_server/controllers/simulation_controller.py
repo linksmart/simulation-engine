@@ -242,7 +242,21 @@ def create_simulation(body):  # noqa: E501
         redis_db.set("run:" + id, "created")
 
         radial = data["radials"]
+        common = data["common"]
         models_list = ["Maximize Self-Consumption", "Maximize Self-Production", "MinimizeCosts"]
+
+        new_data={}
+        for parameter, value in common.items():
+            new_data[parameter]=value
+            if not parameter == "MVAsc1":
+                new_data["MVAsc1"] = 21000
+            if not parameter == "MVAsc3":
+                new_data["MVAsc3"] = 20000
+            if not parameter == "MVAsc1" and value == None:
+                new_data["MVAsc1"] = 21000
+            if not parameter == "MVAsc3" and value == None:
+                new_data["MVAsc3"] = 21000
+        data["common"] = new_data
 
         count = 0
         for values in radial:

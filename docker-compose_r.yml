@@ -49,7 +49,7 @@ services:
       - ../simulation-engine/results:/usr/src/app/data
       - /c/Program Files/OpenVPN/config:/usr/src/app/openvpn
     ports:
-      - "9090:9090"
+      - "9091:9090"
     logging:
       driver: "json-file"
       options:
