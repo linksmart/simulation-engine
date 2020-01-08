@@ -1,6 +1,7 @@
 import json
 import re
-
+import random
+import numpy as np
 
 class dssToJson:
 	def convert_dss_to_json(self):
@@ -27,7 +28,7 @@ class dssToJson:
 		path = '/opt/project/tests/data/123Bus'
 		cur_path = path  + '/' + rel_path
 		new_path = '/opt/project/tests/data/123Bus' + '/' + 'ResultFile.DSS'
-		f1 = open(new_path, 'a')
+		f1 = open(new_path, 'w')
 		with open(cur_path, 'r') as f:
 			for cnt, line in enumerate(f):
 				words = line.strip(' ').split()
