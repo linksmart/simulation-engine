@@ -69,7 +69,8 @@ class Profiles:
             return None
 
         price_list = []
-        if data is not None:
+        if data is not None and not "Transparency Service unavailable" in data:
+            #logger.debug("data "+str(data))
             data_list = []
             time_series = data["Publication_MarketDocument"]["TimeSeries"]
             if isinstance(time_series, list):
