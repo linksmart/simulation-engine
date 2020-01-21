@@ -117,6 +117,7 @@ class gridController(threading.Thread):
 			self.redisDB.set("status_"+ str(self.id), answer_setup)
 			self.Stop()
 		logger.debug("!---------------Elements added to simulator------------------------ \n")
+
 		################################################################################################
 		
 		transformer_names = self.sim.get_transformer_names()
@@ -347,12 +348,15 @@ class gridController(threading.Thread):
 
 						if hours == 0 or not ((hours + 1) % 24):
 							logger.debug("Getting global profile")
-							global_profile_total = self.global_control.gesscon(load_profiles, pv_profiles, price_profile,
-																			   soc_list_new_total)
+							#time.sleep(6)
+							global_profile_total = self.global_control.gesscon(load_profiles, pv_profiles, price_profile, soc_list_new_total)
+							#global_profile_total = [{'node_a19': {'storage_mlnz3XM58': [-0.0819140077566895, 0.0, 0.0, 0.0, 0.0, 0.0, -0.575152457422627, -1.67573353482068, 0.0, 2.72418665735904, 2.86590443767715, 0.0, 3.77866328458742, 0.0, 0.0, 0.00624562037638832, -1.25257625107764, -2.67657213183395, -3.31908736011582, -1.39176425697259, 0.0, 0.0, 0.0, 0.0]}}]
+
 
 						if not global_profile_total == [] and not global_profile_total == None:
 							logger.debug("Global profile received")
 							global_profile = self.input.get_profile(global_profile_total, hours, 24)
+							#global_profile = [{'node_a19': {'storage_mlnz3XM58': [-0.0819140077566895, 0.0, 0.0, 0.0, 0.0, 0.0, -0.575152457422627, -1.67573353482068, 0.0, 2.72418665735904, 2.86590443767715, 0.0, 3.77866328458742, 0.0, 0.0, 0.00624562037638832, -1.25257625107764, -2.67657213183395, -3.31908736011582, -1.39176425697259, 0.0, 0.0, 0.0, 0.0]}}]
 						# logger.debug("profess_global_profile "+str(profess_global_profile))
 
 						else:
@@ -514,6 +518,7 @@ class gridController(threading.Thread):
 					logger.debug("soc_list_new_evs "+str(soc_list_new_evs))
 					if flag_global_control:
 						logger.debug("global profile " + str(global_profile))
+						logger.debug("prive profile "+str(price_profile))
 						answer = self.profev.set_up_profev(soc_list_new_evs, load_profiles, pv_profiles, price_profile,
 						                          global_profile, chargers=chargers)
 					elif not flag_global_control and flag_is_price_profile_needed:

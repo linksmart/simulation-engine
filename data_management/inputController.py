@@ -771,14 +771,14 @@ class InputController:
             logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
             if flag_is_price_profile_needed or flag_global_control:
                 self.price_profile = self.get_price_profile_from_server(profiles, city, country, time_in_days)
-                if not isinstance(self.price_profile, list):
+                #logger.debug("price profile "+str(self.price_profile))
+                #self.price_profile = [-0.0819140077566895, 0.0, 0.0, 0.0, 0.0, 0.0, -0.575152457422627, -1.67573353482068, 0.0, 2.72418665735904, 2.86590443767715, 0.0, 3.77866328458742, 0.0, 0.0, 0.00624562037638832, -1.25257625107764, -2.67657213183395, -3.31908736011582, -1.39176425697259, 0.0, 0.0, 0.0, 0.0]
+
+                if not isinstance(self.price_profile, list) and not len(self.price_profile) == 0:
                     return "Price prediction service missing"
                 #logger.debug("length price profile "+str(len(self.price_profile)))
 
         for values in radial:
-            #logger.debug("values of the radial: "+str(values))
-            #values = values.to_dict()
-            # logger.debug("Values: "+str(values))
 
             if "transformer" in values.keys() and values["transformer"] is not None:
                 # logger.debug("!---------------Setting Transformers------------------------")
