@@ -1253,7 +1253,7 @@ class OpenDSS:
 
 
 
-    def setPVshapes(self, pvs, powerprofiles, city, country, sim_days, profiles, profess):
+    def setPVshapes(self, pvs, powerprofiles, city, country, sim_hours, profiles, profess):
 
         try:
 
@@ -1295,11 +1295,12 @@ class OpenDSS:
 
                             #logger.debug("sim_days "+str(sim_days))
 
-                            sim_hours = sim_days*24+24
+                            sim_hours_compare = sim_hours + 24
                             #logger.debug("sim_hours " + str(sim_hours))
                             len_pv_profile = len(pv_profile)
-                            if len_pv_profile < sim_hours:
-                                rest = sim_hours - len_pv_profile
+                            logger.debug("len pv profile "+str(len_pv_profile) + " sim_hours "+str(sim_hours_compare))
+                            if len_pv_profile < sim_hours_compare:
+                                rest = sim_hours_compare - len_pv_profile
                                 if len_pv_profile >= rest:
                                     pv_profile.extend(pv_profile[0:rest])
                                 elif len_pv_profile < rest:
@@ -1316,14 +1317,15 @@ class OpenDSS:
 
                             logger.debug("pv profile "+str(pv_profile))
                             logger.debug("len pv profile " + str(len(pv_profile)))
-                    # --------store_profile_for_line----------#
+                    # --------store_profile_for_line----------##
+                    logger.debug("Storing loadshape for pv "  +str(pv_name) + " with the following id " + str(loadshape_id))
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name,"loadshape": pv_profile}
                     normalize = False
                     useactual = True
-                    self.setLoadshape(loadshape_id, sim_days * 24, 1, pv_profile, normalize, useactual)
+                    self.setLoadshape(loadshape_id, sim_hours, 1, pv_profile, normalize, useactual)
                 else:
                     # ----------get_a_profile---------------#
-                    pv_profile_data = profiles.pv_profile(city, country, sim_days, 1, 1561932000)
+                    pv_profile_data = profiles.pv_profile(city, country, sim_hours, 1, 1561932000)
                     if not isinstance(pv_profile_data, list):
                         return "PV profile could not be queried"
                     loadshape_id = "Shape_"+pv_name
@@ -1333,7 +1335,7 @@ class OpenDSS:
                     # --------store_profile_for_line----------#
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name, "loadshape": pv_profile}
 
-                    self.setLoadshape(loadshape_id, sim_days * 24, 1, pv_profile, normalize, useactual)
+                    self.setLoadshape(loadshape_id, sim_hours, 1, pv_profile, normalize, useactual)
 
             return 0
 

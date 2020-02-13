@@ -1,6 +1,6 @@
 
 # Use an official Python runtime as a parent image
-FROM python:3.7.5-stretch
+FROM python:3.7.6-stretch
 
 # Set the working directory to usr/src/app
 RUN mkdir -p /usr/src/app

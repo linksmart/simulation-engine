@@ -1,17 +1,22 @@
 import datetime
 import logging
 import json
+import os
+
 import numpy as np
 import time
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 from gesscon.MQTTClient import MQTTClient
+from data_management.utils import Utils
 
 class GESSCon():
         def __init__(self):
-                self.payload  = {}
+                self.payload = {}
                 self.payload_set = False
+                self.utils = Utils()
+
 
         def get_ESS_data_format(self, storage):
                 """
@@ -146,6 +151,9 @@ class GESSCon():
                         "tele": tele,
                         "config": config }
                         payload = json.dumps(payload_var)
+                        path = os.path.join("/usr/src/app/data", str(self.id), "gesscon_input.txt")
+                        self.utils.store_data_raw(path, payload)
+                        logger.debug("Gesscon input data successfully stored")
                         #logger.info("Payload: %s", payload)
 
                         # MQTT

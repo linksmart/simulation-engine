@@ -4,6 +4,8 @@ Created by Saba khan: July 16 2019
 
 import datetime
 import logging
+import math
+
 import requests
 import time
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
@@ -86,7 +88,7 @@ class Profiles:
             #logger.info("Price data = %s: ", price_list)
         return price_list
 
-    def pv_profile(self, city, country, days = 365, max_power_kw=1, timestamp = None):
+    def pv_profile(self, city, country, num_hours = 365 * 24, max_power_kw=1, timestamp = None):
         """
         Returns the pv profile for the given number of days
         Args:
@@ -98,6 +100,7 @@ class Profiles:
         Returns:
             list: Number of elements = number of days * 24
         """
+        days = math.ceil(num_hours / 24)
         if timestamp == None:
             timestamp = datetime.datetime.now()
         else:

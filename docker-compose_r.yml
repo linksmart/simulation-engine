@@ -25,8 +25,8 @@ services:
     volumes:
       - ./optimization-framework/prediction/resources:/usr/src/app/prediction/resources
       - ./optimization-framework/optimization/resources:/usr/src/app/optimization/resources
-      - ./optimization-framework/utils/resources:/usr/src/app/utils/resources
       - ./optimization-framework/logs:/usr/src/app/logs
+      - ./optimization-framework/utils:/usr/src/app/utils
       - ./optimization-framework/logs/pyomo:/usr/src/app/logs/pyomo
       - ./optimization-framework/utils/gurobi/license:/usr/src/app/share/gurobi811/license
     logging:
@@ -35,6 +35,23 @@ services:
         max-size: "10m"
         max-file: "10"
     command: ["python3", "-u", "ofw.py"]
+    restart: "always"
+  ml:
+    build:
+      context: /Linksmart/optimization-framework
+      dockerfile: prediction/docker/Dockerfile
+    image: garagon/optimization:amd_training
+    container_name: ml
+    depends_on:
+      - redis
+    volumes:
+      - ./optimization-framework/prediction/resources:/usr/src/app/prediction/resources
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
+    command: ["python3", "-u", "mlTraining.py"]
     restart: "always"
   se:
     build:

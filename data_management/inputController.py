@@ -206,10 +206,10 @@ class InputController:
         logger.debug("Photovoltaics charged")
         return message
 
-    def setPVshapes(self, profiles_object, profess_object, pvs, city, country, sim_days, powerprofile):
+    def setPVshapes(self, profiles_object, profess_object, pvs, city, country, sim_hours, powerprofile):
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
-            message = self.sim.setPVshapes(pvs, powerprofile, city, country, sim_days, profiles_object, profess_object)
+            message = self.sim.setPVshapes(pvs, powerprofile, city, country, sim_hours, profiles_object, profess_object)
             if message == 0:
                 logger.debug("Loadshapes for PVs charged")
             return message
@@ -904,7 +904,7 @@ class InputController:
 
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(profiles, profess, photovoltaics, city, country, time_in_days, powerprofile)
+                    message = self.setPVshapes(profiles, profess, photovoltaics, city, country, self.sim_hours, powerprofile)
                     logger.debug("message "+str(message))
                     if not message == 0:
                         return message

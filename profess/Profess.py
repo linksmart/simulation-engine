@@ -471,7 +471,7 @@ class Profess:
         """
         json_response = response.json()
         if "Data source for following keys not declared:" in json_response:
-            logger.error("Missing data for optimization model, couldn't start")
+            logger.error("Missing data for optimization model, couldn't start. "+str(json_response))
             pattern = re.compile("'(.*?)'")  # regex to find which parameters where missing
             missing_parameters = pattern.findall(str(json_response))
             for parameter in missing_parameters:
@@ -902,12 +902,14 @@ class Profess:
                             config_data_of_node = self.dataList[node_number][node_name][profess_id]
                             if node_name in ess_con_global:
                                 phase = ess_con_global[node_name]
-                                if node_name + ".1.2.3" in phase:
+                                for storage_name, global_profile in phase.items():
+                                    config_data_of_node["global_control"]["ESS_Control"] = global_profile
+                                """if node_name + ".1.2.3" in phase:
                                     config_data_of_node["global_control"]["ESS_Control"] = phase[node_name + ".1.2.3"]
                                     # logger.debug("ess_con profile set")
                                 if node_name in phase:
-                                    config_data_of_node["global_control"]["ESS_Control"] = phase[node_name]
-                                logger.debug("ess_con profile set")
+                                    config_data_of_node["global_control"]["ESS_Control"] = phase[node_name]"""
+                                logger.debug("ess_con profile set for "+str(node_name))
                 else:
                     logger.debug("no ess_con profile was given")
 
