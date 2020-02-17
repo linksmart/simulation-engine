@@ -105,7 +105,7 @@ class gridController(threading.Thread):
 		
 		# ----------PROFILES----------------#
 		self.profiles = Profiles()
-		self.global_control = GESSCon()
+		self.global_control = GESSCon(self.id)
 
 
 		################################### Setting elements to opendss ###############################
