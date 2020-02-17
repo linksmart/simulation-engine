@@ -1,3 +1,5 @@
+import math
+
 import connexion
 import six
 import logging
@@ -266,12 +268,12 @@ def get_simulation_status(id):  # noqa: E501
         if status_message == "OK":
             timestep = int(redis_db.get("timestep_"+str(id)))
             logger.debug("timestep "+str(timestep))
-            sim_days = int(redis_db.get("sim_days_"+str(id)))
-            logger.debug("sim_days "+str(sim_days))
+            sim_hours = int(redis_db.get("sim_hours_"+str(id)))
+            logger.debug("sim_hours "+str(sim_hours))
 
-            status = (timestep / (sim_days-1)) * 100.0
+            status = (timestep / (sim_hours-1)) * 100.0
 
-            if timestep == (sim_days - 1):
+            if timestep == (sim_hours - 1):
                 flag_stop = redis_db.get("opt_stop_" + id)
                 logger.debug("flag stop "+str(flag_stop))
                 if flag_stop == "False":
@@ -332,27 +334,7 @@ def run_simulation(id, body=None):  # noqa: E501
     else:
         logger.error("Wrong Content-Type")
         return "Wrong Content-Type"
-        """if flag is not None and flag == "created":
-                if variable.isRunningExists():
-                    logger.debug("isRunning exists")
-                    if not variable.get_isRunning(id):
-                        response = variable.run(id, data)
-                        return response
-                    else:
-                        logger.debug("System already running")
-                        return "System already running"
-                else:
-                    logger.debug("isRunning not created yet")
-                    response = variable.run(id, data)
-                    return response
-            else:
-                response = "Id not existing"
 
-        except Exception as e:
-            logger.error(e)
-            response = e
-
-    return response"""
 
 
 def buildAnswer(listNames=None, listValues=None, thres_High=0.1, thres_Medium=0.05, thres_Low=0.025):
