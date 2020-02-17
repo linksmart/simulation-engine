@@ -1131,7 +1131,7 @@ class Profev:
                                     # logger.debug("ess_con profile set")
                                 if node_name in phase:
                                     config_data_of_node["global_control"]["ESS_Control"] = phase[node_name]"""
-                                logger.debug("ess_con profile set")
+                                logger.debug("ess_con profile set for "+str(node_name))
                 else:
                     logger.debug("no ess_con profile was given")
 

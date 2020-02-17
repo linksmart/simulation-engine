@@ -235,7 +235,7 @@ class Profess:
                 if not response.json() == {}:
                     return response.json()
                 else:
-                    logger.error("OFW returned an empty response")
+                    logger.error("OFW returned an empty response. "+str(response.json()))
                     return 1
             else:
                 logger.error("failed to get output from professID: " + str(profess_id) + " response from ofw: " + str(
@@ -304,8 +304,8 @@ class Profess:
                     if not output == 1:
                         output_list.append({profess_id: output})
                     else:
-                        #logger.debug(
-                            #"output for " + str(node_name) + " with id:" + str(profess_id) + " is " + str(output))
+                        logger.error(
+                            "output for " + str(node_name) + " with id:" + str(profess_id) + " is " + str(output))
                         return 1
             logger.debug("OFW finished, all optimizations stopped")
             translated_output = self.translate_output(output_list, soc_list)
@@ -451,6 +451,8 @@ class Profess:
                 start_response = self.start(1, 24, 3600, storage_opt_model, 1, solver, type_optimization,
                                             self.get_profess_id(node_name, soc_list), single_ev)
 
+                json_response = start_response.json()
+                logger.debug("--- OFW --- :" + str(json_response))
                 if start_response is None:
                     return 1
                 if start_response.status_code is not 200 and start_response is not None:
@@ -471,7 +473,7 @@ class Profess:
         """
         json_response = response.json()
         if "Data source for following keys not declared:" in json_response:
-            logger.error("Missing data for optimization model, couldn't start")
+            logger.error("Missing data for optimization model, couldn't start. "+str(json_response))
             pattern = re.compile("'(.*?)'")  # regex to find which parameters where missing
             missing_parameters = pattern.findall(str(json_response))
             for parameter in missing_parameters:
@@ -529,13 +531,15 @@ class Profess:
         :return: 0 when successful, else 1
         """
         logger.debug("update_config_json has started at " + str(profess_id))
+        time.sleep(0.05)
         if profess_id != 0:
             response = self.httpClass.put(self.domain + "inputs/dataset/" + profess_id, config_json)
-            #json_response = response.json()
-            #logger.debug("Response from OFW to update_config :" + str(json_response) + ": " + str(profess_id))
+            json_response = response.json()
+            logger.debug("--- OFW --- :" + str(json_response) + ": " + str(profess_id))
             if response.status_code == 200:
                 return 0
             else:
+                logger.error(response)
                 return 1
         else:
             return 1
@@ -902,12 +906,14 @@ class Profess:
                             config_data_of_node = self.dataList[node_number][node_name][profess_id]
                             if node_name in ess_con_global:
                                 phase = ess_con_global[node_name]
-                                if node_name + ".1.2.3" in phase:
+                                for storage_name, global_profile in phase.items():
+                                    config_data_of_node["global_control"]["ESS_Control"] = global_profile
+                                """if node_name + ".1.2.3" in phase:
                                     config_data_of_node["global_control"]["ESS_Control"] = phase[node_name + ".1.2.3"]
                                     # logger.debug("ess_con profile set")
                                 if node_name in phase:
-                                    config_data_of_node["global_control"]["ESS_Control"] = phase[node_name]
-                                logger.debug("ess_con profile set")
+                                    config_data_of_node["global_control"]["ESS_Control"] = phase[node_name]"""
+                                logger.debug("ess_con profile set for "+str(node_name))
                 else:
                     logger.debug("no ess_con profile was given")
 

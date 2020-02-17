@@ -1,17 +1,24 @@
 import datetime
 import logging
 import json
+import os
+
 import numpy as np
 import time
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
+
 from gesscon.MQTTClient import MQTTClient
+from data_management.utils import Utils
 
 class GESSCon():
-        def __init__(self):
-                self.payload  = {}
+        def __init__(self, id):
+                self.payload = {}
                 self.payload_set = False
+                self.utils = Utils()
+                self.id = id
+
 
         def get_ESS_data_format(self, storage):
                 """
@@ -42,18 +49,29 @@ class GESSCon():
                 Returns:
                         list: aggregated profile(list of 24 values)
                 """
+                #logger.debug("data list "+str(data_list))
                 aggregate_list = []
                 for data in data_list:
                         data_id = list(data.keys())
+                        logger.debug("data_id "+str(data_id))
+                        logger.debug("len data_id " + str(len(data_id)))
+                        for key, value in data.items():
+                                for name, profile in value.items():
+                                        aggregate_list.append(profile)
+
+                        """data_id = list(data.keys())
+                        logger.debug("data_id "+str(data_id))
                         data_values = data[data_id[0]]
+                        logger.debug("data_values " + str(data_values))
                         if (isinstance(data_values, dict)):
                                 agg_list = []
                                 for val in data_values:
+                                        logger.debug("val "+str(val))
                                         agg_list.append(np.square(data_values[val]))
                                 aggregate = [sum(x) for x in zip(*agg_list)]
-                                aggregate_list.append(list(np.sqrt(aggregate)))
+                                aggregate_list.append(list(np.sqrt(aggregate)))"""
                 aggregate_list = [sum(x) for x in zip(*aggregate_list)]
-                #logger.debug("Aggregated data = %s ", aggregate_list)
+                logger.debug("Aggregated data = %s ", aggregate_list)
                 return aggregate_list
 
         def create_tele_config(self, Soc):
@@ -146,6 +164,7 @@ class GESSCon():
                         "tele": tele,
                         "config": config }
                         payload = json.dumps(payload_var)
+
                         #logger.info("Payload: %s", payload)
 
                         # MQTT
@@ -160,6 +179,10 @@ class GESSCon():
                         mqtt_receive.subscribe_to_topics([("GessconSimulationOutput",2)], self.on_msg_received)
                         logger.debug("successfully subscribed")
                         mqtt_send.publish("GessconSimulationInput", payload, False)
+
+                        path = os.path.join("/usr/src/app/data", str(self.id), "gesscon_input.txt")
+                        self.utils.store_data_raw(path, payload_var)
+                        logger.debug("Gesscon input data successfully stored")
                         # Checks for output from GESSCon for atmost 15 seconds
                         t = 0
                         while t<= 60:
@@ -184,6 +207,8 @@ class GESSCon():
                         mqtt_send.MQTTExit()
                         mqtt_receive.MQTTExit()
                         #logger.debug("GESSCon Connector Output: %s", output_list)
+                        path = os.path.join("/usr/src/app/data", str(self.id), "gesscon_output.txt")
+                        self.utils.store_data_raw(path, output_list)
                         return output_list
                 except Exception as e:
                         logger.error(e)

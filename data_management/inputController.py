@@ -206,10 +206,10 @@ class InputController:
         logger.debug("Photovoltaics charged")
         return message
 
-    def setPVshapes(self, profiles_object, profess_object, pvs, city, country, sim_days, powerprofile):
+    def setPVshapes(self, profiles_object, profess_object, pvs, city, country, sim_hours, powerprofile):
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
-            message = self.sim.setPVshapes(pvs, powerprofile, city, country, sim_days, profiles_object, profess_object)
+            message = self.sim.setPVshapes(pvs, powerprofile, city, country, sim_hours, profiles_object, profess_object)
             if message == 0:
                 logger.debug("Loadshapes for PVs charged")
             return message
@@ -774,9 +774,11 @@ class InputController:
                 #logger.debug("price profile "+str(self.price_profile))
                 #self.price_profile = [-0.0819140077566895, 0.0, 0.0, 0.0, 0.0, 0.0, -0.575152457422627, -1.67573353482068, 0.0, 2.72418665735904, 2.86590443767715, 0.0, 3.77866328458742, 0.0, 0.0, 0.00624562037638832, -1.25257625107764, -2.67657213183395, -3.31908736011582, -1.39176425697259, 0.0, 0.0, 0.0, 0.0]
 
-                if not isinstance(self.price_profile, list) and not len(self.price_profile) == 0:
-                    return "Price prediction service missing"
-                #logger.debug("length price profile "+str(len(self.price_profile)))
+                if not isinstance(self.price_profile, list) and self.price_profile == None or len(self.price_profile) == 0:
+                    return "Price prediction service missing "
+
+
+
 
         for values in radial:
 
@@ -904,7 +906,7 @@ class InputController:
 
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(profiles, profess, photovoltaics, city, country, time_in_days, powerprofile)
+                    message = self.setPVshapes(profiles, profess, photovoltaics, city, country, self.sim_hours, powerprofile)
                     logger.debug("message "+str(message))
                     if not message == 0:
                         return message
