@@ -42,36 +42,38 @@ class GESSCon():
                 return ess_data_list
 
         def aggregate(self, data_list):
-	        
-            """
-			Calculates the aggregate values of load and pv.
-			Args:
-					load/pv(list): load/pv profile per node
-			Returns:
-					list: aggregated profile(list of 24 values)
-			"""
-            """for data in data_list:
-				data_id = list(data.keys())
-				logger.debug("data_id " + str(data_id))
-				logger.debug("len data_id " + str(len(data_id)))
-				for key, value in data.items():
-					for name, profile in value.items():
-						aggregate_list.append(profile)"""
-        
-            aggregate_list = []
-            for data in data_list:
-                data_id = list(data.keys())
-                logger.debug("data_id "+str(data_id))
-                for key, value in data.items():
-                    agg_list = []
-                    for name, profile in value.items():
-                        agg_list.append(np.square(profile))
-                    aggregate = [sum(x) for x in zip(*agg_list)]
-                    aggregate_list.append(list(np.sqrt(aggregate)))
-            aggregate_list = [sum(x) for x in zip(*aggregate_list)]
-            logger.debug("Aggregated data = %s ", aggregate_list)
-            return aggregate_list
-        
+                """
+                Calculates the aggregate values of load and pv.
+                Args:
+                        load/pv(list): load/pv profile per node
+                Returns:
+                        list: aggregated profile(list of 24 values)
+                """
+                #logger.debug("data list "+str(data_list))
+                aggregate_list = []
+                for data in data_list:
+                        data_id = list(data.keys())
+                        logger.debug("data_id "+str(data_id))
+                        logger.debug("len data_id " + str(len(data_id)))
+                        for key, value in data.items():
+                                for name, profile in value.items():
+                                        aggregate_list.append(profile)
+
+                        """data_id = list(data.keys())
+                        logger.debug("data_id "+str(data_id))
+                        data_values = data[data_id[0]]
+                        logger.debug("data_values " + str(data_values))
+                        if (isinstance(data_values, dict)):
+                                agg_list = []
+                                for val in data_values:
+                                        logger.debug("val "+str(val))
+                                        agg_list.append(np.square(data_values[val]))
+                                aggregate = [sum(x) for x in zip(*agg_list)]
+                                aggregate_list.append(list(np.sqrt(aggregate)))"""
+                aggregate_list = [sum(x) for x in zip(*aggregate_list)]
+                logger.debug("Aggregated data = %s ", aggregate_list)
+                return aggregate_list
+
         def create_tele_config(self, Soc):
                 soc_values = []
                 len_soc = len(Soc)
