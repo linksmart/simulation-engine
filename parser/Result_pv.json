@@ -3402,6 +3402,827 @@
                     "c0": 0.0,
                     "length": 0.001
                 }
+            ],
+            "photovoltaic": [
+                {
+                    "id": "PV_S1a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "1",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S2b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "2",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S4c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "4",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 2.0
+                },
+                {
+                    "id": "PV_S5c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "5",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S6c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "6",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S7a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "7",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S9a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "9",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 2.0
+                },
+                {
+                    "id": "PV_S10a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "10",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S11a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "11",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S12b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "12",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S16c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "16",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S17c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "17",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S19a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "19",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S20a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "20",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S22b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "22",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S24c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "24",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S28a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "28",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 2.0
+                },
+                {
+                    "id": "PV_S29a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "29",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S30c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "30",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S31c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "31",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S32c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "32",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S33a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "33",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 0.0
+                },
+                {
+                    "id": "PV_S34c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "34",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S35a",
+                    "kV": 4.16,
+                    "phases": 1,
+                    "bus1": "35",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 0.0
+                },
+                {
+                    "id": "PV_S37a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "37",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S38b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "38",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S39b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "39",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S41c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "41",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 8.0
+                },
+                {
+                    "id": "PV_S42a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "42",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 0.0
+                },
+                {
+                    "id": "PV_S43b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "43",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S45a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "45",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S46a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "46",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S47",
+                    "kV": 4.16,
+                    "phases": 3,
+                    "bus1": "47",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S48",
+                    "kV": 4.16,
+                    "phases": 3,
+                    "bus1": "48",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S49a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "49",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S49b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "49",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S49c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "49",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S50c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "50",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S51a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "51",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 0.0
+                },
+                {
+                    "id": "PV_S52a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "52",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S53a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "53",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 0.0
+                },
+                {
+                    "id": "PV_S55a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "55",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S56b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "56",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S58b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "58",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 8.0
+                },
+                {
+                    "id": "PV_S59b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "59",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 0.0
+                },
+                {
+                    "id": "PV_S60a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "60",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S62c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "62",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S63a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "63",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S64b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "64",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S65a",
+                    "kV": 4.16,
+                    "phases": 1,
+                    "bus1": "65",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 8.0
+                },
+                {
+                    "id": "PV_S65b",
+                    "kV": 4.16,
+                    "phases": 1,
+                    "bus1": "65",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S65c",
+                    "kV": 4.16,
+                    "phases": 1,
+                    "bus1": "65",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S66c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "66",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S68a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "68",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S69a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "69",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S70a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "70",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S71a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "71",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S73c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "73",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S74c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "74",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S75c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "75",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S76a",
+                    "kV": 4.16,
+                    "phases": 1,
+                    "bus1": "76",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S76b",
+                    "kV": 4.16,
+                    "phases": 1,
+                    "bus1": "76",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S76c",
+                    "kV": 4.16,
+                    "phases": 1,
+                    "bus1": "76",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S77b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "77",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 2.0
+                },
+                {
+                    "id": "PV_S79a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "79",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 0.0
+                },
+                {
+                    "id": "PV_S80b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "80",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 7.0
+                },
+                {
+                    "id": "PV_S82a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "82",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 2.0
+                },
+                {
+                    "id": "PV_S83c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "83",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 2.0
+                },
+                {
+                    "id": "PV_S84c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "84",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S85c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "85",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S86b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "86",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S87b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "87",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S88a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "88",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S90b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "90",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S92c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "92",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S94a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "94",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S95b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "95",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S96b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "96",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S98a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "98",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S99b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "99",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S100c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "100",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 6.0
+                },
+                {
+                    "id": "PV_S102c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "102",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 8.0
+                },
+                {
+                    "id": "PV_S103c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "103",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 4.0
+                },
+                {
+                    "id": "PV_S104c",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "104",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S106b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "106",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S107b",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "107",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 1.0
+                },
+                {
+                    "id": "PV_S109a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "109",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 2.0
+                },
+                {
+                    "id": "PV_S111a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "111",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S112a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "112",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 3.0
+                },
+                {
+                    "id": "PV_S113a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "113",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                },
+                {
+                    "id": "PV_S114a",
+                    "kV": 2.4,
+                    "phases": 1,
+                    "bus1": "114",
+                    "power_profile_id": "pv_profile",
+                    "control": "no_control",
+                    "max_power_kW": 5.0
+                }
             ]
         }
     ]
