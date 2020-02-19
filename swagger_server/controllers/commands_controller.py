@@ -266,12 +266,12 @@ def get_simulation_status(id):  # noqa: E501
         if status_message == "OK":
             timestep = int(redis_db.get("timestep_"+str(id)))
             logger.debug("timestep "+str(timestep))
-            sim_days = int(redis_db.get("sim_days_"+str(id)))
-            logger.debug("sim_days "+str(sim_days))
+            sim_hours = int(redis_db.get("sim_hours_"+str(id)))
+            logger.debug("sim_hours "+str(sim_hours))
 
-            status = (timestep / (sim_days-1)) * 100.0
+            status = (timestep / (sim_hours-1)) * 100.0
 
-            if timestep == (sim_days - 1):
+            if timestep == (sim_hours - 1):
                 flag_stop = redis_db.get("opt_stop_" + id)
                 logger.debug("flag stop "+str(flag_stop))
                 if flag_stop == "False":
