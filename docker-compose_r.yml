@@ -29,6 +29,7 @@ services:
       - ./optimization-framework/utils:/usr/src/app/utils
       - ./optimization-framework/logs/pyomo:/usr/src/app/logs/pyomo
       - ./optimization-framework/utils/gurobi/license:/usr/src/app/share/gurobi811/license
+
     logging:
       driver: "json-file"
       options:
@@ -57,14 +58,14 @@ services:
     build:
       context: ""
       dockerfile: Dockerfile
-    #image: "simulation_engine"
-    image: garagon/simulation-engine:latest
+    image: garagon/simulation_engine:latest
+    #image: garagon/simulation-engine:latest
+
     container_name: "se"
     depends_on:
       - redis
     volumes:
-      - ../simulation-engine/results:/usr/src/app/data
-      - /c/Program Files/OpenVPN/config:/usr/src/app/openvpn
+      - /c/Linksmart/simulation-engine/results:/usr/src/app/data
     ports:
       - "9091:9090"
     logging:
