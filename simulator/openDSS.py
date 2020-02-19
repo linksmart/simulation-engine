@@ -627,9 +627,16 @@ class OpenDSS:
         self.set_active_element("Generator."+pv_name)
         logger.debug("name "+str(dss.CktElement.Name()))
         powers = dss.CktElement.Powers()
-        #logger.debug("powers " + str(dss.CktElement.Powers()))
-        power_to_return = -1*(powers[0] + powers[2] + powers[4])
-        q_power_to_return = -1*(powers[1] + powers[3] + powers[5])
+        logger.debug("powers " + str(dss.CktElement.Powers()))
+        if len(powers) == 8:
+            power_to_return = -1*(powers[0] + powers[2] + powers[4])
+            q_power_to_return = -1*(powers[1] + powers[3] + powers[5])
+        elif len(powers) == 6:
+            power_to_return = -1*(powers[0] + powers[2])
+            q_power_to_return = -1*(powers[1] + powers[3])
+        if len(powers) == 4:
+            power_to_return = -1*(powers[0])
+            q_power_to_return = -1*(powers[1])
         return (power_to_return, q_power_to_return)
 
     def get_pv_powers(self):
