@@ -15,7 +15,7 @@ class Storage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, min_soc: float=None, max_soc: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None, global_control: bool=False, voltage_sensitivity_factor_active_power: float=None, voltage_sensitivity_factor_reactive_power: float=None):  # noqa: E501
+    def __init__(self, id: str=None, bus1: str=None, phases: int=None, connection: str=None, soc: float=None, min_soc: float=None, max_soc: float=None, kv: float=None, kw_rated: float=None, storage_capacity: float=None, kwh_stored: float=None, max_charging_power: float=None, max_discharging_power: float=None, charge_efficiency: float=None, discharge_efficiency: float=None, powerfactor: float=None, optimization_model: str=None, global_control: bool=False, voltage_sensitivity_factor_active_power_pu: float=None, voltage_sensitivity_factor_reactive_power_pu: float=None, max_power_import_in_k_w: float=None, max_power_export_in_k_w: float=None, max_reactive_power_import_in_k_var: float=None, max_reactive_power_export_in_k_var: float=None):  # noqa: E501
         """Storage - a model defined in Swagger
 
         :param id: The id of this Storage.  # noqa: E501
@@ -54,10 +54,18 @@ class Storage(Model):
         :type optimization_model: str
         :param global_control: The global_control of this Storage.  # noqa: E501
         :type global_control: bool
-        :param voltage_sensitivity_factor_active_power: The voltage_sensitivity_factor_active_power of this Storage.  # noqa: E501
-        :type voltage_sensitivity_factor_active_power: float
-        :param voltage_sensitivity_factor_reactive_power: The voltage_sensitivity_factor_reactive_power of this Storage.  # noqa: E501
-        :type voltage_sensitivity_factor_reactive_power: float
+        :param voltage_sensitivity_factor_active_power_pu: The voltage_sensitivity_factor_active_power_pu of this Storage.  # noqa: E501
+        :type voltage_sensitivity_factor_active_power_pu: float
+        :param voltage_sensitivity_factor_reactive_power_pu: The voltage_sensitivity_factor_reactive_power_pu of this Storage.  # noqa: E501
+        :type voltage_sensitivity_factor_reactive_power_pu: float
+        :param max_power_import_in_k_w: The max_power_import_in_k_w of this Storage.  # noqa: E501
+        :type max_power_import_in_k_w: float
+        :param max_power_export_in_k_w: The max_power_export_in_k_w of this Storage.  # noqa: E501
+        :type max_power_export_in_k_w: float
+        :param max_reactive_power_import_in_k_var: The max_reactive_power_import_in_k_var of this Storage.  # noqa: E501
+        :type max_reactive_power_import_in_k_var: float
+        :param max_reactive_power_export_in_k_var: The max_reactive_power_export_in_k_var of this Storage.  # noqa: E501
+        :type max_reactive_power_export_in_k_var: float
         """
         self.swagger_types = {
             'id': str,
@@ -78,8 +86,12 @@ class Storage(Model):
             'powerfactor': float,
             'optimization_model': str,
             'global_control': bool,
-            'voltage_sensitivity_factor_active_power': float,
-            'voltage_sensitivity_factor_reactive_power': float
+            'voltage_sensitivity_factor_active_power_pu': float,
+            'voltage_sensitivity_factor_reactive_power_pu': float,
+            'max_power_import_in_k_w': float,
+            'max_power_export_in_k_w': float,
+            'max_reactive_power_import_in_k_var': float,
+            'max_reactive_power_export_in_k_var': float
         }
 
         self.attribute_map = {
@@ -101,8 +113,12 @@ class Storage(Model):
             'powerfactor': 'powerfactor',
             'optimization_model': 'optimization_model',
             'global_control': 'global_control',
-            'voltage_sensitivity_factor_active_power': 'voltage_sensitivity_factor_active_power',
-            'voltage_sensitivity_factor_reactive_power': 'voltage_sensitivity_factor_reactive_power'
+            'voltage_sensitivity_factor_active_power_pu': 'voltage_sensitivity_factor_active_power_pu',
+            'voltage_sensitivity_factor_reactive_power_pu': 'voltage_sensitivity_factor_reactive_power_pu',
+            'max_power_import_in_k_w': 'max_power_import_in_kW',
+            'max_power_export_in_k_w': 'max_power_export_in_kW',
+            'max_reactive_power_import_in_k_var': 'max_reactive_power_import_in_kVar',
+            'max_reactive_power_export_in_k_var': 'max_reactive_power_export_in_kVar'
         }
 
         self._id = id
@@ -123,8 +139,12 @@ class Storage(Model):
         self._powerfactor = powerfactor
         self._optimization_model = optimization_model
         self._global_control = global_control
-        self._voltage_sensitivity_factor_active_power = voltage_sensitivity_factor_active_power
-        self._voltage_sensitivity_factor_reactive_power = voltage_sensitivity_factor_reactive_power
+        self._voltage_sensitivity_factor_active_power_pu = voltage_sensitivity_factor_active_power_pu
+        self._voltage_sensitivity_factor_reactive_power_pu = voltage_sensitivity_factor_reactive_power_pu
+        self._max_power_import_in_k_w = max_power_import_in_k_w
+        self._max_power_export_in_k_w = max_power_export_in_k_w
+        self._max_reactive_power_import_in_k_var = max_reactive_power_import_in_k_var
+        self._max_reactive_power_export_in_k_var = max_reactive_power_export_in_k_var
 
     @classmethod
     def from_dict(cls, dikt) -> 'Storage':
@@ -552,47 +572,131 @@ class Storage(Model):
         self._global_control = global_control
 
     @property
-    def voltage_sensitivity_factor_active_power(self) -> float:
-        """Gets the voltage_sensitivity_factor_active_power of this Storage.
+    def voltage_sensitivity_factor_active_power_pu(self) -> float:
+        """Gets the voltage_sensitivity_factor_active_power_pu of this Storage.
 
         Unit: V/kW  # noqa: E501
 
-        :return: The voltage_sensitivity_factor_active_power of this Storage.
+        :return: The voltage_sensitivity_factor_active_power_pu of this Storage.
         :rtype: float
         """
-        return self._voltage_sensitivity_factor_active_power
+        return self._voltage_sensitivity_factor_active_power_pu
 
-    @voltage_sensitivity_factor_active_power.setter
-    def voltage_sensitivity_factor_active_power(self, voltage_sensitivity_factor_active_power: float):
-        """Sets the voltage_sensitivity_factor_active_power of this Storage.
+    @voltage_sensitivity_factor_active_power_pu.setter
+    def voltage_sensitivity_factor_active_power_pu(self, voltage_sensitivity_factor_active_power_pu: float):
+        """Sets the voltage_sensitivity_factor_active_power_pu of this Storage.
 
         Unit: V/kW  # noqa: E501
 
-        :param voltage_sensitivity_factor_active_power: The voltage_sensitivity_factor_active_power of this Storage.
-        :type voltage_sensitivity_factor_active_power: float
+        :param voltage_sensitivity_factor_active_power_pu: The voltage_sensitivity_factor_active_power_pu of this Storage.
+        :type voltage_sensitivity_factor_active_power_pu: float
         """
 
-        self._voltage_sensitivity_factor_active_power = voltage_sensitivity_factor_active_power
+        self._voltage_sensitivity_factor_active_power_pu = voltage_sensitivity_factor_active_power_pu
 
     @property
-    def voltage_sensitivity_factor_reactive_power(self) -> float:
-        """Gets the voltage_sensitivity_factor_reactive_power of this Storage.
+    def voltage_sensitivity_factor_reactive_power_pu(self) -> float:
+        """Gets the voltage_sensitivity_factor_reactive_power_pu of this Storage.
 
         Unit: V/kW  # noqa: E501
 
-        :return: The voltage_sensitivity_factor_reactive_power of this Storage.
+        :return: The voltage_sensitivity_factor_reactive_power_pu of this Storage.
         :rtype: float
         """
-        return self._voltage_sensitivity_factor_reactive_power
+        return self._voltage_sensitivity_factor_reactive_power_pu
 
-    @voltage_sensitivity_factor_reactive_power.setter
-    def voltage_sensitivity_factor_reactive_power(self, voltage_sensitivity_factor_reactive_power: float):
-        """Sets the voltage_sensitivity_factor_reactive_power of this Storage.
+    @voltage_sensitivity_factor_reactive_power_pu.setter
+    def voltage_sensitivity_factor_reactive_power_pu(self, voltage_sensitivity_factor_reactive_power_pu: float):
+        """Sets the voltage_sensitivity_factor_reactive_power_pu of this Storage.
 
         Unit: V/kW  # noqa: E501
 
-        :param voltage_sensitivity_factor_reactive_power: The voltage_sensitivity_factor_reactive_power of this Storage.
-        :type voltage_sensitivity_factor_reactive_power: float
+        :param voltage_sensitivity_factor_reactive_power_pu: The voltage_sensitivity_factor_reactive_power_pu of this Storage.
+        :type voltage_sensitivity_factor_reactive_power_pu: float
         """
 
-        self._voltage_sensitivity_factor_reactive_power = voltage_sensitivity_factor_reactive_power
+        self._voltage_sensitivity_factor_reactive_power_pu = voltage_sensitivity_factor_reactive_power_pu
+
+    @property
+    def max_power_import_in_k_w(self) -> float:
+        """Gets the max_power_import_in_k_w of this Storage.
+
+
+        :return: The max_power_import_in_k_w of this Storage.
+        :rtype: float
+        """
+        return self._max_power_import_in_k_w
+
+    @max_power_import_in_k_w.setter
+    def max_power_import_in_k_w(self, max_power_import_in_k_w: float):
+        """Sets the max_power_import_in_k_w of this Storage.
+
+
+        :param max_power_import_in_k_w: The max_power_import_in_k_w of this Storage.
+        :type max_power_import_in_k_w: float
+        """
+
+        self._max_power_import_in_k_w = max_power_import_in_k_w
+
+    @property
+    def max_power_export_in_k_w(self) -> float:
+        """Gets the max_power_export_in_k_w of this Storage.
+
+
+        :return: The max_power_export_in_k_w of this Storage.
+        :rtype: float
+        """
+        return self._max_power_export_in_k_w
+
+    @max_power_export_in_k_w.setter
+    def max_power_export_in_k_w(self, max_power_export_in_k_w: float):
+        """Sets the max_power_export_in_k_w of this Storage.
+
+
+        :param max_power_export_in_k_w: The max_power_export_in_k_w of this Storage.
+        :type max_power_export_in_k_w: float
+        """
+
+        self._max_power_export_in_k_w = max_power_export_in_k_w
+
+    @property
+    def max_reactive_power_import_in_k_var(self) -> float:
+        """Gets the max_reactive_power_import_in_k_var of this Storage.
+
+
+        :return: The max_reactive_power_import_in_k_var of this Storage.
+        :rtype: float
+        """
+        return self._max_reactive_power_import_in_k_var
+
+    @max_reactive_power_import_in_k_var.setter
+    def max_reactive_power_import_in_k_var(self, max_reactive_power_import_in_k_var: float):
+        """Sets the max_reactive_power_import_in_k_var of this Storage.
+
+
+        :param max_reactive_power_import_in_k_var: The max_reactive_power_import_in_k_var of this Storage.
+        :type max_reactive_power_import_in_k_var: float
+        """
+
+        self._max_reactive_power_import_in_k_var = max_reactive_power_import_in_k_var
+
+    @property
+    def max_reactive_power_export_in_k_var(self) -> float:
+        """Gets the max_reactive_power_export_in_k_var of this Storage.
+
+
+        :return: The max_reactive_power_export_in_k_var of this Storage.
+        :rtype: float
+        """
+        return self._max_reactive_power_export_in_k_var
+
+    @max_reactive_power_export_in_k_var.setter
+    def max_reactive_power_export_in_k_var(self, max_reactive_power_export_in_k_var: float):
+        """Sets the max_reactive_power_export_in_k_var of this Storage.
+
+
+        :param max_reactive_power_export_in_k_var: The max_reactive_power_export_in_k_var of this Storage.
+        :type max_reactive_power_export_in_k_var: float
+        """
+
+        self._max_reactive_power_export_in_k_var = max_reactive_power_export_in_k_var

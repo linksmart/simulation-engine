@@ -1699,7 +1699,7 @@ class OpenDSS:
         return self.PVs
 
     def setStorages(self, storage):
-        #logger.info("Setting up the Storages")
+        logger.info("Setting up the Storages")
         try:
             for element in storage:
                 logger.debug("storage element "+str(element))

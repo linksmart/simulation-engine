@@ -288,10 +288,6 @@ definitions:
         type: "string"
       country:
         type: "string"
-      max_real_power_in_kW_to_grid:
-        type: "number"
-      max_reactive_power_in_kVar_to_grid:
-        type: "number"
   Radial:
     type: "object"
     properties:
@@ -644,12 +640,20 @@ definitions:
       global_control:
         type: "boolean"
         default: false
-      voltage_sensitivity_factor_active_power:
+      voltage_sensitivity_factor_active_power_pu:
         type: "number"
         description: "Unit: V/kW"
-      voltage_sensitivity_factor_reactive_power:
+      voltage_sensitivity_factor_reactive_power_pu:
         type: "number"
         description: "Unit: V/kW"
+      max_power_import_in_kW:
+        type: "number"
+      max_power_export_in_kW:
+        type: "number"
+      max_reactive_power_import_in_kVar:
+        type: "number"
+      max_reactive_power_export_in_kVar:
+        type: "number"
   Photovoltaic:
     type: "object"
     required:
