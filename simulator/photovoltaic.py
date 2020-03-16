@@ -1,19 +1,23 @@
-import logging, os, json
+import logging
+import os
+import json
 
-logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(
+    format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
+
 
 class Photovoltaic:
 
-    def __init__(self,id, node, phases, voltage, max_power, max_q_power, powerfactor, control_strategy="ofw", meta=None):
-        self.id =id
+    def __init__(self, id, node, phases, voltage, max_power, max_q_power, powerfactor, control_strategy="ofw", meta=None):
+        self.id = id
         self.voltage = voltage
-        self.node =  node
+        self.node = node
         self.max_power = max_power
         self.max_q_power = max_q_power
         self.pf = powerfactor
         self.control = Control_strategy(control_strategy)
-        if not meta== None:
+        if not meta == None:
             for control_setting, value_control in meta.items():
                 if control_strategy == "limit_power":
                     if control_setting == "percentage_max_power":
@@ -31,7 +35,6 @@ class Photovoltaic:
                     if control_setting == "max_vpu_low":
                         self.control.get_strategy().set_max_vpu_low(value_control)
 
-
         self.momentary_power = 0
         self.output_power = 0
         self.output_q_power = 0
@@ -46,10 +49,8 @@ class Photovoltaic:
         self.id = id
 
     def get_node_base(self):
-        node=self.node
-        if "." in node:
-            node.split(".")[0]
-        return node
+        node = self.node
+        return node.split(".")[0]
 
     def get_node(self):
         return self.node
@@ -127,7 +128,7 @@ class Control_strategy:
 
 class No_control:
     def __init__(self):
-        self.power =  0
+        self.power = 0
         self.name = "no_control"
 
     def get_name(self):
@@ -139,9 +140,10 @@ class No_control:
     def get_control_power(self):
         return self.power
 
+
 class Ofw:
     def __init__(self):
-        self.power =  0
+        self.power = 0
         self.name = "ofw"
 
     def get_name(self):
@@ -153,9 +155,10 @@ class Ofw:
     def get_control_power(self):
         return self.power
 
+
 class Limit_power:
     def __init__(self):
-        self.percentage  = 50
+        self.percentage = 50
         self.sensitivity_factor = 1
         self.name = "limit_power"
 
@@ -207,6 +210,7 @@ class Volt_Watt:
 
     def get_control_power(self):
         return self.power
+
 
 class Volt_Var:
     def __init__(self):
