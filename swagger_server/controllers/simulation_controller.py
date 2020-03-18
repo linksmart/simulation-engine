@@ -432,47 +432,57 @@ def create_simulation(body):  # noqa: E501
         return "Bad JSON Format"
 
 def is_PV(radial):
-	for values in radial:
-		if "photovoltaics" in values:
-			return True
-		else:
-			return False
+    for values in radial:
+        if "photovoltaics" in values:
+            return True
+        else:
+            return False
 
 def is_ESS(radial):
-	for values in radial:
-		if "storageUnits" in values:
-			return True
-		else:
-			return False
+    for values in radial:
+        if "storageUnits" in values:
+            return True
+        else:
+            return False
 
 def get_PV_nodes(list_pv):
-	bus=[]
-	for pv_element in list_pv:
-		bus_name = pv_element["bus1"]
-		bus.append(bus_name)
-	
-	bus_to_send = order_nodes_in_lists(bus)
-	return bus_to_send
+    bus=[]
+    for pv_element in list_pv:
+        bus_name = pv_element["bus1"]
+        bus.append(bus_name)
+    logger.debug("--PV bus: "+str(bus))
+    bus_to_send = order_nodes_in_lists(bus)
+    return bus_to_send
 
 def get_charging_station_nodes(list_cs):
-	bus = []
-	for cs_element in list_cs:
-		bus_name = cs_element["bus"]
-		bus.append(bus_name)
-	
-	bus_to_send = order_nodes_in_lists(bus)
-	return bus_to_send
+    bus = []
+    for cs_element in list_cs:
+        bus_name = cs_element["bus"]
+        bus.append(bus_name)
+    
+    bus_to_send = order_nodes_in_lists(bus)
+    return bus_to_send
 
 def order_nodes_in_lists(list_nodes):
     bus_to_send = []
-    substring_list = [".1", ".2", ".3"]
+    for bus_name in list_nodes:
+        bus_to_send.append(bus_name)
+    if not bus_to_send == []:
+        import itertools
+        bus_to_send = list(k for k, _ in itertools.groupby(bus_to_send))
+    return bus_to_send
 
+def order_nodes_in_lists_backup(list_nodes):
+    bus_to_send = []
+    substring_list = [".1", ".2", ".3"]
+    
     for bus_name_2 in list_nodes:
+    
         if "." in bus_name_2:
             name_root = bus_name_2.split(".")[0]
             bus_name_list = [idx for idx in list_nodes if idx.split(".")[0] == name_root]
             flag = True
-
+    
             for substring in substring_list:
                 flag_temp = False
                 for element in bus_name_list:
@@ -485,14 +495,14 @@ def order_nodes_in_lists(list_nodes):
                         first_phase = "."+element.split(".")[1]
                         second_phase = "."+element.split(".")[2]
                         bus_name_list=[name_root+first_phase, name_root+second_phase]
-
+    
                     elif len(element.split(".")) == 4:
                         flag_temp = True
                         logger.debug("len == 4")
-
+    
                 if len(bus_name_list) > 1:
                     bus_name_list.sort()
-
+    
                 flag = flag and flag_temp
             if flag:
                 bus_to_send.append([name_root])
@@ -500,217 +510,213 @@ def order_nodes_in_lists(list_nodes):
                 bus_to_send.append(bus_name_list)
         else:
             bus_to_send.append([bus_name_2])
-
+    
     if not bus_to_send == []:
         import itertools
         bus_to_send = list(k for k, _ in itertools.groupby(bus_to_send))
-
+    
     return bus_to_send
 
 def get_ESS_nodes(list_ess):
-	bus=[]
-	for ess_element in list_ess:
-		bus_name = ess_element["bus1"]
-		bus.append(bus_name)
-	
-	bus_to_send = order_nodes_in_lists(bus)
-	return bus_to_send
-
-def get_Load_nodes(list_loads):
-	bus = []
-	for load_element in list_loads:
-		bus_name = load_element["bus"]
-		bus.append(bus_name)
-	
-	bus_to_send = order_nodes_in_lists(bus)
-	return bus_to_send
-
-"""def get_ESS_nodes(list_ess):
     bus=[]
     for ess_element in list_ess:
-        bus.append(ess_element["bus1"])
-    return bus"""
+        bus_name = ess_element["bus1"]
+        bus.append(bus_name)
+    
+    bus_to_send = order_nodes_in_lists(bus)
+    return bus_to_send
+
+def get_Load_nodes(list_loads):
+    bus = []
+    for load_element in list_loads:
+        bus_name = load_element["bus"]
+        logger.debug("Load element " + str(load_element) + " bus_name "+str(bus_name))
+        bus.append(bus_name)
+    logger.debug("--Load bus: " + str(bus))
+    bus_to_send = order_nodes_in_lists(bus)
+    return bus_to_send
+
 
 def get_simulation_result(id):  # noqa: E501
-	"""Get a simulation result
-
-	 # noqa: E501
-
-	:param id: ID of the simulation
-	:type id: str
-
-	:rtype: Simulation result - array of nodes, and corresponding voltage
-	"""
-	
-	try:
-		fname = str(id) + "_result"
-		logger.debug("File name = " + str(fname))
-		path = os.path.join("data", str(id), fname)
-		result = utils.get_stored_data(path)
-	
-	except Exception as e:
-		logger.error(e)
-		result = e
-	return result
+    """Get a simulation result
+    
+     # noqa: E501
+    
+    :param id: ID of the simulation
+    :type id: str
+    
+    :rtype: Simulation result - array of nodes, and corresponding voltage
+    """
+    
+    try:
+        fname = str(id) + "_result"
+        logger.debug("File name = " + str(fname))
+        path = os.path.join("data", str(id), fname)
+        result = utils.get_stored_data(path)
+    
+    except Exception as e:
+        logger.error(e)
+        result = e
+    return result
 
 def str_to_complex(data):
-	result = []
-	try:
-		for element in data:
-			print(complex(element))
-			result.append(complex(element))
-		return result
-	except Exception as e:
-		print(e)
+    result = []
+    try:
+        for element in data:
+            print(complex(element))
+            result.append(complex(element))
+        return result
+    except Exception as e:
+        print(e)
 
 def get_simulation_result_raw_with_node(id, result_type, node_name):  # noqa: E501
-	"""Get a simulation result from result_raw file
-	:param id: ID of the simulation :type str
-	:param result_type: Result type such as voltages/currents/losses :type str
-	:param node_name: Name of node/bus :type str
-
-	:rtype: Simulation result - list of simulation results for the given result_type and node.
-	"""
-	
-	try:
-		fname = str(id) + "_result_raw.json"
-		logger.debug("File name = " + str(fname))
-		path = os.path.join("data", str(id), fname)
-		raw_data = utils.get_stored_data(path)
-		if raw_data == 1:
-			message = "No simulation found for id: "+str(id)
-			logger.error(message)
-			return message
-		output = {}
-		if(result_type in raw_data.keys() and raw_data[result_type] is not None):
-			raw_data = raw_data[result_type]
-			output[result_type] = {}
-			raw_data_keys = raw_data.keys()
-			nodes = node_name.split(".")
-			for key in raw_data_keys:
-				if len(nodes) > 1:
-					if key == nodes[0]:
-						for k in raw_data[key].keys():
-							if nodes[1] == k:
-								output[result_type][key] = {}
-								output[result_type][key][k] = raw_data[key][k]
-								return output
-				elif key == nodes[0]:
-					output[result_type][key] = raw_data[key]
-			if not output[result_type]:
-				output = "No record found for " + node_name
-		else:
-			output = "result type not found"
-	except Exception as e:
-		logger.error(e)
-		output = str(e)
-	return output
+    """Get a simulation result from result_raw file
+    :param id: ID of the simulation :type str
+    :param result_type: Result type such as voltages/currents/losses :type str
+    :param node_name: Name of node/bus :type str
+    
+    :rtype: Simulation result - list of simulation results for the given result_type and node.
+    """
+    
+    try:
+        fname = str(id) + "_result_raw.json"
+        logger.debug("File name = " + str(fname))
+        path = os.path.join("data", str(id), fname)
+        raw_data = utils.get_stored_data(path)
+        if raw_data == 1:
+            message = "No simulation found for id: "+str(id)
+            logger.error(message)
+            return message
+        output = {}
+        if(result_type in raw_data.keys() and raw_data[result_type] is not None):
+            raw_data = raw_data[result_type]
+            output[result_type] = {}
+            raw_data_keys = raw_data.keys()
+            nodes = node_name.split(".")
+            for key in raw_data_keys:
+                if len(nodes) > 1:
+                    if key == nodes[0]:
+                        for k in raw_data[key].keys():
+                            if nodes[1] == k:
+                                output[result_type][key] = {}
+                                output[result_type][key][k] = raw_data[key][k]
+                                return output
+                elif key == nodes[0]:
+                    output[result_type][key] = raw_data[key]
+            if not output[result_type]:
+                output = "No record found for " + node_name
+        else:
+            output = "result type not found"
+    except Exception as e:
+        logger.error(e)
+        output = str(e)
+    return output
 
 def get_simulation_result_raw(id, result_type):  # noqa: E501
-	"""Get a simulation result from result_raw file
-	:param id: ID of the simulation :type str
-	:param result_type: Result type such as voltages/currents/losses :type str
-
-	:rtype: Simulation result - list of simulation results for the given result_type.
-	"""
-	
-	try:
-		fname = str(id) + "_result_raw.json"
-		logger.debug("File name = " + str(fname))
-		path = os.path.join("data", str(id), fname)
-		raw_data = utils.get_stored_data(path)
-		if raw_data == 1:
-			message = "No simulation found for id: "+str(id)
-			logger.error(message)
-			return message
-		output = {}
-		if(result_type in raw_data.keys() and raw_data[result_type] is not None):
-			output[result_type] = raw_data[result_type]
-		else:
-			output = "result type not found"
-	except Exception as e:
-		logger.error(e)
-		output = str(e)
-	return output
+    """Get a simulation result from result_raw file
+    :param id: ID of the simulation :type str
+    :param result_type: Result type such as voltages/currents/losses :type str
+    
+    :rtype: Simulation result - list of simulation results for the given result_type.
+    """
+    
+    try:
+        fname = str(id) + "_result_raw.json"
+        logger.debug("File name = " + str(fname))
+        path = os.path.join("data", str(id), fname)
+        raw_data = utils.get_stored_data(path)
+        if raw_data == 1:
+            message = "No simulation found for id: "+str(id)
+            logger.error(message)
+            return message
+        output = {}
+        if(result_type in raw_data.keys() and raw_data[result_type] is not None):
+            output[result_type] = raw_data[result_type]
+        else:
+            output = "result type not found"
+    except Exception as e:
+        logger.error(e)
+        output = str(e)
+    return output
 
 def delete_simulation(id):  # noqa: E501
-	"""Delete a simulation and its data
-
-	 # noqa: E501
-
-	:param id: ID of the simulation
-	:type id: str
-
-	:rtype: None
-	"""
-	
-	status = "None"
-	try:
-		import shutil
-		folder_name = os.path.join("data", str(id))
-		shutil.rmtree(folder_name)
-		#util.rmfile(id, "data")
-		status = 'Simulation ' + str(id) + ' deleted!'
-	except:
-		status = "ERROR: Could not delete Simulation " + str(id)
-	return status
+    """Delete a simulation and its data
+    
+     # noqa: E501
+    
+    :param id: ID of the simulation
+    :type id: str
+    
+    :rtype: None
+    """
+    
+    status = "None"
+    try:
+        import shutil
+        folder_name = os.path.join("data", str(id))
+        shutil.rmtree(folder_name)
+        #util.rmfile(id, "data")
+        status = 'Simulation ' + str(id) + ' deleted!'
+    except:
+        status = "ERROR: Could not delete Simulation " + str(id)
+    return status
 
 def mod_dict(data, k, v):
-	for key in data.keys():
-		if key == k:
-			data[key] = v
-		elif type(data[key]) is dict:
-			mod_dict(data[key], k, v)
+    for key in data.keys():
+        if key == k:
+            data[key] = v
+        elif type(data[key]) is dict:
+            mod_dict(data[key], k, v)
 
 def update_simulation(id):  # noqa: E501 ##TODO: work in progress
-	"""Send new data to an existing simulation
-	 # noqa: E501
-	:param id: ID of the simulation
-	:type id: str
-	:param radial: Updated grid data
-	:type radial: dict | bytes
-	:rtype: None
-	"""
-	"""if connexion.request.is_json:
-	    body = Grid.from_dict(connexion.request.get_json())  # noqa: E501
-	    logger.debug(body)"""
-	fileid = connexion.request.args.get('id')
-	key = connexion.request.args.get('key')
-	value = connexion.request.args.get('value')
-	try:
-		dir_data = os.path.join("data", str(fileid))
-		
-		if not os.path.exists(dir_data):
-			return "Id not existing"
-		
-		fname = str(fileid) + "_input_grid"
-		logger.debug("File name = " + str(fname))
-		path = os.path.join("data", str(fileid), fname)
-		
-		f = open(path, 'a')  # open(str(id)+"_results.txt")
-		# logger.debug("GET file "+str(f))
-		content = f.read()
-		# logger.info(content)
-		data = json.loads(content)
-		f.close()
-		# utils.store_data(path, data)
-		
-		mod_dict(data, key, value)
-	except:
-		logger.debug("Error updating")
-	return 'Simulation ' + fileid + ' updated!'
+    """Send new data to an existing simulation
+     # noqa: E501
+    :param id: ID of the simulation
+    :type id: str
+    :param radial: Updated grid data
+    :type radial: dict | bytes
+    :rtype: None
+    """
+    """if connexion.request.is_json:
+        body = Grid.from_dict(connexion.request.get_json())  # noqa: E501
+        logger.debug(body)"""
+    fileid = connexion.request.args.get('id')
+    key = connexion.request.args.get('key')
+    value = connexion.request.args.get('value')
+    try:
+        dir_data = os.path.join("data", str(fileid))
+        
+        if not os.path.exists(dir_data):
+            return "Id not existing"
+        
+        fname = str(fileid) + "_input_grid"
+        logger.debug("File name = " + str(fname))
+        path = os.path.join("data", str(fileid), fname)
+        
+        f = open(path, 'a')  # open(str(id)+"_results.txt")
+        # logger.debug("GET file "+str(f))
+        content = f.read()
+        # logger.info(content)
+        data = json.loads(content)
+        f.close()
+        # utils.store_data(path, data)
+        
+        mod_dict(data, key, value)
+    except:
+        logger.debug("Error updating")
+    return 'Simulation ' + fileid + ' updated!'
 
 
 
 
 def get_topology_per_node(id):  # noqa: E501
     """Get topology ordered per nodes
-
+    
      # noqa: E501
-
+    
     :param id: ID of the simulation
     :type id: str
-
+    
     :rtype: SimulationResult
     """
     input = InputController(id,None,None)
