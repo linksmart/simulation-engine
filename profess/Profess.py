@@ -724,14 +724,15 @@ class Profess:
                                         len_node_name_complete = len(node_name_complete.split("."))
 
                                     logger.debug("profile for node "+str(node_name_complete)+" values "+str(values))
+                                    if not charger_unit == None:
+                                        power_profile_ev = charger_unit.get_power_profile_charging_station()
+                                        # logger.debug("power_profile_ev "+str(power_profile_ev))
+                                        if len(power_profile_ev) == 24:
+                                            new_values = [sum(x) for x in zip(values, power_profile_ev)]
+                                    else:
+                                        new_values = values
+                                        
                                     if (node_name_base == node_name_complete) or len_node_name_complete > 2:
-                                        if not charger_unit == None:
-                                            power_profile_ev = charger_unit.get_power_profile_charging_station()
-                                            logger.debug("power_profile_ev "+str(power_profile_ev))
-                                            if len(power_profile_ev) == 24:
-                                                new_values = [sum(x) for x in zip(values, power_profile_ev)]
-                                        else:
-                                            new_values = values
                                         logger.debug("new values "+str(new_values))
                                         config_data_of_node["load"]["P_Load"] = new_values
                                         three_phase = new_values
@@ -774,16 +775,17 @@ class Profess:
                                                 config_data_of_node["load"]["P_Load_T"] = [0] * 24
 
                                     elif node_name_base in node_name_complete and len_node_name_complete == 2:
+                                        logger.debug("new values " + str(new_values))
                                         flag_per_phase = True
                                         # checks which phases are used
                                         if node_name_base + ".1" == node_name_complete:
-                                            config_data_of_node["load"]["P_Load_R"] = values
+                                            config_data_of_node["load"]["P_Load_R"] = new_values
                                             r_flag = True
                                         if node_name_base + ".2" == node_name_complete:
-                                            config_data_of_node["load"]["P_Load_S"] = values
+                                            config_data_of_node["load"]["P_Load_S"] = new_values
                                             s_flag = True
                                         if node_name_base + ".3" == node_name_complete:
-                                            config_data_of_node["load"]["P_Load_T"] = values
+                                            config_data_of_node["load"]["P_Load_T"] = new_values
                                             t_flag = True
 
                                     else:
@@ -806,7 +808,7 @@ class Profess:
                                         three_phase.append(three_phase_value)
                                     config_data_of_node["load"]["P_Load"] = three_phase
 
-                                logger.debug("load profile set for " + str(node_name))
+                                logger.debug("load profile set for " + str(node_name) + " with profile "+str(config_data_of_node["load"]))
 
                 else:
                     logger.debug("no load profile was given")
