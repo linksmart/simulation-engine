@@ -304,7 +304,7 @@ class gridController(threading.Thread):
 				evs_connected = charger_element.get_EV_connected()
 				
 				for ev_unit in evs_connected:
-					ev_unit.calculate_position(self.sim_hours, 1)
+					ev_unit.calculate_position(self.sim_hours+24, 1)
 					EV_names.append("ESS_" + ev_unit.get_id())
 					EV_position.append({ev_unit.get_id(): ev_unit.get_position_profile()})
 					logger.debug(
@@ -400,8 +400,7 @@ class gridController(threading.Thread):
 					if flag_is_charging_station:
 						logger.debug("Setting plugin profiles for evs")
 						self.setup_chargers(chargers, hours)
-
-					if flag_is_charging_station:
+						#if flag_is_charging_station:
 						soc_list_new_evs = self.input.set_new_soc_evs(soc_list_evs_commercial, soc_list_evs_residential,
 																	  chargers)
 						

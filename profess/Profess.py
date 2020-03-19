@@ -727,7 +727,7 @@ class Profess:
                                     if (node_name_base == node_name_complete) or len_node_name_complete > 2:
                                         if not charger_unit == None:
                                             power_profile_ev = charger_unit.get_power_profile_charging_station()
-                                            
+                                            logger.debug("power_profile_ev "+str(power_profile_ev))
                                             if len(power_profile_ev) == 24:
                                                 new_values = [sum(x) for x in zip(values, power_profile_ev)]
                                         else:

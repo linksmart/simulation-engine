@@ -94,6 +94,7 @@ class EV:
         self.position_profile = data
 
     def calculate_position(self, horizon, repetition):
+        logger.debug("Calculating positon profile with horizon "+str(horizon))
         data = self.uncertainty.monte_carlo_simulation(3600, horizon, repetition, self.unplugged_mean, self.unplugged_mean_std,
                                                                self.plugged_mean, self.plugged_mean_std, 1)
         self.set_position_profile(data)
