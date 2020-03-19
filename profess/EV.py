@@ -13,6 +13,7 @@ class EV:
         self.id = id
         self.uncertainty = Uncertainty()
         self.position_profile = None
+        
         self.unplugged_mean = 7.32
         self.unplugged_mean_std = 0.78
         self.plugged_mean = 18.76
@@ -40,20 +41,23 @@ class EV:
         return self.Soc
 
     def set_SoC(self, value):
-        if value < 0:
-            self.Soc = 0
-            return 1
-        elif value > 100:
-            self.Soc = 100
-            return 1
+        if not value == None:
+            if value < 0:
+                self.Soc = 0
+                return 1
+            elif value > 100:
+                self.Soc = 100
+                return 1
+            else:
+                self.Soc = value
+                return 1
         else:
-            self.Soc = value
-            return 1
+            logger.error("None is not a value for SoC")
 
     def get_Battery_Capacity(self):
         return self.Battery_Capacity
 
-    def calculate_S0C_next_timestep(self, P_ev, number_km_driven):
+    def calculate_S0C_next_timestep(self, P_ev, number_km_driven=1):
         #number_km = 5
         number_km = number_km_driven
         #consumption_for_x_km = (11.7 * number_km) / 100  # 11.7 kwh/100km consumption for VW Eup
@@ -76,6 +80,8 @@ class EV:
             else:
                 return value
 
+    
+        
     def get_position_profile(self, start=None, number_of_elements=None):
         if not start == None and not number_of_elements == None:
             position_profile = self.position_profile[int(start):int(start + number_of_elements)]
@@ -108,10 +114,17 @@ class Charger:
         self.bus_name = bus_name
         self.charge_efficiency = charge_efficiency
         self.ev_plugged = None
+        self.power_profile = None
 
     def get_id(self):
         return self.name
 
+    def get_power_profile_charging_station(self):
+        return self.power_profile
+
+    def set_power_profile_charging_station(self, power_profile):
+        self.power_profile = power_profile
+        
     def get_bus_name(self):
         return self.bus_name
 

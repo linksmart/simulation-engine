@@ -450,7 +450,7 @@ def get_PV_nodes(list_pv):
     for pv_element in list_pv:
         bus_name = pv_element["bus1"]
         bus.append(bus_name)
-    logger.debug("--PV bus: "+str(bus))
+    #logger.debug("--PV bus: "+str(bus))
     bus_to_send = order_nodes_in_lists(bus)
     return bus_to_send
 
@@ -530,7 +530,7 @@ def get_Load_nodes(list_loads):
     bus = []
     for load_element in list_loads:
         bus_name = load_element["bus"]
-        logger.debug("Load element " + str(load_element) + " bus_name "+str(bus_name))
+        #logger.debug("Load element " + str(load_element) + " bus_name "+str(bus_name))
         bus.append(bus_name)
     logger.debug("--Load bus: " + str(bus))
     bus_to_send = order_nodes_in_lists(bus)

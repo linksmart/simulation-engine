@@ -58,7 +58,7 @@ services:
     build:
       context: ""
       dockerfile: Dockerfile
-    image: garagon/simulation_engine:latest
+    image: garagon/simulation-engine:latest
     #image: garagon/simulation-engine:latest
 
     container_name: "se"

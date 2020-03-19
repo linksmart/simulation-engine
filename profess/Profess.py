@@ -671,7 +671,7 @@ class Profess:
             logger.error(
                 "a wrong profess_id was set for node: " + str(node_name) + " , profess_id: " + str(new_profess_id))
 
-    def set_profiles(self, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None, soc_list=None, voltage_prediction=None):
+    def set_profiles(self, load_profiles=None, chargers=None, pv_profiles=None, price_profiles=None, ess_con=None, soc_list=None, voltage_prediction=None):
         """
         sets the profiles for all configs of all relevant nodes(nodes with ESS)
 
@@ -704,7 +704,7 @@ class Profess:
 
                             if node_name_base in load_profile_for_node:
                                 profile_per_node = load_profile_for_node[node_name_base]
-                                # logger.debug("profile_per_node  "+str(profile_per_node))
+                                #logger.debug("profile_per_node  "+str(profile_per_node))
 
                                 # if node_name_base + ".1.2.3" or node_name_base in profile_per_node:
                                 # logger.debug("node_name_base or 123 in profile_per_node")
@@ -713,14 +713,28 @@ class Profess:
                                 s_flag = False
                                 t_flag = False
                                 for node_name_complete, values in profile_per_node.items():
-
+                                    charger_unit = None
+                                    if not chargers == None:
+                                        for key, charger_element in chargers.items():
+                                            if node_name_complete == charger_element.get_bus_name():
+                                                charger_unit = charger_element
+                                    
                                     len_node_name_complete = 1
                                     if "." in node_name_complete:
                                         len_node_name_complete = len(node_name_complete.split("."))
 
+                                    logger.debug("profile for node "+str(node_name_complete)+" values "+str(values))
                                     if (node_name_base == node_name_complete) or len_node_name_complete > 2:
-                                        config_data_of_node["load"]["P_Load"] = values
-                                        three_phase = values
+                                        if not charger_unit == None:
+                                            power_profile_ev = charger_unit.get_power_profile_charging_station()
+                                            
+                                            if len(power_profile_ev) == 24:
+                                                new_values = [sum(x) for x in zip(values, power_profile_ev)]
+                                        else:
+                                            new_values = values
+                                        logger.debug("new values "+str(new_values))
+                                        config_data_of_node["load"]["P_Load"] = new_values
+                                        three_phase = new_values
                                         single_phase = []
 
                                         if len_node_name_complete != 3:
@@ -972,7 +986,7 @@ class Profess:
         self.dataList = node_element_list
 
 
-    def set_up_profess(self, soc_list=None, load_profiles=None, pv_profiles=None, price_profiles=None, ess_con=None,voltage_prediction=None):
+    def set_up_profess(self, soc_list=None, load_profiles=None, chargers=None, pv_profiles=None, price_profiles=None, ess_con=None,voltage_prediction=None):
         """
         sets all important information retrieved from the parameters and topology
         :param soc_list: syntax when a list: [{node_name1:{"SoC":value, "id": id_name},{node_name2:{...},...] value is
@@ -1018,7 +1032,7 @@ class Profess:
 
             self.set_soc_ess(soc_list)
             #logger.debug("load_profiles "+str(load_profiles))
-            self.set_profiles(load_profiles=load_profiles, pv_profiles=pv_profiles, price_profiles=price_profiles
+            self.set_profiles(load_profiles=load_profiles, chargers=chargers, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list, voltage_prediction=voltage_prediction)
             #logger.debug("data list "+str(self.dataList))
 
