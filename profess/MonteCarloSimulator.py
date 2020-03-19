@@ -59,7 +59,9 @@ class Uncertainty:
                 cand_arr = np.random.normal(plugged_mean, plugged_std, max_number_of_cars)
 
                 # If departure<arrival
-                if all(cand_dep < cand_arr):
+                if (unplugged_mean < plugged_mean and all(cand_dep < cand_arr)) or \
+                        (plugged_mean < unplugged_mean and all(cand_arr < cand_dep)):
+                #if all(cand_dep < cand_arr):
                     overlap = False
                     min_dep = cand_dep * 60
                     hou_dep, min_dep = divmod(min_dep, 60)

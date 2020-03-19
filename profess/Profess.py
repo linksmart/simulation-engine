@@ -146,9 +146,11 @@ class Profess:
         posts standard_data to the ofw for every relevant bus (nodes with ESS)
         :return: returns 0 when successful, 1 when not successful
         """
+        
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         all_successful = True
         for node_name in node_name_list:
+            #time.sleep(0.5)
             if self.post_data((self.standard_data), node_name, soc_list):
                 all_successful = False
                 logger.error("failed to post_all_standard_data to OFW ")
@@ -556,7 +558,6 @@ class Profess:
         profess_id = self.get_profess_id(node_name, soc_list)
         if profess_id != 0:
             config_data_of_node = self.dataList[node_number][node_name][profess_id]
-
             # for radial_number in range(len(self.json_parser.topology["radials"])):
             node_element_list = self.json_parser.get_node_element_list(soc_list)[node_number][node_name]
 
@@ -723,10 +724,10 @@ class Profess:
                                     if "." in node_name_complete:
                                         len_node_name_complete = len(node_name_complete.split("."))
 
-                                    logger.debug("profile for node "+str(node_name_complete)+" values "+str(values))
+                                    logger.debug("profile for node "+str(node_name_complete))
                                     if not charger_unit == None:
                                         power_profile_ev = charger_unit.get_power_profile_charging_station()
-                                        # logger.debug("power_profile_ev "+str(power_profile_ev))
+                                        logger.debug("power_profile_ev "+str(power_profile_ev))
                                         if len(power_profile_ev) == 24:
                                             new_values = [sum(x) for x in zip(values, power_profile_ev)]
                                     else:
@@ -808,7 +809,7 @@ class Profess:
                                         three_phase.append(three_phase_value)
                                     config_data_of_node["load"]["P_Load"] = three_phase
 
-                                logger.debug("load profile set for " + str(node_name) + " with profile "+str(config_data_of_node["load"]))
+                                logger.debug("load profile set for " + str(node_name))
 
                 else:
                     logger.debug("no load profile was given")
@@ -1005,12 +1006,7 @@ class Profess:
         :return:
         """
         logger.debug("setup profess started")
-        #logger.debug("price prifile profess " + str(price_profiles))
-        #logger.debug("soc_list " + str(soc_list))
-        #logger.debug("load_profiles "+ str(load_profiles))
-        # logger.debug("pv_profiles "+ str(pv_profiles))
-        # logger.debug("price_profiles "+ str(price_profiles))
-        # logger.debug("ess_con " + str(ess_con))
+        #logger.debug("dataList "+str(self.dataList))
         if self.dataList == []:
             # this happends just for the first set_up
             self.set_data_list(soc_list)
@@ -1022,6 +1018,7 @@ class Profess:
             if node_name_list != 0:
                 for nodeName in node_name_list:
                     self.set_storage(nodeName, soc_list)
+                    logger.debug("Storage steup")
                     self.set_photovoltaics(nodeName, soc_list)
                     self.set_generic(nodeName,soc_list)
                     self.set_grid(nodeName,soc_list)
@@ -1150,19 +1147,18 @@ class Profess:
                                 config_data_of_node = self.dataList[node_number][node_name][profess_id]
                                 if node_name in soc_list_for_node:
                                     storage_information = soc_list_for_node[node_name]
-
                                     for storage_key in self.storage_mapping:
                                         if storage_key in storage_information["ESS"]:
                                             if storage_key in self.percentage_mapping:
                                                 percentage = 100
                                             else:
                                                 percentage = 1
-                                            if type(self.storage_mapping[storage_key]) == dict:
+                                            if isinstance(self.storage_mapping[storage_key], dict):
                                                 # this means the key is mapped to meta data
                                                 config_data_of_node["ESS"]["meta"][
                                                     self.storage_mapping[storage_key]["meta"]] = \
                                                     storage_information["ESS"][storage_key] / percentage
-                                            if type(self.storage_mapping[storage_key]) == list:
+                                            if isinstance(self.storage_mapping[storage_key], list):
                                                 # this means a value in the storageunit is mapped to multiple values in the ofw
                                                 for part in self.storage_mapping[storage_key]:
                                                     if "meta" in part:
@@ -1175,6 +1171,8 @@ class Profess:
                                                 # the key can be directly mapped
                                                 config_data_of_node["ESS"][self.storage_mapping[storage_key]] = \
                                                     storage_information["ESS"][storage_key] / percentage
+                                                
+                                                
     def translate_output(self, output_data, soc_list):
         """
         translates the ouptut data from whole time horizon to next hour, and also just returns wanted values

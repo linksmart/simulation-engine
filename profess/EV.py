@@ -93,10 +93,17 @@ class EV:
         #logger.debug("postion profile data "+str(data))
         self.position_profile = data
 
-    def calculate_position(self, horizon, repetition):
+    def calculate_position(self, horizon, repetition, type_application="residential"):
         logger.debug("Calculating positon profile with horizon "+str(horizon))
-        data = self.uncertainty.monte_carlo_simulation(3600, horizon, repetition, self.unplugged_mean, self.unplugged_mean_std,
-                                                               self.plugged_mean, self.plugged_mean_std, 1)
+        if type_application == "residential":
+            data = self.uncertainty.monte_carlo_simulation(3600, horizon, repetition, self.unplugged_mean,
+                                                           self.unplugged_mean_std,
+                                                           self.plugged_mean, self.plugged_mean_std, 1)
+        if type_application == "commercial":
+            data = self.uncertainty.monte_carlo_simulation(3600, horizon, repetition, 18.86,
+                                                           2.42,
+                                                           11.13, 2.4, 1)
+            logger.debug("data commercial "+str(data))
         self.set_position_profile(data)
         #logger.debug("position profile "+str(self.position_profile))
 

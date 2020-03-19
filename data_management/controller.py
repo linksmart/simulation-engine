@@ -99,11 +99,11 @@ class gridController(threading.Thread):
 				SoC = None
 				for position in position_profile:
 					if position == 1:
-						logger.debug("position: "+str(position)+" soc "+str(ev_unit.get_SoC()))
+						#logger.debug("position: "+str(position)+" soc "+str(ev_unit.get_SoC()))
 						if ev_unit.get_SoC() < 100:
 							next_soc = ev_unit.calculate_S0C_next_timestep(charger_element.get_max_charging_power())
 							ev_unit.set_SoC(next_soc)
-							logger.debug("soc " + str(ev_unit.get_SoC()))
+							#logger.debug("soc " + str(ev_unit.get_SoC()))
 							power_profile.append(charger_element.get_max_charging_power())
 						else:
 							power_profile.append(0)
@@ -111,7 +111,7 @@ class gridController(threading.Thread):
 						number_km = random.randrange(2,15,1)
 						next_soc = ev_unit.calculate_S0C_next_timestep(-1, number_km)
 						ev_unit.set_SoC(next_soc)
-						logger.debug("number_km_driven "+str(number_km)+" soc " + str(ev_unit.get_SoC()))
+						#logger.debug("number_km_driven "+str(number_km)+" soc " + str(ev_unit.get_SoC()))
 						power_profile.append(0)
 						if count == 0:
 							SoC = next_soc
@@ -163,7 +163,7 @@ class gridController(threading.Thread):
 		self.domain = self.get_profess_url() + "/v1/"
 		logger.debug("profess url: " + str(self.domain))
 		self.profess = Profess(self.id, self.domain, self.topology)
-		self.profev = Profev(self.id, self.domain, self.topology)
+		self.profev = Profess(self.id, self.domain, self.topology)
 		
 		# ----------PROFILES----------------#
 		self.profiles = Profiles()
@@ -304,7 +304,7 @@ class gridController(threading.Thread):
 				evs_connected = charger_element.get_EV_connected()
 				
 				for ev_unit in evs_connected:
-					ev_unit.calculate_position(self.sim_hours+24, 1)
+					ev_unit.calculate_position(self.sim_hours+24, 1, charger_element.get_type_application())
 					EV_names.append("ESS_" + ev_unit.get_id())
 					EV_position.append({ev_unit.get_id(): ev_unit.get_position_profile()})
 					logger.debug(
@@ -325,6 +325,7 @@ class gridController(threading.Thread):
 			if not charger_commercial_list == []:
 				soc_list_evs_commercial = self.input.get_soc_list_evs(self.topology, charger_commercial_list)
 				logger.debug("soc_list_evs commercial" + str(soc_list_evs_commercial))
+
 
 		pv_objects_alone = []
 		if not chargers == None:
@@ -562,21 +563,21 @@ class gridController(threading.Thread):
 				
 				if not soc_list_new_evs == []:
 					if flag_global_control:
-						answer = self.profess.set_up_profess(soc_list_new_evs, load_profiles, chargers, pv_profiles,
+						answer = self.profev.set_up_profess(soc_list_new_evs, load_profiles, chargers, pv_profiles,
 															 price_profile, global_profile)
 					elif not flag_global_control and flag_is_price_profile_needed:
-						answer = self.profess.set_up_profess(soc_list_new_evs, load_profiles, chargers, pv_profiles,
+						answer = self.profev.set_up_profess(soc_list_new_evs, load_profiles, chargers, pv_profiles,
 															 price_profile)
 					else:
-						answer = self.profess.set_up_profess(soc_list_new_evs, load_profiles, chargers, pv_profiles)
+						answer = self.profev.set_up_profess(soc_list_new_evs, load_profiles, chargers, pv_profiles)
 					
 					if answer:
 						self.Stop()
 					
 					
-					status_profess = self.profess.start_all(soc_list_new_evs)
+					status_profess = self.profev.start_all(soc_list_new_evs)
 					if not status_profess:
-						profess_output = self.profess.wait_and_get_output(soc_list_new_evs)
+						profess_output = self.profev.wait_and_get_output(soc_list_new_evs)
 						# logger.debug("output profess " + str(profess_output))
 						if not profess_output == [] and not profess_output == 1:
 							logger.debug("Optimization succeded")

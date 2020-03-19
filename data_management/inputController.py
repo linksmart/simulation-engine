@@ -388,11 +388,16 @@ class InputController:
                         if pv_element["bus1"] == ess_element["bus1"]:
                             pv_kW = pv_element["max_power_kW"]
 
+                    cs_kW = 0
+                    for cs in charging_station:
+                        if cs["bus"] == ess_element["bus1"]:
+                            cs_kW = cs["max_charging_power_kW"]
+
                     soc_dict[ess_element["bus1"]]["Grid"] = {
-                        "Q_Grid_Max_Export_Power": max(load_kW, pv_kW),
-                        "P_Grid_Max_Export_Power": max(load_kW, pv_kW)}
+                        "Q_Grid_Max_Export_Power": max(load_kW + cs_kW, pv_kW),
+                        "P_Grid_Max_Export_Power": max(load_kW +  cs_kW, pv_kW)}
                     logger.warning("Missing \"max_power_import_in_kW\" or \"max_power_export_in_kW\" in ess element " + ess_element["id"])
-                    logger.debug("max_power_import_in_kW "+str(max(load_kW, pv_kW))+ " max_power_export_in_kW "+str(max(load_kW, pv_kW)))
+                    logger.debug("max_power_import_in_kW "+str(max(load_kW + cs_kW, pv_kW))+ " max_power_export_in_kW "+str(max(load_kW + cs_kW, pv_kW)))
                     #return "Missing \"max_power_import_in_kW\" or \"max_power_export_in_kW\" in ess element " + ess_element["id"]
                 for pv_element in photovoltaics:
                     if pv_element["bus1"] == ess_element["bus1"]:
@@ -415,9 +420,9 @@ class InputController:
         for element in radial:
             for key, value in element.items():
                 if key == "chargingStations":
-                    charging_station=value
+                    charging_station = value
                 if key == "storageUnits":
-                    storages=value
+                    storages = value
                 if key == "photovoltaics":
                     photovoltaics=value
                 if key == "loads":
@@ -442,16 +447,16 @@ class InputController:
 
                     for pv_element in photovoltaics:
                         bus_pv = pv_element["bus1"]
-                        if "." in bus_pv:
-                            if len(bus_pv.split(".")) == 4:
-                                bus_pv = bus_pv.split(".")[0]
+                        #if "." in bus_pv:
+                            #if len(bus_pv.split(".")) == 4:
+                                #bus_pv = bus_pv.split(".")[0]
                         if bus_pv == charger_element.get_bus_name():
                             soc_dict[charger_element.get_bus_name()]["PV"]={"pv_name": pv_element["id"]}
                     for ess_element in storages:
                         bus_ess = ess_element["bus1"]
-                        if "." in bus_ess:
-                            if len(bus_ess.split(".")) == 4:
-                                bus_ess = bus_ess.split(".")[0]
+                        #if "." in bus_ess:
+                            #if len(bus_ess.split(".")) == 4:
+                                #bus_ess = bus_ess.split(".")[0]
                         if bus_ess == charger_element.get_bus_name():
                             soc_dict[charger_element.get_bus_name()]["ESS"] = {"SoC":ess_element["soc"],
                                                             "T_SoC":25,
@@ -476,14 +481,19 @@ class InputController:
                                     if pv_element["bus1"] == ess_element["bus1"]:
                                         pv_kW = pv_element["max_power_kW"]
 
+                                cs_kW = 0
+                                for cs in charging_station:
+                                    if cs["bus"] == ess_element["bus1"]:
+                                        cs_kW = cs["max_charging_power_kW"]
+
                                 soc_dict[charger_element.get_bus_name()]["Grid"] = {
-                                    "Q_Grid_Max_Export_Power": max(load_kW, pv_kW),
-                                    "P_Grid_Max_Export_Power": max(load_kW, pv_kW)}
+                                    "Q_Grid_Max_Export_Power": max(load_kW + cs_kW, pv_kW),
+                                    "P_Grid_Max_Export_Power": max(load_kW + cs_kW, pv_kW)}
                                 logger.warning(
                                     "Missing \"max_power_import_in_kW\" or \"max_power_export_in_kW\" in ess element " +
                                     ess_element["id"])
                                 logger.debug("max_power_import_in_kW " + str(
-                                    max(load_kW, pv_kW)) + " max_power_export_in_kW " + str(max(load_kW, pv_kW)))
+                                    max(load_kW + cs_kW, pv_kW)) + " max_power_export_in_kW " + str(max(load_kW + cs_kW, pv_kW)))
                                 # return "Missing \"max_power_import_in_kW\" or \"max_power_export_in_kW\" in ess element " + ess_element["id"]
                 soc_list.append(soc_dict)
             #list_storages.append(ess_element)
