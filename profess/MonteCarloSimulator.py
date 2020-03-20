@@ -39,6 +39,7 @@ class Uncertainty:
         position_proof = {}
         count = 0
         for dt in d_range:
+            #logger.debug(dt)
             # Iterate through the date range (for which we will calculate the markov model)
             mstr = str(dt).split(' ')[1]
             timestamps.append(mstr[:5])  # Generate a list that contains the day times in HH:MM format
@@ -62,6 +63,7 @@ class Uncertainty:
                 if (unplugged_mean < plugged_mean and all(cand_dep < cand_arr)) or \
                         (plugged_mean < unplugged_mean and all(cand_arr < cand_dep)):
                 #if all(cand_dep < cand_arr):
+
                     overlap = False
                     min_dep = cand_dep * 60
                     hou_dep, min_dep = divmod(min_dep, 60)
@@ -72,7 +74,9 @@ class Uncertainty:
                         # Convert float to HH:MM format
                         departure[car_label + 1] = "%02d:%02d" % (hou_dep[car_label], min_dep[car_label])
                         arrival[car_label + 1] = "%02d:%02d" % (hou_arr[car_label], min_arr[car_label])
-            #logger.debug("departure "+str(departure)+" length "+str(len(departure)))
+            
+            logger.debug("arrival "+str(arrival))
+            logger.debug("departure " + str(departure))
             #for nb in range(len(timestamps)):
             for nb in range(horizon):
                 # Iterates trough every HH:MM of the horizon
@@ -83,14 +87,24 @@ class Uncertainty:
 
                 # Checks how many cars are at home state
                 for car_label in range(1, max_number_of_cars + 1):
-                    #logger.debug("car label "+str(car_label))
-                    if departure[car_label] < current_time_step < arrival[car_label]:
-                        total_parking_cars += 0
-                    else:
-                        total_parking_cars += 1
-
+                    
+                    if departure[car_label] > arrival[car_label]:
+                        logger.debug("out")
+                        if current_time_step < arrival[car_label] or current_time_step > departure[car_label]:
+                            total_parking_cars += 0
+                        else:
+                            total_parking_cars += 1
+                    
+                    if departure[car_label] < arrival[car_label]:
+                        #logger.debug("inside")
+                        if current_time_step < arrival[car_label] and current_time_step > departure[car_label]:
+                            total_parking_cars += 0
+                        else:
+                            total_parking_cars += 1
+    
                 # Use this as a proof for hosting n cars at HH:MM
                 position_proof[current_time_step_list, total_parking_cars] += 1 / repetition
+                
 
         behaviour_model = []
 
