@@ -292,7 +292,7 @@ class gridController(threading.Thread):
 			
 
 			for key, charger_element in chargers.items():
-				logger.debug("charger_element.get_bus_name() " + str(charger_element.get_bus_name()))
+				logger.debug("charger_element_bus " + str(charger_element.get_bus_name()))
 				
 				if charger_element.get_type_application() == "residential" and not charger_element.get_bus_name() in list_node_charging_station_without_storage:
 					charger_residential_list.append(charger_element)
@@ -320,11 +320,11 @@ class gridController(threading.Thread):
 			
 			if not charger_residential_list == []:
 				soc_list_evs_residential = self.input.get_soc_list_evs(self.topology, charger_residential_list)
-				logger.debug("soc_list_evs residential" + str(soc_list_evs_residential))
+				#logger.debug("soc_list_evs residential" + str(soc_list_evs_residential))
 			
 			if not charger_commercial_list == []:
 				soc_list_evs_commercial = self.input.get_soc_list_evs(self.topology, charger_commercial_list)
-				logger.debug("soc_list_evs commercial" + str(soc_list_evs_commercial))
+				#logger.debug("soc_list_evs commercial" + str(soc_list_evs_commercial))
 
 
 		pv_objects_alone = []
@@ -496,7 +496,6 @@ class gridController(threading.Thread):
 							p_pv_output = None
 							max_charging_power = None
 
-
 							pv_object = None
 							for key, value in element.items():
 								node_name = key
@@ -559,7 +558,6 @@ class gridController(threading.Thread):
 				logger.debug("charging stations present in the simulation")
 				logger.debug("-------------------------------------------")
 				
-				logger.debug("soc_list_new_evs" +str(soc_list_new_evs))
 				
 				if not soc_list_new_evs == []:
 					if flag_global_control:
@@ -586,7 +584,6 @@ class gridController(threading.Thread):
 																					   soc_list_new_evs)
 							
 							for element in profess_result:
-								logger.debug("element "+str(element))
 								ess_name = None
 								pv_name = None
 								p_ess_output = None

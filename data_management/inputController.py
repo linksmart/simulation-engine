@@ -10,6 +10,9 @@ import math
 
 import datetime
 import logging
+import sys
+from collections import Counter
+
 from data_management.utils import Utils
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(name)s: %(message)s', level=logging.DEBUG)
@@ -206,10 +209,10 @@ class InputController:
         logger.debug("Photovoltaics charged")
         return message
 
-    def setPVshapes(self, profiles_object, profess_object, pvs, city, country, sim_hours, powerprofile):
+    def setPVshapes(self, profiles_object, profess_object, pvs, city, country, initial_timestamp, sim_hours, powerprofile):
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
-            message = self.sim.setPVshapes(pvs, powerprofile, city, country, sim_hours, profiles_object, profess_object)
+            message = self.sim.setPVshapes(pvs, powerprofile, city, country, initial_timestamp, sim_hours, profiles_object, profess_object)
             if message == 0:
                 logger.debug("Loadshapes for PVs charged")
             return message
@@ -335,17 +338,16 @@ class InputController:
             list_soc.append(self.sim.getSoCfromBattery(ess_name))
         return list_soc
 
-    def get_soc_list(self,topology):
+    def get_soc_list(self, topology):
         radial=topology["radials"]#["storageUnits"]
-        common=topology["common"]
-        list_storages=[]
+        #common=topology["common"]
         soc_list = []
-        soc_dict_intern = {"SoC":None}
         charging_station = []
         photovoltaics = []
         storages = []
         for element in radial:
             for key, value in element.items():
+                #logger.debug("key "+str(key)+" value "+str(value))
                 if key == "chargingStations":
                     charging_station = value
                 if key == "storageUnits":
@@ -358,7 +360,7 @@ class InputController:
         charging_station_buses =[]
         for cs in charging_station:
             charging_station_buses.append(cs["bus"])
-
+            
         for ess_element in storages:
             if not ess_element["bus1"] in charging_station_buses:
                 soc_dict = {}
@@ -762,7 +764,7 @@ class InputController:
             logger.debug("list_all_storage_nodes "+str(list_all_storage_nodes))
 
             if not len(list_nodes_storages_with_cs) == 0:
-                if list_nodes_storages_with_cs == list_all_storage_nodes:
+                if Counter(list_nodes_storages_with_cs) == Counter(list_all_storage_nodes):
                     return False
                 else:
                     return True
@@ -791,18 +793,24 @@ class InputController:
             return False
 
     def get_city(self, common):
-        if common["city"]:
+        if "city" in common.keys():
             self.city = common["city"]
             return self.city
         else:
             return 1
 
     def get_country(self, common):
-        if common["country"]:
+        if "country" in common.keys():
             self.country = common["country"]
             return self.country
         else:
             return 1
+
+    def get_timestamp(self, common):
+        if "simulation_initial_timestamp" in common.keys():
+            return common["simulation_initial_timestamp"]
+        else:
+            return 1583020800
 
     def get_sim_days(self):
         return self.sim_hours
@@ -817,6 +825,8 @@ class InputController:
             logger.debug("city " + str(city))
             country = self.get_country(common)
             logger.debug("country " + str(country))
+            initial_timestamp = self.get_timestamp(common)
+            logger.debug("Initial timestamp "+str(initial_timestamp))
             #self.price_profile = self.get_price_profile_from_server(city,country,self.sim_days)
             flag_is_price_profile_needed = self.is_price_profile_needed(topology)
             flag_global_control = self.is_global_control_in_Storage(topology)
@@ -951,7 +961,7 @@ class InputController:
 
                 if not city == None and not country == None:
                     logger.debug("! >>>  ---------------Loading PV Profiles beforehand ------------------------- \n")
-                    message = self.setPVshapes(profiles, profess, photovoltaics, city, country, self.sim_hours, powerprofile)
+                    message = self.setPVshapes(profiles, profess, photovoltaics, city, country, initial_timestamp, self.sim_hours, powerprofile)
                     logger.debug("message "+str(message))
                     if not message == 0:
                         return message

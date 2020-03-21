@@ -89,7 +89,7 @@ class Uncertainty:
                 for car_label in range(1, max_number_of_cars + 1):
                     
                     if departure[car_label] > arrival[car_label]:
-                        logger.debug("out")
+                        #logger.debug("out")
                         if current_time_step < arrival[car_label] or current_time_step > departure[car_label]:
                             total_parking_cars += 0
                         else:

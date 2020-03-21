@@ -1260,10 +1260,11 @@ class OpenDSS:
 
 
 
-    def setPVshapes(self, pvs, powerprofiles, city, country, sim_hours, profiles, profess):
+    def setPVshapes(self, pvs, powerprofiles, city, country, initial_timestamp, sim_hours, profiles, profess):
 
         try:
-
+            
+            pv_profile_data = profiles.pv_profile(city, country, sim_hours + 24, 1, initial_timestamp)
             for element in pvs:
                 pv_name = element["id"]
                 bus_name = element["bus1"]
@@ -1332,7 +1333,7 @@ class OpenDSS:
                     self.setLoadshape(loadshape_id, sim_hours, 1, pv_profile, normalize, useactual)
                 else:
                     # ----------get_a_profile---------------#
-                    pv_profile_data = profiles.pv_profile(city, country, sim_hours, 1, 1561932000)
+                    
                     if not isinstance(pv_profile_data, list):
                         return "PV profile could not be queried"
                     loadshape_id = "Shape_"+pv_name

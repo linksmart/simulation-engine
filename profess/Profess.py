@@ -983,6 +983,7 @@ class Profess:
         # logger.debug("data for nodes is set")
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         node_element_list = []
+        logger.debug("node_name_list "+str(node_name_list))
         for node_name in node_name_list:
             node_element_list.append({node_name: {}})
 

@@ -15,7 +15,7 @@ class GridDefinition(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, base_frequency: int=None, voltage_bases: List[float]=None, url_storage_controller: str='http://localhost:8080', city: str=None, country: str=None):  # noqa: E501
+    def __init__(self, id: str=None, base_k_v: float=None, per_unit: float=None, phases: int=None, bus1: str=None, angle: int=None, mv_asc3: float=None, mv_asc1: float=None, base_frequency: int=None, voltage_bases: List[float]=None, url_storage_controller: str='http://localhost:8080', city: str=None, country: str=None, simulation_initial_timestamp: int=None):  # noqa: E501
         """GridDefinition - a model defined in Swagger
 
         :param id: The id of this GridDefinition.  # noqa: E501
@@ -44,6 +44,8 @@ class GridDefinition(Model):
         :type city: str
         :param country: The country of this GridDefinition.  # noqa: E501
         :type country: str
+        :param simulation_initial_timestamp: The simulation_initial_timestamp of this GridDefinition.  # noqa: E501
+        :type simulation_initial_timestamp: int
         """
         self.swagger_types = {
             'id': str,
@@ -58,7 +60,8 @@ class GridDefinition(Model):
             'voltage_bases': List[float],
             'url_storage_controller': str,
             'city': str,
-            'country': str
+            'country': str,
+            'simulation_initial_timestamp': int
         }
 
         self.attribute_map = {
@@ -74,7 +77,8 @@ class GridDefinition(Model):
             'voltage_bases': 'VoltageBases',
             'url_storage_controller': 'url_storage_controller',
             'city': 'city',
-            'country': 'country'
+            'country': 'country',
+            'simulation_initial_timestamp': 'simulation_initial_timestamp'
         }
 
         self._id = id
@@ -90,6 +94,7 @@ class GridDefinition(Model):
         self._url_storage_controller = url_storage_controller
         self._city = city
         self._country = country
+        self._simulation_initial_timestamp = simulation_initial_timestamp
 
     @classmethod
     def from_dict(cls, dikt) -> 'GridDefinition':
@@ -390,3 +395,24 @@ class GridDefinition(Model):
         """
 
         self._country = country
+
+    @property
+    def simulation_initial_timestamp(self) -> int:
+        """Gets the simulation_initial_timestamp of this GridDefinition.
+
+
+        :return: The simulation_initial_timestamp of this GridDefinition.
+        :rtype: int
+        """
+        return self._simulation_initial_timestamp
+
+    @simulation_initial_timestamp.setter
+    def simulation_initial_timestamp(self, simulation_initial_timestamp: int):
+        """Sets the simulation_initial_timestamp of this GridDefinition.
+
+
+        :param simulation_initial_timestamp: The simulation_initial_timestamp of this GridDefinition.
+        :type simulation_initial_timestamp: int
+        """
+
+        self._simulation_initial_timestamp = simulation_initial_timestamp

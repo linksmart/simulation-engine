@@ -107,7 +107,7 @@ class Profiles:
             timestamp = datetime.datetime.fromtimestamp(timestamp)
         logger.debug("timestamp "+str(timestamp))
         date = timestamp.strftime("%m%d")
-        #logger.debug("date "+str(date))
+        logger.debug("date "+str(date))
         if (not (city) or not (country)):
             logger.error(
                 "\nPlease provide both city and country name, currenty we support price calculation for Bolzano,Italy and Fur,Denmark")
@@ -115,8 +115,10 @@ class Profiles:
         lat =0
         lon =0
         if (city.lower() == "bolzano" and country.lower() == "italy"):
-            lat = "46.12"
-            lon = "11.12"
+            #lat = "46.12"
+            #lon = "11.12"
+            lat = "56.82"
+            lon = "9.00"
 
         elif (city.lower() == "fur" and country.lower() == "denmark"):
             lat = "56.82"

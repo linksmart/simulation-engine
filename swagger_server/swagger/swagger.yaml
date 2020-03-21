@@ -288,6 +288,8 @@ definitions:
         type: "string"
       country:
         type: "string"
+      simulation_initial_timestamp:
+        type: "integer"
   Radial:
     type: "object"
     properties:
