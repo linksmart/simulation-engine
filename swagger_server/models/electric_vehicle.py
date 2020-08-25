@@ -15,7 +15,7 @@ class ElectricVehicle(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, so_c: float=None, battery_capacity_k_wh: float=None, consumption_in_k_w_pro_100_km: float=None, unit_consumption_assumption: float=5.0, unit_drop_penalty: float=None, unplugged_mean: float=None, unplugged_mean_std: float=None, plugged_mean: float=None, plugged_mean_std: float=None):  # noqa: E501
+    def __init__(self, id: str=None, so_c: float=None, battery_capacity_k_wh: float=None, consumption_in_k_w_pro_100_km: float=None, unit_consumption_assumption: float=5.0, unit_drop_penalty: float=None, unplugged_mean: float=None, unplugged_mean_std: float=None, plugged_mean: float=None, plugged_mean_std: float=None, position_profile: List[int]=None):  # noqa: E501
         """ElectricVehicle - a model defined in Swagger
 
         :param id: The id of this ElectricVehicle.  # noqa: E501
@@ -38,6 +38,8 @@ class ElectricVehicle(Model):
         :type plugged_mean: float
         :param plugged_mean_std: The plugged_mean_std of this ElectricVehicle.  # noqa: E501
         :type plugged_mean_std: float
+        :param position_profile: The position_profile of this ElectricVehicle.  # noqa: E501
+        :type position_profile: List[int]
         """
         self.swagger_types = {
             'id': str,
@@ -49,7 +51,8 @@ class ElectricVehicle(Model):
             'unplugged_mean': float,
             'unplugged_mean_std': float,
             'plugged_mean': float,
-            'plugged_mean_std': float
+            'plugged_mean_std': float,
+            'position_profile': List[int]
         }
 
         self.attribute_map = {
@@ -62,7 +65,8 @@ class ElectricVehicle(Model):
             'unplugged_mean': 'unplugged_mean',
             'unplugged_mean_std': 'unplugged_mean_std',
             'plugged_mean': 'plugged_mean',
-            'plugged_mean_std': 'plugged_mean_std'
+            'plugged_mean_std': 'plugged_mean_std',
+            'position_profile': 'position_profile'
         }
 
         self._id = id
@@ -75,6 +79,7 @@ class ElectricVehicle(Model):
         self._unplugged_mean_std = unplugged_mean_std
         self._plugged_mean = plugged_mean
         self._plugged_mean_std = plugged_mean_std
+        self._position_profile = position_profile
 
     @classmethod
     def from_dict(cls, dikt) -> 'ElectricVehicle':
@@ -308,3 +313,24 @@ class ElectricVehicle(Model):
         """
 
         self._plugged_mean_std = plugged_mean_std
+
+    @property
+    def position_profile(self) -> List[int]:
+        """Gets the position_profile of this ElectricVehicle.
+
+
+        :return: The position_profile of this ElectricVehicle.
+        :rtype: List[int]
+        """
+        return self._position_profile
+
+    @position_profile.setter
+    def position_profile(self, position_profile: List[int]):
+        """Sets the position_profile of this ElectricVehicle.
+
+
+        :param position_profile: The position_profile of this ElectricVehicle.
+        :type position_profile: List[int]
+        """
+
+        self._position_profile = position_profile

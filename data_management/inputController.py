@@ -51,41 +51,58 @@ class InputController:
 
         data_to_return = {}
         for radial_element in radial:
-
             for grid_element_type, values_element in radial_element.items():
-                logger.debug("grid_element "+str(grid_element_type))
-                for elements in values_element:
-                    if not elements == [] and not elements == None:
-                        if grid_element_type == "transformer":
-                            id = elements["id"]
-                            bus1 = elements["buses"][0]
-                            bus2 = elements["buses"][1]
-                            if not bus1 in data_to_return.keys():
-                                data_to_return[bus1]={"transformers":[]}
-                            if not bus2 in data_to_return.keys():
-                                data_to_return[bus2]={"transformers":[]}
+                #logger.debug("grid_element "+str(grid_element_type))
+                if not values_element == None:
+                    for elements in values_element:
+                        #logger.debug("elements "+str(elements))
+                        if not elements == [] and not elements == None:
+                            if grid_element_type == "transformer":
+                                id = elements["id"]
+                                bus1 = elements["buses"][0]
+                                bus2 = elements["buses"][1]
+                                if not bus1 in data_to_return.keys():
+                                    data_to_return[bus1]={"transformers":[]}
+                                if not bus2 in data_to_return.keys():
+                                    data_to_return[bus2]={"transformers":[]}
+    
+                                data_to_return[bus1]["transformers"].append(id)
+                                data_to_return[bus2]["transformers"].append(id)
 
-                            data_to_return[bus1]["transformers"].append(id)
-                            data_to_return[bus2]["transformers"].append(id)
-
-                        if grid_element_type == "loads" or grid_element_type == "chargingStations":
-                            id = elements["id"]
-                            bus = elements["bus"]
-                            if not bus in data_to_return.keys():
-                                data_to_return[bus]={}
-                            if not grid_element_type in data_to_return[bus].keys():
-                                data_to_return[bus][grid_element_type]=[]
-
-                            data_to_return[bus][grid_element_type].append(id)
-                        if grid_element_type == "photovoltaics" or grid_element_type == "storageUnits":
-                            id = elements["id"]
-                            bus = elements["bus1"]
-                            if not bus in data_to_return.keys():
-                                data_to_return[bus] = {}
-                            if not grid_element_type in data_to_return[bus].keys():
-                                data_to_return[bus][grid_element_type] = []
-
-                            data_to_return[bus][grid_element_type].append(id)
+                            if grid_element_type == "loads":
+                                id = elements["id"]
+                                bus = elements["bus"]
+                               
+                                if not bus in data_to_return.keys():
+                                    data_to_return[bus] = {}
+                                if not grid_element_type in data_to_return[bus].keys():
+                                    data_to_return[bus][grid_element_type] = []
+    
+                                data_to_return[bus][grid_element_type].append(id)
+                                
+                            if grid_element_type == "chargingStations":
+                                id = elements["id"]
+                                bus = elements["bus"]
+                                ev = elements["hosted_ev"][0]
+                                id_ev = "ESS_"+ev["id"]
+                                if not bus in data_to_return.keys():
+                                    data_to_return[bus]={}
+                                if not grid_element_type in data_to_return[bus].keys():
+                                    data_to_return[bus][grid_element_type]=[]
+                                
+                                dict = {}
+                                dict[id] = {"ev": id_ev}
+                                data_to_return[bus][grid_element_type].append(dict)
+                                
+                            if grid_element_type == "photovoltaics" or grid_element_type == "storageUnits":
+                                id = elements["id"]
+                                bus = elements["bus1"]
+                                if not bus in data_to_return.keys():
+                                    data_to_return[bus] = {}
+                                if not grid_element_type in data_to_return[bus].keys():
+                                    data_to_return[bus][grid_element_type] = []
+    
+                                data_to_return[bus][grid_element_type].append(id)
 
         logger.debug("data_to_return "+str(data_to_return))
         return data_to_return
@@ -213,6 +230,7 @@ class InputController:
         if not city == None and not country == None:
             logger.debug("Charging the pvshapes into the simulator from profiles")
             message = self.sim.setPVshapes(pvs, powerprofile, city, country, initial_timestamp, sim_hours, profiles_object, profess_object)
+            #sys.exit(0)
             if message == 0:
                 logger.debug("Loadshapes for PVs charged")
             return message
@@ -308,6 +326,24 @@ class InputController:
             return Storage_names
         else:
             return []
+        
+    def get_EV_names(self, topology):
+        cs_names = []
+        radial = topology["radials"]  # ["storageUnits"]
+        storages = []
+
+        for element in radial:
+            for key, value in element.items():
+                if key == "chargingStations":
+                    cs = value
+
+        if not cs == []:
+            for cs_element in cs:
+                for ev_element in cs_element["hosted_ev"]:
+                    cs_names.append("ESS_"+ev_element["id"])
+            return cs_names
+        else:
+            return []
 
 
     def get_Storage_nodes(self, topology):
@@ -327,15 +363,24 @@ class InputController:
     def get_storage_powers(self, list_storage_names):
         list_power = []
         for ess_name in list_storage_names:
+            #logger.debug("ess_name "+str(ess_name))
             value = self.sim.getkWfromBattery(ess_name)
+            #logger.debug("value "+str(value))
             list_power.append(value)
         return list_power
 
-    def get_storage_socs(self, topology):
-        list_storage_names = self.get_Storage_names(topology)
+    def get_storage_socs(self, list_ess_names):
+        #list_storage_names = self.get_Storage_names(topology)
         list_soc = []
-        for ess_name in list_storage_names:
+        for ess_name in list_ess_names:
+            logger.debug("SoC "+str(self.sim.getSoCfromBattery(ess_name))+" for "+str(ess_name))
             list_soc.append(self.sim.getSoCfromBattery(ess_name))
+        return list_soc
+    
+    def get_ev_socs(self, list_ev_names):
+        list_soc = []
+        for ev_name in list_ev_names:
+            list_soc.append(self.sim.getSoCfromBattery(ev_name))
         return list_soc
 
     def get_soc_list(self, topology):
@@ -569,6 +614,7 @@ class InputController:
                 for node_name, value in element.items():
                     element_id = value["ESS"]["id"]
                     SoC = float(self.sim.getSoCfromBattery(element_id))
+                    logger.debug("SoC "+str(SoC)+" of element in node "+str(node_name))
                     value["ESS"]["SoC"] = SoC
 
                     if not chargers == None:
@@ -594,6 +640,7 @@ class InputController:
                 for node_name, value in element.items():
                     element_id = value["ESS"]["id"]
                     SoC = float(self.sim.getSoCfromBattery(element_id))
+                    logger.debug("SoC " + str(SoC) + " of element in node " + str(node_name))
                     value["ESS"]["SoC"] = SoC
 
                     if not chargers == None:
@@ -810,7 +857,7 @@ class InputController:
         if "simulation_initial_timestamp" in common.keys():
             return common["simulation_initial_timestamp"]
         else:
-            return 1583020800
+            return 1585699200
 
     def get_sim_days(self):
         return self.sim_hours
@@ -832,10 +879,10 @@ class InputController:
             flag_global_control = self.is_global_control_in_Storage(topology)
             logger.debug("Flag price profile needed: " + str(flag_is_price_profile_needed))
             if flag_is_price_profile_needed or flag_global_control:
-                self.price_profile = self.get_price_profile_from_server(profiles, city, country, time_in_days)
+                #self.price_profile = self.get_price_profile_from_server(profiles, city, country, time_in_days)
                 #logger.debug("price profile "+str(self.price_profile))
-                #self.price_profile = [-0.0819140077566895, 0.0, 0.0, 0.0, 0.0, 0.0, -0.575152457422627, -1.67573353482068, 0.0, 2.72418665735904, 2.86590443767715, 0.0, 3.77866328458742, 0.0, 0.0, 0.00624562037638832, -1.25257625107764, -2.67657213183395, -3.31908736011582, -1.39176425697259, 0.0, 0.0, 0.0, 0.0]
-
+                #sys.exit(0)
+                self.price_profile = [0.05472, 0.05057, 0.04912, 0.04863, 0.04858, 0.04901, 0.05255, 0.058, 0.05834, 0.05834, 0.0521, 0.04863, 0.04313, 0.04, 0.04212, 0.04364, 0.045840000000000006, 0.04909, 0.052289999999999996, 0.06071, 0.0682, 0.05834, 0.05, 0.046990000000000004, 0.053380000000000004, 0.04906, 0.04906, 0.045829999999999996, 0.045840000000000006, 0.045829999999999996, 0.048409999999999995, 0.04906, 0.049460000000000004, 0.05527, 0.05835, 0.05809, 0.05709, 0.051859999999999996, 0.05151, 0.052340000000000005, 0.0521, 0.055, 0.05392, 0.05842, 0.06620000000000001, 0.058, 0.05061, 0.04604, 0.039799999999999995, 0.039049999999999994, 0.03673, 0.0363, 0.037200000000000004, 0.0416, 0.055, 0.06620999999999999, 0.0719, 0.06352000000000001, 0.04351, 0.01303, 0.003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.003, 0.04351, 0.07375, 0.067, 0.04351, 0.04351]
                 if not isinstance(self.price_profile, list) and self.price_profile == None or len(self.price_profile) == 0:
                     return "Price prediction service missing "
 

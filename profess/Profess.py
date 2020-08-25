@@ -1031,7 +1031,7 @@ class Profess:
         if soc_list is not None:
 
             self.set_soc_ess(soc_list)
-            #logger.debug("load_profiles "+str(load_profiles))
+            logger.debug("chargers "+str(chargers))
             self.set_profiles(load_profiles=load_profiles, chargers=chargers, pv_profiles=pv_profiles, price_profiles=price_profiles
                               , ess_con=ess_con, soc_list=soc_list, voltage_prediction=voltage_prediction)
             #logger.debug("data list "+str(self.dataList))

@@ -77,8 +77,8 @@ class Profev:
             },
             "EV":{
                 "meta": {
-                    "Unit_Consumption_Assumption": 10,
-                    "Unit_Drop_Penalty": 2
+                    "Unit_Consumption_Assumption": 5,
+                    "Unit_Drop_Penalty": 10
                 }
             },
             "chargers":{
@@ -99,7 +99,7 @@ class Profev:
                 "VAC_States": {
                     "Min": 0,
                     "Max": 100,
-                    "Steps": 10
+                    "Steps": 5
                 },
                 "meta": {
                     "monte_carlo_repetition": 1000
@@ -282,6 +282,7 @@ class Profev:
         otherwise false
         """
         # busy waiting
+        flag_start = True
         for i in range(1,4):
             #logger.debug("finish status key " +str(self.redisDB.get(self.finish_status_key)))
             if self.redisDB.get(self.finish_status_key) == "True":
@@ -321,7 +322,15 @@ class Profev:
         node_name_list = self.json_parser.get_node_name_list(soc_list)
         if node_name_list != 0:
             running = True
+            flag_first = True
             while running:
+                if flag_first:
+                    flag_first = False
+                    for i in range(1,60):
+                        if self.redisDB.get(self.finish_status_key) == "True":
+                            break
+                        else:
+                            time.sleep(1)
                 running = self.is_running(soc_list)
                 logger.debug("finish status key " + str(self.redisDB.get(self.finish_status_key)))
                 if self.redisDB.get(self.finish_status_key) == "True":
@@ -713,6 +722,8 @@ class Profev:
                     ev_connected = charger_element.get_EV_connected()
                     for ev in ev_connected:
                         config_data_of_node["EV"][ev.get_id()]={"Battery_Capacity_kWh": ev.get_Battery_Capacity()}
+                        config_data_of_node["EV"]["meta"]={"Unit_Consumption_Assumption":ev.get_unit_consumtion_assumption(),
+                                                           "Unit_Drop_Penalty": ev.get_unit_drop_penalty()}
 
             #logger.debug("config data of node " + str(config_data_of_node))
             self.dataList[node_number][node_name][profess_id] = config_data_of_node
@@ -755,7 +766,7 @@ class Profev:
                         config_data_of_node["uncertainty"]["VAC_States"] = {
                             "Min": 0,
                             "Max": 100,
-                            "Steps": 10
+                            "Steps": 5
                         }
 
             #logger.debug("config data of node " + str(config_data_of_node))
@@ -1209,7 +1220,7 @@ class Profev:
         :param ess_con: [{node_name:{node_name.1.2.3:[value1,value2, ...]}, ...}
         :return:
         """
-        logger.debug("set_up_profess started")
+        logger.debug("setup profev started")
         #logger.debug("load_profile " + str(load_profiles))
         # logger.debug("load_profiles "+ str(load_profiles))
         # logger.debug("pv_profiles "+ str(pv_profiles))

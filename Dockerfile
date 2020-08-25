@@ -31,9 +31,11 @@ RUN apt-get update -y && apt-get install -y git-core curl zlib1g-dev libssl-dev 
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade OpenDSSDirect.py[extras]
 
+
 # Set the working directory to usr/src/app
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
+
 
 COPY requirements.txt /usr/src/app/
 RUN pip3 install -r requirements.txt

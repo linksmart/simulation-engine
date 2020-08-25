@@ -109,6 +109,7 @@ class OpenDSS:
         return dss.Circuit.AllNodeNames()
 
     def set_active_element(self, element_name):
+        logger.debug("Setting active element: "+str(element_name))
         dss.Circuit.SetActiveElement(element_name)
 
     def get_transformer_names(self):
@@ -376,11 +377,8 @@ class OpenDSS:
             logger.error("strategy not implemented")
 
 
-
-
-
     def set_switch(self, line_name, opened):
-        self.set_active_element(line_name)
+        self.set_active_element("Line."+line_name)
         if opened:
             dss_string = "Line." + str(line_name) + ".Switch=y"
         else:
@@ -390,13 +388,17 @@ class OpenDSS:
         dss.run_command(dss_string)
 
     def setSoCtoBatery(self, battery_name, soc_value):
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage." + battery_name)
         dss_string = "Storage." + str(battery_name) + ".%stored=" + str(int(soc_value))
         logger.debug("dss_string " + str(dss_string))
         dss.run_command(dss_string)
 
     def setActivePowertoBatery(self,battery_name, power, max_power):
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage." + battery_name)
+        logger.debug("Active ckt element " + str(dss.CktElement.Name()))
+        #logger.debug("Active ckt bus " + str(dss.CktElement.BusNames()))
+        #logger.debug("Active ckt enabled " + str(dss.CktElement.Enabled()))
+        #logger.debug("kwrated: "+str(self.getkWratedfromBattery(battery_name)))
         logger.debug("Power to be set to the battery: "+str(power)+" kW with max charging power: "+str(max_power)+" kW")
         if power < 0:
             percentage_charge=(abs(power)/max_power)*100
@@ -425,42 +427,52 @@ class OpenDSS:
         dss.Circuit.UpdateStorage()
 
     def get_power_Transformer(self, name):
-        self.set_active_element(name)
+        self.set_active_element("Storage." + battery_name)
         logger.debug("Transformer name "+str(dss.Transformers.Name()))
         dss.Transformers.Wdg(1)
         logger.debug("Tranformer KVA "+str(dss.Transformers.kVA()))
 
     def setSoCBattery(self, battery_name, value):
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage." + battery_name)
         dss_string="Storage."+str(battery_name)+".%stored="+str(value)
         logger.debug("dss_string "+str(dss_string))
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
     def getSoCfromBattery(self, battery_name):
-        #logger.debug("Battery name "+str(battery_name))
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage." + battery_name)
+        
         dss_string="? Storage."+str(battery_name)+".%stored"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
+        #logger.debug("State "+str(dss.CktElement.Variable("State",0)))
+        #return dss.CktElement.Variable("State",0)
+        #logger.debug("Variables "+str(dss.CktElement.AllVariableNames()))
+        #return dss.CktElement.AllVariableNames()
 
+    def getAllVariablesESS(self, battery_name):
+        self.set_active_element("Storage." + battery_name)
+        logger.debug("Variables "+str(dss.CktElement.AllVariableNames()))
+        logger.debug("Values " + str(dss.CktElement.AllVariableValues()))
+        
     def getCapacityfromBattery(self, battery_name):
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage." + battery_name)
         dss_string="? Storage."+str(battery_name)+".kWhrated"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
     def getMinSoCfromBattery(self, battery_name):
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage." + battery_name)
         dss_string="? Storage."+str(battery_name)+".%reserve"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
     def getkWfromBattery(self, battery_name):
-        self.set_active_element(battery_name)
-        #dss_string="? Storage."+str(battery_name)+".kW"
+        active_element = "Storage." + battery_name
+        self.set_active_element(active_element)
+        logger.debug("Active element "+str(dss.CktElement.Name()))
         powers = dss.CktElement.Powers()
-        #logger.debug("powers "+str(powers))
+
         node_order = self.get_node_order()
         list = []
         count = 0
@@ -487,25 +499,25 @@ class OpenDSS:
             return 1
 
     def getkWhStoredfromBattery(self, battery_name):
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage."+battery_name)
         dss_string="? Storage."+str(battery_name)+".kWhstored"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
     def getkWratedfromBattery(self, battery_name):
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage."+battery_name)
         dss_string="? Storage."+str(battery_name)+".kWRated"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
     def getStatefromBattery(self, battery_name):
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage."+battery_name)
         dss_string="? Storage."+str(battery_name)+".State"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
 
     def getBusfromBattery(self, battery_name):
-        self.set_active_element(battery_name)
+        self.set_active_element("Storage."+battery_name)
         dss_string="? Storage."+str(battery_name)+".bus1"
         #dss.run_command('? Storage.Akku1.%stored')
         return dss.run_command(dss_string)
@@ -1011,7 +1023,7 @@ class OpenDSS:
 
 
                 #dss_string = "New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} kW={voltage_kW} kVar={voltage_kVar} pf={power_factor} power_profile_id={shape}".format(
-                dss_string="New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV}".format(
+                dss_string="New Load.{load_name} Bus1={bus_name}  Phases={num_phases} Conn={conn} Model={model} kV={voltage_kV} Vminpu=0.7 Vmaxpu=1.3".format(
                 load_name=load_name,
                 bus_name=bus_name,
                 num_phases=num_phases,
@@ -1263,13 +1275,13 @@ class OpenDSS:
     def setPVshapes(self, pvs, powerprofiles, city, country, initial_timestamp, sim_hours, profiles, profess):
 
         try:
-            
             pv_profile_data = profiles.pv_profile(city, country, sim_hours + 24, 1, initial_timestamp)
+            logger.debug("pv_profile_data "+str(pv_profile_data))
             for element in pvs:
                 pv_name = element["id"]
                 bus_name = element["bus1"]
                 max_power= element["max_power_kW"]
-                #logger.debug("max power "+str(max_power))
+                logger.debug("max power "+str(max_power))
 
 
                 if 'power_profile_id' in element.keys() and element["power_profile_id"] is not None:
@@ -1343,7 +1355,7 @@ class OpenDSS:
                     # --------store_profile_for_line----------#
                     self.loadshapes_for_pv[pv_name] = {"name": loadshape_id, "bus": bus_name, "loadshape": pv_profile}
 
-                    self.setLoadshape(loadshape_id, sim_hours, 1, pv_profile, normalize, useactual)
+                    self.setLoadshape(loadshape_id, sim_hours+24, 1, pv_profile, normalize, useactual)
 
             return 0
 
@@ -1666,6 +1678,13 @@ class OpenDSS:
                                 self.EVs[evs["id"]].set_unplugged_values(evs["unplugged_mean"], evs["unplugged_mean_std"])
                             if "plugged_mean" in evs.keys() and "plugged_mean_std" in evs.keys():
                                 self.EVs[evs["id"]].set_plugged_values(evs["plugged_mean"], evs["plugged_mean_std"])
+                            if not evs["unit_consumption_assumption"] == None and not evs["unit_consumption_assumption"] == "":
+                                self.EVs[evs["id"]].set_unit_consumtion_assumption(evs["unit_consumption_assumption"])
+                            if not evs["unit_drop_penalty"] == None and not evs["unit_drop_penalty"] == "":
+                                self.EVs[evs["id"]].set_unit_drop_penalty(evs["unit_drop_penalty"])
+                            if "position_profile" in evs.keys():
+                                if not evs["position_profile"] == [] or not evs["position_profile"] == None:
+                                    self.EVs[evs["id"]].set_position_profile(evs["position_profile"])
                             ev_object.append(self.EVs[evs["id"]])
                     else:
                         logger.debug("key not registered: "+str(key))
@@ -1685,7 +1704,7 @@ class OpenDSS:
                 for ev in list_ev:
                     bus2 = bus1 + "_"+str(counter)
                     self.setPowerLine("Line_"+ev.get_id(), phases, bus1, bus2, r1=0.0001, r0=0.0001, x1=0, x0=0, c1=0, c0=0, switch="y")
-                    self.setStorage("ESS_"+ev.get_id(),bus2, phases, connection, ev.get_SoC(),min_soc=0, kv=kv, kw_rated=kw_rated, kwh_rated=ev.get_Battery_Capacity(), kwh_stored=ev.get_Battery_Capacity(), charge_efficiency=charge_efficiency, discharge_efficiency=1, powerfactor=powerfactor)
+                    self.setStorage("ESS_"+ev.get_id(),bus2, phases, connection, ev.get_SoC(),min_soc=0, kv=kv, kw_rated=kw_rated, kwh_rated=ev.get_Battery_Capacity(), kwh_stored=ev.get_Battery_Capacity(), charge_efficiency=charge_efficiency, discharge_efficiency=100, powerfactor=powerfactor)
                     counter = counter + 1
 
             return 0
@@ -1760,8 +1779,8 @@ class OpenDSS:
 
 
     def setStorage(self, id, bus1, phases, connection, soc, min_soc, kv, kw_rated, kwh_rated, kwh_stored, charge_efficiency, discharge_efficiency, powerfactor):
-
-        dss_string="New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve={min_soc} kV={kv}  kWhrated={kwh_rated} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
+        #{min_soc}
+        dss_string="New Storage.{id} bus1={bus1}  phases={phases} conn={connection} %stored={soc} %reserve=0 kV={kv} kWhRated={kwh_rated} %EffCharge={charge_efficiency} %EffDischarge={discharge_efficiency} pf={powerfactor}".format(
                 id=id,
             bus1=bus1,
             phases=phases,
@@ -1777,9 +1796,9 @@ class OpenDSS:
         )
 
 
-        dss_string = dss_string + " TimeChargeTrigger=-1 "
+        dss_string = dss_string + " TimeChargeTrigger=-10 %IdlingkW=0 State=IDLING "
         if not kw_rated == None:
-            dss_string = dss_string + " kWrated="+str(kw_rated)
+            dss_string = dss_string + " kWRated="+str(kw_rated)
 
         logger.debug(dss_string)
         dss.run_command(dss_string)

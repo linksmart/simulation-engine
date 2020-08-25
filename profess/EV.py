@@ -6,7 +6,7 @@ logger = logging.getLogger(__file__)
 
 class EV:
 
-    def __init__(self,id, Battery_Capacity, SoC, consumption_pro_100_km):
+    def __init__(self,id, Battery_Capacity, SoC, consumption_pro_100_km, unit_consumtion_assumption=10, unit_drop_penalty=1):
         self.Battery_Capacity = Battery_Capacity
         self.consumption = consumption_pro_100_km
         self.Soc = SoC
@@ -18,6 +18,8 @@ class EV:
         self.unplugged_mean_std = 0.78
         self.plugged_mean = 18.76
         self.plugged_mean_std = 1.3
+        self.unit_consumtion_assumption = unit_consumtion_assumption
+        self.unit_drop_penalty = unit_drop_penalty
         logger.debug("EV "+str(self.id)+" created")
 
     def get_plugged_values(self):
@@ -107,7 +109,17 @@ class EV:
             logger.debug("data commercial "+str(data))
         self.set_position_profile(data)
 
-
+    def set_unit_consumtion_assumption(self, value):
+        self.unit_consumtion_assumption = value
+    
+    def get_unit_consumtion_assumption(self):
+        return self.unit_consumtion_assumption
+    
+    def set_unit_drop_penalty(self, value):
+        self.unit_drop_penalty = value
+    
+    def get_unit_drop_penalty(self):
+        return self.unit_drop_penalty
 
 
 class Charger:

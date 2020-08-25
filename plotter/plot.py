@@ -1,5 +1,6 @@
 
 import logging
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,7 +41,7 @@ class Plotter:
         query = self.url_dsf_se+"/se/simulation/"+ id +"/voltages"
         response = self.httpClass.get(query)
         json_response = response.json()
-        #logger.debug("type json_response "+str(type(json_response)))
+        #logger.debug("json_response "+str(json_response))
         if response.status_code == 200:
             if name == None:
                 data = json_response["voltages"]
@@ -59,7 +60,8 @@ class Plotter:
                 data_to_return["lower limit"] = limit_list_low
                 return data_to_return
             else:
-                data = json_response["voltages"][name]
+                
+                data = json_response["voltages"][name.split(".")[0]]
                 data_to_return = {}
 
                 data_to_return[name] = {}
@@ -82,9 +84,11 @@ class Plotter:
         if not element in possible_elements:
             logger.error("Wrong element. Possible elements " + str(possible_elements))
         query = self.url_dsf_se + "/se/simulation/" + id + "/soc/"+element
+        logger.debug("query "+str(query))
         response = self.httpClass.get(query)
         json_response = response.json()
-        # logger.debug("type json_response "+str(type(json_response)))
+        logger.debug("json_response "+str(json_response))
+        logger.debug("name "+str(name))
         if response.status_code == 200:
             if name == None:
                 return json_response["soc"][element]
@@ -125,10 +129,10 @@ class Plotter:
         if not element in possible_elements:
             logger.error("Wrong element. Possible elements "+str(possible_elements))
         query = self.url_dsf_se+"/se/simulation/"+ str(id) +"/powers/" + str(element)
-        #logger.debug("query "+str(query))
+        logger.debug("query "+str(query))
         response = self.httpClass.get(query)
         json_response = response.json()
-        #logger.debug("type json_response "+str(type(json_response)))
+        logger.debug("json_response "+str(json_response))
         if response.status_code == 200:
             if name == None:
                 return json_response["powers"][element]
@@ -318,7 +322,7 @@ class Plotter:
         #sns.set_palette(sns.hls_palette(8, l=.1, s=.8))
 
         number_colors = len(data)
-
+        logger.debug("file_name in plot "+str(file_name))
         if not file_name.find("voltage") == -1 or not file_name.find("soc") == -1 or not file_name.find("usage") == -1 or not file_name.find("comparison") == -1:
             palete = {}
             if number_colors == 1:
@@ -329,19 +333,31 @@ class Plotter:
                 palete = sns.hls_palette(number_colors, l=.5, s=.8)
         elif not file_name.find("powers") == -1:
             palete = {}
+            logger.debug("data "+str(data.keys()))
             for key in data.keys():
-                if "grid" in key:
-                    palete[key]="#ED4C67"#"#0652DD"
-                elif "load" in key:
-                    palete[key] = "#009432"
-                elif "pv" in key:
-                    palete[key]="#F79F1F"
-                elif "storage" in key:
+                logger.debug("key "+str(key))
+                logger.debug("palete " + str(palete))
+                if not key.find("grid") == -1:
+                    logger.debug("Entered grid")
+                    palete[key] = "#ED4C67"             #"#0652DD"
+                if not key.find("pv") == -1:
+                    logger.debug("Entered pv")
+                    palete[key] = "#F79F1F"
+                if not key.find("storage") == -1:
+                    logger.debug("Entered storage")
                     palete[key] = "#1B1464"
-                elif "ev" in key:
+                if not key.find("ev") == -1:
+                    logger.debug("Entered ev")
                     palete[key] = "#833471"
-                elif "transformer" in key:
+                if not key.find("transformer") == -1:
+                    logger.debug("Entered transformer")
                     palete[key] = "#0652DD"
+                if not key.find("TR1") == -1:
+                    logger.debug("Entered TR1")
+                    palete[key] = "#0652DD"
+                if not key.find("load") == -1 or not key.find("consumer") == -1:
+                    logger.debug("Entered load")
+                    palete[key] = "#009432"
 
 
             logger.debug("palete "+str(palete))
@@ -394,25 +410,51 @@ class Plotter:
         ######################################################################
 
         for bus_name, element_object in connections.items():
+            logger.debug("##############################################################################")
+            logger.debug("bus name " + str(bus_name))
+            logger.debug("##############################################################################")
             base = os.path.join("results", folder_name, bus_name)
-            file_name_soc = os.path.join(base, "soc")
-
+        
             element_type_to_get = None
             for element_type, element_names in element_object.items():
                 if element_type == "storageUnits":
                     element_type_to_get = "Storages"
-                elif element_type == "chargingStations":
+                    
+                    for name in element_names:
+                        logger.debug("------------------------------------------------------------------------------")
+                        logger.debug("name in soc "+str(name))
+                        logger.debug("------------------------------------------------------------------------------")
+                        
+                        if not element_type_to_get == None:
+    
+                            if element_type == "storageUnits":
+                                xlabel = "Timestamp [h]"
+                                ylabel = "SoC [%]"
+                                soc_ESS = self.get_data_soc(id, element_type_to_get, name)
+                                file_name_soc = os.path.join(base, "soc_ESS")
+                                logger.debug("file_name_soc ESS " + str(file_name_soc))
+                                self.utils.store_data(file_name_soc+".json", soc_ESS)
+                                self.plot(soc_ESS, file_name=file_name_soc, xlabel=xlabel, ylabel=ylabel)
+                            
+                if element_type == "chargingStations":
                     element_type_to_get = "EVs"
-
-                for name in element_names:
-                    if not element_type_to_get == None:
-
-                        if element_type == "storageUnits" or element_type == "chargingStations":
-                            xlabel = "Timestamp [h]"
-                            ylabel = "SoC [%]"
-                            soc_ESS = self.get_data_soc(id, element_type_to_get, name)
-                            self.utils.store_data(file_name_soc+".json", soc_ESS)
-                            self.plot(soc_ESS, file_name=file_name_soc, xlabel=xlabel, ylabel=ylabel)
+                
+                    for name in element_names:
+                        logger.debug("name "+str(name))
+                        for name_cs, values_ev in name.items():
+                            name_ev = values_ev["ev"]
+                            logger.debug("name in soc "+str(name_ev)+ " in charging station "+str(name_cs))
+                            if not element_type_to_get == None:
+        
+                                if element_type == "chargingStations":
+                                    xlabel = "Timestamp [h]"
+                                    ylabel = "SoC [%]"
+                                    soc_ESS = self.get_data_soc(id, element_type_to_get, name_ev)
+                                    file_name_soc = os.path.join(base, "soc_EV")
+                                    logger.debug("file_name_soc EV "+str(file_name_soc))
+                                    self.utils.store_data(file_name_soc+".json", soc_ESS)
+                                    self.plot(soc_ESS, file_name=file_name_soc, xlabel=xlabel, ylabel=ylabel)
+                
 
     def create_plots_for_powers(self, id, folder_name):
         connections = self.get_connection_topology(id)
@@ -422,6 +464,10 @@ class Plotter:
         ######################################################################
 
         for bus_name, element_object in connections.items():
+            #if bus_name == "node_116757":
+            logger.debug("##############################################################################")
+            logger.debug("bus name " + str(bus_name))
+            logger.debug("##############################################################################")
             base = os.path.join("results", folder_name, bus_name)
             file_name_P = os.path.join(base, "powers_P")
             file_name_Q = os.path.join(base, "powers_Q")
@@ -434,6 +480,8 @@ class Plotter:
             real_powers = {"photovoltaics" :None, "loads":None, "storageUnits":None, "chargingStations":None}
             reactive_powers = {"photovoltaics" :None, "loads":None, "storageUnits":None, "chargingStations":None}
             for element_type, element_names in element_object.items():
+                logger.debug("element type "+str(element_type))
+                element_type_to_get = None
                 if element_type == "transformers":
                     element_type_to_get = "Transformer"
                 if element_type == "loads":
@@ -444,23 +492,31 @@ class Plotter:
                     element_type_to_get = "Storages"
                 elif element_type == "chargingStations":
                     element_type_to_get = "EVs"
-
+                logger.debug("element_type_to_get "+str(element_type_to_get))
                 for name in element_names:
+                    logger.debug("------------------------------------------------------------------------------")
+                    logger.debug("element name "+str(name))
+                    logger.debug("------------------------------------------------------------------------------")
                     if not element_type_to_get == None:
-                        #logger.debug("element_type_to_get "+str(element_type_to_get)+ " with name "+str(name))
-                        powers = self.get_data_powers(id, str(element_type_to_get), str(name))
+                        
+                        if element_type == "chargingStations":
+                            for name_cs, values_ev in name.items():
+                                name_ev = values_ev["ev"]
+                                powers = self.get_data_powers(id, str(element_type_to_get), str(name_ev))
+                        else:
+                            powers = self.get_data_powers(id, str(element_type_to_get), str(name))
 
                         if not element_type in real_powers.keys():
                             real_powers[element_type]={}
                         real_powers[element_type] = self.get_active_powers(powers, phase_number)
-
+                        if element_type == "chargingStations":
+                            real_powers[element_type][name_ev] = [-1*x for x in real_powers[element_type][name_ev]]
+                        
                         if not element_type in reactive_powers.keys():
                             reactive_powers[element_type]={}
                         reactive_powers[element_type] = self.get_reactive_powers(powers, phase_number)
-
-
-            #logger.debug("real powers " +str(real_powers))
-            #logger.debug("reactive powers "+ str(reactive_powers))
+                        if element_type == "chargingStations":
+                            reactive_powers[element_type][name_ev] = [-1*x for x in reactive_powers[element_type][name_ev]]
 
 
             if not element_type == "transformers":
@@ -505,6 +561,7 @@ class Plotter:
                     data = reactive_powers["transformers"]
                     self.utils.store_data(file_name_Q + ".json", data)
                     self.plot(data, file_name=file_name_Q, xlabel=xlabel, ylabel=ylabel)
+            
 
     def create_plots_for_pv_usage(self, id, folder_name):
         connections = self.get_connection_topology(id)
@@ -516,6 +573,9 @@ class Plotter:
         ylabel = "PV usage [%]"
 
         for bus_name, element_object in connections.items():
+            logger.debug("##############################################################################")
+            logger.debug("bus name " + str(bus_name))
+            logger.debug("##############################################################################")
             base = os.path.join("results", folder_name, bus_name)#"results/" + folder_name + "/" + bus_name + "/"
             file_name = os.path.join(base, "usage_PV")
             for element_type, element_names in element_object.items():
@@ -537,6 +597,7 @@ class Plotter:
 
 
     def create_plots_for_voltages(self, id, folder_name):
+        logger.debug("id "+str(id))
         connections = self.get_connection_topology(id)
         logger.debug("connections " + str(connections))
 
@@ -556,6 +617,9 @@ class Plotter:
 
 
         for bus_name, connected_elements in connections.items():
+            logger.debug("##############################################################################")
+            logger.debug("bus name " + str(bus_name))
+            logger.debug("##############################################################################")
             xlabel = "Timestamp [h]"
             ylabel = "Voltage [pu]"
             base = os.path.join("results", folder_name, bus_name)
@@ -629,17 +693,41 @@ def main():
     #url = "http://192.168.99.100:9091"
     url = "http://localhost:9091"
     plotter = Plotter(url)
-    comparison = True
+    comparison = False
 
     if not comparison:
         logger.debug("Reading information from dsf-se")
 
+        #id = "fae0303a69c7"  #with ESS self-production
+        #folder_name = "Bolzano_residential_1_CS_self-production"
+        #id = "06bbd8919911"  # with ESS self-production
+        #folder_name = "Bolzano_residential_1_CS_self-production_5_15h_Steps_5_5"
+        #id = "44ec450b2e2e"  # with ESS self-production
+        #folder_name = "Bolzano_residential_1_CS_self-production_5_15h_Steps_10_5"
+        #id = "0bca45d7da48"  # with ESS self-production
+        #folder_name = "Bolzano_residential_1_CS_self-production_5_16h_Steps_10_5"
+        #id = "f29b9d4e9f20"  # with ESS self-production
+        #folder_name = "virtual_capacity_MinimizeCosts_ev_one_charging_station_9_18_Steps_10_5_4kW_cs"
+        #id = "38baa359edce"  # with ESS self-production
+        #folder_name = "virtual_capacity_Maximize Self-Production_ev_one_charging_station_9_18_Steps_10_5_4kW_cs_udp_10"
+        #id = "3b9424eaa2eb"  # with ESS self-production
+        #folder_name = "virtual_capacity_Maximize Self-Production_ev_one_charging_station_9_18_Steps_10_5_4kW_cs_udp_100"
+        #id = "57ba29defc87"  # with ESS self-production
+        #folder_name = "virtual_capacity_Maximize Self-Production_ev_one_charging_station_9_18_Steps_10_5_4kW_cs_udp_1000"
+        #id = "097c510e74c2"  # with ESS self-production
+        #folder_name = "virtual_capacity_Maximize Self-Production_ev_one_charging_station_9_18_Steps_10_5_4kW_cs_udp_10000"
+        #id = "21e301be113c"  # with ESS self-production
+        #folder_name = "virtual_capacity_Maximize Self-Production_ev_one_charging_station_9_18_Steps_10_5_4kW_cs_udp_100000"
+        id = "48d01b25ce19"  # with ESS self-production
+        folder_name = "virtual_capacity_Maximize Self-Production_ev_one_charging_station_9_18_Steps_10_5_4kW_cs_udp_1000000"
+        #id = "b7ad4b743b74"  # with ESS self-production
+        #folder_name = "Bolzano_residential_1_ESS"
         #id = "3d68cf40d742"  #with ESS self-production
         #folder_name = "grid_with_ESS_self_production"
         #id = "8fe2e7980820"   #with PV_no_control
         #folder_name = "grid_with_PV_no_control"
-        id = "1add147eeb22"  # with PV limit power
-        folder_name = "grid_with_PV_limit_power_60"
+        #id = "1add147eeb22"  # with PV limit power
+        #folder_name = "grid_with_PV_limit_power_60"
         #id = "d1f51b384763"  # with PV limit power
         #folder_name = "grid_with_PV_volt_watt"
 
@@ -655,12 +743,18 @@ def main():
         #folder_name = "grid_with_PV_limit_power_60_gurobi"
         #id = "32d8e9338170"  # with PV limit power
         #folder_name = "grid_with_PV_volt_watt_gurobi"
+        
+        id_list=["a4444a735c1b","f9e7ec8fba53"]
+        name_list=[]
 
-
-        plotter.create_plots_for_voltages(id, folder_name)
-        plotter.create_plots_for_powers(id, folder_name)
-        plotter.create_plots_for_socs(id, folder_name)
-        plotter.create_plots_for_pv_usage(id, folder_name)
+        logger.debug("########################## Voltages ##########################################")
+        #plotter.create_plots_for_voltages(id, folder_name)
+        logger.debug("########################## Powers ##########################################")
+        #plotter.create_plots_for_powers(id, folder_name)
+        logger.debug("########################## SoCs ##########################################")
+        #plotter.create_plots_for_socs(id, folder_name)
+        logger.debug("########################## PV Usage ##########################################")
+        #plotter.create_plots_for_pv_usage(id, folder_name)
 
     else:
 

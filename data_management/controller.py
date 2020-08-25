@@ -304,7 +304,8 @@ class gridController(threading.Thread):
 				evs_connected = charger_element.get_EV_connected()
 				
 				for ev_unit in evs_connected:
-					ev_unit.calculate_position(self.sim_hours+24, 1, charger_element.get_type_application())
+					if ev_unit.get_position_profile() == None or len(ev_unit.get_position_profile()) < (self.sim_hours + 24):
+						ev_unit.calculate_position(self.sim_hours + 24, 1, charger_element.get_type_application())
 					EV_names.append("ESS_" + ev_unit.get_id())
 					EV_position.append({ev_unit.get_id(): ev_unit.get_position_profile()})
 					logger.debug(

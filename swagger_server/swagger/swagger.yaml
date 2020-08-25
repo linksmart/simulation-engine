@@ -786,6 +786,10 @@ definitions:
         type: "number"
       plugged_mean_std:
         type: "number"
+      position_profile:
+        type: "array"
+        items:
+          type: "integer"
   Winding:
     type: "object"
     properties:
