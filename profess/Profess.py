@@ -1019,7 +1019,7 @@ class Profess:
             if node_name_list != 0:
                 for nodeName in node_name_list:
                     self.set_storage(nodeName, soc_list)
-                    logger.debug("Storage steup")
+                    logger.debug("Storage setup")
                     self.set_photovoltaics(nodeName, soc_list)
                     self.set_generic(nodeName,soc_list)
                     self.set_grid(nodeName,soc_list)

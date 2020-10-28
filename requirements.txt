@@ -6,7 +6,8 @@ more-itertools==7.2.0
 jsonpickle==1.2
 simplejson==3.16.0
 Flask-Cors==3.0.8
-numpy==1.14.5
+numpy
+#==1.14.5
 senml==0.1.0
 paho-mqtt==1.4.0
 

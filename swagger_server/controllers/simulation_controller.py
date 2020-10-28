@@ -131,6 +131,7 @@ def check_loads(radial_value):
             logger.debug("Checking loads")
 
             loads = radial_value["loads"]
+            count=1
             for load_elements in loads:
                 element_change = load_elements
                 if "power_profile_id" in load_elements.keys():
@@ -140,8 +141,10 @@ def check_loads(radial_value):
                         element_change["power_profile_id"] = False
                     if load_elements["power_profile_id"] == "true" or load_elements["power_profile_id"] == "True":
                         element_change["power_profile_id"] = True
-                #else:
-                    #element_change["power_profile_id"] = False
+                #TODO: erase these lines
+                else:
+                    element_change["power_profile_id"] = "profile_"+str(count)
+                    count = count + 1
                 new_data.append(element_change)
 
         logger.debug("Loads succesfully checked")
@@ -321,6 +324,9 @@ def create_simulation(body):  # noqa: E501
                             storage_eleement_change["discharge_efficiency"] = 90
                         if not "global_control" in storage_elements.keys():
                             storage_eleement_change["global_control"] = False
+
+                        #TODO erase initial soc
+                        storage_eleement_change["soc"] = 24
 
                         data_to_store.append(storage_eleement_change)
 

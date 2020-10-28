@@ -39,6 +39,7 @@ class Plotter:
 
     def get_data_voltages(self, id, name=None, phase_number = 1):
         query = self.url_dsf_se+"/se/simulation/"+ id +"/voltages"
+        logger.debug("query: "+str(query))
         response = self.httpClass.get(query)
         json_response = response.json()
         #logger.debug("json_response "+str(json_response))
@@ -313,10 +314,10 @@ class Plotter:
 
 
         sns.set(context="paper")
-        sns.set(context="paper", rc={'figure.figsize': (14, 8), "lines.linewidth": 1.5}, font_scale=1.5)
+        sns.set(context="paper", rc={'figure.figsize': (14, 8), "lines.linewidth": 1.5}, font_scale=2)
         sns.set_style("ticks", {'grid.color': '.8'})
 
-        fig = plt.figure(figsize=(10,10))
+        fig = plt.figure(figsize=(15,10))
         ax1 = fig.subplots()
         #continent_colors = ["#009432", "#0652DD", "#EE5A24", "#9980FA", "#B53471" ]
         #sns.set_palette(sns.hls_palette(8, l=.1, s=.8))
@@ -385,18 +386,19 @@ class Plotter:
         # Removed 'ax' from T.W.'s answer here aswell:
         box = g.get_position()
 
+        #g.legend(framealpha=1, frameon=True)
         g.set_position([box.x0, box.y0, box.width * 0.85, box.height])  # resize position
         g.legend(loc='center right', bbox_to_anchor=(1.25, 0.5), ncol=1)
         plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-        #plt.autoscale(enable=True)
+
 
         if not file_name == None:
-            file_name = file_name + ".jpg"#"./" + file_name + ".jpg"
+            file_name = file_name + ".pdf"#"./" + file_name + ".jpg"
             path = self.utils.get_path(file_name)
             self.utils.create_path(path)
             logger.debug("filename "+str(path))
 
-            plt.savefig(path, dpi=600, format="jpg", bbox_inches="tight")
+            plt.savefig(path, dpi=1080, format="pdf", bbox_inches="tight")
             #import sys
             #sys.exit(0)
         else:

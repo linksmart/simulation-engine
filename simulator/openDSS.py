@@ -47,9 +47,9 @@ class OpenDSS:
         dss.run_command(dss_string)
 
     def setNewCircuit(self, name, common):
-        self.common = common
+        #self.common = common
         try:
-            for key, value in self.common.items():
+            for key, value in common.items():
                 if key == "id":
                     common_id = value
                 elif key == "base_kV":
@@ -186,11 +186,11 @@ class OpenDSS:
             pv_object.set_use_percent(100)
 
             if power >= 0:
-                dss.Generators.kW(power)
-                logger.debug("kW "+str(power))
-                #dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
-                #logger.debug("dss_string " + str(dss_string))
-                #dss.run_command(dss_string)
+                #dss.Generators.kW(power)
+                #logger.debug("kW "+str(power))
+                dss_string = "Generator." + str(pv_name) + ".kw=" + str(power)
+                logger.debug("dss_string " + str(dss_string))
+                dss.run_command(dss_string)
                 dss_string = "Generator." + str(pv_name) + ".kvar=0"
                 logger.debug("dss_string " + str(dss_string))
                 dss.run_command(dss_string)
@@ -637,9 +637,9 @@ class OpenDSS:
     def get_single_pv_power(self, pv_name):
         #logger.debug("Generator."+pv_name)
         self.set_active_element("Generator."+pv_name)
-        logger.debug("name "+str(dss.CktElement.Name()))
+        #logger.debug("name "+str(dss.CktElement.Name()))
         powers = dss.CktElement.Powers()
-        logger.debug("powers " + str(dss.CktElement.Powers()))
+        #logger.debug("powers " + str(dss.CktElement.Powers()))
         if len(powers) == 8:
             power_to_return = -1*(powers[0] + powers[2] + powers[4])
             q_power_to_return = -1*(powers[1] + powers[3] + powers[5])
@@ -657,7 +657,7 @@ class OpenDSS:
 
         powers_from_generators = []
         while i_Power > 0:
-            logger.debug("Generator name " + str(dss.CktElement.Name()))
+            #logger.debug("Generator name " + str(dss.CktElement.Name()))
             powers = dss.CktElement.Powers()
             node_order = self.get_node_order()
             list = []
@@ -1796,7 +1796,8 @@ class OpenDSS:
         )
 
 
-        dss_string = dss_string + " TimeChargeTrigger=-10 %IdlingkW=0 State=IDLING "
+        #dss_string = dss_string + " TimeChargeTrigger=-10 %IdlingkW=0 State=IDLING "
+        dss_string = dss_string + " %IdlingkW=0 State=IDLING "
         if not kw_rated == None:
             dss_string = dss_string + " kWRated="+str(kw_rated)
 

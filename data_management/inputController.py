@@ -384,6 +384,7 @@ class InputController:
         return list_soc
 
     def get_soc_list(self, topology):
+        logger.debug("get_soc_list")
         radial=topology["radials"]#["storageUnits"]
         #common=topology["common"]
         soc_list = []
@@ -439,23 +440,26 @@ class InputController:
                     for cs in charging_station:
                         if cs["bus"] == ess_element["bus1"]:
                             cs_kW = cs["max_charging_power_kW"]
-
-                    soc_dict[ess_element["bus1"]]["Grid"] = {
-                        "Q_Grid_Max_Export_Power": max(load_kW + cs_kW, pv_kW),
-                        "P_Grid_Max_Export_Power": max(load_kW +  cs_kW, pv_kW)}
+                    
+                    logger.debug("Setting max values")
+                    soc_dict[ess_element["bus1"]]["Grid"] = {#test
+                        #"Q_Grid_Max_Export_Power": load_kW,
+                        #"P_Grid_Max_Export_Power": load_kW}
+                        "Q_Grid_Max_Export_Power": 1,  # max(load_kW + cs_kW, pv_kW),
+                        "P_Grid_Max_Export_Power": load_kW}  # max(load_kW +  cs_kW, pv_kW)}
+                        
                     logger.warning("Missing \"max_power_import_in_kW\" or \"max_power_export_in_kW\" in ess element " + ess_element["id"])
-                    logger.debug("max_power_import_in_kW "+str(max(load_kW + cs_kW, pv_kW))+ " max_power_export_in_kW "+str(max(load_kW + cs_kW, pv_kW)))
-                    #return "Missing \"max_power_import_in_kW\" or \"max_power_export_in_kW\" in ess element " + ess_element["id"]
+                    logger.debug("max_power_import_in_kW "+str(soc_dict[ess_element["bus1"]]["Grid"]["P_Grid_Max_Export_Power"])+ " max_power_export_in_kW "+str(soc_dict[ess_element["bus1"]]["Grid"]["Q_Grid_Max_Export_Power"]))
+                    
                 for pv_element in photovoltaics:
                     if pv_element["bus1"] == ess_element["bus1"]:
                         soc_dict[ess_element["bus1"]]["PV"]={"pv_name": pv_element["id"]}
                 soc_list.append(soc_dict)
-                #list_storages.append(ess_element)
-        #logger.debug("list_storages "+str(list_storages))
-        #logger.debug("soc_list " + str(soc_list))
+                
         return soc_list
 
     def get_soc_list_evs(self,topology, chargers):
+        logger.debug("get_soc_list_evs")
         radial=topology["radials"]#["storageUnits"]
         common=topology["common"]
         list_storages=[]
@@ -534,8 +538,8 @@ class InputController:
                                         cs_kW = cs["max_charging_power_kW"]
 
                                 soc_dict[charger_element.get_bus_name()]["Grid"] = {
-                                    "Q_Grid_Max_Export_Power": max(load_kW + cs_kW, pv_kW),
-                                    "P_Grid_Max_Export_Power": max(load_kW + cs_kW, pv_kW)}
+                                    "Q_Grid_Max_Export_Power": 4,#max(load_kW + cs_kW, pv_kW),
+                                    "P_Grid_Max_Export_Power": 4}#max(load_kW + cs_kW, pv_kW)}
                                 logger.warning(
                                     "Missing \"max_power_import_in_kW\" or \"max_power_export_in_kW\" in ess element " +
                                     ess_element["id"])

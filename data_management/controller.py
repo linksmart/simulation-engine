@@ -27,9 +27,9 @@ class gridController(threading.Thread):
 	def __init__(self, id, duration):
 		super(gridController, self).__init__()
 		logger.info("Initializing simulation controller")
-		self.sim = OpenDSS(id)
 		self.id = id
 		logger.debug("id " + str(id))
+		self.sim = OpenDSS(id)
 		self.nodeNames = []
 		self.allBusMagPu = []
 		self.yCurrent = []
@@ -144,7 +144,7 @@ class gridController(threading.Thread):
 		
 	
 	def run(self):  # self, id, duration):
-
+		logger.debug("Start id "+str(self.id))
 		self.redisDB.set("status_"+ str(self.id), "OK")
 		start_time = time.time()
 		common = self.topology["common"]
@@ -194,7 +194,7 @@ class gridController(threading.Thread):
 		logger.debug("#####################################################################")
 		
 		# self.sim.runNode13()
-		self.sim.enableCircuit(self.id)
+		#self.sim.enableCircuit(self.id)
 		
 		logger.debug("Active circuit: " + str(self.sim.getActiveCircuit()))
 		
@@ -321,11 +321,11 @@ class gridController(threading.Thread):
 			
 			if not charger_residential_list == []:
 				soc_list_evs_residential = self.input.get_soc_list_evs(self.topology, charger_residential_list)
-				#logger.debug("soc_list_evs residential" + str(soc_list_evs_residential))
+				logger.debug("soc_list_evs residential" + str(soc_list_evs_residential))
 			
 			if not charger_commercial_list == []:
 				soc_list_evs_commercial = self.input.get_soc_list_evs(self.topology, charger_commercial_list)
-				#logger.debug("soc_list_evs commercial" + str(soc_list_evs_commercial))
+				logger.debug("soc_list_evs commercial" + str(soc_list_evs_commercial))
 
 
 		pv_objects_alone = []
@@ -465,7 +465,7 @@ class gridController(threading.Thread):
 				logger.debug("-------------------------------------------")
 				logger.debug("Storages present in the simulation")
 				logger.debug("-------------------------------------------")
-				#logger.debug("soc_list_new_storages" +str(soc_list_new_storages))
+				logger.debug("soc_list_new_storages" +str(soc_list_new_storages))
 				
 				if flag_global_control:
 					# logger.debug("price profile " + str(price_profile))
@@ -796,13 +796,14 @@ class gridController(threading.Thread):
 					pv_powers_phase_3[i].append(PV_powers[i][2])
 
 			if not len_essNames == 0:
+				#logger.debug("essNames "+str(essNames))
 				ESS_powers = self.input.get_storage_powers(essNames)
 				for i in range(len_essNames):
 					ess_powers_phase_1[i].append(ESS_powers[i][0])
 					ess_powers_phase_2[i].append(ESS_powers[i][1])
 					ess_powers_phase_3[i].append(ESS_powers[i][2])
 
-				ESS_soc = self.input.get_storage_socs(self.topology)
+				ESS_soc = self.input.get_storage_socs(essNames)
 				for i in range(len_essNames):
 					ess_soc[i].append(ESS_soc[i])
 
