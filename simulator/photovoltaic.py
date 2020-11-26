@@ -158,7 +158,7 @@ class Ofw:
 
 class Limit_power:
     def __init__(self):
-        self.percentage = 50
+        self.percentage = 60
         self.sensitivity_factor = 1
         self.name = "limit_power"
 
