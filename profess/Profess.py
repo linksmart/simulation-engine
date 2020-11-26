@@ -390,57 +390,57 @@ class Profess:
                             type_optimization = "stochastic"
                             if type == "residential" and storage_opt_model == "Maximize Self-Consumption":
                                 storage_opt_model = "StochasticResidentialMaxPV"
-                                #solver = "cbc"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = True
                             if type == "residential" and storage_opt_model == "Maximize Self-Production":
                                 storage_opt_model = "StochasticResidentialMinGrid"
-                                #solver = "ipopt"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = True
                             if type == "residential" and storage_opt_model == "MinimizeCosts":
                                 storage_opt_model = "StochasticResidentialMinPBill"
-                                #solver = "cbc"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = True
                             if type == "commercial" and storage_opt_model == "Maximize Self-Consumption":
                                 storage_opt_model = "CarParkModel"
-                                #solver = "cbc"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = False
                             if type == "commercial" and storage_opt_model == "Maximize Self-Production":
                                 storage_opt_model = "CarParkModelMinGrid"
-                                #solver = "ipopt"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = False
                         else:
                             type_optimization = "discrete"
                             if storage_opt_model == "Maximize Self-Consumption" and not global_control:
-                                #solver = "cbc"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = False
                             if storage_opt_model == "Maximize Self-Production" and not global_control:
-                                #solver = "ipopt"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = False
                             if storage_opt_model == "MinimizeCosts" and not global_control:
-                                #solver = "cbc"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = False
                             if storage_opt_model == "Maximize Self-Consumption" and global_control:
                                 storage_opt_model = "Maximize Self-Consumption with global control"
-                                #solver = "cbc"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = False
                             if storage_opt_model == "Maximize Self-Production" and global_control:
                                 storage_opt_model = "Maximize Self-Production with global control"
-                                #solver = "ipopt"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = False
                             if storage_opt_model == "MinimizeCosts" and global_control:
                                 storage_opt_model = "MinimizeCosts with global control"
-                                #solver = "cbc"
-                                solver = "gurobi"
+                                solver = "ipopt"
+                                #solver = "gurobi"
                                 single_ev = False
 
 
